@@ -22,12 +22,12 @@ const Module = new Augur.Module()
             await interaction.reply({ content: 'Thank you. Your question has been registered.', ephemeral: true });
 
             // Reply
-            embed = new MessageEmbed()
+            embed = u.embed()
                 .setAuthor(interaction.user.tag, interaction.user.displayAvatarURL())
                 .setDescription(interaction.options.get("question").value)
                 .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
                 .setTimestamp()
-            //ToDo: set color
+                .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
             row = new MessageActionRow()
                 .addComponents(
                     new MessageButton()

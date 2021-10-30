@@ -62,47 +62,6 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => (Module.config.ownerId === (msg.author.id))
 })
-.addCommand({name: "pulse",
-  category: "Bot Admin",
-  hidden: true,
-  description: "The pulse command get basic information about the bot's current health and uptime for each shard (if applicable).",
-  permissions: (msg) => (Module.config.ownerId === msg.author.id),
-  process: async function(msg) {
-    try {
-      let client = msg.client;
-
-      let embed = u.embed()
-      .setAuthor(client.user.username + " Heartbeat", client.user.displayAvatarURL())
-      .setTimestamp();
-
-      if (client.shard) {
-        let guilds = await client.shard.fetchClientValues('guilds.cache.size');
-        guilds = guilds.reduce((prev, val) => prev + val, 0);
-        let channels = client.shard.fetchClientValues('channels.cache.size')
-        channels = channels.reduce((prev, val) => prev + val, 0);
-        let mem = client.shard.broadcastEval("Math.round(process.memoryUsage().rss / 1024 / 1000)");
-        mem = mem.reduce((t, c) => t + c);
-        embed
-        .addField("Shards", `Id: ${client.shard.id}\n(${client.shard.count} total)`, true)
-        .addField("Total Bot Reach", `${guilds} Servers\n${channels} Channels`, true)
-        .addField("Shard Uptime", `${Math.floor(client.uptime / (24 * 60 * 60 * 1000))} days, ${Math.floor(client.uptime / (60 * 60 * 1000)) % 24} hours, ${Math.floor(client.uptime / (60 * 1000)) % 60} minutes`, true)
-        .addField("Shard Commands Used", `${client.commands.commandCount} (${(client.commands.commandCount / (client.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
-        .addField("Total Memory", `${mem}MB`, true);
-
-        msg.channel.send({embeds: [embed]});
-      } else {
-        let uptime = process.uptime();
-        embed
-        .addField("Uptime", `Discord: ${Math.floor(client.uptime / (24 * 60 * 60 * 1000))} days, ${Math.floor(client.uptime / (60 * 60 * 1000)) % 24} hours, ${Math.floor(client.uptime / (60 * 1000)) % 60} minutes\nProcess: ${Math.floor(uptime / (24 * 60 * 60))} days, ${Math.floor(uptime / (60 * 60)) % 24} hours, ${Math.floor(uptime / (60)) % 60} minutes`, true)
-        .addField("Reach", `${client.guilds.cache.size} Servers\n${client.channels.cache.size} Channels\n${client.users.cache.size} Users`, true)
-        .addField("Commands Used", `${client.commands.commandCount} (${(client.commands.commandCount / (client.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
-        .addField("Memory", `${Math.round(process.memoryUsage().rss / 1024 / 1000)}MB`, true);
-
-        msg.channel.send({embeds: [embed]});
-      }
-    } catch(e) { u.errorHandler(e, msg); }
-  }
-})
 .addCommand({name: "reload",
   category: "Bot Admin",
   hidden: true,
