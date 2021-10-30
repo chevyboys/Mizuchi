@@ -94,12 +94,13 @@ const Module = new Augur.Module()
         name: "transfer",
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
+            
             // correct channel?
             if (interaction.channel.id != snowflakes.channels.transfer) {
                 await interaction.reply({ content: `You can't do that here. Try in <#${snowflakes.channels.transfer}>`, ephemeral: true });
                 return;
             }
-
+            let numberOfQuestions = interaction.options.get("questions").value
             // Load data
             files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
             raw = [];
@@ -125,14 +126,19 @@ const Module = new Augur.Module()
             // Format
             strings = [];
             accepted = [];
-            for (i = 0; i < 5; i++) {
+            for (i = 0; i < numberOfQuestions; i++) {
                 if (sorted[i]) {
                     strings.push(sorted[i].string);
                     accepted.push(sorted[i]);
                 }
             }
-
+            strings = strings.join(`\n\n`);
             // Send
+            while (strings.length > 2000) {
+                interaction.channel.send(strings.substring(0, 2000))
+                strings = strings.substring(2000);
+                
+            }
             interaction.reply({ content: `${strings.join(`\n\n`)}` });
 
             // Delete vote messages
