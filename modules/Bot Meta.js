@@ -4,6 +4,45 @@ const fs = require('fs');
 const Augur = require("augurbot");
 const u = require("../utils/utils");
 const moment = require("moment");
+const axios = require("axios").default;
+const snowflakes = require('../config/snowflakes.json');
+
+async function sendDiscordStatus(msg, embed, verbose) {
+    try {
+        let discordStatus = await axios.get("https://srhpyqt94yxb.statuspage.io/api/v2/summary.json");
+        let incidents = discordStatus.data.incidents;
+        discordStatus = discordStatus.data.components;
+        for (const component of discordStatus) {
+            if (component.status != "operational" || verbose) {
+                let emoji;
+                switch (component.status) {
+                    case "operational":
+                        emoji = "🟢"
+                        break;
+                    case "partial_outage":
+                        emoji = "🟡";
+                        break;
+                    case "major_outage":
+                        emoji = "🟠";
+                    default:
+                        emoji = "🔴";
+                        break;
+                }
+                embed.addField(`${emoji} ${component.name}`, `**Status**: ${component.status}`, true);
+            }
+        }
+        for (const incident of incidents) {
+            if (incident.resolved_at == null) {
+                embed.addField(`❗__${incident.name}__❗`, `**Status**: ${incident.status}\n**Impact:** ${incident.impact}\n**Last Update:** ${incident.incident_updates[0].updated_at} \n\t${incident.incident_updates[0].body}`);
+
+            }
+        }
+    } catch (error) {
+        embed.addField(`Discord Components:`, `Unavailable`);
+        u.errorLog(error);
+    }
+    msg.channel.send({embeds: [embed]});
+}
 
 const Module = new Augur.Module()
     .addCommand({
@@ -100,31 +139,59 @@ const Module = new Augur.Module()
             //u.postCommand(msg);
         }
     }).addCommand({
-        name: "ping", // required
-        aliases: ["beep", "ding", "yeet"], // optional
-        syntax: "", // optional
-        description: "Checks to see if the bot is online, and what the current response time is.", // recommended
-        info: "", // recommended
-        hidden: false, // optional
-        category: "Bot Meta", // optional
-        enabled: true, // optional
-        permissions: (msg) => true, // optional
+        name: "playing",
+        category: "Bot Admin",
+        hidden: true,
+        description: "Set playing status",
+        syntax: "[game]",
+        aliases: ["setgame", "game"],
         process: (msg, suffix) => {
-            //u.preCommand(msg);
-            let pong;
-            let { command } = u.parse(msg);
-            if (command.toLowerCase() == "beep") {
-                pong = "Boop";
-            }
-            else if (command.toLowerCase() == "yeet") {
-                pong = "Yoink";
-            }
-            else pong = u.properCase(command.replace(/ing/gi, "ong"));
-            msg.channel.send(`${command}ing...`).then(sent => {
-                sent.edit(`${pong}! Took ${sent.createdTimestamp - (msg.editedTimestamp ? msg.editedTimestamp : msg.createdTimestamp)}ms`);
-            });
-            //u.postCommand(msg);
-        } // required
+            if (suffix) msg.client.user.setActivity(suffix);
+            else msg.client.user.setActivity("");
+            msg.react("👌");
+        },
+        permissions: (msg) => (Module.config.adminId.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin))
+    })
+    .addCommand({
+        name: "pulse",
+        category: "Bot Admin",
+        hidden: true,
+        description: "Check the bot's heartbeat",
+        permissions: (msg) => (Module.config.ownerId === (msg.author.id)),
+        process: async function (msg, suffix) {
+            try {
+                let client = msg.client;
+
+                let embed = u.embed()
+                .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
+                    .setAuthor(client.user.username + " Heartbeat", client.user.displayAvatarURL())
+                    .setTimestamp();
+
+                if (client.shard) {
+                    let guilds = await client.shard.fetchClientValues('guilds.cache.size');
+                    guilds = guilds.reduce((prev, val) => prev + val, 0);
+                    let channels = client.shard.fetchClientValues('channels.cache.size')
+                    channels = channels.reduce((prev, val) => prev + val, 0);
+                    let mem = client.shard.broadcastEval("Math.round(process.memoryUsage().rss / 1024 / 1000)");
+                    mem = mem.reduce((t, c) => t + c);
+                    embed
+                        .addField("Shards", `Id: ${client.shard.id}\n(${client.shard.count} total)`, true)
+                        .addField("Total Bot Reach", `${guilds} Servers\n${channels} Channels`, true)
+                        .addField("Shard Uptime", `${Math.floor(client.uptime / (24 * 60 * 60 * 1000))} days, ${Math.floor(client.uptime / (60 * 60 * 1000)) % 24} hours, ${Math.floor(client.uptime / (60 * 1000)) % 60} minutes`, true)
+                        .addField("Shard Commands Used", `${client.commands.commandCount} (${(client.commands.commandCount / (client.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
+                        .addField("Total Memory", `${mem}MB`, true);
+                    sendDiscordStatus(msg, embed, (suffix.indexOf('verbose') > -1));
+                } else {
+                    let uptime = process.uptime();
+                    embed
+                        .addField("Uptime", `Discord: ${Math.floor(client.uptime / (24 * 60 * 60 * 1000))} days, ${Math.floor(client.uptime / (60 * 60 * 1000)) % 24} hours, ${Math.floor(client.uptime / (60 * 1000)) % 60} minutes\nProcess: ${Math.floor(uptime / (24 * 60 * 60))} days, ${Math.floor(uptime / (60 * 60)) % 24} hours, ${Math.floor(uptime / (60)) % 60} minutes`, true)
+                        .addField("Reach", `${client.guilds.cache.size} Servers\n${client.channels.cache.size} Channels\n${client.users.cache.size} Users`, true)
+                        .addField("Commands Used", `${client.commands.commandCount} (${(client.commands.commandCount / (client.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
+                        .addField("Memory", `${Math.round(process.memoryUsage().rss / 1024 / 1000)}MB`, false);
+                    sendDiscordStatus(msg, embed, (suffix.indexOf('verbose') > -1));
+                }
+            } catch (e) { u.errorHandler(e, msg); }
+        }
     });
 
 module.exports = Module;
