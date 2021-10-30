@@ -5,6 +5,7 @@ const Augur = require("augurbot"),
   const { REST } = require('@discordjs/rest');
   const { Routes } = require('discord-api-types/v9');
   const fs = require('fs');
+  const snowflakes = require('../config/snowflakes.json');
 
 const Module = new Augur.Module()
 .addCommand({name: "gotobed",
@@ -124,43 +125,12 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
-//When the bot is fully online, fetch all the ldsg members, since it will only autofetch for small servers and we want them all.
+//When the bot is fully online, fetch all the discord members, since it will only autofetch for small servers and we want them all.
 .addEvent("ready", () => {
-  Module.client.guilds.cache.get(Module.config.ldsg).members.fetch();
+  Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.fetch();
 })
 //when ready, refresh commands
-.addEvent("ready", async () => {
 
-const commands = [];
-const commandFiles = fs.readdirSync('./registry/').filter(file => file.endsWith('.js'));
-
-// Place your client and guild ids here
-const clientId = '892508150773723166';
-const guildId = Module.config.ldsg;
-
-for (const file of commandFiles) {
-	const command = require(`../registry/${file}`);
-	commands.push(command.data.toJSON());
-}
-
-const rest = new REST({ version: '9' }).setToken(Module.config.token);
-let commandResponse = [];
-(async () => {
-	try {
-		console.log('Started refreshing application (/) commands.--------------------------------------------------------------------------------');
-
-		commandResponse = await rest.put(
-			Routes.applicationGuildCommands(clientId, guildId),
-			{ body: commands },
-		);
-      console.log(commandResponse);
-		console.log('Successfully reloaded application (/) commands.--------------------------------------------------------------------------------');
-	} catch (error) {
-		console.error(error);
-	}
-})();
-
-})
 //each time this module is loaded, update the module.config snowflakes.
 .setInit(async (reload) => {
   try {
