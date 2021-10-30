@@ -3,12 +3,77 @@ const Discord = require("discord.js"),
 
 const errorLog = new Discord.WebhookClient(config.error);
 
+/**
+ * @typedef {Object} ParsedInteraction
+ * @property {String} command - The command issued, represented as a string.
+ * @property {Array} data - Associated data for the command, such as command options or values selected.
+ */
+
+/**
+ * Converts an interaction into a more universal format for error messages.
+ * @param {Discord.Interaction} inter The interaction to be parsed.
+ * @returns {ParsedInteraction} The interaction after it has been broken down.
+ */
+function parseInteraction(inter) {
+  if (inter.isCommand()) {
+    const commandParts = [`/${inter.commandName}`];
+    let optionData = inter.options.data;
+    if (optionData.length == 0) {
+      return {
+        command: commandParts.join(" "),
+        data: optionData
+      };
+    }
+
+    if (optionData[0].type == "SUB_COMMAND_GROUP") {
+      commandParts.push(optionData[0].name);
+      optionData = optionData[0].options;
+      if (optionData.length == 0) {
+        return {
+          command: commandParts.join(" "),
+          data: optionData
+        };
+      }
+    }
+
+    if (optionData[0].type == "SUB_COMMAND") {
+      commandParts.push(optionData[0].name);
+      optionData = optionData[0].options;
+      return {
+        command: commandParts.join(" "),
+        data: optionData ?? []
+      };
+    }
+  }
+
+  if (inter.isContextMenu()) {
+    return {
+      command: `[Context Menu] ${inter.commandName}`,
+      data: inter.options.data
+    };
+  }
+
+  if (inter.isMessageComponent()) {
+    const data = [{
+      name: "Message",
+      value: inter.message.guild ? `[Original Message](${inter.message.url})` : "(DM)"
+    }];
+    const command = inter.isButton() ? `[Button] ${(inter.component?.emoji?.name ?? "") + (inter.component?.label ?? "")}` : "[Select Menu]";
+
+    if (inter.isSelectMenu()) {
+      data.push({ name: "Selection", value: inter.values.join() });
+    }
+
+    return { command, data };
+  }
+}
+
 const utils = {
   /**
    * If a command is run in a channel that doesn't want spam, returns #bot-lobby so results can be posted there.
    * @param {Discord.Message} msg The Discord message to check for bot spam.
    */
-  botSpam: function (msg) {
+  botSpam: function(msg) {
     if (msg.guild?.id === config.ldsg && // Is in server
       msg.channel.id !== config.channels.botspam && // Isn't in bot-lobby
       msg.channel.id !== config.channels.bottesting && // Isn't in Bot Testing
@@ -23,12 +88,14 @@ const utils = {
   },
   /**
    * After the given amount of time, attempts to delete the message.
-   * @param {Discord.Message} msg The message to delete.
+   * @param {Discord.Message|Discord.Interaction} msg The message to delete.
    * @param {number} t The length of time to wait before deletion, in milliseconds.
    */
   clean: async function(msg, t = 20000) {
     await utils.wait(t);
-    if (msg.deletable && !msg.deleted) {
+    if (msg instanceof Discord.CommandInteraction) {
+      msg.deleteReply().catch(utils.noop);
+    } else if ((msg instanceof Discord.Message) && (msg.deletable && !msg.deleted)) {
       msg.delete().catch(utils.noop);
     }
     return Promise.resolve(msg);
@@ -83,10 +150,10 @@ const utils = {
 
     console.error(Date());
 
-    let embed = utils.embed().setTitle(error.name);
+    const embed = utils.embed().setTitle(error.name);
 
     if (message instanceof Discord.Message) {
-      let loc = (message.guild ? `${message.guild?.name} > ${message.channel?.name}` : "DM");
+      const loc = (message.guild ? `${message.guild?.name} > ${message.channel?.name}` : "DM");
       console.error(`${message.author.username} in ${loc}: ${message.cleanContent}`);
 
       message.channel.send("I've run into an error. I've let my devs know.")
@@ -95,13 +162,20 @@ const utils = {
         .addField("Location", loc, true)
         .addField("Command", message.cleanContent || "`undefined`", true);
     } else if (message instanceof Discord.Interaction) {
-      let loc = (message.guild ? `${message.guild?.name} > ${message.channel?.name}` : "DM");
+      const loc = (message.guild ? `${message.guild?.name} > ${message.channel?.name}` : "DM");
       console.error(`Interaction by ${message.user.username} in ${loc}`);
 
-      message[(message.deferred ? "editReply" : "reply")]({content: "I've run into an error. I've let my devs know.", ephemeral: true}).catch(utils.noop);
+      message[((message.deferred || message.replied) ? "editReply" : "reply")]({ content: "I've run into an error. I've let my devs know.", ephemeral: true }).catch(utils.noop);
       embed.addField("User", message.user?.username, true)
-        .addField("Location", loc, true)
-        .addField("Interaction", message.commandId || message.customId || "`undefined`", true);
+        .addField("Location", loc, true);
+
+      const descriptionLines = [message.commandId || message.customId || "`undefined`"];
+      const { command, data } = parseInteraction(message);
+      descriptionLines.push(command);
+      for (const datum of data) {
+        descriptionLines.push(`${datum.name}: ${datum.value}`);
+      }
+      embed.addField("Interaction", descriptionLines.join("\n"));
     } else if (typeof message === "string") {
       console.error(message);
       embed.addField("Message", message);
@@ -113,7 +187,7 @@ const utils = {
     if (stack.length > 4096) stack = stack.slice(0, 4000);
 
     embed.setDescription(stack);
-    errorLog.send({embeds: [embed]});
+    errorLog.send({ embeds: [embed] });
   },
   errorLog,
   /**
@@ -129,22 +203,24 @@ const utils = {
    *
    * It does literally nothing.
    * */
-  noop: () => { },
+  noop: () => {
+    // No-op, do nothing
+  },
   /**
    * Returns an object containing the command, suffix, and params of the message.
    * @param {Discord.Message} msg The message to get command info from.
    * @param {boolean} clean Whether to use the messages cleanContent or normal content. Defaults to false.
    */
   parse: (msg, clean = false) => {
-    for (let prefix of [config.prefix, `<@${msg.client.user.id}>`, `<@!${msg.client.user.id}>`]) {
-      let content = clean ? msg.cleanContent : msg.content;
+    for (const prefix of [config.prefix, `<@${msg.client.user.id}>`, `<@!${msg.client.user.id}>`]) {
+      const content = clean ? msg.cleanContent : msg.content;
       if (!content.startsWith(prefix)) continue;
-      let trimmed = content.substr(prefix.length).trim();
+      const trimmed = content.substr(prefix.length).trim();
       let [command, ...params] = trimmed.split(" ");
       if (command) {
         let suffix = params.join(" ");
-        if (suffix.toLowerCase() === "help") {  // Allow `!command help` syntax
-          let t = command.toLowerCase();
+        if (suffix.toLowerCase() === "help") { // Allow `!command help` syntax
+          const t = command.toLowerCase();
           command = "help";
           suffix = t;
           params = t.split(" ");
@@ -159,12 +235,21 @@ const utils = {
     return null;
   },
   /**
+   * Choose a random element from an array
+   * @function rand
+   * @param {Array} selections Items to choose from
+   * @returns {*} A random element from the array
+   */
+  rand: function(selections) {
+    return selections[Math.floor(Math.random() * selections.length)];
+  },
+  /**
    * Returns a promise that will fulfill after the given amount of time.
    * If awaited, will block for the given amount of time.
    * @param {number} t The time to wait, in milliseconds.
    */
   wait: function(t) {
-    return new Promise((fulfill, reject) => {
+    return new Promise((fulfill) => {
       setTimeout(fulfill, t);
     });
   }

@@ -4,6 +4,7 @@
     "snipcart": "",
     "steam": ""
   },
+  "applicationId": "",
   "color": [248, 154, 34],
   "db": {
     "model": "utils/dbModels.js",
@@ -18,10 +19,21 @@
     "url": ""
   },
   "events": [
+    "channelCreate",
+    "channelUpdate",
+    "guildBanAdd",
+    "guildMemberAdd",
+    "guildMemberRemove",
+    "guildMemberUpdate",
     "interactionCreate",
     "messageCreate",
+    "messageReactionAdd",
+    "messageReactionRemove",
     "messageUpdate",
-    "ready"
+    "presenceUpdate",
+    "ready",
+    "threadCreate",
+    "userUpdate"
   ],
   "ldsg": "96335850576556032",
   "ownerId": "111232201848295424",
