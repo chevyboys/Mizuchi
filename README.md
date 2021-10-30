@@ -1,4 +1,4 @@
-## Icarus - Custom Discord bot for the [LDSG Community](https://ldsgamers.com)
+## Mizuchi - Custom Discord bot for the Climbers Court Community
 
 Mizuchi is built in Node.js for the Climbers Court community. It runs on the [Augur framework](https://github.com/Gaiwecoor/augurbot), utilizing the [Discord.js library](https://discord.js.org/).
 
@@ -10,3 +10,6 @@ When submitting a PR, please include the following questions with the appropriat
 * Are any changes to Interaction fingerprints needed? If so, are they reflected in the appropriate file in /registry?
 * Have I used JSdoc style comments (at least) to properly document all of my functions? 
 * Are there any new dependencies that need to be installed? If so, are they reflected in package.json?
+
+
+Some code has been re-used with permission from Kevin Dixon (Gaiwecoor).

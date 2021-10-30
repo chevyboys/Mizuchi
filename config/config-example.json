@@ -1,20 +1,11 @@
 {
-  "adminId": ["111232201848295424", "96335658997526528", "96354827579174912"],
+  "adminId": [""],
   "api": {
     "snipcart": "",
     "steam": ""
   },
   "applicationId": "",
   "color": [248, 154, 34],
-  "db": {
-    "model": "utils/dbModels.js",
-    "db": "",
-    "settings": {
-      "useNewUrlParser": true,
-      "user": "",
-      "pass": ""
-    }
-  },
   "error": {
     "url": ""
   },
