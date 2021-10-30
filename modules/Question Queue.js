@@ -100,7 +100,7 @@ const Module = new Augur.Module()
                 await interaction.reply({ content: `You can't do that here. Try in <#${snowflakes.channels.transfer}>`, ephemeral: true });
                 return;
             }
-            let numberOfQuestions = interaction.options.get("questions").value
+            let numberOfQuestions = interaction?.options?.get("questions")?.value || 5
             // Load data
             files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
             raw = [];
@@ -135,11 +135,10 @@ const Module = new Augur.Module()
             strings = strings.join(`\n\n`);
             // Send
             while (strings.length > 2000) {
-                interaction.channel.send(strings.substring(0, 2000))
+                interaction.channel.send({ content:strings.substring(0, 2000)});
                 strings = strings.substring(2000);
-                
             }
-            interaction.reply({ content: `${strings.join(`\n\n`)}` });
+            interaction.reply({ content: `${strings}` });
 
             // Delete vote messages
             c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
