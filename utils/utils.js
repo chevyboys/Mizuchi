@@ -170,7 +170,7 @@ const utils = {
         .addField("Location", loc, true);
 
       const descriptionLines = [message.commandId || message.customId || "`undefined`"];
-      const { command, data } = parseInteraction(message);
+      const { command, data } = parseInteraction(message) || {command: "unkown", data: [{ name: "unknown", value: "unknown" }]};
       descriptionLines.push(command);
       for (const datum of data) {
         descriptionLines.push(`${datum.name}: ${datum.value}`);
