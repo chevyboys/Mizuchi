@@ -16,3 +16,4 @@ site/*
 
 # For Visual Studio's temp directory
 .vs/
+.vscode/launch.json

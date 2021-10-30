@@ -6,6 +6,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { REST, DiscordAPIError } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { Client, MessageEmbed, Intents, MessageButton, MessageActionRow } = require('discord.js');
+const { raw } = require("express");
 
 const Module = new Augur.Module()
     .addInteractionCommand({
@@ -138,13 +139,72 @@ const Module = new Augur.Module()
                 interaction.channel.send({ content:strings.substring(0, 2000)});
                 strings = strings.substring(2000);
             }
-            interaction.reply({ content: `${strings}` });
+            interaction.reply({ content: `${strings}`});
 
             // Delete vote messages
             c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
             for (i = 0; i < accepted.length; i++) {
                 fs.unlinkSync(`./data/${accepted[i].file}`);
-                m = await c.messages.fetch(accepted[i].fetch.message);
+                try {
+                    m = await c.messages.fetch(accepted[i].fetch.message);
+                } catch (error) {
+                    if(error.toString().indexOf("Unknown Message") > -1) {
+                        u.errorLog("That question has been deleted")
+                    }
+                }
+                
+                if (m) m.delete().catch(err => u.errorLog(`ERR: Insufficient permissions to delete messages.`));
+            }
+
+        }
+
+    }).addInteractionCommand({
+        name: "question-remove",
+        guildId: snowflakes.guilds.PrimaryServer,
+        process: async (interaction) => {
+
+            // Load data
+            files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+            let rawData = [];
+            for (i = 0; i < files.length; i++) {
+                data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+                rawData.push({
+                    file: files[i],
+                    fetch: data.fetch,
+                    string: `<@${data.details.asker}>: ${data.details.question}`,
+                    votes: data.system.votes
+                });
+            }
+
+            // Check
+            if (rawData.length == 0) {
+                interaction.reply({ content: `There are no questions to delete! Check back later.` , ephemeral: true });
+                return
+            }
+            let targetId = interaction?.options?.get("id")?.value;
+            let target = rawData.find(msg => msg.fetch.message == targetId);
+            if (target == undefined) {
+                interaction.reply({ content: `There are no questions with that ID in my memory crystals` , ephemeral: true });
+                return
+            }
+            target = [target];
+            interaction.reply({ content: `I have removed ${target[0].string}`, ephemeral: true  });
+
+           
+            
+            // Delete vote messages
+            c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
+            for (i = 0; i < target.length; i++) {
+                fs.unlinkSync(`./data/${target[i].file}`);
+                try {
+                    m = await c.messages.fetch(target[i].fetch.message);
+                    
+                } catch (error) {
+                    if(error.toString().indexOf("Unknown Message") > -1) {
+                        u.errorLog("That question has been deleted")
+                    }
+                }
+                
                 if (m) m.delete().catch(err => u.errorLog(`ERR: Insufficient permissions to delete messages.`));
             }
 
