@@ -33,7 +33,7 @@ const Module = new Augur.Module()
                 .addComponents(
                     new MessageButton()
                         .setCustomId('upVoteQuestion')
-                        .setLabel(`0`)
+                        .setLabel(`1`)
                         .setStyle('SECONDARY')
                         .setEmoji(snowflakes.emoji.upDawn),
                 )
@@ -51,8 +51,10 @@ const Module = new Augur.Module()
                     message: msg.id
                 },
                 system: {
-                    votes: 0,
-                    IDs: [],
+                    votes: 1,
+                    IDs: [
+                        Module.client.user.id
+                    ],
                     entered: Date.now()
                 }
             }
