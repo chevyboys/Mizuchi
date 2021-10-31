@@ -13,3 +13,15 @@ When submitting a PR, please include the following questions with the appropriat
 
 
 Some code has been re-used with permission from Kevin Dixon (Gaiwecoor).
+
+## Release Naming:
+Releases will be named based on the last word in the title of books published by the author. Expected titles for releases are:
+- v1.0.0 - Magic
+- v2.0.0 - Titan
+- v3.0.0 - Star
+- v4.0.0 - Sword
+- v5.0.0 - Diamantine
+- v6.0.0 - Soulbrand
+- v7.0.0 - Divinity
+- v8.0.0 - Sorcery
+- v9.0.0 - Destiny
