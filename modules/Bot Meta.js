@@ -92,8 +92,9 @@ const Module = new Augur.Module()
                         embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
                         if (i == 20) {
                             try {
-                                 await msg.author.send({ embed });
+                                 await msg.author.send({ embeds: [embed] });
                             } catch (e) {
+                                u.errorHandler(e);
                                 msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
                                 return;
                             }
@@ -109,7 +110,7 @@ const Module = new Augur.Module()
                     }
                 }
                 try {
-                    await msg.author.send({ embed });
+                    await msg.author.send({ embeds: [embed] });
                 } catch (e) {
                     msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
                     return;
@@ -127,7 +128,7 @@ const Module = new Augur.Module()
 
                     if (command.aliases.length > 0) embed.addField("Aliases", command.aliases.map(a => `!${a}`).join(", "));
                     try {
-                         await msg.author.send({ embed });
+                         await msg.author.send({ embeds: [embed] });
                     } catch (e) {
                         msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
                         return;
@@ -151,6 +152,17 @@ const Module = new Augur.Module()
             msg.react("👌");
         },
         permissions: (msg) => (Module.config.adminId.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin))
+    }).addCommand({
+        name: "say",
+        syntax: "<stuff>",
+        aliases: [], // optional
+        category: "Fun",
+        hidden: true,
+        process: (msg, suffix) => {
+            if (msg.deletable && (suffix.indexOf("-x") > -1) && (msg.client.config.adminId.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id)) msg.delete();
+            msg.channel.send(suffix.replace("-x", ""));
+        },
+        permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
     })
     .addCommand({
         name: "pulse",
