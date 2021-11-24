@@ -106,10 +106,10 @@ const Module = new Augur.Module()
             let numberOfQuestions = interaction?.options?.get("questions")?.value || 5
             // Load data
             files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
-            raw = [];
+            rawData = [];
             for (i = 0; i < files.length; i++) {
                 data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
-                raw.push({
+                rawData.push({
                     file: files[i],
                     fetch: data.fetch,
                     string: `<@${data.details.asker}>: ${data.details.question}`,
@@ -118,7 +118,7 @@ const Module = new Augur.Module()
             }
 
             // Sort
-            sorted = raw.sort((a, b) => (a.votes < b.votes) ? 1 : -1);
+            sorted = rawData.sort((a, b) => (a.votes < b.votes) ? 1 : -1);
 
             // Check
             if (sorted.length == 0) {

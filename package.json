@@ -1,8 +1,8 @@
 {
-  "name": "icarus5",
-  "version": "5.0.0",
-  "description": "Custom Discord bot for the LDSG community",
-  "main": "icarus.js",
+  "name": "Tavare",
+  "version": "1.0.1",
+  "description": "Custom Discord bot for the Climber's Court",
+  "main": "bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/Gaiwecoor/icarus5.git"
   },
-  "author": "Kevin \"Gaiwecoor\" Dixon",
+  "author": "Nick",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Gaiwecoor/icarus5/issues"
@@ -48,6 +48,7 @@
       "ecmaVersion": 2021
     },
     "extends": "eslint:recommended",
-    "rules": {}
-  }
+    "rules": []
+  },
+  "nodeVersion": "17.1.0"
 }

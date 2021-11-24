@@ -8,11 +8,8 @@ config/*
 test.js
 *-.js
 *-.json
-data/*
-!data/*-reference.json
-!data/birthday.json
-!data/nameParts.json
 site/*
+data/*
 
 # For Visual Studio's temp directory
 .vs/
