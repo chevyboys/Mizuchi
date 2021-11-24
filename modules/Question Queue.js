@@ -38,7 +38,7 @@ const Module = new Augur.Module()
                         .setEmoji(snowflakes.emoji.upDawn),
                 )
             msg = await interaction.channel.send({ embeds: [embed], components: [row] });
-
+            
             // Write JSON
             data = {
                 details: {
@@ -58,6 +58,7 @@ const Module = new Augur.Module()
                     entered: Date.now()
                 }
             }
+            console.log(`${interaction.user.tag} asked:\n\t${data.details.question}\n\nID:${data.fetch.message}\n\n\n`)
             fs.writeFileSync(`./data/${msg.id}.json`, JSON.stringify(data, null, 4));
         }
 
