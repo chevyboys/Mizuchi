@@ -32,7 +32,7 @@ async function spoilerMsg(msg) {
 }
 
 const Module = new Augur.Module()
-.addInteractionCommand({ name: "Spoilers",
+.addInteractionCommand({ name: "spoilers",
 guildId: snowflakes.guilds.PrimaryServer,
 process: async (interaction) => {
   try {

@@ -77,6 +77,7 @@ const Module = new Augur.Module()
         for (const file of registryFiles) {
             if (file.indexOf(".js") > -1) {
                 let fileToRegister = file;
+                if(!msg.guild.commands.cache.filter(c => c.name == file.name).size > 0)
                 let clientID = Module.client.user.id
                 let guildID = snowflakes.guilds.PrimaryServer
                 const apiEndpoint = `https://discord.com/api/v8/applications/${clientID}/guilds/${guildID}/commands`;
