@@ -44,7 +44,7 @@ const Module = new Augur.Module()
                 details: {
                     asker: interaction.user.id,
                     question: interaction.options.get("question").value,
-                    number: (fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)
+                    number: (msg.id)
                 },
                 fetch: {
                     channel: interaction.channel.id,
