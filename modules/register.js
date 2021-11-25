@@ -81,7 +81,7 @@ const Module = new Augur.Module()
                 let guildID = snowflakes.guilds.PrimaryServer
                 const apiEndpoint = `https://discord.com/api/v8/applications/${clientID}/guilds/${guildID}/commands`;
                 const botToken = require("../config/config.json").token;
-                const commandData = require(`./registry/${fileToRegister}`);
+                const commandData = require(`../registry/${fileToRegister}`);
                 const fetch = require('node-fetch')
                 const response = await fetch(apiEndpoint, {
                     method: 'post',
