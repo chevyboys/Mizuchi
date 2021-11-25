@@ -61,7 +61,20 @@ const Module = new Augur.Module()
                         .setRequired(true)),
 
         ].map(command => command.toJSON());
-
+        
+        let registryFiles = fs.readdirSync('./registry/');
+        let dummyFetch = (await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer)).commands.fetch();
+        let guild = await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
+        let commandCache = guild.commands.cache;
+        for (const file of registryFiles) {
+            if (file.indexOf(".js") > -1) {
+                let fileToRegister = file;
+                if(!commandCache.filter(c => c.name == file.name).size > 0) {
+                    const commandData = require(`../registry/${fileToRegister}`);
+                    this.commands.push(commandData);
+                }
+            }
+        }
         // Register API version with the token
         rest = new REST({ version: '9' }).setToken(Module.config.token);
 
@@ -73,33 +86,6 @@ const Module = new Augur.Module()
         //restrict the question remove command
         await restrict(tt[2], [snowflakes.roles.Admin, snowflakes.roles.Whisper, snowflakes.roles.BotMaster])
 
-        let registryFiles = fs.readdirSync('./registry/');
-        let dummyFetch = (await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer)).commands.fetch();
-        let guild = await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
-        let commandCache = guild.commands.cache;
-        for (const file of registryFiles) {
-            if (file.indexOf(".js") > -1) {
-                let fileToRegister = file;
-                if(!commandCache.filter(c => c.name == file.name).size > 0) {
-                    let clientID = Module.client.user.id
-                    let guildID = snowflakes.guilds.PrimaryServer
-                    const apiEndpoint = `https://discord.com/api/v8/applications/${clientID}/guilds/${guildID}/commands`;
-                    const botToken = require("../config/config.json").token;
-                    const commandData = require(`../registry/${fileToRegister}`);
-                    const fetch = require('node-fetch')
-                    const response = await fetch(apiEndpoint, {
-                        method: 'post',
-                        body: JSON.stringify(commandData),
-                        headers: {
-                            'Authorization': 'Bot ' + botToken,
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    const json = await response.json()
-    
-                    console.log(json)
-                }
-            }
-        }
+        
     });
 module.exports = Module;
