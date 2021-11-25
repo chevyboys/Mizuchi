@@ -34,7 +34,6 @@ async function spoilerMsg(msg) {
 const Module = new Augur.Module()
 .addInteractionCommand({ name: "spoilers",
 guildId: snowflakes.guilds.PrimaryServer,
-commandId: "913244146125389834",
 process: async (interaction) => {
   try {
     await interaction.deferReply?.({ ephemeral: true });
