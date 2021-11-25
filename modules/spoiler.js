@@ -22,7 +22,6 @@ async function spoilerMsg(msg) {
         newMessage.embeds = msg.embeds
         for (const embed of newMessage.embeds) {
            embed.description = `||${embed.description}||`;
-           embed.title = `||${embed.title}||`;
            for (const field of embed.fields) {
                 field.value = `||${field.value}||`;
            }
