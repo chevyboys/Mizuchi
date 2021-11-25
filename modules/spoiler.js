@@ -24,7 +24,7 @@ async function spoilerMsg(msg) {
            embed.description = `||${embed.description}||`;
            embed.title = `||${embed.title}||`;
            for (const feild in embed.feilds) {
-               feild = `||${feild}||`
+               feild.value = `||${feild.value}||`
            }
         }
     }
