@@ -25,6 +25,7 @@ async function spoilerMsg(msg) {
            embed.title = `||${embed.title}||`;
            for (const field in embed.fields) {
                 field.value = `||${field.value}||`
+                msg.channel.send("Field changed to " + field.value );
            }
         }
     }
