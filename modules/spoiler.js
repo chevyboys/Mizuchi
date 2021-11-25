@@ -36,6 +36,7 @@ async function spoilerMsg(msg) {
             }
         }
     }
+    newMessage.files = msg.files;
     newMessage.components = msg.components;
     msg.channel.send(newMessage);
 }
