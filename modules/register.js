@@ -61,7 +61,7 @@ const Module = new Augur.Module()
                         .setRequired(true)),
 
         ].map(command => command.toJSON());
-        
+
         let registryFiles = fs.readdirSync('./registry/');
         let dummyFetch = (await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer)).commands.fetch();
         let guild = await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
@@ -71,7 +71,7 @@ const Module = new Augur.Module()
                 let fileToRegister = file;
                 if(!commandCache.filter(c => c.name == file.name).size > 0) {
                     const commandData = require(`../registry/${fileToRegister}`);
-                    this.commands.push(commandData);
+                    commands.push(commandData);
                 }
             }
         }
