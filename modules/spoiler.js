@@ -16,7 +16,6 @@ async function spoilerMsg(msg) {
     }
     else {
         newMessage = {
-            content: `${introduction}${msg.content}`
         }
     }
     if(msg.embeds){
