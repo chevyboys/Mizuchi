@@ -1,5 +1,5 @@
 /* This category is for commands useable by everyone that give information about the bot or specifically aid in the bots ability to be run on the server.
-*/ 
+*/
 const fs = require('fs');
 const Augur = require("augurbot");
 const u = require("../utils/utils");
@@ -41,7 +41,7 @@ async function sendDiscordStatus(msg, embed, verbose) {
         embed.addField(`Discord Components:`, `Unavailable`);
         u.errorLog(error);
     }
-    msg.channel.send({embeds: [embed]});
+    msg.channel.send({ embeds: [embed] });
 }
 
 const Module = new Augur.Module()
@@ -54,7 +54,7 @@ const Module = new Augur.Module()
         process: async (msg, suffix) => {
             //u.preCommand(msg);
             msg.react("👌");
-            u.clean(msg);   
+            u.clean(msg);
             let prefix = Module.config.prefix;
             let commands = Module.client.commands.filter(c => c.permissions(msg) && c.enabled);
             let embed = u.embed()
@@ -62,7 +62,7 @@ const Module = new Augur.Module()
                 .setThumbnail(msg.client.user.displayAvatarURL({ size: 128 }));
 
             if (!suffix) { // FULL HELP
-                embed .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
+                embed.setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
                     .setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : "."))
                     .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
                 let categories;
@@ -92,7 +92,7 @@ const Module = new Augur.Module()
                         embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
                         if (i == 20) {
                             try {
-                                 await msg.author.send({ embeds: [embed] });
+                                await msg.author.send({ embeds: [embed] });
                             } catch (e) {
                                 u.errorHandler(e);
                                 msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
@@ -128,7 +128,7 @@ const Module = new Augur.Module()
 
                     if (command.aliases.length > 0) embed.addField("Aliases", command.aliases.map(a => `!${a}`).join(", "));
                     try {
-                         await msg.author.send({ embeds: [embed] });
+                        await msg.author.send({ embeds: [embed] });
                     } catch (e) {
                         msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
                         return;
@@ -145,9 +145,28 @@ const Module = new Augur.Module()
         hidden: true,
         description: "Set playing status",
         syntax: "[game]",
-        aliases: ["setgame", "game"],
-        process: (msg, suffix) => {
-            if (suffix) msg.client.user.setActivity(suffix);
+        aliases: ["streaming", "watching", "listening"],
+        process: (msg, suffix) => {//msg.client.user.setActivity(suffix);
+            if (suffix) {
+                let { command } = u.parse(msg);
+                command = command.toUpperCase();
+                let url = false;
+                if (command == "STREAMING") {
+
+                    //detect if URL
+                    const args = suffix.trim().split(/s/);
+                    //Determine if a string is a url
+                    function isURL(str) {
+                        const urlMatch = /<?(https?:\/\/\S+)>?/;
+                        const match = urlMatch.exec(str);
+                        return match ? match[1] : null;
+                    }
+                    url = isURL(suffix);
+                    msg.client.user.setActivity({ type: command.toUpperCase(), url: url, name: suffix.replace(url, "").replace("  ", " ").trim() });
+                }
+                else msg.client.user.setActivity({ type: command.toUpperCase(), name: suffix })
+                
+            }
             else msg.client.user.setActivity("");
             msg.react("👌");
         },
@@ -175,7 +194,7 @@ const Module = new Augur.Module()
                 let client = msg.client;
 
                 let embed = u.embed()
-                .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
+                    .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
                     .setAuthor(client.user.username + " Heartbeat", client.user.displayAvatarURL())
                     .setTimestamp();
 
