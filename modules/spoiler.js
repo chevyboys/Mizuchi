@@ -5,7 +5,6 @@ const snowflakes = require('../config/snowflakes.json');
 // Message context menu for mods spoilering things
 
 async function spoilerMsg(msg) {
-    u.clean(msg, 0);
     let introduction = "";
     if (msg.author != Module.client.user) introduction = msg.member.displayName + " says: ";
     let newMessage;
@@ -36,6 +35,7 @@ async function spoilerMsg(msg) {
     newMessage.files = msg.files;
     newMessage.components = msg.components;
     msg.channel.send(newMessage);
+    u.clean(msg, 0);
 }
 
 const Module = new Augur.Module()
