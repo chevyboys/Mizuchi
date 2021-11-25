@@ -8,8 +8,16 @@ async function spoilerMsg(msg) {
     u.clean(msg, 0);
     let introduction = "";
     if (msg.author != Module.client.user) introduction = msg.member.displayName + " says: ";
-    let newMessage = {
-        content: `${introduction}||${msg.content}||`
+    let newMessage;
+    if(msg.content.length > 0) {
+        newMessage = {
+            content: `${introduction}||${msg.content}||`
+        }
+    }
+    else {
+        newMessage = {
+            content: `${introduction}${msg.content}`
+        }
     }
     if(msg.embeds){
         newMessage.embeds = msg.embeds
