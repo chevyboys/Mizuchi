@@ -6,8 +6,10 @@ const snowflakes = require('../config/snowflakes.json');
 
 async function spoilerMsg(msg) {
     u.clean(msg, 0);
+    let introduction = "";
+    if (msg.author != Module.client.user) introduction = msg.member.displayName + " says: ";
     let newMessage = {
-        content: `||${msg.content}||`
+        content: `${introduction}||${msg.content}||`
     }
     if(msg.embeds){
         newMessage.embeds = msg.embeds
