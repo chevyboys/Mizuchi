@@ -21,7 +21,7 @@ async function spoilerMsg(msg) {
            }
         }
     }
-    if(msg.attachements.length > 0){
+    if(msg.attachements && msg.attachements.length > 0){
         newMessage.attachements = msg.attachements;
         for (const attachement of newMessage.attachements ) {
             if(attachement) {
