@@ -32,7 +32,7 @@ async function spoilerMsg(msg) {
 
 const Module = new Augur.Module()
 .addInteractionCommand({ name: "Spoilers",
-commandId: "913225082980159488",
+commandId: "913225804115214399",
 process: async (interaction) => {
   try {
     await interaction.deferReply?.({ ephemeral: true });
