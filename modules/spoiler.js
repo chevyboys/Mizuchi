@@ -1,7 +1,8 @@
 const Augur = require("augurbot"),
 u = require("../utils/utils");
+const snowflakes = require('../config/snowflakes.json');
 
-// Message context menu for bookmarking a message.
+// Message context menu for mods spoilering things
 
 async function spoilerMsg(msg) {
     u.clean(msg, 0);
@@ -32,6 +33,7 @@ async function spoilerMsg(msg) {
 
 const Module = new Augur.Module()
 .addInteractionCommand({ name: "Spoilers",
+guildId: snowflakes.guilds.PrimaryServer,
 process: async (interaction) => {
   try {
     await interaction.deferReply?.({ ephemeral: true });
