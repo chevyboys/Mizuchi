@@ -30,9 +30,7 @@ async function spoilerMsg(msg) {
     if(msg.attachements && msg.attachements.length > 0){
         newMessage.attachements = msg.attachements;
         for (const attachement of newMessage.attachements ) {
-            if(attachement) {
-                attachement.name = "SPOILER_" + attachement.name;
-            }
+                attachement.setName("SPOILER_" + attachement.name);
         }
     }
     newMessage.files = msg.files;
