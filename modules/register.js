@@ -85,8 +85,7 @@ const Module = new Augur.Module()
         await restrict(tt[1], [snowflakes.roles.Admin, snowflakes.roles.WorldMaker])
         //restrict the question remove command
         await restrict(tt[2], [snowflakes.roles.Admin, snowflakes.roles.Whisper, snowflakes.roles.BotMaster])
-        //restrict spoilers
-        await restrict(tt.filter(c => c.name == "spoilers")[0], [snowflakes.roles.Admin, snowflakes.roles.Whisper, snowflakes.roles.BotMaster])
+        //restrict spoiler
         
     });
 module.exports = Module;
