@@ -59,13 +59,13 @@ async function spoilerMsg(inputObject) {
 }
 //Kester msg handling
 async function kesterBomb(inputObject){
-    
+    u.noop()
 }
 
 const Module = new Augur.Module().setInit(() => {
     modRequest(Module, "Spoiler", "🤫", spoilerMsg, spoilerMsg);
     modRequest(Module, "Pin", "📌", pinMsgApprove, pinMsgOverride);
-    modRequest(Module, "Kester Bomb", )
+    //modRequest(Module, "Kester Bomb", )
 })
 
 module.exports = Module;
