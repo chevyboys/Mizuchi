@@ -97,7 +97,7 @@ modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmoji
           const user = interaction.member;
           if (message) {
             if (user.bot) return;
-            if (message.pinnable || (!message.system && !message.deleted && (!this.guild || (message.channel?.viewable && message.channel?.permissionsFor(this.client.user)?.has(Permissions.FLAGS.MANAGE_MESSAGES, false))))) {
+            if ((!message.system && !message.deleted)) {
               // modRequest Request
               try {
                 if ((message.channel.permissionsFor(user).has("MANAGE_MESSAGES") || message.channel.permissionsFor(user).has("ADMINISTRATOR") || message.channel.permissionsFor(user).has("MANAGE_WEBHOOKS"))) {
@@ -126,7 +126,27 @@ modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmoji
       }
     })
     .addInteractionHandler({ customId: `${modRequestFunctionName}Approve`, process: processCardAction })
-    .addInteractionHandler({ customId: `${modRequestFunctionName}Reject`, process: processCardAction });;
+    .addInteractionHandler({ customId: `${modRequestFunctionName}Reject`, process: processCardAction })
+    .addEvent("messageReactionAdd", async (reaction, user) => {
+      message = reaction.message;
+      if (message.guild?.id != snowflakes.guilds.PrimaryServer || user.bot) return;
+      if ((reaction.emoji.name == modRequestFunctionEmoji)) {
+        // Pin Request
+        try {
+          if ((message.channel.permissionsFor(user).has("MANAGE_MESSAGES") || message.channel.permissionsFor(user).has("ADMINISTRATOR") || message.channel.permissionsFor(user).has("MANAGE_WEBHOOKS"))) {
+            overrideCallback({
+              mod: user,
+              user: user,
+              target: message,
+              interaction: message
+            })
+          } else {
+            let card = await modRequestCard(message, message);
+            activeRequests.push({ targetMessage: message.id, targetChannel: message.channel.id, card: card.id, requstedBy: user.id, originalInteraction: message });
+          }
+        } catch (e) { u.errorHandler(e, "modRequest Request Processing"); }
+      }
+    });
 }
 
 module.exports = modRequest;
