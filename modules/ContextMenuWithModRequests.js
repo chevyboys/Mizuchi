@@ -2,8 +2,8 @@ const Augur = require("augurbot"),
     u = require("../utils/utils");
 const modRequest = require('../utils/modRequest');
 
-// Message context menu for mods spoilering things
 
+//Pin msg handling
 async function pinMsgApprove(inputObject) {
     let messages = await inputObject.target.channel.messages.fetchPinned().catch(u.noop);
     if (messages?.size == 50) {
@@ -22,7 +22,7 @@ async function pinMsgOverride(inputObject) {
     else inputObject.target.pin(`Requested by ${inputObject.user.username}`);
     inputObject.interaction.editReply({ content: `I have pinned the message for you`, ephemeral: true });
 }
-
+//Spoiler msg handling
 async function spoilerMsg(inputObject) {
     let msg = inputObject.target;
     let introduction = "";
@@ -52,15 +52,20 @@ async function spoilerMsg(inputObject) {
             attachement.setName("SPOILER_" + attachement.name);
         }
     }
-    newMessage.files = msg.files;
+    newMessage.files = Array.from(newMessage.attachements.values());
     newMessage.components = msg.components;
     msg.channel.send(newMessage);
     u.clean(msg, 0);
 }
+//Kester msg handling
+async function kesterBomb(inputObject){
+    
+}
 
 const Module = new Augur.Module().setInit(() => {
     modRequest(Module, "Spoiler", "🤫", spoilerMsg, spoilerMsg);
-    modRequest(Module, "Pin", "📌", pinMsgApprove, pinMsgOverride)
+    modRequest(Module, "Pin", "📌", pinMsgApprove, pinMsgOverride);
+    modRequest(Module, "Kester Bomb", )
 })
 
 module.exports = Module;
