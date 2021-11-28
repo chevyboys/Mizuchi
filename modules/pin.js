@@ -75,7 +75,7 @@ async function processCardAction(interaction) {
 const Module = new Augur.Module()
   .addInteractionCommand({
     name: "Pin",
-    commandId: "893660744879583232",
+    guildId: snowflakes.guilds.PrimaryServer,
     process: async (interaction) => {
       try {
         await interaction.deferReply?.({ ephemeral: true });
