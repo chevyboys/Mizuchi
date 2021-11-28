@@ -13,7 +13,7 @@ async function pinMsgApprove(inputObject) {
             inputObject.activeRequest.originalInteraction.editReply("Approved by " + mod.displayName)
         }
     }
-    else target.pin(`Requested by ${requestingUser.displayName}`);
+    else inputObject.target.pin(`Requested by ${requestingUser.displayName}`);
 }
 
 async function pinMsgOverride(inputObject) {
