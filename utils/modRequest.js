@@ -18,7 +18,6 @@ let activeRequests = [];
 modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam, approvedCallback, overrideCallback) => {
   let modRequestFunctionName = modRequestFunctionNameParam;
   let modRequestFunctionEmoji = modRequestFunctionEmojiParam;
-  let approvedCallback = approvedCallback;
 
   const modRequestActions = [
     new MessageActionRow().addComponents(
