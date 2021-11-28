@@ -44,7 +44,7 @@ let activeRequests = [];
 
 const spoilerActions = [
   new MessageActionRow().addComponents(
-    new MessageButton().setCustomId("spoilerApprove").setLabel("Oh Yeah, Pin it").setStyle("SUCCESS"),
+    new MessageButton().setCustomId("spoilerApprove").setLabel("Oh Yeah, Spoil it").setStyle("SUCCESS"),
     new MessageButton().setCustomId("spoilerReject").setLabel("Nah, lets not").setStyle("DANGER"),
   ),
 ];
