@@ -128,9 +128,10 @@ modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmoji
     .addInteractionHandler({ customId: `${modRequestFunctionName}Approve`, process: processCardAction })
     .addInteractionHandler({ customId: `${modRequestFunctionName}Reject`, process: processCardAction })
     .addEvent("messageReactionAdd", async (reaction, user) => {
+      console.log(`"${reaction.emoji.name}""`)
       message = reaction.message;
       if (message.guild?.id != snowflakes.guilds.PrimaryServer || user.bot) return;
-      if ((reaction.emoji.name == modRequestFunctionEmoji)) {
+      if ((reaction.emoji.name.indexOf(modRequestFunctionEmoji) > -1)) {
         // Pin Request
         try {
           if ((message.channel.permissionsFor(user).has("MANAGE_MESSAGES") || message.channel.permissionsFor(user).has("ADMINISTRATOR") || message.channel.permissionsFor(user).has("MANAGE_WEBHOOKS"))) {
