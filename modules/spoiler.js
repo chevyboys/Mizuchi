@@ -39,6 +39,6 @@ async function spoilerMsg(inputObject) {
   u.clean(msg, 0);
 }
 
-const Module = async () => await modRequest("Spoilers", "🤫", spoilerMsg, spoilerMsg);
+const Module = modRequest("Spoilers", "🤫", spoilerMsg, spoilerMsg);
 
 module.exports = Module;
