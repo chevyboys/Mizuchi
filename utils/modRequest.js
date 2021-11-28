@@ -69,6 +69,7 @@ modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmoji
         embed.setColor(0x00FFFF);
         approvedCallback({
           mod: mod,
+          user: mod,
           card: card,
           embed: embed,
           activeRequest: activeRequest,
