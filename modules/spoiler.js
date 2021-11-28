@@ -1,5 +1,6 @@
 const Augur = require("augurbot"),
-u = require("../utils/utils");
+u = require("../utils/utils"),
+  { MessageActionRow, MessageButton } = require("discord.js");
 const snowflakes = require('../config/snowflakes.json');
 
 // Message context menu for mods spoilering things
