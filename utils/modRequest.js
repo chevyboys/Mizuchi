@@ -103,6 +103,7 @@ modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmoji
                 if ((message.channel.permissionsFor(user).has("MANAGE_MESSAGES") || message.channel.permissionsFor(user).has("ADMINISTRATOR") || message.channel.permissionsFor(user).has("MANAGE_WEBHOOKS"))) {
                   overrideCallback({
                     mod: user,
+                    user: user,
                     target: message,
                     interaction: interaction
                   })
