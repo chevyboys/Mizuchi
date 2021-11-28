@@ -2,7 +2,7 @@ const Augur = require("augurbot"),
     u = require("../utils/utils");
 const modRequest = require('../utils/modRequest');
 const Discord = require("discord.js"),
-const config = require("../config/config.json")
+config = require("../config/config.json");
 
 
 //Pin msg handling
