@@ -40,7 +40,7 @@ async function spoilerMsg(inputObject) {
 }
 
 const Module = new Augur.Module().setInit(() => {
-  modRequest(Module, "Spoilers", "🤫", spoilerMsg, spoilerMsg);
+  modRequest(Module, "Spoilers", "🤫", spoilerMsg, spoilerMsg, true);
 })
 
 module.exports = Module;
