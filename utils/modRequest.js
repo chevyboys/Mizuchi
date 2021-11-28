@@ -78,16 +78,17 @@ async function processCardAction(interaction) {
 
 // Message context menu for bookmarking a message.
 /**
+ * @param {Augur.Module} Module
  * @param {string} modRequestFunctionNameParam the name of the mod request function. Should be a single word.
  * @param {string} modRequestFunctionEmojiParam the emoji associated with this function
  * @param {function approvedCallback({mod,card,embed,activeRequest, requestingUser, target, interaction})} approvedCallback
  * @param {function overrideCallback({mod, target, interaction})} overrideCallback this function should accept an object containing the mod doing the action, the interaction, and the target message
  */
-modRequest = async (modRequestFunctionNameParam, modRequestFunctionEmojiParam, approvedCallback, overrideCallback) => {
+modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam, approvedCallback, overrideCallback) => {
 modRequestFunctionName = modRequestFunctionNameParam;
 modRequestFunctionEmoji = modRequestFunctionEmojiParam;
 approvedCallback = approvedCallback;
-const Module = new Augur.Module()
+Module
   .addInteractionCommand({
     name: `${modRequestFunctionName}`,
     guildId: snowflakes.guilds.PrimaryServer,
@@ -127,7 +128,6 @@ const Module = new Augur.Module()
   })
   .addInteractionHandler({ customId: `${modRequestFunctionName}Approve`, process: processCardAction })
   .addInteractionHandler({ customId: `${modRequestFunctionName}Reject`, process: processCardAction });;
-  return Module;
 }
 
 module.exports = modRequest;
