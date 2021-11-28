@@ -46,16 +46,11 @@ async function spoilerMsg(inputObject) {
             }
         }
     }
-    if (msg.attachements && msg.attachements.length > 0) {
-        newMessage.attachements = msg.attachements;
-        for (const attachement of newMessage.attachements) {
-            attachement.setName("SPOILER_" + attachement.name);
-        }
-    }
-    newMessage.files = Array.from(newMessage.attachements.values());
+    if (msg.attachments?.size > 0)
+    newMessage.files = [msg.attachments?.first()?.url]
     newMessage.components = msg.components;
-    msg.channel.send(newMessage);
-    u.clean(msg, 0);
+    return newMessage;
+    //u.clean(msg, 0);
 }
 //Kester msg handling
 async function kesterBomb(inputObject){
