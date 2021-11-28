@@ -31,7 +31,7 @@ let restrict = async (command, allowedRoles) => {
 }
 
 const Module = new Augur.Module()
-    .addEvent("ready", async () => {
+.setInit(() =>  {
         // Build slash commands
         commands = [
             new SlashCommandBuilder()
