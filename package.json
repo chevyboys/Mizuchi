@@ -5,7 +5,7 @@
   "main": "bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "forever bot.js"
+    "start": "forever bot.js"
   },
   "repository": {
     "type": "git",
