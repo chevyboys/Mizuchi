@@ -1,13 +1,17 @@
 {
   "messageId": "",
-  "qAndA" :[
+  "qAndA": [
     {
-       "question": "Where can I roleplay?",
-       "answer": "you want to role play in the setting, then you might be interested in The Perfect Stranger Arcane Ascension Roleplaying Server. If you have questions about the roleplaying server, you can talk to the server's representatives -- the @ Architects. Invite link here: https://discord.gg/N9fmbJqeSK"
-     },
-  {
-       "question": "How do I contact a moderator?",
-       "answer": "Our goal is to make it as easy as possible to contact moderators on the server. If you feel comfortable, you are welcome and encouraged to direct message (DM) or ping moderators with questions or concerns. Alternatively, we have created several forms that can be used to make reports or provide feedback in a more structured format. Both methods work equally well. We would rather have your feedback than not have your feedback because you were trying to be courteous of our notifications."
-     }
-]
+      "question": "Where can I roleplay?",
+      "answer": "you want to role play in the setting, then you might be interested in The Perfect Stranger Arcane Ascension Roleplaying Server. If you have questions about the roleplaying server, you can talk to the server's representatives -- the @ Architects. Invite link here: https://discord.gg/N9fmbJqeSK"
+    },
+    {
+      "question": "How do I contact a moderator?",
+      "answer": "Our goal is to make it as easy as possible to contact moderators on the server. If you feel comfortable, you are welcome and encouraged to direct message (DM) or ping moderators with questions or concerns. Alternatively, we have created several forms that can be used to make reports or provide feedback in a more structured format. Both methods work equally well. We would rather have your feedback than not have your feedback because you were trying to be courteous of our notifications."
+    },
+    {
+      "question": "What are the bot masters?",
+      "answer": "The bot masters are the wonderful people who run our bots. The bot master over Tavare is <@487085787326840843>"
+    }
+  ]
 }
