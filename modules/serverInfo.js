@@ -23,7 +23,7 @@ const Module = new Augur.Module()
             let botMasterRole = (await msg.guild.roles.cache.get(snowflakes.roles.BotMaster));
             let color = whisperRole.hexColor;
             
-            let embed = u.embed().addField("Current Climbers Court Staff Members:",`<@&${snowflakes.roles.Admin}>` + "```" + Admin + "```\n\n" + `<@&${snowflakes.roles.Whisper}>` + "```" + Mod + "```"+ `<@&${snowflakes.roles.SoaringWings}>` + "```" + SW + "```\n\n").addField("Staff Assistants",`<@&${snowflakes.roles.BotMaster}>` + "```" + botMaster + "```").setColor(color);
+            let embed = u.embed().addField("Current Climbers Court Staff Members:",`**<@&${snowflakes.roles.Admin}>:**` + "```" + Admin + "```\n\n" + `**<@&${snowflakes.roles.Whisper}>:**` + "```" + Mod + "```\n\n"+ `**<@&${snowflakes.roles.SoaringWings}>:**` + "```" + SW + "```\n\n\n\n").addField("Staff Assistants",`**<@&${snowflakes.roles.BotMaster}>**:` + "```" + botMaster + "```").setColor(color);
             
             msg.channel.send({ embeds: [embed]});
         }
