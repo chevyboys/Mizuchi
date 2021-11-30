@@ -1,10 +1,11 @@
 {
   "name": "Tavare",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Custom Discord bot for the Climber's Court",
   "main": "bot.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "forever bot.js"
   },
   "repository": {
     "type": "git",
@@ -12,9 +13,6 @@
   },
   "author": "Nick",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Gaiwecoor/icarus5/issues"
-  },
   "homepage": "https://github.com/Gaiwecoor/icarus5#readme",
   "dependencies": {
     "@discordjs/rest": "^0.1.0-canary.0",

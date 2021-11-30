@@ -9,6 +9,9 @@
   "error": {
     "url": ""
   },
+  "kesterBombs": {
+    "url": ""
+  },
   "events": [
     "channelCreate",
     "channelUpdate",
