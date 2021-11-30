@@ -7,7 +7,7 @@ const Module = new Augur.Module()
         name: "stafflist",
         aliases: ["staff", "staffinfo"],
         description: "Gets the current staff members and bot masters",
-        permissions: true,
+        permissions: () => {return true},
         process: async (msg) => {
             let SW = await msg.guild.members.cache.map((m) => { if (m.roles.cache.has(snowflakes.roles.SoaringWings)) return m.displayName || m.username }).filter(r => (r != null)).join(`\n`);
 
