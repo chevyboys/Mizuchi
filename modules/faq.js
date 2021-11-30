@@ -9,7 +9,6 @@ let questions = [];
 async function dynamicallyCreateButtons(faqsfile){
     let rows = [];
     let rowi = 0;
-    let buttonId = 0;
     let row;
     for (const faq of faqsfile) {
         if(rowi == 5) {
@@ -35,6 +34,7 @@ async function dynamicallyCreateButtons(faqsfile){
     if(rows.length > 5){
         rows = rows.slice(0,4);
     }
+    console.log(JSON.stringify(rows));
     return rows;
 }
 
