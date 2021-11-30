@@ -14,3 +14,4 @@ data/*
 # For Visual Studio's temp directory
 .vs/
 .vscode/launch.json
+.forever/

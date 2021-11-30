@@ -13,7 +13,7 @@ async function dynamicallyCreateButtons(faqsfile){
     for (const faq of faqsfile) {
         if(rowi == 5) {
             rowi == 0;
-            row.push(row);
+            rows.push(row);
         }
         if(rowi == 0){
             row = new MessageActionRow();
@@ -30,6 +30,7 @@ async function dynamicallyCreateButtons(faqsfile){
         })
         rowi++;
     }
+    rows.push(row);
     if(rows.length > 5){
         rows = rows.slice(0,4);
     }
