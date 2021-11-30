@@ -1,7 +1,8 @@
 const Augur = require("augurbot"),
     u = require("../utils/utils"),
     snowflakes = require('../config/snowflakes.json');
-const faqs = require("../faq/faq.json")
+const faqs = require("../faq/faq.json");
+const { MessageActionRow, MessageButton } = require("discord.js");
 
 let questions = [];
 
