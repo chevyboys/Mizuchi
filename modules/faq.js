@@ -29,7 +29,6 @@ async function dynamicallyCreateButtons(faqsfile){
             answer: faq.answer,
         })
         rowi++;
-        buttonId++;   
     }
     if(rows.length > 5){
         rows = rows.slice(0,4);
