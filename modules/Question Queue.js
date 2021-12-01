@@ -71,8 +71,8 @@ const Module = new Augur.Module()
 
             // Already voted?
             if (data.system.IDs.includes(interaction.user.id)) {
-                //data.system.votes -= 1;
-                //data.system.IDs = data.system.IDs.filter((id) => (id != interaction.user.id && id != null));
+                data.system.votes -= 1;
+                data.system.IDs = data.system.IDs.filter((id) => (id != interaction.user.id && id != null));
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
                 row = new MessageActionRow()
                     .addComponents(
