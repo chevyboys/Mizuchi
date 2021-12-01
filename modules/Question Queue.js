@@ -99,7 +99,7 @@ const Module = new Augur.Module()
                         .setStyle('SECONDARY')
                         .setEmoji(snowflakes.emoji.upDawn),
                 )
-            msg.edit({ embeds: [msg.embeds[0].setDescription(data.question)], components: [row] });
+            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond
             interaction.deferUpdate();
