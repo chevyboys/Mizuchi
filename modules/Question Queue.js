@@ -38,7 +38,7 @@ const Module = new Augur.Module()
                         .setEmoji(snowflakes.emoji.upDawn),
                 )
             msg = await interaction.channel.send({ embeds: [embed], components: [row] });
-            
+
             // Write JSON
             data = {
                 details: {
@@ -73,6 +73,16 @@ const Module = new Augur.Module()
             if (data.system.IDs.includes(interaction.user.id)) {
                 data.system.votes -= 1;
                 data.system.IDs = data.system.IDs.filter((id) => (id != interaction.user.id && id != null));
+                msg = await interaction.channel.messages.fetch(interaction.message.id);
+                row = new MessageActionRow()
+                    .addComponents(
+                        new MessageButton()
+                            .setCustomId('upVoteQuestion')
+                            .setLabel(`${data.system.votes}`)
+                            .setStyle('DANGER')
+                            .setEmoji(snowflakes.emoji.upDawn),
+                    )
+                msg.edit({ embeds: [msg.embeds[0].setDescription(data.question)], components: [row] });
             } else {
                 data.system.votes += 1;
                 data.system.IDs.push(interaction.user.id);
@@ -89,7 +99,7 @@ const Module = new Augur.Module()
                         .setStyle('SECONDARY')
                         .setEmoji(snowflakes.emoji.upDawn),
                 )
-            msg.edit({ embeds: [msg.embeds[0]], components: [row] });
+            msg.edit({ embeds: [msg.embeds[0].setDescription(data.question)], components: [row] });
 
             // Respond
             interaction.deferUpdate();
@@ -98,7 +108,7 @@ const Module = new Augur.Module()
         name: "transfer",
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
-            
+
             // correct channel?
             if (interaction.channel.id != snowflakes.channels.transfer) {
                 await interaction.reply({ content: `You can't do that here. Try in <#${snowflakes.channels.transfer}>`, ephemeral: true });
@@ -139,10 +149,10 @@ const Module = new Augur.Module()
             strings = strings.join(`\n\n`);
             // Send
             while (strings.length > 2000) {
-                interaction.channel.send({ content:strings.substring(0, 2000)});
+                interaction.channel.send({ content: strings.substring(0, 2000) });
                 strings = strings.substring(2000);
             }
-            interaction.reply({ content: `${strings}`});
+            interaction.reply({ content: `${strings}` });
 
             // Delete vote messages
             c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
@@ -151,11 +161,11 @@ const Module = new Augur.Module()
                 try {
                     m = await c.messages.fetch(accepted[i].fetch.message);
                 } catch (error) {
-                    if(error.toString().indexOf("Unknown Message") > -1) {
+                    if (error.toString().indexOf("Unknown Message") > -1) {
                         u.errorLog("That question has been deleted")
                     }
                 }
-                
+
                 if (m) m.delete().catch(err => u.errorLog(`ERR: Insufficient permissions to delete messages.`));
             }
 
@@ -181,33 +191,33 @@ const Module = new Augur.Module()
 
             // Check
             if (rawData.length == 0) {
-                interaction.reply({ content: `There are no questions to delete! Check back later.` , ephemeral: true });
+                interaction.reply({ content: `There are no questions to delete! Check back later.`, ephemeral: true });
                 return
             }
             let targetId = interaction?.options?.get("id")?.value;
             let target = rawData.find(msg => msg.fetch.message == targetId);
             if (target == undefined) {
-                interaction.reply({ content: `There are no questions with that ID in my memory crystals` , ephemeral: true });
+                interaction.reply({ content: `There are no questions with that ID in my memory crystals`, ephemeral: true });
                 return
             }
             target = [target];
-            interaction.reply({ content: `I have removed ${target[0].string}`, ephemeral: true  });
+            interaction.reply({ content: `I have removed ${target[0].string}`, ephemeral: true });
 
-           
-            
+
+
             // Delete vote messages
             c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
             for (i = 0; i < target.length; i++) {
                 fs.unlinkSync(`./data/${target[i].file}`);
                 try {
                     m = await c.messages.fetch(target[i].fetch.message);
-                    
+
                 } catch (error) {
-                    if(error.toString().indexOf("Unknown Message") > -1) {
+                    if (error.toString().indexOf("Unknown Message") > -1) {
                         u.errorLog("That question has been deleted")
                     }
                 }
-                
+
                 if (m) m.delete().catch(err => u.errorLog(`ERR: Insufficient permissions to delete messages.`));
             }
 
