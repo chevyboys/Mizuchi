@@ -82,7 +82,7 @@ const Module = new Augur.Module()
                             .setStyle('DANGER')
                             .setEmoji(snowflakes.emoji.upDawn),
                     )
-                msg.edit({ embeds: [msg.embeds[0].setDescription(data.question)], components: [row] });
+                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
             } else {
                 data.system.votes += 1;
                 data.system.IDs.push(interaction.user.id);
