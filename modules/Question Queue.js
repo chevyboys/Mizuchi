@@ -49,7 +49,7 @@ const Module = new Augur.Module()
                 .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
                 .setTimestamp()
                 .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
-            row = questionRowButtons()
+            row = questionRowButtons("SECONDARY", "SECONDARY", "❔")
             msg = await interaction.channel.send({ embeds: [embed], components: [row] });
 
             // Write JSON
@@ -97,7 +97,7 @@ const Module = new Augur.Module()
 
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
-            row = questionRowButtons;
+            row = questionRowButtons("SECONDARY", "SECONDARY", "❔");
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond
@@ -124,7 +124,7 @@ const Module = new Augur.Module()
 
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
-            row = questionRowButtons();
+            row = questionRowButtons("SECONDARY", "SECONDARY", "❔");
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond
