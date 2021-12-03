@@ -8,6 +8,26 @@ const { Routes } = require('discord-api-types/v9');
 const { Client, MessageEmbed, Intents, MessageButton, MessageActionRow } = require('discord.js');
 const { raw } = require("express");
 
+function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonTwoEmoji) {
+    return new MessageActionRow()
+                    .addComponents(
+                            //add the upvote button
+                        new MessageButton()
+                            .setCustomId('upVoteQuestion')
+                            .setLabel(`${(data.system.votes == 0 || !data.system.votes) ? 1 : data.system.votes}`)
+                            .setStyle(buttonOneStyle || "SECONDARY")
+                            .setEmoji(snowflakes.emoji.upDawn),
+
+                            //add the check vote status button
+                        new MessageButton()
+                            .setCustomId('voteCheck')
+                            .setLabel("Check Vote Status")
+                            .setStyle(buttonTwoStyle || "SECONDARY")
+                            .setEmoji(buttonTwoEmoji || '❔')
+
+                    )
+}
+
 const Module = new Augur.Module()
     .addInteractionCommand({
         name: "ask",
@@ -29,14 +49,7 @@ const Module = new Augur.Module()
                 .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
                 .setTimestamp()
                 .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
-            row = new MessageActionRow()
-                .addComponents(
-                    new MessageButton()
-                        .setCustomId('upVoteQuestion')
-                        .setLabel(`1`)
-                        .setStyle('SECONDARY')
-                        .setEmoji(snowflakes.emoji.upDawn),
-                )
+            row = questionRowButtons()
             msg = await interaction.channel.send({ embeds: [embed], components: [row] });
 
             // Write JSON
@@ -74,14 +87,7 @@ const Module = new Augur.Module()
                 data.system.votes -= 1;
                 data.system.IDs = data.system.IDs.filter((id) => (id != interaction.user.id && id != null));
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = new MessageActionRow()
-                    .addComponents(
-                        new MessageButton()
-                            .setCustomId('upVoteQuestion')
-                            .setLabel(`${data.system.votes}`)
-                            .setStyle('DANGER')
-                            .setEmoji(snowflakes.emoji.upDawn),
-                    )
+                row = questionRowButtons("DANGER")
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
             } else {
                 data.system.votes += 1;
@@ -91,14 +97,34 @@ const Module = new Augur.Module()
 
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
-            row = new MessageActionRow()
-                .addComponents(
-                    new MessageButton()
-                        .setCustomId('upVoteQuestion')
-                        .setLabel(`${data.system.votes}`)
-                        .setStyle('SECONDARY')
-                        .setEmoji(snowflakes.emoji.upDawn),
-                )
+            row = questionRowButtons;
+            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+
+            // Respond
+            interaction.deferUpdate();
+        }
+    })
+    .addInteractionHandler({
+        customId: "voteCheck",
+        process: async (interaction) => {
+            // Check & Load data
+            if (!fs.existsSync(`./data/${interaction.message.id}.json`)) return;
+            data = JSON.parse(fs.readFileSync(`./data/${interaction.message.id}.json`));
+
+            // Already voted?
+            if (data.system.IDs.includes(interaction.user.id)) {
+                msg = await interaction.channel.messages.fetch(interaction.message.id);
+                row = questionRowButtons("SECONDARY", "SUCCESS", "✅")
+                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+            } else {
+                msg = await interaction.channel.messages.fetch(interaction.message.id);
+                row = questionRowButtons("SECONDARY", "DANGER", "❌");
+                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+            }
+
+            // Update message with new count
+            msg = await interaction.channel.messages.fetch(interaction.message.id);
+            row = questionRowButtons();
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond
