@@ -87,7 +87,7 @@ const Module = new Augur.Module()
                 data.system.votes -= 1;
                 data.system.IDs = data.system.IDs.filter((id) => (id != interaction.user.id && id != null));
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("DANGER")
+                row = questionRowButtons("DANGER", "SECONDARY", "❔");
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
             } else {
                 data.system.votes += 1;
