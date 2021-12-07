@@ -88,8 +88,11 @@ const Module = new Augur.Module()
 .addEvent("ready", () => {
   Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.fetch();
 })
-//when ready, refresh commands
-
+//when ready start the webhook server
+.addEvent("ready", () => {
+  const site = require("../site/siteDisplay")
+  site.start();
+})
 //each time this module is loaded, update the module.config snowflakes.
 .setInit(async (reload) => {
   try {
