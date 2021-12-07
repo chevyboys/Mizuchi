@@ -3,27 +3,7 @@ const Augur = require("augurbot"),
 const snowflakes = require('../config/snowflakes.json');
 
 const Module = new Augur.Module()
-    .addCommand({
-        name: "stafflist",
-        aliases: ["staff", "staffinfo"],
-        description: "Gets the current staff members and bot masters",
-        permissions: () => {return true},
-        process: async (msg) => {
-            let SW = await msg.guild.members.cache.map((m) => { if (m.roles.cache.has(snowflakes.roles.SoaringWings)) return m.displayName || m.username }).filter(r => (r != null)).join(`\n`);
-
-            let Mod = await msg.guild.members.cache.map((m) => { if (m.roles.cache.has(snowflakes.roles.Whisper) && !m.roles.cache.has(snowflakes.roles.Admin)) return m.displayName || m.username }).filter(r => (r != null)).join(`\n`);
-            
-            let Admin = await msg.guild.members.cache.map((m) => { if (m.roles.cache.has(snowflakes.roles.Admin)) return m.displayName || m.username }).filter(r => (r != null)).join(`\n`);
-
-            let whisperRole = (await msg.guild.roles.cache.get(snowflakes.roles.Whisper));
-
-            let color = whisperRole.hexColor;
-            
-            let embed = u.embed().setTitle("Current Climbers Court Staff Members:").setDescription(`<@&${snowflakes.roles.Admin}>:` + "```" + Admin + "```\n\n" + `<@&${snowflakes.roles.Whisper}>:` + "```" + Mod + "```\n\n"+ `<@&${snowflakes.roles.SoaringWings}>:` + "```" + SW + "```\n\n\n\n").setColor(color);
-            
-            msg.channel.send({ embeds: [embed]});
-        }
-    }).addInteractionCommand({
+    .addInteractionCommand({
         name: "staff",
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
