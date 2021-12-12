@@ -87,7 +87,7 @@ modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmoji
           const userReactions = activeRequest.originalInteraction.reactions.cache.filter(reaction => reaction.users.cache.has(activeRequest.requstedBy));
           try {
             for (const reaction of userReactions.values()) {
-              await reaction.users.remove(userId);
+              await reaction.users.remove(activeRequest.requstedBy);
             }
           } catch (error) {
             console.error('Failed to remove reactions.');
