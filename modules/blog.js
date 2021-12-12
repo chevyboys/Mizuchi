@@ -4,7 +4,7 @@ const config = require("../config/config.json");
 const snowflakes = require('../config/snowflakes.json');
 const Parser = require('rss-parser');
 const TurndownService = require('turndown')
-const Discord = require("discord.js"),
+const Discord = require("discord.js");
 
 
 const blogWebHook = new Discord.WebhookClient(config.blogPosts);
