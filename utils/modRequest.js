@@ -126,7 +126,7 @@ modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmoji
     .addInteractionHandler({ customId: `${modRequestFunctionName}Approve`, process: processCardAction })
     .addInteractionHandler({ customId: `${modRequestFunctionName}Reject`, process: processCardAction })
     .addEvent("messageReactionAdd", async (reaction, user) => {
-      //console.log(`"we have liftoff ${JSON.stringify(reaction, 0, 2)}"`);
+      console.log(`"${reaction.emoji.name}"`);
       message = reaction.message;
       if (message.guild?.id != snowflakes.guilds.PrimaryServer || user.bot) return;
       if ((reaction.emoji.name.indexOf(modRequestFunctionEmoji) > -1)) {
