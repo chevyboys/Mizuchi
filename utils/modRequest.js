@@ -80,11 +80,19 @@ modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmoji
         // REJECT modRequest
         embed.setColor(0x00FF00)
           .addField("Resolved", `${u.escapeText(mod.displayName)} cleared the flag.`);
-          if(activeRequest.originalInteraction instanceof Discord.Integration)
-            activeRequest.originalInteraction.editReply("❌");
-          else if (activeRequest.originalInteraction instanceof Discord.Message){
-            activeRequest.originalInteraction.react("❌");
+        if (activeRequest.originalInteraction instanceof Discord.Integration)
+          activeRequest.originalInteraction.editReply("❌");
+        else if (activeRequest.originalInteraction instanceof Discord.Message) {
+          activeRequest.originalInteraction.react("❌");
+          const userReactions = activeRequest.originalInteraction.reactions.cache.filter(reaction => reaction.users.cache.has(activeRequest.requstedBy));
+          try {
+            for (const reaction of userReactions.values()) {
+              await reaction.users.remove(userId);
+            }
+          } catch (error) {
+            console.error('Failed to remove reactions.');
           }
+        }
       }
       await interaction.update({ embeds: [embed], components: [] });
     } catch (error) { u.errorHandler(error, interaction); }
