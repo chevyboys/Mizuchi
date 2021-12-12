@@ -103,7 +103,7 @@ const Module = new Augur.Module()
         }
     })
     .addInteractionHandler({
-        customId: "voteCheck",
+        customId: "unvoteQuestion",
         process: async (interaction) => {
             // Check & Load data
             if (!fs.existsSync(`./data/${interaction.message.id}.json`)) return;
