@@ -8,9 +8,10 @@ const parser = new Parser();
 const turndownService = new TurndownService();
 const blogLink = "https://andrewkrowe.wordpress.com/feed/";
 let feed = null;
+const Module = new Augur.Module()
 
 // Message context menu for bookmarking a message.
-async function blogHandler(Module) {
+async function blogHandler() {
     if (!feed) feed = await parser.parseURL(blogLink);
 		const last = feed.items[0].link;
 		feed = await parser.parseURL(blogLink);
@@ -30,11 +31,11 @@ async function blogHandler(Module) {
 }
 
 
-const Module = new Augur.Module()
-.setClockwork(() => {
+
+Module.setClockwork(() => {
     let seconds = 10*60;
     try {
-      return setInterval((await blogHandler(Module)), seconds * 1000);
+      return setInterval(blogHandler), seconds * 1000);
     } catch(error) { u.errorHandler(error, "Blog Clockwork"); }
   })
 
