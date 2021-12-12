@@ -6,6 +6,7 @@ const snowflakes = require('../config/snowflakes.json');
 
 let activeRequests = [];
 
+
 // Message context menu for bookmarking a message.
 /**
  * @param {Augur.Module} Module
@@ -15,8 +16,36 @@ let activeRequests = [];
  * @param {function overrideCallback({mod, target, interaction})} overrideCallback this function should accept an object containing the mod doing the action, the interaction, and the target message
  */
 modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam, approvedCallback, overrideCallback) => {
+  Module.reactionHandlers = Module.reactionHandlers || [];
   let modRequestFunctionName = modRequestFunctionNameParam;
   let modRequestFunctionEmoji = modRequestFunctionEmojiParam;
+  Module.reactionHandlers.push({emoji: modRequestFunctionEmojiParam, approvedCallback: approvedCallback, overrideCallback: overrideCallback})
+  async function handleReaction(reaction, user, reactionHandler){
+      message = reaction.message;
+      if (message.guild?.id != snowflakes.guilds.PrimaryServer || user.bot) return;
+      if ((reaction.emoji.name == modRequestFunctionEmoji)) {
+        // Pin Request
+        try {
+          if ((message.channel.permissionsFor(user).has("MANAGE_MESSAGES") || message.channel.permissionsFor(user).has("ADMINISTRATOR") || message.channel.permissionsFor(user).has("MANAGE_WEBHOOKS"))) {
+            reactionHandler.overrideCallback({
+              mod: user,
+              user: user,
+              target: message,
+              interaction: message
+            })
+          } else {
+            let card = await modRequestCard(message, message);
+            activeRequests.push({ 
+              targetMessage: message.id, 
+              targetChannel: message.channel.id, 
+              card: card.id, 
+              requstedBy: user.id, 
+              originalInteraction: message, 
+              reactionEmoji: modRequestFunctionEmojiParam });
+          }
+        } catch (e) { u.errorHandler(e, "modRequest Request Processing"); }
+      }
+  }
 
   const modRequestActions = [
     new MessageActionRow().addComponents(
@@ -66,7 +95,21 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
       if (interaction.customId == `${modRequestFunctionName}Approve`) {
         // Approve modRequest
         embed.setColor(0x00FFFF);
-        approvedCallback({
+        if(activeRequest.reactionEmoji){
+          Module.reactionHandlers.find(r => {
+            return r.emoji == activeRequest.reactionEmoji
+          }).approvedCallback({
+            mod: mod,
+            user: mod,
+            card: card,
+            embed: embed,
+            activeRequest: activeRequest,
+            requestingUser: requestingUser,
+            target: target,
+            interaction: interaction
+          });
+        }
+        else approvedCallback({
           mod: mod,
           user: mod,
           card: card,
@@ -139,24 +182,13 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
     .addInteractionHandler({ customId: `${modRequestFunctionName}Approve`, process: processCardAction })
     .addInteractionHandler({ customId: `${modRequestFunctionName}Reject`, process: processCardAction })
     .addEvent("messageReactionAdd", async (reaction, user) => {
-      console.log(`"${(reaction.emoji.name == modRequestFunctionEmoji)}"`);
-      message = reaction.message;
-      if (message.guild?.id != snowflakes.guilds.PrimaryServer || user.bot) return;
-      if ((reaction.emoji.name == modRequestFunctionEmoji)) {
-        // Pin Request
-        try {
-          if ((message.channel.permissionsFor(user).has("MANAGE_MESSAGES") || message.channel.permissionsFor(user).has("ADMINISTRATOR") || message.channel.permissionsFor(user).has("MANAGE_WEBHOOKS"))) {
-            overrideCallback({
-              mod: user,
-              user: user,
-              target: message,
-              interaction: message
-            })
-          } else {
-            let card = await modRequestCard(message, message);
-            activeRequests.push({ targetMessage: message.id, targetChannel: message.channel.id, card: card.id, requstedBy: user.id, originalInteraction: message });
-          }
-        } catch (e) { u.errorHandler(e, "modRequest Request Processing"); }
+      if(Module.reactionHandlers.filter(r => {
+        return r.emoji == reaction.emoji.name
+      }).length > 0) {
+        let reactionHandler = Module.reactionHandlers.find(r => {
+          return r.emoji == reaction.emoji.name
+        })
+        handleReaction(reaction, user, reactionHandler)
       }
     });
 }
