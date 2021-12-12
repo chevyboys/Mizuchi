@@ -1,9 +1,13 @@
 const Augur = require("augurbot"),
     u = require("../utils/utils");
+const config = require("../config/config.json");
 const snowflakes = require('../config/snowflakes.json');
 const Parser = require('rss-parser');
 const TurndownService = require('turndown')
+const Discord = require("discord.js"),
 
+
+const blogWebHook = new Discord.WebhookClient(config.blogPosts);
 const parser = new Parser();
 const turndownService = new TurndownService();
 const blogLink = "https://andrewkrowe.wordpress.com/feed/";
@@ -24,7 +28,7 @@ async function blogHandler() {
 			.setDescription(turndownService.turndown(entry.content))
 			.setColor('#c8dee5')
 			.setThumbnail(thumbnailUrl.split('?', 1)[0]);
-		return await (await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).channels.cache.get(snowflakes.channels.blogAnnouncements).send({
+		return blogWebHook.send({
 			content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.BlogUpdates}>`,
 			embeds: [embed]
 		});
