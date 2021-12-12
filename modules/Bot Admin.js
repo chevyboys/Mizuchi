@@ -87,9 +87,7 @@ const Module = new Augur.Module()
 //When the bot is fully online, fetch all the discord members, since it will only autofetch for small servers and we want them all.
 .addEvent("ready", () => {
   Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.fetch();
-})
-//when ready start the webhook server
-.addEvent("ready", () => {
+  //start the site when ready
   const site = require("../site/siteDisplay")
   site.start();
 })
