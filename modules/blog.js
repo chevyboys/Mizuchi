@@ -25,7 +25,7 @@ async function blogHandler() {
 			.setColor('#c8dee5')
 			.setThumbnail(thumbnailUrl.split('?', 1)[0]);
 		return await (await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).channels.cache.get(snowflakes.channels.blogAnnouncements).send({
-			content: `${snowflakes.roles.Updates.AllUpdates, snowflakes.roles.Updates.BlogUpdates}`,
+			content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.BlogUpdates}>`,
 			embeds: [embed]
 		});
 }
