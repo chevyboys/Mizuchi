@@ -8,7 +8,7 @@ const { Routes } = require('discord-api-types/v9');
 const { Client, MessageEmbed, Intents, MessageButton, MessageActionRow } = require('discord.js');
 const { raw } = require("express");
 
-function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonTwoEmoji) {
+function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, buttonTwoEmoji) {
     return new MessageActionRow()
         .addComponents(
             //add the upvote button
@@ -21,14 +21,14 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonTwoEmoji) {
             new MessageButton()
                 .setCustomId('voteCheck')
                 .setLabel(`${(data.system.votes == 0 || !data.system.votes) ? 1 : data.system.votes}`)
-                .setStyle("SECONDARY")
+                .setStyle(buttonTwoStyle || "SECONDARY")
                 .setEmoji(buttonTwoEmoji || ''),
 
             //add the check vote status button
             new MessageButton()
                 .setCustomId('unvoteQuestion')
                 .setLabel("")
-                .setStyle(buttonTwoStyle || "SECONDARY")
+                .setStyle(buttonThreeStyle || "SECONDARY")
                 .setEmoji('⬇')
 
         )
@@ -55,7 +55,7 @@ const Module = new Augur.Module()
                 .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
                 .setTimestamp()
                 .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
-            row = questionRowButtons("SECONDARY", "SECONDARY", "")
+            row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "")
             msg = await interaction.channel.send({ embeds: [embed], components: [row] });
 
             // Write JSON
@@ -91,7 +91,7 @@ const Module = new Augur.Module()
             // Already voted?
             if (data.system.IDs.includes(interaction.user.id)) {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("DANGER", "SECONDARY", "");
+                row = questionRowButtons("DANGER", "SECONDARY", "SECONDARY", "");
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
             } else {
                 data.system.votes += 1;
@@ -101,7 +101,7 @@ const Module = new Augur.Module()
 
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
-            row = questionRowButtons("SECONDARY", "SECONDARY", "");
+            row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "");
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond
@@ -117,17 +117,17 @@ const Module = new Augur.Module()
             // Already voted?
             if (data.system.IDs.includes(interaction.user.id)) {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("SECONDARY", "SUCCESS", "✅")
+                row = questionRowButtons("SECONDARY", "SUCCESS", "SECONDARY", "✅")
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
             } else {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("SECONDARY", "DANGER", "❌");
+                row = questionRowButtons("SECONDARY", "DANGER", "SECONDARY", "❌");
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
             }
 
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
-            row = questionRowButtons("SECONDARY", "SECONDARY", "");
+            row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "");
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond
@@ -147,13 +147,13 @@ const Module = new Augur.Module()
                 data.system.IDs = data.system.IDs.filter((id) => (id != interaction.user.id && id != null));
             } else {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("SECONDARY", "DANGER", "❌");
+                row = questionRowButtons("SECONDARY", "SECONDARY", "DANGER",  "❌");
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
             }
 
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
-            row = questionRowButtons("SECONDARY", "SECONDARY", "");
+            row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "");
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond
