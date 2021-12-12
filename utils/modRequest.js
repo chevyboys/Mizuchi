@@ -80,10 +80,10 @@ modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmoji
         // REJECT modRequest
         embed.setColor(0x00FF00)
           .addField("Resolved", `${u.escapeText(mod.displayName)} cleared the flag.`);
-          if(originalInteraction instanceof Discord.Integration)
+          if(activeRequest.originalInteraction instanceof Discord.Integration)
             activeRequest.originalInteraction.editReply("❌");
-          else if (originalInteraction instanceof Discord.Message){
-            originalInteraction.react("❌");
+          else if (activeRequest.originalInteraction instanceof Discord.Message){
+            activeRequest.originalInteraction.react("❌");
           }
       }
       await interaction.update({ embeds: [embed], components: [] });
