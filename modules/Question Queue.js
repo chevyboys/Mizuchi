@@ -21,7 +21,7 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonTwoEmoji) {
                             //add the check vote status button
                         new MessageButton()
                             .setCustomId('unvoteQuestion')
-                            .setLabel("remove your vote for a question")
+                            .setLabel("")
                             .setStyle(buttonTwoStyle || "SECONDARY")
                             .setEmoji(buttonTwoEmoji || '⬇')
 
