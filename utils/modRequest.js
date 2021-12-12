@@ -5,8 +5,6 @@ const snowflakes = require('../config/snowflakes.json');
 
 let activeRequests = [];
 
-console.log("loaded");
-
 // Message context menu for bookmarking a message.
 /**
  * @param {Augur.Module} Module
