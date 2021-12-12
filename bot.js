@@ -13,7 +13,7 @@ const client = new AugurClient(config, {
   commands: "./modules",
   errorHandler: u.errorHandler,
   parse: u.parse
-});
+}).setMaxListeners(20);
 
 client.login();
 
