@@ -149,7 +149,7 @@ const Module = new Augur.Module()
                 fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
             } else {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("SECONDARY", "SECONDARY", "DANGER",  "❌");
+                row = questionRowButtons("SECONDARY", "SECONDARY", "DANGER",  "");
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
             }
 
