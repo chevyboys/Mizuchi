@@ -2,7 +2,7 @@ const Augur = require("augurbot"),
     u = require("../utils/utils");
 const modRequest = require('../utils/modRequest');
 const Discord = require("discord.js"),
-config = require("../config/config.json");
+    config = require("../config/config.json");
 
 
 //Pin msg handling
@@ -49,13 +49,13 @@ async function spoilerMsg(inputObject) {
         }
     }
     if (msg.attachments?.size > 0)
-    newMessage.files = [msg.attachments?.first()?.url]
+        newMessage.files = [msg.attachments?.first()?.url]
     newMessage.components = msg.components;
     msg.channel.send(newMessage);
     //u.clean(msg, 0);
 }
 //Kester msg handling
-async function kesterBomb(inputObject){
+async function kesterBomb(inputObject) {
     let msg = inputObject.target
     let newMessage;
     if (msg.content.length > 0) {
@@ -77,18 +77,17 @@ async function kesterBomb(inputObject){
         }
     }
     if (msg.attachments?.size > 0)
-    newMessage.files = [msg.attachments?.first()?.url]
+        newMessage.files = [msg.attachments?.first()?.url]
     newMessage.components = msg.components;
     const kesterBombHook = new Discord.WebhookClient(config.kesterBombs)
     kesterBombHook.send(newMessage)
-    
+
 }
 
-const Module = new Augur.Module().setInit(() => {
-    modRequest(Module, "Spoiler", "🤫", spoilerMsg, spoilerMsg);
-    modRequest(Module, "Pin", "📌", pinMsgApprove, pinMsgOverride);
-    modRequest(Module, "Kester Bomb", "💣", kesterBomb, kesterBomb);
-    //modRequest(Module, "Kester Bomb", )
-})
+const Module = new Augur.Module()
+modRequest(Module, "Spoiler", "🤫", spoilerMsg, spoilerMsg);
+modRequest(Module, "Pin", "📌", pinMsgApprove, pinMsgOverride);
+modRequest(Module, "Kester Bomb", "💣", kesterBomb, kesterBomb);
+
 
 module.exports = Module;
