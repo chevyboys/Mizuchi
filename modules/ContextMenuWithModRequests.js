@@ -85,9 +85,9 @@ async function kesterBomb(inputObject) {
 }
 
 const Module = new Augur.Module()
-await modRequest(Module, "Spoiler", "🤫", spoilerMsg, spoilerMsg);
-await modRequest(Module, "Pin", "📌", pinMsgApprove, pinMsgOverride);
-await modRequest(Module, "Kester Bomb", "💣", kesterBomb, kesterBomb);
+modRequest(Module, "Spoiler", "🤫", spoilerMsg, spoilerMsg);
+modRequest(Module, "Pin", "📌", pinMsgApprove, pinMsgOverride);
+modRequest(Module, "Kester Bomb", "💣", kesterBomb, kesterBomb);
 
 
 module.exports = Module;
