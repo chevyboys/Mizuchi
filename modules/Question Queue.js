@@ -55,7 +55,7 @@ const Module = new Augur.Module()
                 .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
                 .setTimestamp()
                 .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
-            row = questionRowButtons("SECONDARY", "SECONDARY", "⬇")
+            row = questionRowButtons("SECONDARY", "SECONDARY", "")
             msg = await interaction.channel.send({ embeds: [embed], components: [row] });
 
             // Write JSON
@@ -91,7 +91,7 @@ const Module = new Augur.Module()
             // Already voted?
             if (data.system.IDs.includes(interaction.user.id)) {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("DANGER", "SECONDARY", "⬇");
+                row = questionRowButtons("DANGER", "SECONDARY", "");
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
             } else {
                 data.system.votes += 1;
@@ -101,7 +101,7 @@ const Module = new Augur.Module()
 
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
-            row = questionRowButtons("SECONDARY", "SECONDARY", "⬇");
+            row = questionRowButtons("SECONDARY", "SECONDARY", "");
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond
@@ -153,7 +153,7 @@ const Module = new Augur.Module()
 
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
-            row = questionRowButtons("SECONDARY", "SECONDARY", "⬇");
+            row = questionRowButtons("SECONDARY", "SECONDARY", "");
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond
