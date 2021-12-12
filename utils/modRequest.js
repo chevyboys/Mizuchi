@@ -126,8 +126,8 @@ modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmoji
     .addInteractionHandler({ customId: `${modRequestFunctionName}Approve`, process: processCardAction })
     .addInteractionHandler({ customId: `${modRequestFunctionName}Reject`, process: processCardAction })
     .addEvent("messageReactionAdd", async (reaction, user) => {
-      console.log(`"we have liftoff ${JSON.stringify(reaction, 0, 2)}"`);
-      /*message = reaction.message;
+      //console.log(`"we have liftoff ${JSON.stringify(reaction, 0, 2)}"`);
+      message = reaction.message;
       if (message.guild?.id != snowflakes.guilds.PrimaryServer || user.bot) return;
       if ((reaction.emoji.name.indexOf(modRequestFunctionEmoji) > -1)) {
         // Pin Request
@@ -144,7 +144,7 @@ modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmoji
             activeRequests.push({ targetMessage: message.id, targetChannel: message.channel.id, card: card.id, requstedBy: user.id, originalInteraction: message });
           }
         } catch (e) { u.errorHandler(e, "modRequest Request Processing"); }
-      }*/
+      }
     });
 }
 
