@@ -19,16 +19,17 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonTwoEmoji) {
                 .setEmoji(snowflakes.emoji.upDawn),
 
             new MessageButton()
-                .setCustomId('upVoteQuestion')
+                .setCustomId('voteCheck')
                 .setLabel(`${(data.system.votes == 0 || !data.system.votes) ? 1 : data.system.votes}`)
-                .setStyle("SECONDARY"),
+                .setStyle("SECONDARY")
+                .setEmoji(buttonTwoEmoji || ''),
 
             //add the check vote status button
             new MessageButton()
                 .setCustomId('unvoteQuestion')
                 .setLabel("")
                 .setStyle(buttonTwoStyle || "SECONDARY")
-                .setEmoji(buttonTwoEmoji || '⬇')
+                .setEmoji('⬇')
 
         )
 }
@@ -101,6 +102,32 @@ const Module = new Augur.Module()
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
             row = questionRowButtons("SECONDARY", "SECONDARY", "⬇");
+            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+
+            // Respond
+            interaction.deferUpdate();
+        }
+    }).addInteractionHandler({
+        customId: "voteCheck",
+        process: async (interaction) => {
+            // Check & Load data
+            if (!fs.existsSync(`./data/${interaction.message.id}.json`)) return;
+            data = JSON.parse(fs.readFileSync(`./data/${interaction.message.id}.json`));
+
+            // Already voted?
+            if (data.system.IDs.includes(interaction.user.id)) {
+                msg = await interaction.channel.messages.fetch(interaction.message.id);
+                row = questionRowButtons("SECONDARY", "SUCCESS", "✅")
+                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+            } else {
+                msg = await interaction.channel.messages.fetch(interaction.message.id);
+                row = questionRowButtons("SECONDARY", "DANGER", "❌");
+                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+            }
+
+            // Update message with new count
+            msg = await interaction.channel.messages.fetch(interaction.message.id);
+            row = questionRowButtons("SECONDARY", "SECONDARY", "");
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond
