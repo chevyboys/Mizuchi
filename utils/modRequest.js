@@ -14,7 +14,7 @@ let activeRequests = [];
  * @param {function approvedCallback({mod,card,embed,activeRequest, requestingUser, target, interaction})} approvedCallback
  * @param {function overrideCallback({mod, target, interaction})} overrideCallback this function should accept an object containing the mod doing the action, the interaction, and the target message
  */
-modRequest = async (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam, approvedCallback, overrideCallback) => {
+modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam, approvedCallback, overrideCallback) => {
   let modRequestFunctionName = modRequestFunctionNameParam;
   let modRequestFunctionEmoji = modRequestFunctionEmojiParam;
 
