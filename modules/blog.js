@@ -35,7 +35,7 @@ async function blogHandler() {
 Module.setClockwork(() => {
     let seconds = 10*60;
     try {
-      return setInterval(blogHandler), seconds * 1000);
+      return setInterval(blogHandler, seconds * 1000);
     } catch(error) { u.errorHandler(error, "Blog Clockwork"); }
   })
 
