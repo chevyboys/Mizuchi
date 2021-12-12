@@ -93,12 +93,13 @@ const Module = new Augur.Module()
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
                 row = questionRowButtons("DANGER", "SECONDARY", "SECONDARY", "");
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+                
             } else {
                 data.system.votes += 1;
                 data.system.IDs.push(interaction.user.id);
+                fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
             }
-            fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
-
+            
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
             row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "");
@@ -145,6 +146,7 @@ const Module = new Augur.Module()
             if (data.system.IDs.includes(interaction.user.id)) {
                 data.system.votes -= 1;
                 data.system.IDs = data.system.IDs.filter((id) => (id != interaction.user.id && id != null));
+                fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
             } else {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
                 row = questionRowButtons("SECONDARY", "SECONDARY", "DANGER",  "❌");
