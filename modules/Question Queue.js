@@ -10,22 +10,27 @@ const { raw } = require("express");
 
 function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonTwoEmoji) {
     return new MessageActionRow()
-                    .addComponents(
-                            //add the upvote button
-                        new MessageButton()
-                            .setCustomId('upVoteQuestion')
-                            .setLabel(`${(data.system.votes == 0 || !data.system.votes) ? 1 : data.system.votes}`)
-                            .setStyle(buttonOneStyle || "SECONDARY")
-                            .setEmoji(snowflakes.emoji.upDawn),
+        .addComponents(
+            //add the upvote button
+            new MessageButton()
+                .setCustomId('upVoteQuestion')
+                .setLabel(``)
+                .setStyle(buttonOneStyle || "SECONDARY")
+                .setEmoji(snowflakes.emoji.upDawn),
 
-                            //add the check vote status button
-                        new MessageButton()
-                            .setCustomId('unvoteQuestion')
-                            .setLabel("")
-                            .setStyle(buttonTwoStyle || "SECONDARY")
-                            .setEmoji(buttonTwoEmoji || '⬇')
+            new MessageButton()
+                .setCustomId('upVoteQuestion')
+                .setLabel(`${(data.system.votes == 0 || !data.system.votes) ? 1 : data.system.votes}`)
+                .setStyle("SECONDARY"),
 
-                    )
+            //add the check vote status button
+            new MessageButton()
+                .setCustomId('unvoteQuestion')
+                .setLabel("")
+                .setStyle(buttonTwoStyle || "SECONDARY")
+                .setEmoji(buttonTwoEmoji || '⬇')
+
+        )
 }
 
 const Module = new Augur.Module()
