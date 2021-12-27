@@ -6,7 +6,7 @@ const Augur = require("augurbot"),
     AUtils = require("../Judgement/Attunement Roles Utils")
 
 let selectSpire = async (interaction) => {
-    interaction.reply(`you have selected the ${interaction.value} spire`)
+    interaction.reply({content: `you have selected the ${interaction.value} spire`, ephemeral: true})
 }
 
 
