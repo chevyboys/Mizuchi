@@ -13,10 +13,10 @@ const Module = new Augur.Module()
     process: async (interaction) => {
         // Akn
         let embed = u.embed()
-        .setAuthor(msg.member?.displayName || msg.author?.username, msg.author?.displayAvatarURL({ size: 16 }), msg.url)
-        .setDescription(msg.cleanContent)
-        .setColor(msg.member?.displayColor)
-        .setTimestamp(msg.createdAt);
+        .setAuthor(interaction.member?.displayName || interaction.author?.username, interaction.author?.displayAvatarURL({ size: 16 }), interaction.url)
+        .setDescription(interaction.cleanContent)
+        .setColor(interaction.member?.displayColor)
+        .setTimestamp(interaction.createdAt);
         await interaction.reply({ embed: embed, ephemeral: true });
     }
 });
