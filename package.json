@@ -4,7 +4,7 @@
   "description": "Custom Discord bot for the Climber's Court",
   "main": "foreverBot.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "foreverBot.js"
   },
   "repository": {
     "type": "git",

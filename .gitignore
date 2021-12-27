@@ -16,3 +16,4 @@ faq/*.json
 .vscode/launch.json
 .forever/
 faq/faq.json
+package-lock.json
