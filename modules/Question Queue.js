@@ -8,24 +8,30 @@ const { Routes } = require('discord-api-types/v9');
 const { Client, MessageEmbed, Intents, MessageButton, MessageActionRow } = require('discord.js');
 const { raw } = require("express");
 
-function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonTwoEmoji) {
+function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, buttonTwoEmoji) {
     return new MessageActionRow()
-                    .addComponents(
-                            //add the upvote button
-                        new MessageButton()
-                            .setCustomId('upVoteQuestion')
-                            .setLabel(`${(data.system.votes == 0 || !data.system.votes) ? 1 : data.system.votes}`)
-                            .setStyle(buttonOneStyle || "SECONDARY")
-                            .setEmoji(snowflakes.emoji.upDawn),
+        .addComponents(
+            //add the upvote button
+            new MessageButton()
+                .setCustomId('upVoteQuestion')
+                .setLabel(``)
+                .setStyle(buttonOneStyle || "SECONDARY")
+                .setEmoji(snowflakes.emoji.upDawn),
 
-                            //add the check vote status button
-                        new MessageButton()
-                            .setCustomId('voteCheck')
-                            .setLabel("Check Vote Status")
-                            .setStyle(buttonTwoStyle || "SECONDARY")
-                            .setEmoji(buttonTwoEmoji || '❔')
+            new MessageButton()
+                .setCustomId('voteCheck')
+                .setLabel(`${(data.system.votes == 0 || !data.system.votes) ? 1 : data.system.votes}`)
+                .setStyle(buttonTwoStyle || "SECONDARY")
+                .setEmoji(buttonTwoEmoji || ''),
 
-                    )
+            //add the check vote status button
+            new MessageButton()
+                .setCustomId('unvoteQuestion')
+                .setLabel("")
+                .setStyle(buttonThreeStyle || "SECONDARY")
+                .setEmoji('⬇')
+
+        )
 }
 
 const Module = new Augur.Module()
@@ -49,7 +55,7 @@ const Module = new Augur.Module()
                 .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
                 .setTimestamp()
                 .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
-            row = questionRowButtons("SECONDARY", "SECONDARY", "❔")
+            row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "")
             msg = await interaction.channel.send({ embeds: [embed], components: [row] });
 
             // Write JSON
@@ -84,27 +90,25 @@ const Module = new Augur.Module()
 
             // Already voted?
             if (data.system.IDs.includes(interaction.user.id)) {
-                data.system.votes -= 1;
-                data.system.IDs = data.system.IDs.filter((id) => (id != interaction.user.id && id != null));
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("DANGER", "SECONDARY", "❔");
+                row = questionRowButtons("DANGER", "SECONDARY", "SECONDARY", "");
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+                
             } else {
                 data.system.votes += 1;
                 data.system.IDs.push(interaction.user.id);
+                fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
             }
-            fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
-
+            
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
-            row = questionRowButtons("SECONDARY", "SECONDARY", "❔");
+            row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "");
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond
             interaction.deferUpdate();
         }
-    })
-    .addInteractionHandler({
+    }).addInteractionHandler({
         customId: "voteCheck",
         process: async (interaction) => {
             // Check & Load data
@@ -114,17 +118,44 @@ const Module = new Augur.Module()
             // Already voted?
             if (data.system.IDs.includes(interaction.user.id)) {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("SECONDARY", "SUCCESS", "✅")
+                row = questionRowButtons("SECONDARY", "SUCCESS", "SECONDARY", "✅")
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
             } else {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("SECONDARY", "DANGER", "❌");
+                row = questionRowButtons("SECONDARY", "DANGER", "SECONDARY", "❌");
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
             }
 
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
-            row = questionRowButtons("SECONDARY", "SECONDARY", "❔");
+            row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "");
+            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+
+            // Respond
+            interaction.deferUpdate();
+        }
+    })
+    .addInteractionHandler({
+        customId: "unvoteQuestion",
+        process: async (interaction) => {
+            // Check & Load data
+            if (!fs.existsSync(`./data/${interaction.message.id}.json`)) return;
+            data = JSON.parse(fs.readFileSync(`./data/${interaction.message.id}.json`));
+
+            // Already voted?
+            if (data.system.IDs.includes(interaction.user.id)) {
+                data.system.votes -= 1;
+                data.system.IDs = data.system.IDs.filter((id) => (id != interaction.user.id && id != null));
+                fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
+            } else {
+                msg = await interaction.channel.messages.fetch(interaction.message.id);
+                row = questionRowButtons("SECONDARY", "SECONDARY", "DANGER",  "");
+                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+            }
+
+            // Update message with new count
+            msg = await interaction.channel.messages.fetch(interaction.message.id);
+            row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "");
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             // Respond

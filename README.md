@@ -1,4 +1,4 @@
-## Mizuchi - Custom Discord bot for the Climbers Court Community
+## Project Mizuchi - Custom Discord bot for the Climbers Court Community
 
 Mizuchi is built in Node.js for the Climbers Court community. It runs on the [Augur framework](https://github.com/Gaiwecoor/augurbot), utilizing the [Discord.js library](https://discord.js.org/).
 

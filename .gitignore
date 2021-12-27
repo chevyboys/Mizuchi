@@ -10,8 +10,9 @@ test.js
 *-.json
 site/*
 data/*
-faq/*
+faq/*.json
 # For Visual Studio's temp directory
 .vs/
 .vscode/launch.json
 .forever/
+faq/faq.json
