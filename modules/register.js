@@ -62,7 +62,6 @@ const Module = new Augur.Module()
             new SlashCommandBuilder()
                 .setName("judgement")
                 .setDescription("Begin your journey to find your attunement.")
-                .setDefaultPermission
 
         ].map(command => command.toJSON());
 
