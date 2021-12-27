@@ -59,6 +59,10 @@ const Module = new Augur.Module()
                         .setName('id')
                         .setDescription('The id of the question you would like to nuke')
                         .setRequired(true)),
+            new SlashCommandBuilder()
+                .setName("judgement")
+                .setDescription("Begin your journey to find your attunement.")
+                .setDefaultPermission
 
         ].map(command => command.toJSON());
 
@@ -69,7 +73,7 @@ const Module = new Augur.Module()
         for (const file of registryFiles) {
             if (file.indexOf(".js") > -1) {
                 let fileToRegister = file;
-                if(!commandCache.filter(c => c.name == file.name).size > 0) {
+                if (!commandCache.filter(c => c.name == file.name).size > 0) {
                     const commandData = require(`../registry/${fileToRegister}`);
                     commands.push(commandData);
                 }
@@ -85,7 +89,9 @@ const Module = new Augur.Module()
         await restrict(tt[1], [snowflakes.roles.Admin, snowflakes.roles.WorldMaker])
         //restrict the question remove command
         await restrict(tt[2], [snowflakes.roles.Admin, snowflakes.roles.Whisper, snowflakes.roles.BotMaster])
+        //restrict judgement while in development
+        await restrict(tt[3], [snowflakes.roles.Admin, snowflakes.roles.Whisper, snowflakes.roles.BotMaster, snowflakes.roles.SoaringWings])
         //restrict spoiler
-        
+
     });
 module.exports = Module;
