@@ -5,8 +5,12 @@ const Augur = require("augurbot"),
     Attunements = require('../Judgement/AttunementRoles.json'),
     AUtils = require("../Judgement/Attunement Roles Utils")
 
-let selectSpire = (interaction) => {
+let selectSpire = async (interaction) => {
     await interaction.update({components: buildSpireSelectComponents(interaction, true) });
+}
+let confirmSpireSelection = async (interation) => {
+    //TODO
+    interation.reply("Coming soon");
 }
 
 let buildSpireSelectEmbed = (interaction) => {
@@ -67,9 +71,6 @@ const Module = new Augur.Module()
         name: "judgement",
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
-
-
-
             // Akn
             await interaction.reply({ embeds: [buildSpireSelectEmbed(interaction)], components: buildSpireSelectComponents(interaction, false), ephemeral: true });
         }
