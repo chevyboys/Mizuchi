@@ -1,25 +1,80 @@
 const Augur = require("augurbot"),
     u = require("../utils/utils"),
     snowflakes = require('../config/snowflakes.json'),
-    { MessageActionRow, MessageButton } = require("discord.js"),
-    Attunements = require('../Judgement/AttunementRoles.json');
-const { embed } = require("../utils/utils");
+    { MessageActionRow, MessageButton, MessageSelectMenu } = require("discord.js"),
+    Attunements = require('../Judgement/AttunementRoles.json'),
+    AUtils = require("../Judgement/Attunement Roles Utils")
 
+let selectSpire = (interaction) => {
+    await interaction.update({components: buildSpireSelectComponents(interaction, true) });
+}
 
-const Module = new Augur.Module()
-.addInteractionCommand({
-    name: "judgement",
-    guildId: snowflakes.guilds.PrimaryServer,
-    process: async (interaction) => {
-        // Akn
-        let embed = u.embed()
+let buildSpireSelectEmbed = (interaction) => {
+    return u.embed()
         .setAuthor(interaction.member?.displayName || interaction.author?.username, interaction.author?.displayAvatarURL({ size: 16 }), interaction.url)
-        .setDescription(interaction.cleanContent)
+        .setDescription("Your judgement begins. Please select a spire.")
         .setColor(interaction.member?.displayColor)
         .setTimestamp(interaction.createdAt);
-        await interaction.reply({ embed: embed, ephemeral: true });
+}
+let buildSpireSelectComponents = (interaction, confirmButton) => {
+    let SelectMenuOptions = [];
+    //buildSelectMenu
+    for (const spire of AUtils.spires()) {
+        SelectMenuOptions.push({
+            label: spire,
+            description: `The ${spire} spire`,
+            value: spire,
+        })
     }
-});
+    let rows = []
+    const row = new MessageActionRow()
+        .addComponents(
+            new MessageSelectMenu()
+                .setCustomId('JudgementSpireSelect')
+                .setPlaceholder('Nothing    selected')
+                .addOptions(SelectMenuOptions),
+        );
+    rows.push(row);
+    //add confirm button
+    if (confirmButton) {
+        rows.push(
+            new MessageActionRow()
+                .addComponents(
+                    new MessageButton()
+                        .setCustomId("JudgementSpireSelectConfirm")
+                        .setStyle("PRIMARY")
+                        .setLabel('Confirm')
+                )
+        )
+    }
+    else {
+        rows.push(
+            new MessageActionRow()
+                .addComponents(
+                    new MessageButton()
+                        .setCustomId("JudgementSpireSelectConfirm")
+                        .setStyle("PRIMARY")
+                        .setLabel('Confirm')
+                        .setDisabled(true)
+                )
+        )
+    }
+    return rows;
+}
+
+const Module = new Augur.Module()
+    .addInteractionCommand({
+        name: "judgement",
+        guildId: snowflakes.guilds.PrimaryServer,
+        process: async (interaction) => {
+
+
+
+            // Akn
+            await interaction.reply({ embeds: [buildSpireSelectEmbed(interaction)], components: buildSpireSelectComponents(interaction, false), ephemeral: true });
+        }
+    })
+    .addInteractionHandler({ customId: `JudgementSpireSelect`, process: selectSpire });
 
 
 
