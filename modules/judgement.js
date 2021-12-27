@@ -6,12 +6,9 @@ const Augur = require("augurbot"),
     AUtils = require("../Judgement/Attunement Roles Utils")
 
 let selectSpire = async (interaction) => {
-    await interaction.update({components: buildSpireSelectComponents(interaction, true) });
+    interaction.reply(`you have selected the ${interaction.value} spire`)
 }
-let confirmSpireSelection = async (interation) => {
-    //TODO
-    interation.reply("Coming soon");
-}
+
 
 let buildSpireSelectEmbed = (interaction) => {
     return u.embed()
@@ -20,7 +17,7 @@ let buildSpireSelectEmbed = (interaction) => {
         .setColor(interaction.member?.displayColor)
         .setTimestamp(interaction.createdAt);
 }
-let buildSpireSelectComponents = (interaction, confirmButton) => {
+let buildSpireSelectComponents = (interaction) => {
     let SelectMenuOptions = [];
     //buildSelectMenu
     for (const spire of AUtils.spires()) {
@@ -39,30 +36,6 @@ let buildSpireSelectComponents = (interaction, confirmButton) => {
                 .addOptions(SelectMenuOptions),
         );
     rows.push(row);
-    //add confirm button
-    if (confirmButton) {
-        rows.push(
-            new MessageActionRow()
-                .addComponents(
-                    new MessageButton()
-                        .setCustomId("JudgementSpireSelectConfirm")
-                        .setStyle("PRIMARY")
-                        .setLabel('Confirm')
-                )
-        )
-    }
-    else {
-        rows.push(
-            new MessageActionRow()
-                .addComponents(
-                    new MessageButton()
-                        .setCustomId("JudgementSpireSelectConfirm")
-                        .setStyle("PRIMARY")
-                        .setLabel('Confirm')
-                        .setDisabled(true)
-                )
-        )
-    }
     return rows;
 }
 
