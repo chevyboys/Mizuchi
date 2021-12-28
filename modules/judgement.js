@@ -9,13 +9,9 @@ let activeAttunements = [];
 
 //general helper functions
 let buildGenericEmbed = (interaction) => {
-    return u.embed()
-        .setAuthor({
-            name: "The Voice of the Tower", 
-            iconURL: interaction.author?.displayAvatarURL({ size: 16 }),
-            url: interaction.url
-        })
-        .setColor(interaction.member?.displayColor)
+        return u.embed()
+            .setAuthor("The Voice of the Tower")
+            .setColor(interaction.member?.displayColor)
 
 }
 
