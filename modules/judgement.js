@@ -11,7 +11,7 @@ let activeAttunements = [];
 let buildGenericEmbed = (interaction) => {
     return u.embed()
         .setAuthor({
-            name: interaction.member?.displayName || interaction.author?.username, 
+            name: "The Voice of the Tower", 
             iconURL: interaction.author?.displayAvatarURL({ size: 16 }),
             url: interaction.url
         })
