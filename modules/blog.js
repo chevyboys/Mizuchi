@@ -14,15 +14,14 @@ const blogLink = "https://andrewkrowe.wordpress.com/feed/";
 let feed = null;
 const Module = new Augur.Module()
 
-// Message context menu for bookmarking a message.
-async function blogHandler() {
+async function blogHandler(force) {
     if (!feed) feed = await parser.parseURL(blogLink);
 		const last = feed.items[0].link;
 		feed = await parser.parseURL(blogLink);
 		const entry = feed.items[0];
-		if (last === entry.link) return;
+		if (last === entry.link && !force) return;
 		const thumbnailUrl = feed.image.url
-		const embed = new MessageEmbed()
+		const embed = u.embed()
 			.setTitle(entry.title)
 			.setURL(entry.link)
 			.setDescription(turndownService.turndown(entry.content))
@@ -41,6 +40,16 @@ Module.setClockwork(() => {
     try {
       return setInterval(blogHandler, seconds * 1000);
     } catch(error) { u.errorHandler(error, "Blog Clockwork"); }
-  })
+  }).addCommand({name: "forceblog",
+  description: "Forces the blog post in case of an error",
+  hidden: true,
+  process: async function(msg) {
+    try {
+      await msg.react("📃");
+	  blogHandler(true);
+    } catch(e) { u.errorHandler(e, msg); }
+  },
+  permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+})
 
 module.exports = Module;
