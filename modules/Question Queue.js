@@ -286,7 +286,7 @@ const Module = new Augur.Module()
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
 
-            let statEmbed = u.embed().setTitle("Question Queue Stats")
+            let statEmbed = u.embed().setTitle("Question Queue Stats").setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
 
             let numberOfQuestions = 5
             // Load data
