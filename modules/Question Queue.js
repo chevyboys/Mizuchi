@@ -7,6 +7,7 @@ const { REST, DiscordAPIError } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { Client, MessageEmbed, Intents, MessageButton, MessageActionRow } = require('discord.js');
 const { raw } = require("express");
+const { embed } = require("../utils/utils");
 
 function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, buttonTwoEmoji) {
     return new MessageActionRow()
@@ -278,6 +279,53 @@ const Module = new Augur.Module()
                 if (m) m.delete().catch(err => u.errorLog(`ERR: Insufficient permissions to delete messages.`));
             }
 
+        }
+
+    }).addInteractionCommand({
+        name: "question-stats",
+        guildId: snowflakes.guilds.PrimaryServer,
+        process: async (interaction) => {
+
+            let statEmbed = u.embed().setTitle("Question Queue Stats")
+
+            let numberOfQuestions = 5
+            // Load data
+            files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+            rawData = [];
+            for (i = 0; i < files.length; i++) {
+                data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+                rawData.push({
+                    file: files[i],
+                    fetch: data.fetch,
+                    string: `<@${data.details.asker}>: ${data.details.question}`,
+                    votes: data.system.votes
+                });
+            }
+
+            // Sort
+            sorted = rawData.sort((a, b) => (a.votes < b.votes) ? 1 : -1);
+            statEmbed.addField("Total questions", "`"+ sorted.length+ "`");
+            // Check
+            if (sorted.length == 0) {
+                embed.addField("Top Questions:", "`There are no questions in the Queue`")
+                interaction.reply({ embeds: [statEmbed]  });
+                return
+            }
+
+            // Format
+            strings = [];
+            accepted = [];
+            for (i = 0; i < numberOfQuestions; i++) {
+                if (sorted[i]) {
+                    strings.push(sorted[i].string.substring(0, 200));
+                    accepted.push(sorted[i]);
+                }
+            }
+            strings = strings.join(`\n\n`);
+
+            embed.addField("Top Questions:", strings);
+            // Send
+            interaction.reply({ embeds: [statEmbed]  });
         }
 
     });
