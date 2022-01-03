@@ -312,12 +312,9 @@ const Module = new Augur.Module()
                 return
             }
 
-            // Format
-            strings = [];
-            accepted = [];
             for (i = 0; i < numberOfQuestions; i++) {
                 if (sorted[i]) {
-                    statEmbed.addField("Top Question " + i + ":", sorted[i].string.substring(0, 1000));
+                    statEmbed.addField("Top Question " + i + ":" + "( " + sorted[i].system.votes + " votes)", sorted[i].string.substring(0, 1000));
                 }
             }
             // Send
