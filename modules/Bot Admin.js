@@ -32,16 +32,23 @@ const Module = new Augur.Module()
     sent.edit({content: `Pong! Took ${sent.createdTimestamp - (msg.editedTimestamp ? msg.editedTimestamp : msg.createdTimestamp)}ms`, allowedMentions: {repliedUser: false}});
   }
 })
-.addCommand({name: "pull",
+.addCommand({name: "git",
   category: "Bot Admin",
-  description: "Pull bot updates from git",
+  description: "git pull or git stash",
   hidden: true,
-  process: (msg) => {
+  process: (msg, suffix) => {
     let spawn = require("child_process").spawn;
 
     u.clean(msg);
 
-    let cmd = spawn("git", ["pull"], {cwd: process.cwd()});
+    let cmd;
+    if ( suffix.indexOf("pull") ) {
+       cmd = spawn("git", ["pull"], {cwd: process.cwd()});
+    }
+    else if  ( suffix.indexOf("stash") ) {
+       cmd = spawn("git", ["stash"], {cwd: process.cwd()});
+    }
+
     let stdout = [];
     let stderr = [];
 
