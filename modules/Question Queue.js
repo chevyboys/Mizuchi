@@ -314,7 +314,7 @@ const Module = new Augur.Module()
 
             for (i = 0; i < numberOfQuestions; i++) {
                 if (sorted[i]) {
-                    statEmbed.addField("Top Question " + i + ":" + "( " + sorted[i].system.votes + " votes)", sorted[i].string.substring(0, 1000));
+                    statEmbed.addField("Top Question " + i + ":" + "( " + sorted[i].votes + " votes)", sorted[i].string.substring(0, 1000));
                 }
             }
             // Send
