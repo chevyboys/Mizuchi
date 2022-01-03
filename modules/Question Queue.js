@@ -307,7 +307,7 @@ const Module = new Augur.Module()
             statEmbed.addField("Total questions", "`"+ sorted.length+ "`");
             // Check
             if (sorted.length == 0) {
-                embed.addField("Top Questions:", "`There are no questions in the Queue`")
+                statEmbed.addField("Top Questions:", "`There are no questions in the Queue`")
                 interaction.reply({ embeds: [statEmbed]  });
                 return
             }
@@ -323,7 +323,7 @@ const Module = new Augur.Module()
             }
             strings = strings.join(`\n\n`);
 
-            embed.addField("Top Questions:", strings);
+            statEmbed.addField("Top Questions:", strings);
             // Send
             interaction.reply({ embeds: [statEmbed]  });
         }
