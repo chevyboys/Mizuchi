@@ -29,7 +29,7 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, bu
                 .setCustomId('unvoteQuestion')
                 .setLabel("")
                 .setStyle(buttonThreeStyle || "SECONDARY")
-                .setEmoji('⬇')
+                .setEmoji(snowflakes.emoji.unDawn)
 
         )
 }

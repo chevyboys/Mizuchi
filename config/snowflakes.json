@@ -30,7 +30,8 @@
     }
   },
   "emoji": {
-    "upDawn": "dawnAnimated:776081525929934868"
+    "upDawn": "dawnAnimated:776081525929934868",
+    "unDawn": "dawnredact:927451014259433502"
   },
   "messages": {
     "faq": "915311497129906247"

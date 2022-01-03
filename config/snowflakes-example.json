@@ -1,38 +1,39 @@
 {
   "guilds": {
-    "PrimaryServer": "443421134109671424",
-    "ClimbersCourt": "443421134109671424",
-    "TestServer": "879564413751918593"
+    "PrimaryServer": "",
+    "ClimbersCourt": "",
+    "TestServer": ""
   },
   "channels": {
-    "ask": "844377214875336724",
-    "blogAnnouncements": "841491239697514536",
-    "earthTemple": "841491239697514536",
-    "faq": "918685304049766420",
-    "modRequests": "914308709964980254",
-    "transfer": "578706502001360897"
+    "ask": "",
+    "blogAnnouncements": "",
+    "earthTemple": "",
+    "faq": "",
+    "modRequests": "",
+    "transfer": ""
     
   },
   "roles": {
-    "BotMaster": "795898204101017610",
-    "Admin": "869452779813494834",
-    "SoaringWings": "877216611361247252",
-    "Whisper": "702186427949252679",
-    "WorldMaker": "450044488371535872",
+    "BotMaster": "",
+    "Admin": "",
+    "SoaringWings": "",
+    "Whisper": "",
+    "WorldMaker": "",
     "Updates": {
-      "BotUpdates": "915047343957618748",
-      "MetaUpdates": "752339011250421803",
-      "TTRPGUpdates": "863561830530416650",
-      "BookUpdates": "863561879598399528",
-      "BlogUpdates": "863561864897363978",
-      "AllUpdates": "863562448791404575",
-      "RoleplayingUpdates": "715309563833745499"
+      "BotUpdates": "",
+      "MetaUpdates": "",
+      "TTRPGUpdates": "",
+      "BookUpdates": "",
+      "BlogUpdates": "",
+      "AllUpdates": "",
+      "RoleplayingUpdates": ""
     }
   },
   "emoji": {
-    "upDawn": "dawnAnimated:776081525929934868"
+    "upDawn": "",
+    "unDawn": ""
   },
   "messages": {
-    "faq": "915311497129906247"
+    "faq": ""
   }
 }
