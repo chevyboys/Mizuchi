@@ -42,10 +42,10 @@ const Module = new Augur.Module()
     u.clean(msg);
 
     let cmd;
-    if ( suffix.indexOf("pull") ) {
+    if ( suffix.toLowerCase().indexOf("pull") > -1) {
        cmd = spawn("git", ["pull"], {cwd: process.cwd()});
     }
-    else if  ( suffix.indexOf("stash") ) {
+    else if  ( suffix.indexOf("stash") > -1) {
        cmd = spawn("git", ["stash"], {cwd: process.cwd()});
     }
 
