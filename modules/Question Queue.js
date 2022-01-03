@@ -317,13 +317,9 @@ const Module = new Augur.Module()
             accepted = [];
             for (i = 0; i < numberOfQuestions; i++) {
                 if (sorted[i]) {
-                    strings.push(sorted[i].string.substring(0, 200));
-                    accepted.push(sorted[i]);
+                    statEmbed.addField("Top Question " + i + ":", sorted[i].string.substring(0, 1000));
                 }
             }
-            strings = strings.join(`\n\n`);
-
-            statEmbed.addField("Top Questions:", strings);
             // Send
             interaction.reply({ embeds: [statEmbed]  });
         }
