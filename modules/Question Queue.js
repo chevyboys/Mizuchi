@@ -53,7 +53,7 @@ const Module = new Augur.Module()
                 details: {
                     asker: interaction.user.id,
                     question: interaction.options.get("question").value,
-                    number: (msg.id)
+                    number: ""
                 },
                 fetch: {
                     channel: interaction.channel.id,
