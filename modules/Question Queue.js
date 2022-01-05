@@ -57,7 +57,7 @@ const Module = new Augur.Module()
                 },
                 fetch: {
                     channel: interaction.channel.id,
-                    message: msg.id
+                    message: ""
                 },
                 system: {
                     votes: 1,
@@ -67,8 +67,7 @@ const Module = new Augur.Module()
                     entered: Date.now()
                 }
             }
-            console.log(`${interaction.user.tag} asked:\n\t${data.details.question}\n\nID:${data.fetch.message}\n\n\n`)
-            fs.writeFileSync(`./data/${msg.id}.json`, JSON.stringify(data, null, 4));
+            
 
             // Reply
             embed = u.embed()
@@ -79,6 +78,28 @@ const Module = new Augur.Module()
                 .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
             let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data)
             let msg = await interaction.channel.send({ embeds: [embed], components: [row] });
+
+            data = {
+                details: {
+                    asker: interaction.user.id,
+                    question: interaction.options.get("question").value,
+                    number: (msg.id)
+                },
+                fetch: {
+                    channel: interaction.channel.id,
+                    message: msg.id
+                },
+                system: {
+                    votes: 1,
+                    IDs: [
+                        Module.client.user.id
+                    ],
+                    entered: Date.now()
+                }
+            }
+            
+            console.log(`${interaction.user.tag} asked:\n\t${data.details.question}\n\nID:${data.fetch.message}\n\n\n`)
+            fs.writeFileSync(`./data/${msg.id}.json`, JSON.stringify(data, null, 4));
 
 
         }
