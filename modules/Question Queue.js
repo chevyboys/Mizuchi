@@ -7,7 +7,6 @@ const { REST, DiscordAPIError } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { Client, MessageEmbed, Intents, MessageButton, MessageActionRow } = require('discord.js');
 const { raw } = require("express");
-const { embed } = require("../utils/utils");
 
 function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, buttonTwoEmoji) {
     return new MessageActionRow()

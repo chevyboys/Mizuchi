@@ -10,4 +10,4 @@ const Module = new Augur.Module()
             msg.channel.send("Radiance wishes you a happy day of cake. 🎂")
         }
     });
-module.exports = Module;
+module.exports = Module;    
