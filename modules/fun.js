@@ -4,7 +4,7 @@ const Augur = require("augurbot"),
 const mee6 = "848863263218728980"
 const Module = new Augur.Module()
 .addEvent("messageCreate", async (msg) => {
-    if(msg.author.id != mee6 || msg.content.indexOf("2.5k birthday xp.") < 0) return;
+    if(msg.author.id != mee6 || !(msg.content.indexOf("2.5k birthday xp.") > -1) || msg.channel.id != snowflakes.channels.general) return;
     else {
         msg.channel.send("Radiance wishes you a happy day of cake. 🎂")
     }
