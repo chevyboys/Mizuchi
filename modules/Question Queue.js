@@ -29,10 +29,69 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, bu
                 .setCustomId('unvoteQuestion')
                 .setLabel("")
                 .setStyle(buttonThreeStyle || "SECONDARY")
-                .setEmoji(snowflakes.emoji.unDawn)
+                .setEmoji(snowflakes.emoji.unDawn),
+
+            new MessageButton()
+                .setCustomId("deleteQuestion")
+                .setEmoji("🗑")
+                .setStyle("DANGER")
 
         )
 }
+
+function deleteQuestion(interaction, target) {
+
+    // Load data
+    files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+    let rawData = [];
+    let asker;
+    for (i = 0; i < files.length; i++) {
+        data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+        if (files[i].fetch.message == interaction.message.id) asker = files[i].details.asker;
+        rawData.push({
+            file: files[i],
+            fetch: data.fetch,
+            string: `<@${data.details.asker}>: ${data.details.question}`,
+            votes: data.system.votes
+        });
+    }
+    //permissions check
+    if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && interaction.user.id != asker) {
+        interaction.reply({ content: "Radiance cannot permit you to do that", ephemeral: true });
+        return;
+    }
+    // Check
+    if (rawData.length == 0) {
+        interaction.reply({ content: `There are no questions to delete! Check back later.`, ephemeral: true });
+        return;
+    }
+
+    interaction.reply({ content: `I have removed ${target[0].string}`, ephemeral: true });
+
+    //allow the asker to send again
+    if (askedRecently.has(asker)) {
+        askedRecently.delete(asker);
+    }
+
+
+    // Delete vote messages
+    c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
+    for (i = 0; i < target.length; i++) {
+        fs.unlinkSync(`./data/${target[i].file}`);
+        try {
+            m = await c.messages.fetch(target[i].fetch.message);
+
+        } catch (error) {
+            if (error.toString().indexOf("Unknown Message") > -1) {
+                u.errorLog("That question has been deleted")
+            }
+        }
+
+        if (m) m.delete().catch(err => u.errorLog(`ERR: Insufficient permissions to delete messages.`));
+    }
+
+}
+
 
 async function ask(interaction) {
     const hoursBetweenQuestions = 3;
@@ -119,11 +178,6 @@ async function ask(interaction) {
             }, hoursBetweenQuestions * 60 * 60 * 1000);
         }
     }
-
-
-
-
-
 }
 
 
@@ -160,6 +214,12 @@ const Module = new Augur.Module()
 
             // Respond
             interaction.deferUpdate();
+        }
+    }).addInteractionHandler({
+        customId: "deleteQuestion",
+        process: async (interaction) => {
+            let target = interaction.message.id;
+            deleteQuestion(interaction, target);
         }
     }).addInteractionHandler({
         customId: "voteCheck",
@@ -285,25 +345,6 @@ const Module = new Augur.Module()
         name: "question-remove",
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
-
-            // Load data
-            files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
-            let rawData = [];
-            for (i = 0; i < files.length; i++) {
-                data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
-                rawData.push({
-                    file: files[i],
-                    fetch: data.fetch,
-                    string: `<@${data.details.asker}>: ${data.details.question}`,
-                    votes: data.system.votes
-                });
-            }
-
-            // Check
-            if (rawData.length == 0) {
-                interaction.reply({ content: `There are no questions to delete! Check back later.`, ephemeral: true });
-                return
-            }
             let targetId = interaction?.options?.get("id")?.value;
             let target = rawData.find(msg => msg.fetch.message == targetId);
             if (target == undefined) {
@@ -311,26 +352,7 @@ const Module = new Augur.Module()
                 return
             }
             target = [target];
-            interaction.reply({ content: `I have removed ${target[0].string}`, ephemeral: true });
-
-
-
-            // Delete vote messages
-            c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
-            for (i = 0; i < target.length; i++) {
-                fs.unlinkSync(`./data/${target[i].file}`);
-                try {
-                    m = await c.messages.fetch(target[i].fetch.message);
-
-                } catch (error) {
-                    if (error.toString().indexOf("Unknown Message") > -1) {
-                        u.errorLog("That question has been deleted")
-                    }
-                }
-
-                if (m) m.delete().catch(err => u.errorLog(`ERR: Insufficient permissions to delete messages.`));
-            }
-
+            deleteQuestion(interaction, target)
         }
 
     }).addInteractionCommand({
