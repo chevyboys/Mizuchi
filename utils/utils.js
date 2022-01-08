@@ -150,7 +150,7 @@ const utils = {
 
     console.error(Date());
 
-    const embed = utils.embed().setTitle(error.name);
+    const embed = utils.embed().setTitle(error.name ? error.name : "Warning");
 
     if (message instanceof Discord.Message) {
       const loc = (message.guild ? `${message.guild?.name} > ${message.channel?.name}` : "DM");
