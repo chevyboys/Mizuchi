@@ -18,7 +18,7 @@ const Module = new Augur.Module()
             let diceQuantity = interaction?.options?.get("number-of-dice")?.value || 1;
             if (diceQuantity < 1) diceQuantity = 1;
             if (diceQuantity > 100) diceQuantity = 100;
-            let modifier = interaction?.options?.get("modifier")?.value || 0;
+            let modifier = await interaction?.options?.get("modifier")?.value || 0;
             let results = [];
             let total = 0;
             
