@@ -30,7 +30,7 @@ const Module = new Augur.Module()
                 }
                 else results.push(`(${roll})`);
             }
-            let embed = u.embed().setTitle("d"+diceType + " result:").setDescription("```" + total + "```")
+            let embed = u.embed().setTitle("d"+diceType + " result:").setDescription("```" + total + "```").setColor(message.member?.displayColor);
             if(modifier != 0 || diceQuantity != 1) embed.addField("Breakdown:", `\`\`\`${results.slice(0, 10).join("+")}\`\`\``)
             interaction.reply({embeds: [embed]});
         }
