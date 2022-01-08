@@ -356,7 +356,7 @@ const Module = new Augur.Module()
         }
 
     }).addEvent("messageCreate", async (msg) => {
-        if (msg.author.id == bot || msg.channel.id != snowflakes.channels.ask) return;
+        if (msg.author.bot || msg.channel.id != snowflakes.channels.ask) return;
         ask(msg);
     });
 
