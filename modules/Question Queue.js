@@ -39,7 +39,7 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, bu
         )
 }
 
-function deleteQuestion(interaction, target) {
+async function deleteQuestion(interaction, target) {
 
     // Load data
     files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
