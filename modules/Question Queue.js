@@ -218,7 +218,7 @@ const Module = new Augur.Module()
     }).addInteractionHandler({
         customId: "deleteQuestion",
         process: async (interaction) => {
-            let target = interaction.message.id;
+            let target = [interaction.message.id];
             deleteQuestion(interaction, target);
         }
     }).addInteractionHandler({
