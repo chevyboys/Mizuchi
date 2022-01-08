@@ -11,10 +11,10 @@ async function dynamicallyCreateButtons(faqsfile) {
     let faqId = 0;
     let row = new MessageActionRow();;
     for (const faq of faqsfile.qAndA) {
-        if(faq.question.length > 80) {
+        if (faq.question.length > 80) {
             u.errorHandler("Question Length " + faq.question.length + " is over the warning threshold of 80 characters.\n" + "```Question error: " + faq.question + "```Length:" + faq.question.length)
         }
-        if(faq.answer.length > 2000) {
+        if (faq.answer.length > 2000) {
             u.errorHandler("Answer Length " + faq.answer.length + " is over 2000 characters. I'm going to have to cut off the end!\n" + "```Question error: " + faq.question)
         }
         if (rowi > 4) {
@@ -25,12 +25,12 @@ async function dynamicallyCreateButtons(faqsfile) {
         row.addComponents(
             new MessageButton()
                 .setCustomId(`faq${faqId}`)
-                .setLabel(`${faq.question.trim().slice(0,80)}`)
+                .setLabel(`${faq.question.trim().slice(0, 80)}`)
                 .setStyle('SECONDARY')
         )
         questions.push({
-            question: faq.question.trim().slice(0,80),
-            answer: faq.answer.trim().slice(0,2000),
+            question: faq.question.trim().slice(0, 80),
+            answer: faq.answer.trim().slice(0, 2000),
             faqId: `faq${faqId}`,
             faqMsgId: faqsfile.messageId
         })
@@ -64,7 +64,7 @@ async function updateFaqMessage(faqFile, faqFileName, Module) {
         .setDescription("Click any of the question buttons below to see the answer to the question.");
 
     let components = await dynamicallyCreateButtons(faqFile);
-    faqMsg.edit({embeds: [embed], components: components });
+    faqMsg.edit({ embeds: [embed], components: components });
 }
 
 const Module = new Augur.Module()
@@ -76,14 +76,17 @@ const Module = new Augur.Module()
             if (typeof files != typeof []) files = [files];
             for (const file of files) {
                 let faqFile = require(`../faq/${file}`);
-                if (faqFile.messageId == "") {
-                    let faqGuild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-                    let faqChannel = await faqGuild.channels.fetch(snowflakes.channels.faq);
-                    let newFaqMsg = await faqChannel.send({embeds:[(u.embed().setDescription("🔃 Generating FAQ. Please wait"))]});
-                    faqFile.messageId = newFaqMsg.id;
-                     fs.writeFileSync(`./faq/${file}`, JSON.stringify(faqFile, 1, 4));
+                if (file.toLowerCase().indexOf("-example") > -1) continue
+                else {
+                    if (faqFile.messageId == "") {
+                        let faqGuild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+                        let faqChannel = await faqGuild.channels.fetch(snowflakes.channels.faq);
+                        let newFaqMsg = await faqChannel.send({ embeds: [(u.embed().setDescription("🔃 Generating FAQ. Please wait"))] });
+                        faqFile.messageId = newFaqMsg.id;
+                        fs.writeFileSync(`./faq/${file}`, JSON.stringify(faqFile, 1, 4));
+                    }
+                    await updateFaqMessage(faqFile, file, Module)
                 }
-                await updateFaqMessage(faqFile, file, Module)
             }
         });
 
