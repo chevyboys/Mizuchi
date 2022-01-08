@@ -60,8 +60,8 @@ async function updateFaqMessage(faqFile, faqFileName, Module) {
         .setTitle(`FAQ: ${faqFileName}`)
         .setColor(faqMsg.member.displayHexColor)
         .setTimestamp()
-        .setAuthor(faqMsg.member.displayName, faqMsg.member.user.displayAvatarURL())
-        .setDescription("Click any of the question buttons below to see the answer to the question.");
+        //.setAuthor(faqMsg.member.displayName, faqMsg.member.user.displayAvatarURL())
+        //.setDescription("Click any of the question buttons below to see the answer to the question.");
 
     let components = await dynamicallyCreateButtons(faqFile);
     faqMsg.edit({ embeds: [embed], components: components });
