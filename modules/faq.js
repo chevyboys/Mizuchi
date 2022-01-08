@@ -11,10 +11,10 @@ async function dynamicallyCreateButtons(faqsfile) {
     let faqId = 0;
     let row = new MessageActionRow();;
     for (const faq of faqsfile.qAndA) {
-        if(faq.question.length > 80) {
+        if(faq.question.length > 79) {
             u.errorHandler("Question Length " + faq.question.length + " is over 80 characters. I'm going to have to cut off the end!")
         }
-        if(faq.answer.length > 2000) {
+        if(faq.answer.length > 1999) {
             u.errorHandler("Answer Length " + faq.answer.length + " is over 2000 characters. I'm going to have to cut off the end!")
         }
         if (rowi > 4) {
@@ -29,8 +29,8 @@ async function dynamicallyCreateButtons(faqsfile) {
                 .setStyle('SECONDARY')
         )
         questions.push({
-            question: faq.question.trim().slice(0,80),
-            answer: faq.answer.trim().slice(0,2000),
+            question: faq.question.trim().slice(0,79),
+            answer: faq.answer.trim().slice(0,1999),
             faqId: `faq${faqId}`,
             faqMsgId: faqsfile.messageId
         })
