@@ -42,7 +42,7 @@ async function ask(interaction) {
             return;
         }
         //make sure the object has the correct structure
-        interaction.user = msg.author
+        interaction.user = interaction.author
         //Akn
         await interaction.react("👍");
         u.clean(interaction);
