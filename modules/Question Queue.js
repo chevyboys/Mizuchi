@@ -58,7 +58,7 @@ async function ask(interaction) {
     let data = {
         details: {
             asker: interaction.user.id,
-            question: interaction.options.get("question").value,
+            question: interaction.options? interaction.options.get("question").value : interaction.cleanContent,
             number: ""
         },
         fetch: {
@@ -88,7 +88,7 @@ async function ask(interaction) {
     data = {
         details: {
             asker: interaction.user.id,
-            question: interaction.options.get("question").value,
+            question: interaction.options? interaction.options.get("question").value : interaction.cleanContent,
             number: (msg.id)
         },
         fetch: {
