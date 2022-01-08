@@ -11,7 +11,7 @@ async function dynamicallyCreateButtons(faqsfile) {
     let faqId = 0;
     let row = new MessageActionRow();;
     for (const faq of faqsfile.qAndA) {
-        if(faq.question.length > 79) {
+        if(faq.question.length > 74) {
             u.errorHandler("Question Length " + faq.question.length + " is over the warning threshold of 75 characters.\n" + "```Question error: ```" + faq.question + "```Length:" + faq.question.length)
         }
         if(faq.answer.length > 1999) {
