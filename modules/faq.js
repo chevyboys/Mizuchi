@@ -64,7 +64,7 @@ async function updateFaqMessage(faqFile, faqFileName, Module) {
         //.setDescription("Click any of the question buttons below to see the answer to the question.");
 
     let components = await dynamicallyCreateButtons(faqFile);
-    faqMsg.edit({ embeds: [embed], components: components });
+    faqMsg.edit({content: `**__FAQ: ${faqFileName}__**`,  embeds: [], components: components });
 }
 
 const Module = new Augur.Module()
