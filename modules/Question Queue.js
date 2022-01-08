@@ -39,7 +39,7 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, bu
         )
 }
 
-async function deleteQuestion(interaction, target) {
+async function deleteQuestion(interaction, targetId) {
 
     // Load data
     files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
@@ -55,6 +55,12 @@ async function deleteQuestion(interaction, target) {
             votes: data.system.votes
         });
     }
+    let target = rawData.find(msg => msg.fetch.message == targetId);
+    if (target == undefined) {
+        interaction.reply({ content: `There are no questions with that ID in my memory crystals`, ephemeral: true });
+        return
+    }
+    target = [target];
     //permissions check
     if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && interaction.user.id != asker) {
         interaction.reply({ content: "Radiance cannot permit you to do that", ephemeral: true });
@@ -66,7 +72,7 @@ async function deleteQuestion(interaction, target) {
         return;
     }
 
-    interaction.reply({ content: `I have removed ${target[0].string}`, ephemeral: true });
+    interaction.reply({ content: `I have removed ${target[0].string ? target[0].string : target[0]}`, ephemeral: true });
 
     //allow the asker to send again
     if (askedRecently.has(asker)) {
@@ -346,13 +352,7 @@ const Module = new Augur.Module()
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
             let targetId = interaction?.options?.get("id")?.value;
-            let target = rawData.find(msg => msg.fetch.message == targetId);
-            if (target == undefined) {
-                interaction.reply({ content: `There are no questions with that ID in my memory crystals`, ephemeral: true });
-                return
-            }
-            target = [target];
-            deleteQuestion(interaction, target)
+            deleteQuestion(interaction, targetId)
         }
 
     }).addInteractionCommand({
