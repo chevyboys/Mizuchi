@@ -19,11 +19,11 @@ async function dynamicallyCreateButtons(faqsfile) {
         row.addComponents(
             new MessageButton()
                 .setCustomId(`faq${faqId}`)
-                .setLabel(`Q: ${faq.question}`)
+                .setLabel(`Q: ${faq.question.trim()}`)
                 .setStyle('SECONDARY')
         )
         questions.push({
-            question: faq.question,
+            question: faq.question.trim(),
             answer: faq.answer,
             faqId: `faq${faqId}`,
             faqMsgId: faqsfile.messageId
