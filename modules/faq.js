@@ -15,7 +15,7 @@ async function dynamicallyCreateButtons(faqsfile) {
             u.errorHandler("Question Length " + faq.question.length + " is over 80 characters. I'm going to have to cut off the end!\n" + "```Question error: " + faq.question)
         }
         if(faq.answer.length > 1999) {
-            u.errorHandler("Answer Length " + faq.answer.length + " is over 2000 characters. I'm going to have to cut off the end!")
+            u.errorHandler("Answer Length " + faq.answer.length + " is over 2000 characters. I'm going to have to cut off the end!\n" + "```Question error: " + faq.question)
         }
         if (rowi > 4) {
             rowi = 0;
