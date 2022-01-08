@@ -59,7 +59,7 @@ async function updateFaqMessage(faqFile, faqFileName, Module) {
     let embed = u.embed({ color: 0xF0004C, author: faqMsg.member })
         .setTitle(`FAQ: ${faqFileName}`)
         .setColor(faqMsg.member.displayHexColor)
-        .setTimestamp()
+        //.setTimestamp()
         //.setAuthor(faqMsg.member.displayName, faqMsg.member.user.displayAvatarURL())
         //.setDescription("Click any of the question buttons below to see the answer to the question.");
 
