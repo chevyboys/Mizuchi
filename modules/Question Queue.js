@@ -34,7 +34,7 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, bu
             new MessageButton()
                 .setCustomId("deleteQuestion")
                 .setEmoji("🗑")
-                .setStyle("DANGER")
+                .setStyle("SECONDARY")
 
         )
 }
