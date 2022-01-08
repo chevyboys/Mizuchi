@@ -41,6 +41,8 @@ async function ask(interaction) {
             await interaction.reply({ content: `You can't do that here. Try in <#${snowflakes.channels.ask}>`, ephemeral: true });
             return;
         }
+        //make sure the object has the correct structure
+        interaction.user = msg.author
         //Akn
         await interaction.react("👍");
         u.clean(interaction);
