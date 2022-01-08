@@ -47,7 +47,7 @@ async function deleteQuestion(interaction, targetId) {
     let asker;
     for (i = 0; i < files.length; i++) {
         data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
-        if (data.fetch.message == interaction.message.id) asker = data.details.asker;
+        if (data.fetch.message == targetId) asker = data.details.asker;
         rawData.push({
             file: files[i],
             fetch: data.fetch,
