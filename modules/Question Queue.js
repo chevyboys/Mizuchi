@@ -81,7 +81,7 @@ async function ask(interaction) {
         .setTimestamp()
         .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
     let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data)
-    let msg = await interaction.guild.channels.get(snowflakes.channels.ask).send({ embeds: [embed], components: [row] });
+    let msg = await interaction.guild.channels.cache.get(snowflakes.channels.ask).send({ embeds: [embed], components: [row] });
 
     data = {
         details: {
