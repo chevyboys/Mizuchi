@@ -5,7 +5,7 @@ const fs = require('fs');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { REST, DiscordAPIError } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const { Client, MessageEmbed, Intents, MessageButton, MessageActionRow } = require('discord.js');
+const { Message, MessageButton, MessageActionRow } = require('discord.js');
 
 
 function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, buttonTwoEmoji, data) {
@@ -34,76 +34,88 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, bu
         )
 }
 
+async function ask(interaction) {
+    if (interaction instanceof Message) {
+        // correct channel?
+        if (interaction.channel.id != snowflakes.channels.ask) {
+            await interaction.reply({ content: `You can't do that here. Try in <#${snowflakes.channels.ask}>`, ephemeral: true });
+            return;
+        }
+        //Akn
+        await interaction.react("👍");
+        u.clean(interaction);
+    } else {
+        // Akn
+        await interaction.reply({ content: 'Thank you. Your question has been registered.', ephemeral: true });
+    }
+
+
+
+
+    // Write JSON
+    let data = {
+        details: {
+            asker: interaction.user.id,
+            question: interaction.options.get("question").value,
+            number: ""
+        },
+        fetch: {
+            channel: snowflakes.channels.ask,
+            message: ""
+        },
+        system: {
+            votes: 1,
+            IDs: [
+                Module.client.user.id
+            ],
+            entered: Date.now()
+        }
+    }
+
+
+    // Reply
+    embed = u.embed()
+        .setAuthor(interaction.user.tag, interaction.user.displayAvatarURL())
+        .setDescription(interaction.options.get("question").value)
+        .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
+        .setTimestamp()
+        .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
+    let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data)
+    let msg = await interaction.guild.channels.get(snowflakes.channels.ask).send({ embeds: [embed], components: [row] });
+
+    data = {
+        details: {
+            asker: interaction.user.id,
+            question: interaction.options.get("question").value,
+            number: (msg.id)
+        },
+        fetch: {
+            channel: snowflakes.channels.ask,
+            message: msg.id
+        },
+        system: {
+            votes: 1,
+            IDs: [
+                Module.client.user.id
+            ],
+            entered: Date.now()
+        }
+    }
+
+    console.log(`${interaction.user.tag} asked:\n\t${data.details.question}\n\nID:${data.fetch.message}\n\n\n`)
+    fs.writeFileSync(`./data/${msg.id}.json`, JSON.stringify(data, null, 4));
+
+
+}
+
+
 const Module = new Augur.Module()
     .addInteractionCommand({
         name: "ask",
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
-            // correct channel?
-            if (interaction.channel.id != snowflakes.channels.ask) {
-                await interaction.reply({ content: `You can't do that here. Try in <#${snowflakes.channels.ask}>`, ephemeral: true });
-                return;
-            }
-
-            // Akn
-            await interaction.reply({ content: 'Thank you. Your question has been registered.', ephemeral: true });
-
-            // Write JSON
-            let data = {
-                details: {
-                    asker: interaction.user.id,
-                    question: interaction.options.get("question").value,
-                    number: ""
-                },
-                fetch: {
-                    channel: interaction.channel.id,
-                    message: ""
-                },
-                system: {
-                    votes: 1,
-                    IDs: [
-                        Module.client.user.id
-                    ],
-                    entered: Date.now()
-                }
-            }
-            
-
-            // Reply
-            embed = u.embed()
-                .setAuthor(interaction.user.tag, interaction.user.displayAvatarURL())
-                .setDescription(interaction.options.get("question").value)
-                .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
-                .setTimestamp()
-                .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
-            let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data)
-            let msg = await interaction.channel.send({ embeds: [embed], components: [row] });
-
-            data = {
-                details: {
-                    asker: interaction.user.id,
-                    question: interaction.options.get("question").value,
-                    number: (msg.id)
-                },
-                fetch: {
-                    channel: interaction.channel.id,
-                    message: msg.id
-                },
-                system: {
-                    votes: 1,
-                    IDs: [
-                        Module.client.user.id
-                    ],
-                    entered: Date.now()
-                }
-            }
-            
-            console.log(`${interaction.user.tag} asked:\n\t${data.details.question}\n\nID:${data.fetch.message}\n\n\n`)
-            fs.writeFileSync(`./data/${msg.id}.json`, JSON.stringify(data, null, 4));
-
-
+            ask(interaction);
         }
-
     }).addInteractionHandler({
         customId: "upVoteQuestion",
         process: async (interaction) => {
@@ -343,6 +355,9 @@ const Module = new Augur.Module()
             interaction.reply({ embeds: [statEmbed] });
         }
 
+    }).addEvent("messageCreate", async (msg) => {
+        if (msg.author.id == bot || msg.channel.id != snowflakes.channels.ask) return;
+        ask(msg);
     });
 
 
