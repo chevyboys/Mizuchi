@@ -6,7 +6,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { REST, DiscordAPIError } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { Message, MessageButton, MessageActionRow } = require('discord.js');
-
+const askedRecently = new Set();
 
 function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, buttonTwoEmoji, data) {
     return new MessageActionRow()
@@ -35,6 +35,8 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, bu
 }
 
 async function ask(interaction) {
+    const hoursBetweenQuestions = 3;
+
     if (interaction instanceof Message) {
         // correct channel?
         if (interaction.channel.id != snowflakes.channels.ask) {
@@ -51,61 +53,75 @@ async function ask(interaction) {
         await interaction.reply({ content: 'Thank you. Your question has been registered.', ephemeral: true });
     }
 
+    if (askedRecently.has(interaction.user.id)) {
+        interaction.reply({ content: "Wait a few hours before asking again. - " + interaction.user, ephemeral: true });
+    } else {
+
+        // Write JSON
+        let data = {
+            details: {
+                asker: interaction.user.id,
+                question: interaction.options ? interaction.options.get("question").value : interaction.cleanContent,
+                number: ""
+            },
+            fetch: {
+                channel: snowflakes.channels.ask,
+                message: ""
+            },
+            system: {
+                votes: 1,
+                IDs: [
+                    Module.client.user.id
+                ],
+                entered: Date.now()
+            }
+        }
 
 
+        // Reply
+        embed = u.embed()
+            .setAuthor(interaction.user.tag, interaction.user.displayAvatarURL())
+            .setDescription(interaction.options ? interaction.options.get("question").value : interaction.cleanContent)
+            .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
+            .setTimestamp()
+            .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
+        let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data)
+        let msg = await interaction.guild.channels.cache.get(snowflakes.channels.ask).send({ embeds: [embed], components: [row] });
 
-    // Write JSON
-    let data = {
-        details: {
-            asker: interaction.user.id,
-            question: interaction.options? interaction.options.get("question").value : interaction.cleanContent,
-            number: ""
-        },
-        fetch: {
-            channel: snowflakes.channels.ask,
-            message: ""
-        },
-        system: {
-            votes: 1,
-            IDs: [
-                Module.client.user.id
-            ],
-            entered: Date.now()
+        data = {
+            details: {
+                asker: interaction.user.id,
+                question: interaction.options ? interaction.options.get("question").value : interaction.cleanContent,
+                number: (msg.id)
+            },
+            fetch: {
+                channel: snowflakes.channels.ask,
+                message: msg.id
+            },
+            system: {
+                votes: 1,
+                IDs: [
+                    Module.client.user.id
+                ],
+                entered: Date.now()
+            }
+        }
+
+        console.log(`${interaction.user.tag} asked:\n\t${data.details.question}\n\nID:${data.fetch.message}\n\n\n`)
+        fs.writeFileSync(`./data/${msg.id}.json`, JSON.stringify(data, null, 4));
+
+        // Adds the user to the set so that they can't ask for a few hours
+        if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper)) {
+            askedRecently.add(interaction.user.id);
+            setTimeout(() => {
+                // Removes the user from the set after 3 hours
+                askedRecently.delete(interaction.user.id);
+            }, hoursBetweenQuestions * 60 * 60 * 1000);
         }
     }
 
 
-    // Reply
-    embed = u.embed()
-        .setAuthor(interaction.user.tag, interaction.user.displayAvatarURL())
-        .setDescription(interaction.options? interaction.options.get("question").value : interaction.cleanContent)
-        .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
-        .setTimestamp()
-        .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
-    let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data)
-    let msg = await interaction.guild.channels.cache.get(snowflakes.channels.ask).send({ embeds: [embed], components: [row] });
 
-    data = {
-        details: {
-            asker: interaction.user.id,
-            question: interaction.options? interaction.options.get("question").value : interaction.cleanContent,
-            number: (msg.id)
-        },
-        fetch: {
-            channel: snowflakes.channels.ask,
-            message: msg.id
-        },
-        system: {
-            votes: 1,
-            IDs: [
-                Module.client.user.id
-            ],
-            entered: Date.now()
-        }
-    }
-
-    console.log(`${interaction.user.tag} asked:\n\t${data.details.question}\n\nID:${data.fetch.message}\n\n\n`)
-    fs.writeFileSync(`./data/${msg.id}.json`, JSON.stringify(data, null, 4));
 
 
 }
