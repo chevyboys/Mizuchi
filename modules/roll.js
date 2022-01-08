@@ -24,9 +24,11 @@ const Module = new Augur.Module()
             
             for (let index = 0; index < diceQuantity; index++) {
                 let roll = getRandomIntInclusive(diceType) + modifier;
-                total += roll;
-                if(modifier != 0) {
+                total += roll + modifier;
+                if(modifier > 0) {
                     results.push(`(${roll}+${modifier})`);
+                } else if (modifier < 0 ) {
+                    results.push(`(${roll}-${modifier})`);
                 }
                 else results.push(`(${roll})`);
             }
