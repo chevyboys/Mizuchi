@@ -78,7 +78,7 @@ async function ask(interaction) {
     // Reply
     embed = u.embed()
         .setAuthor(interaction.user.tag, interaction.user.displayAvatarURL())
-        .setDescription(interaction.options.get("question").value)
+        .setDescription(interaction.options? interaction.options.get("question").value : interaction.cleanContent)
         .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
         .setTimestamp()
         .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
