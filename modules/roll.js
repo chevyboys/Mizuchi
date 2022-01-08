@@ -32,7 +32,7 @@ const Module = new Augur.Module()
             }
             let embed = u.embed().setTitle("d"+diceType + " result:").setDescription("```" + total + "```")
             if(modifier != 0 || diceQuantity != 1) embed.addField("Breakdown:", `\`\`\`${results.slice(0, 10).join(",\n")}\`\`\`\``)
-            interaction.reply()
+            interaction.reply({embeds: [embed]});
         }
 
     });
