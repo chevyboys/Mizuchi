@@ -1,8 +1,8 @@
 const Augur = require("augurbot"),
-const modRequest = require('../utils/Utils.ContextMenu.Message.ModCard');
-const Discord = require("discord.js"),
+    modRequest = require('../utils/Utils.ContextMenu.Message.ModCard'),
+    Discord = require("discord.js"),
     config = require("../config/config.json"),
-    snowflakes = require("../config/snowflakes.json")
+    snowflakes = require("../config/snowflakes.json");
 
 //Kester msg handling
 async function kesterBomb(inputObject) {
