@@ -2,7 +2,7 @@
 */
 const fs = require('fs');
 const Augur = require("augurbot");
-const u = require("../utils/utils");
+const u = require("../utils/Utils.Generic");
 const moment = require("moment");
 const axios = require("axios").default;
 const snowflakes = require('../config/snowflakes.json');
