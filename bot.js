@@ -1,6 +1,6 @@
 const {AugurClient} = require("augurbot"),
   config = require("./config/config.json"),
-  u = require("./utils/utils");
+  u = require("./utils/Utils.Generic");
 
 const client = new AugurClient(config, {
   clientOptions: {
