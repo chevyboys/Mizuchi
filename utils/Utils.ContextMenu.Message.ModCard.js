@@ -1,5 +1,5 @@
 const Augur = require("augurbot"),
-  u = require("../utils/utils"),
+  u = require("./Utils.Generic"),
   { MessageActionRow, MessageButton } = require("discord.js");
 const Discord = require("discord.js");
 const snowflakes = require('../config/snowflakes.json');
@@ -12,8 +12,8 @@ let activeRequests = [];
  * @param {Augur.Module} Module
  * @param {string} modRequestFunctionNameParam the name of the mod request function. Should be a single word.
  * @param {string} modRequestFunctionEmojiParam the emoji associated with this function
- * @param {function approvedCallback({mod,card,embed,activeRequest, requestingUser, target, interaction})} approvedCallback
- * @param {function overrideCallback({mod, target, interaction})} overrideCallback this function should accept an object containing the mod doing the action, the interaction, and the target message
+ * @param {function approvedCallback({mod,card,embed,activeRequest, requestingUser, target, interaction})} approvedCallback //What happens on approval
+ * @param {function overrideCallback({mod, target, interaction})} overrideCallback this function should accept an object containing the mod doing the action, the interaction, and the target message. It is executed if the person has moderation privilages
  */
 modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam, approvedCallback, overrideCallback) => {
   Module.reactionHandlers = Module.reactionHandlers || [];
@@ -95,21 +95,7 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
       if (interaction.customId == `${modRequestFunctionName}Approve`) {
         // Approve modRequest
         embed.setColor(0x00FFFF);
-        if(activeRequest.reactionEmoji){
-          Module.reactionHandlers.find(r => {
-            return r.emoji == activeRequest.reactionEmoji
-          }).approvedCallback({
-            mod: mod,
-            user: mod,
-            card: card,
-            embed: embed,
-            activeRequest: activeRequest,
-            requestingUser: requestingUser,
-            target: target,
-            interaction: interaction
-          });
-        }
-        else approvedCallback({
+        let interactionHandlerInputObject = {
           mod: mod,
           user: mod,
           card: card,
@@ -117,8 +103,15 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
           activeRequest: activeRequest,
           requestingUser: requestingUser,
           target: target,
-          interaction: interaction
-        });
+          interaction: interaction,
+          Module: Module
+        }
+        if(activeRequest.reactionEmoji){
+          Module.reactionHandlers.find(r => {
+            return r.emoji == activeRequest.reactionEmoji
+          }).approvedCallback(interactionHandlerInputObject);
+        }
+        else approvedCallback(interactionHandlerInputObject);
       } else if (interaction.customId == `${modRequestFunctionName}Reject`) {
         // REJECT modRequest
         embed.setColor(0x00FF00)
