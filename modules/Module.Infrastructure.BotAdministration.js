@@ -1,7 +1,7 @@
 //This file is a place for all the publicly visable bot diagnostic commands usable primarily only by the head bot dev.
 
 const Augur = require("augurbot"),
-  u = require("../utils/utils");
+  u = require("../utils/Utils.Generic");
   const { REST } = require('@discordjs/rest');
   const { Routes } = require('discord-api-types/v9');
   const fs = require('fs');

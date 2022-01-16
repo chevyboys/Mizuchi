@@ -1,5 +1,5 @@
 const Augur = require("augurbot"),
-    u = require("../utils/utils");
+    u = require("../utils/Utils.Generic");
 const config = require("../config/config.json");
 const snowflakes = require('../config/snowflakes.json');
 const Parser = require('rss-parser');

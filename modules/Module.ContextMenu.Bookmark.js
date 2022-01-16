@@ -1,5 +1,5 @@
 const Augur = require("augurbot"),
-    u = require("../utils/utils");
+    u = require("../utils/Utils.Generic");
 const snowflakes = require('../config/snowflakes.json');
 
 // Message context menu for bookmarking a message.

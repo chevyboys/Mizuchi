@@ -1,5 +1,5 @@
 const Augur = require("augurbot"),
-    u = require("../utils/utils"),
+    u = require("../utils/Utils.Generic"),
     snowflakes = require('../config/snowflakes.json');
 const mee6 = "848863263218728980"
 const Module = new Augur.Module()

@@ -1,5 +1,5 @@
 const Augur = require("augurbot"),
-    u = require("../utils/utils"),
+    u = require("../utils/Utils.Generic"),
     snowflakes = require('../config/snowflakes.json'),
     { MessageActionRow, MessageButton, MessageSelectMenu } = require("discord.js"),
     Attunements = require('../Judgement/AttunementRoles.json'),
