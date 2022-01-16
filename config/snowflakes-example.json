@@ -1,17 +1,21 @@
 {
-  "guilds": {
-    "PrimaryServer": "",
-    "ClimbersCourt": "",
-    "TestServer": ""
-  },
   "channels": {
     "ask": "",
     "blogAnnouncements": "",
     "earthTemple": "",
     "faq": "",
+    "general": "",
     "modRequests": "",
     "transfer": ""
-    
+  },
+  "emoji": {
+    "upDawn": "",
+    "unDawn": ""
+  },
+  "guilds": {
+    "PrimaryServer": "",
+    "ClimbersCourt": "",
+    "TestServer": ""
   },
   "roles": {
     "BotMaster": "",
@@ -28,12 +32,5 @@
       "AllUpdates": "",
       "RoleplayingUpdates": ""
     }
-  },
-  "emoji": {
-    "upDawn": "",
-    "unDawn": ""
-  },
-  "messages": {
-    "faq": ""
   }
 }

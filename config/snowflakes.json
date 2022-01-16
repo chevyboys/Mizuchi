@@ -1,9 +1,4 @@
 {
-  "guilds": {
-    "PrimaryServer": "443421134109671424",
-    "ClimbersCourt": "443421134109671424",
-    "TestServer": "879564413751918593"
-  },
   "channels": {
     "ask": "844377214875336724",
     "blogAnnouncements": "841491239697514536",
@@ -12,7 +7,15 @@
     "general": "443421134109671428",
     "modRequests": "914308709964980254",
     "transfer": "578706502001360897"
-    
+  },
+  "emoji": {
+    "upDawn": "dawnAnimated:776081525929934868",
+    "unDawn": "dawnredact:927451014259433502"
+  },
+  "guilds": {
+    "PrimaryServer": "443421134109671424",
+    "ClimbersCourt": "443421134109671424",
+    "TestServer": "879564413751918593"
   },
   "roles": {
     "BotMaster": "795898204101017610",
@@ -29,12 +32,5 @@
       "AllUpdates": "863562448791404575",
       "RoleplayingUpdates": "715309563833745499"
     }
-  },
-  "emoji": {
-    "upDawn": "dawnAnimated:776081525929934868",
-    "unDawn": "dawnredact:927451014259433502"
-  },
-  "messages": {
-    "faq": "915311497129906247"
   }
 }
