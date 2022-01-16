@@ -1,5 +1,5 @@
 const Augur = require("augurbot"),
-    u = require("../utils/Utils");
+    u = require("../utils/Utils.Generic");
 const modRequest = require('../utils/Utils.ContextMenu.Message.ModCard');
 
 
