@@ -1,8 +1,7 @@
 const Augur = require("augurbot"),
     u = require("../utils/Utils.Generic");
 const modRequest = require('../utils/Utils.ContextMenu.Message.ModCard');
-const Discord = require("discord.js"),
-    config = require("../config/config.json");
+const snowflakes = require('../config/snowflakes.json')
 
 //Spoiler msg handling
 async function spoilerMsg(inputObject) {
@@ -36,5 +35,5 @@ async function spoilerMsg(inputObject) {
 }
 
 const Module = new Augur.Module()
-modRequest(Module, "Spoiler", "🤫", spoilerMsg, spoilerMsg);
+modRequest(Module, "Spoiler", snowflakes.emoji.spoiler, spoilerMsg, spoilerMsg);
 module.exports = Module;
