@@ -97,9 +97,9 @@ let DataBaseActions = {
                 if (property != "userID") {
                     user[property] = userDataBaseObject[property] || user[property];
                     if (typeof user[property] === 'string' || user[property] instanceof String) {
-                        query = query + ` ${con.escape(property)} = ${con.escape(user[property])},`
+                        query = query + ` ${property} = ${con.escape(user[property])},`
                     } else {
-                        query = query + ` ${con.escape(property)} = ${con.escape(user[property])},`
+                        query = query + ` ${property} = ${con.escape(user[property])},`
                     }
 
                 }
