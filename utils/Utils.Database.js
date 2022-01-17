@@ -6,9 +6,12 @@ let hasBeenInitialized = false;
 let con = mysql.createConnection(config.mySQL);
 let Augur = require("augurbot")
 
+function cleanString(str) {
+    return str.replace(/[\W_]+/g," ");;
+}
 
 function parseuserID(user) {
-    let userID = user.userID?.user?.id || user.userID?.userId || user.id || user.userID || user.Id ||  user;
+    let userID = user.userID?.user?.id || user.userID?.userId || user.id || user.userID || user.Id || user;
     if (!/^\d+$/.test(userID)) {
         throw "INVALD DISCORD ID at Database.ParseUserID: " + JSON.stringify(user);
     }
@@ -24,7 +27,7 @@ let DataBaseActions = {
             userID = parseuserID(userID);
 
             return new Promise((fulfill, reject) => {
-                con.query("SELECT * FROM users WHERE userID='" + userID + "'", function (error, result) {
+                con.query("SELECT * FROM users WHERE userID=" + con.escape(userID), function (error, result) {
                     if (error) reject(error);
                     else fulfill(JSON.parse(JSON.stringify(result))[0]);
                     console.log(result);
@@ -52,16 +55,18 @@ let DataBaseActions = {
             else {
                 return new Promise((fulfill, reject) => {
                     let cakeDay = (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(userID).joinedAt;
+                    let username = cleanString(Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).displayName);
                     let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
                     cakeDay = months[cakeDay.getMonth()] + " " + cakeDay.getDate();
                     let newMember = {
                         userID: userID,
+                        username: username,
                         cakeDay: cakeDay,
                         currentXP: 0,
                         totalXP: 0
                     }
                     console.log(JSON.stringify(newMember, 0, 2));
-                    let sql = `INSERT INTO \`users\` (\`userID\`, \`cakeDay\`, \`currentXP\`, \`totalXP\`) VALUES ('${newMember.userID}', '${newMember.cakeDay}', '${newMember.currentXP}', '${newMember.totalXP}')`;
+                    let sql = `INSERT INTO \`users\` (\`userID\`, \`username\`, \`cakeDay\`, \`currentXP\`, \`totalXP\`) VALUES (${con.escape(newMember.userID)}, ${con.escape(newMember.username)}, ${con.escape(newMember.cakeDay)}, ${con.escape(newMember.currentXP)}, ${con.escape(newMember.totalXP)})`;
                     con.query(sql, function (error, result) {
                         if (error) reject(error);
                         else fulfill(newMember);
@@ -92,14 +97,14 @@ let DataBaseActions = {
                 if (property != "userID") {
                     user[property] = userDataBaseObject[property] || user[property];
                     if (typeof user[property] === 'string' || user[property] instanceof String) {
-                        query = query + ` ${property} = '${user[property]}',`
+                        query = query + ` ${con.escape(property)} = ${con.escape(user[property])},`
                     } else {
-                        query = query + ` ${property} = ${user[property]},`
+                        query = query + ` ${con.escape(property)} = ${con.escape(user[property])},`
                     }
 
                 }
             }
-            query = query.slice(0, -1) + ` WHERE userID='${userID}'`;
+            query = query.slice(0, -1) + ` WHERE userID=${con.escape(userID)}`;
             console.log("User Update SQL command '" + query + "'")
             return new Promise((fulfill, reject) => {
                 con.query(query, function (error, result) {
@@ -120,7 +125,7 @@ let DataBaseActions = {
             })
             hasBeenInitialized = true;
         }
-
+        return con;
     }
 
 }
