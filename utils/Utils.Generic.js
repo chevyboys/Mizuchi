@@ -1,5 +1,6 @@
 const Discord = require("discord.js"),
-  config = require("../config/config.json");
+  config = require("../config/config.json"),
+  snowflakes = require("../config/snowflakes.json")
 
 const errorLog = new Discord.WebhookClient(config.error);
 
@@ -69,11 +70,23 @@ function parseInteraction(inter) {
 }
 
 const utils = {
+  addRoles: async (client, member, roles, takeRoleInsteadOfGive) => {
+    if (client.permissionsIn(snowflakes.channels.earthTemple).toArray().includes("MANAGE_ROLES")) {
+      member.roles.add(roles)
+    } else {
+      if (!Array.isArray(roles)) {
+        roles = [roles];
+      }
+      let embed = await utils.modRequestEmbed("Role Request",{ member: member, guild: member.guild, createdAt: Date.now(), cleanContent: " Dummy Text"}, { member: member }, client)
+      embed.setDescription(`${member.displayName} needs to ${takeRoleInsteadOfGive? "have the following role(s) removed" : "be given the following role(s)"}:\n>>> <@&${roles.join(">\n<@&")}>`);
+      await member.guild.channels.cache.get(snowflakes.channels.modRequests).send({embeds:[embed]});
+    }
+  },
   /**
    * If a command is run in a channel that doesn't want spam, returns #bot-lobby so results can be posted there.
    * @param {Discord.Message} msg The Discord message to check for bot spam.
    */
-  botSpam: function(msg) {
+  botSpam: function (msg) {
     if (msg.guild?.id === config.ldsg && // Is in server
       msg.channel.id !== config.channels.botspam && // Isn't in bot-lobby
       msg.channel.id !== config.channels.bottesting && // Isn't in Bot Testing
@@ -91,7 +104,7 @@ const utils = {
    * @param {Discord.Message|Discord.Interaction} msg The message to delete.
    * @param {number} t The length of time to wait before deletion, in milliseconds.
    */
-  clean: async function(msg, t = 20000) {
+  clean: async function (msg, t = 20000) {
     await utils.wait(t);
     if (msg instanceof Discord.CommandInteraction) {
       msg.deleteReply().catch(utils.noop);
@@ -105,7 +118,7 @@ const utils = {
    * @param {Discord.Interaction} interaction The interaction to delete.
    * @param {number} t The length of time to wait before deletion, in milliseconds.
    */
-  cleanInteraction: async function(interaction, t = 2000) {
+  cleanInteraction: async function (interaction, t = 2000) {
     await utils.wait(t);
     interaction.deleteReply();
   },
@@ -122,7 +135,7 @@ const utils = {
    * @param {any} data The data object to pass to the MessageEmbed constructor.
    *   You can override the color and timestamp here as well.
    */
-  embed: function(data = {}) {
+  embed: function (data = {}) {
     if (data?.author instanceof Discord.GuildMember) {
       data.author = {
         name: data.author.displayName,
@@ -145,7 +158,7 @@ const utils = {
    * @param {Error} error The error to report.
    * @param {any} message Any Discord.Message, Discord.Interaction, or text string.
    */
-  errorHandler: function(error, message = null) {
+  errorHandler: function (error, message = null) {
     if (!error || (error.name === "AbortError")) return;
 
     console.error(Date());
@@ -170,7 +183,7 @@ const utils = {
         .addField("Location", loc, true);
 
       const descriptionLines = [message.commandId || message.customId || "`undefined`"];
-      const { command, data } = parseInteraction(message) || {command: "unkown", data: [{ name: "unknown", value: "unknown" }]};
+      const { command, data } = parseInteraction(message) || { command: "unkown", data: [{ name: "unknown", value: "unknown" }] };
       descriptionLines.push(command);
       for (const datum of data) {
         descriptionLines.push(`${datum.name}: ${datum.value}`);
@@ -195,6 +208,21 @@ const utils = {
    * @param {*} obj The Discord object to fetch.
    */
   fetchPartial: (obj) => { return obj.fetch(); },
+  modRequestEmbed: async (modRequestFunctionName, message, interaction, user, modRequestFunctionEmoji) => {
+    let requestingUser = user ? message?.guild?.members?.cache.get(user.id) || interaction.member : interaction.member;
+    let embed = utils.embed({ color: 0xF0004C, author: message.member, timestamp: (message.editedAt ?? message.createdAt) })
+      .setTitle(`${modRequestFunctionName} request by ` + `${requestingUser.displayName}`)
+      .setColor(0xF0004C)
+      .setTimestamp()
+      .setAuthor({name: `${message.member.displayName} ${modRequestFunctionEmoji? modRequestFunctionEmoji: ""}`, iconURL: message.member.user.displayAvatarURL()})
+      .setDescription(`- ${message.cleanContent} `)
+      .addField(`${modRequestFunctionName} requested by `, requestingUser.displayName)
+    if (message.channel) embed.addField("Channel", message.channel.toString())
+    if (message.url) embed.addField("Jump to Post", `[Original Message](${message.url})`);
+    if (message.attachments?.size > 0)
+      embed.setImage(message.attachments?.first()?.url);
+    return embed;
+  },
   /**
    * This task is extremely complicated.
    * You need to understand it perfectly to use it.
@@ -240,7 +268,7 @@ const utils = {
    * @param {Array} selections Items to choose from
    * @returns {*} A random element from the array
    */
-  rand: function(selections) {
+  rand: function (selections) {
     return selections[Math.floor(Math.random() * selections.length)];
   },
   /**
@@ -248,7 +276,7 @@ const utils = {
    * If awaited, will block for the given amount of time.
    * @param {number} t The time to wait, in milliseconds.
    */
-  wait: function(t) {
+  wait: function (t) {
     return new Promise((fulfill) => {
       setTimeout(fulfill, t);
     });

@@ -95,9 +95,7 @@ const Module = new Augur.Module()
 .addEvent("ready", () => {
   //When the bot is fully online, fetch all the discord members, since it will only autofetch for small servers and we want them all.
   Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.fetch();
-  //start the site when ready
-  const site = require("../site/siteDisplay")
-  site.start();
+  
 })
 //each time this module is loaded, update the module.config snowflakes.
 .setInit(async (reload) => {

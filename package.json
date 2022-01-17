@@ -27,6 +27,7 @@
     "googleapis": "^92.0.0",
     "moment": "^2.29.1",
     "mongoose": "^5.13.7",
+    "mysql": "^2.18.1",
     "nanoid": "^3.1.25",
     "node-cron": "^3.0.0",
     "profanity-matcher": "^1.0.1",
