@@ -16,3 +16,4 @@ faq/*.json
 .forever/
 faq/*
 package-lock.json
+config/snowflakes.json
