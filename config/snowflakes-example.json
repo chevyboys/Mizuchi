@@ -9,9 +9,14 @@
     "transfer": ""
   },
   "emoji": {
-    "spoiler" : "",
-    "upDawn": "",
-    "unDawn": ""
+    "messageContextMenu": {
+      "bookmark": "🔖",
+      "kesterBomb": "💣",
+      "pin": "📌",
+      "spoiler": "🤫"
+    },
+    "upDawn": "⬆",
+    "unDawn": "↩"
   },
   "guilds": {
     "PrimaryServer": "",
