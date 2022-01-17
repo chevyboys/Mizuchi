@@ -54,7 +54,7 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
     ),
   ];
   async function modRequestEmbed(message, interaction, user) {
-    let requestingUser = message.guild.members.cache.get(user.id) || interaction.member;
+    let requestingUser = user ? message.guild.members.cache.get(user.id) || interaction.member : interaction.member;
     let embed = u.embed({ color: 0xF0004C, author: message.member, timestamp: (message.editedAt ?? message.createdAt) })
       .setTitle(`${modRequestFunctionName} request by ` + `${requestingUser.displayName}`)
       .setColor(0xF0004C)
