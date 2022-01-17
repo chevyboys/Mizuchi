@@ -1,7 +1,7 @@
 const Augur = require("augurbot"),
     u = require("../utils/Utils");
 const modRequest = require('../utils/Utils.ContextMenu.Message.ModCard');
-
+const snowflakes = require('../config/snowflakes.json')
 
 //Pin msg handling
 async function pinMsgApprove(inputObject) {
@@ -24,6 +24,6 @@ async function pinMsgOverride(inputObject) {
 }
 
 const Module = new Augur.Module()
-modRequest(Module, "Pin", "📌", pinMsgApprove, pinMsgOverride);
+modRequest(Module, "Pin", snowflakes.emoji.messageContextMenu.pinRequest, pinMsgApprove, pinMsgOverride);
 
 module.exports = Module;

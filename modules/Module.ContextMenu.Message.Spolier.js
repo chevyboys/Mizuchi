@@ -35,5 +35,5 @@ async function spoilerMsg(inputObject) {
 }
 
 const Module = new Augur.Module()
-modRequest(Module, "Spoiler", snowflakes.emoji.spoiler, spoilerMsg, spoilerMsg);
+modRequest(Module, "Spoiler", snowflakes.emoji.messageContextMenu.spoiler, spoilerMsg, spoilerMsg);
 module.exports = Module;
