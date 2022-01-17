@@ -57,16 +57,19 @@ let DataBaseActions = {
                     let cakeDay = (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(userID).joinedAt;
                     let username = cleanString(Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).displayName);
                     let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+                    let roles = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).roles.cache.map(r => r.id);
                     cakeDay = months[cakeDay.getMonth()] + " " + cakeDay.getDate();
                     let newMember = {
                         userID: userID,
                         username: username,
                         cakeDay: cakeDay,
                         currentXP: 0,
-                        totalXP: 0
+                        totalXP: 0,
+                        roles: roles
                     }
-                    console.log(JSON.stringify(newMember, 0, 2));
-                    let sql = `INSERT INTO \`users\` (\`userID\`, \`username\`, \`cakeDay\`, \`currentXP\`, \`totalXP\`) VALUES (${con.escape(newMember.userID)}, ${con.escape(newMember.username)}, ${con.escape(newMember.cakeDay)}, ${con.escape(newMember.currentXP)}, ${con.escape(newMember.totalXP)})`;
+
+                    let sql = `INSERT INTO \`users\` (\`userID\`, \`username\`, \`cakeDay\`, \`currentXP\`, \`totalXP\`, \`roles\`) VALUES (${con.escape(newMember.userID)}, ${con.escape(newMember.username)}, ${con.escape(newMember.cakeDay)}, ${con.escape(newMember.currentXP)}, ${con.escape(newMember.totalXP)}, ${con.escape(JSON.stringify(newMember.roles))})`;
+                    console.log(sql);
                     con.query(sql, function (error, result) {
                         if (error) reject(error);
                         else fulfill(newMember);
@@ -116,6 +119,9 @@ let DataBaseActions = {
             })
 
         },
+        updateRoles: async (Module, guildMember) => {
+            await DataBaseActions.User.update(Module, {roles : guildMember.roles.cache.map(r => con.escape(r.id))})
+        }
     },
     init: () => {
         if (!hasBeenInitialized) {
