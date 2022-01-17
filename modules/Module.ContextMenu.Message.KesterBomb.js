@@ -39,7 +39,7 @@ async function kesterBomb(inputObject) {
 }
 
 const Module = new Augur.Module()
-modRequest(Module, "Kester Bomb", "💣", kesterBomb, kesterBomb);
+modRequest(Module, "Kester Bomb", snowflakes.emoji.messageContextMenu.kesterBomb, kesterBomb, kesterBomb);
 
 
 module.exports = Module;
