@@ -118,7 +118,12 @@ async function ask(interaction) {
         interaction.reply({ content: "Wait a few hours before asking again. - <@" + interaction.user + ">\nYour question was: " + (interaction.options ? interaction.options.get("question").value : interaction.cleanContent), ephemeral: true });
     } else {
         // Akn
-        await interaction.reply({ content: 'Thank you. Your question has been registered.', ephemeral: true });
+        try {
+            u.clean(await interaction.reply({ content: 'Thank you. Your question has been registered.', ephemeral: true }));
+        } catch (error) {
+            u.noop();
+        }
+        
 
         // Write JSON
         let data = {
