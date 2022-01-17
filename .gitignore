@@ -4,7 +4,6 @@ tmp
 config/*
 !config/README.md
 !config/*-example.json
-!config/snowflakes.json
 test.js
 *-.js
 *-.json
