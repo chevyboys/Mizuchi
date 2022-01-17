@@ -19,32 +19,33 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
   Module.reactionHandlers = Module.reactionHandlers || [];
   let modRequestFunctionName = modRequestFunctionNameParam;
   let modRequestFunctionEmoji = modRequestFunctionEmojiParam;
-  Module.reactionHandlers.push({emoji: modRequestFunctionEmojiParam, approvedCallback: approvedCallback, overrideCallback: overrideCallback})
-  async function handleReaction(reaction, user, reactionHandler){
-      message = reaction.message;
-      if (message.guild?.id != snowflakes.guilds.PrimaryServer || user.bot) return;
-      if ((reaction.emoji.name == modRequestFunctionEmoji)) {
-        // Pin Request
-        try {
-          if ((message.channel.permissionsFor(user).has("MANAGE_MESSAGES") || message.channel.permissionsFor(user).has("ADMINISTRATOR") || message.channel.permissionsFor(user).has("MANAGE_WEBHOOKS"))) {
-            reactionHandler.overrideCallback({
-              mod: user,
-              user: user,
-              target: message,
-              interaction: message
-            })
-          } else {
-            let card = await modRequestCard(message, message);
-            activeRequests.push({ 
-              targetMessage: message.id, 
-              targetChannel: message.channel.id, 
-              card: card.id, 
-              requstedBy: user.id, 
-              originalInteraction: message, 
-              reactionEmoji: modRequestFunctionEmojiParam });
-          }
-        } catch (e) { u.errorHandler(e, "modRequest Request Processing"); }
-      }
+  Module.reactionHandlers.push({ emoji: modRequestFunctionEmojiParam, approvedCallback: approvedCallback, overrideCallback: overrideCallback })
+  async function handleReaction(reaction, user, reactionHandler) {
+    message = reaction.message;
+    if (message.guild?.id != snowflakes.guilds.PrimaryServer || user.bot) return;
+    if ((reaction.emoji.name == modRequestFunctionEmoji)) {
+      // Pin Request
+      try {
+        if ((message.channel.permissionsFor(user).has("MANAGE_MESSAGES") || message.channel.permissionsFor(user).has("ADMINISTRATOR") || message.channel.permissionsFor(user).has("MANAGE_WEBHOOKS"))) {
+          reactionHandler.overrideCallback({
+            mod: user,
+            user: user,
+            target: message,
+            interaction: message
+          })
+        } else {
+          let card = await modRequestCard(message, message);
+          activeRequests.push({
+            targetMessage: message.id,
+            targetChannel: message.channel.id,
+            card: card.id,
+            requstedBy: user.id,
+            originalInteraction: message,
+            reactionEmoji: modRequestFunctionEmojiParam
+          });
+        }
+      } catch (e) { u.errorHandler(e, "modRequest Request Processing"); }
+    }
   }
 
   const modRequestActions = [
@@ -54,13 +55,14 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
     ),
   ];
   async function modRequestEmbed(message, interaction) {
+    let requester =  await message.guild.members.cache.get(activeRequests.filter(ar => ar.targetMessage == message && modRequestFunctionEmoji == ar.reactionEmoji)[0].requstedBy || interaction.member.user.id);
     let embed = u.embed({ color: 0xF0004C, author: message.member, timestamp: (message.editedAt ?? message.createdAt) })
-      .setTitle(`${modRequestFunctionName} request by ` + `${interaction.member.displayName}`)
+      .setTitle(`${modRequestFunctionName} request by ` + `${requester.displayName}`)
       .setColor(0xF0004C)
       .setTimestamp()
       .setAuthor(message.member.displayName + " " + modRequestFunctionEmoji, message.member.user.displayAvatarURL())
       .setDescription(message.cleanContent)
-      .addField(`${modRequestFunctionName} requested by `, interaction.member.displayName)
+      .addField(`${modRequestFunctionName} requested by `, requester.displayName)
       .addField("Channel", message.channel.toString())
       .addField("Jump to Post", `[Original Message](${message.url})`);
     if (message.attachments?.size > 0)
@@ -106,7 +108,7 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
           interaction: interaction,
           Module: Module
         }
-        if(activeRequest.reactionEmoji){
+        if (activeRequest.reactionEmoji) {
           Module.reactionHandlers.find(r => {
             return r.emoji == activeRequest.reactionEmoji
           }).approvedCallback(interactionHandlerInputObject);
@@ -175,7 +177,7 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
     .addInteractionHandler({ customId: `${modRequestFunctionName}Approve`, process: processCardAction })
     .addInteractionHandler({ customId: `${modRequestFunctionName}Reject`, process: processCardAction })
     .addEvent("messageReactionAdd", async (reaction, user) => {
-      if(Module.reactionHandlers.filter(r => {
+      if (Module.reactionHandlers.filter(r => {
         return r.emoji == reaction.emoji.name
       }).length > 0) {
         let reactionHandler = Module.reactionHandlers.find(r => {
