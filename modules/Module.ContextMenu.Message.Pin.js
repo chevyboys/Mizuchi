@@ -24,6 +24,6 @@ async function pinMsgOverride(inputObject) {
 }
 
 const Module = new Augur.Module()
-modRequest(Module, "Pin", snowflakes.emoji.messageContextMenu.pinRequest, pinMsgApprove, pinMsgOverride);
+modRequest(Module, "Pin", snowflakes.emoji.messageContextMenu.pin, pinMsgApprove, pinMsgOverride);
 
 module.exports = Module;

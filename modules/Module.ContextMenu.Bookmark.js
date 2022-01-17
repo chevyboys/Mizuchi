@@ -33,7 +33,7 @@ const Module = new Augur.Module()
             }
         }
     }).addEvent("messageReactionAdd", async (reaction, user) => {
-        if (reaction != snowflakes.emoji.messageContextMenu.bookmark) {
+        if (reaction.emoji != snowflakes.emoji.messageContextMenu.bookmark) {
             return;
         } else {
             try {
