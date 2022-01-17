@@ -112,8 +112,9 @@ async function ask(interaction) {
         interaction.user = interaction.author
         //Akn
         await interaction.react("👍");
-        u.clean(interaction);
-    } else if (askedRecently.has(interaction.user.id)) {
+        u.clean(interaction, 3);
+    } 
+    if (askedRecently.has(interaction.user.id)) {
         interaction.reply({ content: "Wait a few hours before asking again. - <@" + interaction.user + ">\nYour question was: " + (interaction.options ? interaction.options.get("question").value : interaction.cleanContent), ephemeral: true });
     } else {
         // Akn
