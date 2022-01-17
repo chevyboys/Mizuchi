@@ -18,7 +18,6 @@ const Module = new Augur.Module()
       let general = guild.channels.cache.get(snowflakes.channels.general); // #general
       let welcomeChannel = guild.channels.cache.get(snowflakes.channels.introductions); // #welcome
       let modLogs = guild.channels.cache.get(snowflakes.channels.modRequests); // #mod-logs
-      let member = await guild.members.fetch(user.userID);
 
 
 
@@ -38,9 +37,9 @@ const Module = new Augur.Module()
           guild.roles.cache.has(role) &&
           !guild.roles.cache.get(role).managed &&
           //put any roles we *don't* want to prompt for here
-          ![].includes(role)
+          ![snowflakes.guilds.PrimaryServer].includes(role)
         ));
-        if (user.roles.length > 0) u.addRoles(Module.client, member, toAdd);
+        if (user.roles.length > 0) u.addRoles(guild.members.cache.get(Module.client.user.id), member, toAdd);
 
         let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
         if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
@@ -54,9 +53,12 @@ const Module = new Augur.Module()
           "Welcome",
           "Hi there",
           "Glad to have you here",
-          "Ahoy"
+          "Hello there",
+          "Greetings"
         ];
         let info1 = [
+          "I hope you brought pizza! \n Take a look at",
+          "Take a peak at",
           "Take a look at",
           "Check out",
           "Head on over to"
@@ -69,17 +71,18 @@ const Module = new Augur.Module()
         let info3 = [
           "What brings you our way?",
           "How'd you find us?",
-          "What platforms/games do you play?"
+          "How far have you gotten in the books?"
         ];
-        welcomeString = `${u.rand(welcome)}, ${member}! ${u.rand(info1)} ${welcomeChannel} ${u.rand(info2)}. ${u.rand(info3)}\n\nTry \`!profile\` over in <#${Module.config.channels.botspam}> if you'd like to opt in to roles or share IGNs.`;
+        welcomeString = `${u.rand(welcome)}, ${member}! ${u.rand(info1)} <#${snowflakes.channels.rules}> ${u.rand(info2)}. ${u.rand(info3)}\n\nHead over to <#${snowflakes.channels.roles}> if you'd like to opt in to roles, and be sure to check out our FAQ and spoiler policy`;
         embed.setTitle(member.displayName + " has joined the server.");
 
         db.User.new(Module, member);
       }
-      modLogs.send({ embed });
+      modLogs.send({ content: "User joined", embeds: [embed] });
 
       if (!member.user.bot)
-        general.send(welcomeString);
+        //general.send(welcomeString);
+        u.noop();
 
     } catch (e) { u.errorHandler(e, "New Member Add"); }
   });

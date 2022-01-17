@@ -77,9 +77,12 @@ const utils = {
       if (!Array.isArray(roles)) {
         roles = [roles];
       }
-      let embed = await utils.modRequestEmbed("Role Request",{ member: member, guild: member.guild, createdAt: Date.now(), cleanContent: " Dummy Text"}, { member: member }, client)
-      embed.setDescription(`${member.displayName} needs to ${takeRoleInsteadOfGive? "have the following role(s) removed" : "be given the following role(s)"}:\n>>> <@&${roles.join(">\n<@&")}>`);
-      await member.guild.channels.cache.get(snowflakes.channels.modRequests).send({embeds:[embed]});
+      let embed = await utils.modRequestEmbed("Role Request", { member: member, guild: member.guild, createdAt: Date.now(), cleanContent: " Dummy Text" }, { member: member }, client)
+      if (roles.length < 1) {
+        return;
+      }
+      embed.setDescription(`${member.displayName} needs to ${takeRoleInsteadOfGive ? "have the following role(s) removed" : "be given the following role(s)"}:\n>>> <@&${roles.join(">\n<@&")}>`);
+      await member.guild.channels.cache.get(snowflakes.channels.modRequests).send({ embeds: [embed] });
     }
   },
   /**
@@ -214,7 +217,7 @@ const utils = {
       .setTitle(`${modRequestFunctionName} request by ` + `${requestingUser.displayName}`)
       .setColor(0xF0004C)
       .setTimestamp()
-      .setAuthor({name: `${message.member.displayName} ${modRequestFunctionEmoji? modRequestFunctionEmoji: ""}`, iconURL: message.member.user.displayAvatarURL()})
+      .setAuthor({ name: `${message.member.displayName} ${modRequestFunctionEmoji ? modRequestFunctionEmoji : ""}`, iconURL: message.member.user.displayAvatarURL() })
       .setDescription(`- ${message.cleanContent} `)
       .addField(`${modRequestFunctionName} requested by `, requestingUser.displayName)
     if (message.channel) embed.addField("Channel", message.channel.toString())

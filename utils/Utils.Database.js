@@ -7,7 +7,7 @@ let con = mysql.createConnection(config.mySQL);
 let Augur = require("augurbot")
 
 function cleanString(str) {
-    return str.replace(/[\W_]+/g," ");;
+    return str.replace(/[\W_]+/g, " ");;
 }
 
 function parseuserID(user) {
@@ -28,9 +28,16 @@ let DataBaseActions = {
 
             return new Promise((fulfill, reject) => {
                 con.query("SELECT * FROM users WHERE userID=" + con.escape(userID), function (error, result) {
-                    if (error) reject(error);
-                    else fulfill(JSON.parse(JSON.stringify(result))[0]);
-                    console.log(result);
+                    let user = JSON.parse(JSON.stringify(result))[0];
+                    if (!user || user == undefined) fulfill(null);
+                    else {
+                        console.log(JSON.stringify(user));
+                        user.roles = JSON.parse(user.roles)
+                        if (error) reject(error);
+                        else fulfill(user);
+                        console.log(result);
+                    }
+
                 });
             });
         },
@@ -120,7 +127,7 @@ let DataBaseActions = {
 
         },
         updateRoles: async (Module, guildMember) => {
-            await DataBaseActions.User.update(Module, {roles : guildMember.roles.cache.map(r => con.escape(r.id))})
+            await DataBaseActions.User.update(Module, { id: guildMember.id, roles: JSON.stringify(guildMember.roles.cache.map(r => r.id)) })
         }
     },
     init: () => {
