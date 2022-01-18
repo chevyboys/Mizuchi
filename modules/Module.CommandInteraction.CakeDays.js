@@ -133,7 +133,7 @@ Module
                     .setTitle("Upcoming Cake Days:")
                     .setDescription("```" + userCakeString + "```" + upcomingCakeUsers)
                     .setColor("#ea596e");
-                interaction.reply({ embeds: [embed], ephemeral: true })
+                interaction.reply({ embeds: [embed], ephemeral: true, allowedMentions: {parse: ['users']} });
 
 
             }
