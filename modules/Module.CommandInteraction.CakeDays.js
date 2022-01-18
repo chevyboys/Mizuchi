@@ -11,16 +11,16 @@ const Augur = require("augurbot"),
 async function celebrate() {
     let guild = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
     if (moment().hours() == 9) {
-        testBirthdays(guild).catch(error => u.errorHandler(error, "Test Birthdays"));
+        testcakeOrJoinDays(guild).catch(error => u.errorHandler(error, "Test cakeOrJoinDays"));
     }
 }
 
-async function testBirthdays(guild) {
+async function testcakeOrJoinDays(guild) {
     try {
         if (!guild || guild == undefined) guild = await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer)
         const curDate = moment();
 
-        // Birthday Blast
+        // cakeOrJoinDay Blast
         const flair = [
             ":tada: ",
             ":confetti_ball: ",
@@ -29,11 +29,11 @@ async function testBirthdays(guild) {
             ":cake: "
         ];
 
-        let birthdayPeeps = (await db.User.getAll()).filter(user => user.cakeDay != null);
-        for (let birthdayPeep of birthdayPeeps) {
+        let cakeOrJoinDayPeeps = (await db.User.getAll()).filter(user => user.cakeDay != null);
+        for (let cakeOrJoinDayPeep of cakeOrJoinDayPeeps) {
             try {
-                let date = moment(birthdayPeep.cakeDay);
-                let member = await guild.members.cache.get(birthdayPeep.userID);
+                let date = moment(cakeOrJoinDayPeep.cakeDay);
+                let member = await guild.members.cache.get(cakeOrJoinDayPeep.userID);
 
                 if (date && (date.month() == curDate.month()) && (date.date() == curDate.date())) {
                     let join = moment(member.joinedAt).subtract(0, "days");
@@ -46,24 +46,24 @@ async function testBirthdays(guild) {
                         } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
                     }
                     await guild.channels.cache.get(snowflakes.channels.general).send(`:birthday: :confetti_ball: :tada: Happy Cake Day, ${member}! :tada: :confetti_ball: :birthday:`);
-                    u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.Birthday);
+                    u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.CakeDay);
                 }
-                else if (member.roles.cache.has(snowflakes.roles.Birthday)) {
-                    u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.Birthday, true);
+                else if (member.roles.cache.has(snowflakes.roles.CakeDay)) {
+                    u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.CakeDay, true);
                 }
             } catch (e) { u.errorHandler(e, "Birthay Send"); continue; }
         }
-    } catch (e) { u.errorHandler(e, "Birthday Error"); }
+    } catch (e) { u.errorHandler(e, "cakeOrJoinDay Error"); }
 }
 
 
 Module
     .addCommand({
-        name: "happybirthday",
-        description: "It's your birthday!?",
+        name: "happycakeOrJoinDay",
+        description: "It's your cakeDay!?",
         syntax: "<@user>", hidden: true,
         process: async (msg) => {
-            await testBirthdays();
+            await testcakeOrJoinDays();
             msg.react("🎂");
         },
         permissions: (msg) => Module.config.adminId.includes(msg.author.id)
@@ -72,9 +72,9 @@ Module
     .setClockwork(() => {
         try {
             return setInterval(celebrate, 60 * 60 * 1000);
-        } catch (e) { u.errorHandler(e, "Birthday Clockwork Error"); }
+        } catch (e) { u.errorHandler(e, "cakeOrJoinDay Clockwork Error"); }
     }).addCommand({
-        name: "birthday",
+        name: "cakeOrJoinDay",
         description: "Let us know when to celebrate you",
         syntax: "Month/Day", hidden: true,
         process: async (msg, suffix) => {
@@ -109,25 +109,25 @@ Module
         name: "cakeday",
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
-            let birthdayDate = (interaction.options.get("date")) ? (interaction.options.get("date")).value.trim().replace(/<+.*>\s*/gm, "") : null
+            let cakeOrJoinDayDate = (interaction.options.get("date")) ? (interaction.options.get("date")).value.trim().replace(/<+.*>\s*/gm, "") : null
             let target = interaction.options.getMember("target")
-            if (birthdayDate) {
-                console.log(`"${birthdayDate}"`);
+            if (cakeOrJoinDayDate) {
+                console.log(`"${cakeOrJoinDayDate}"`);
                 try {
-                    let bd = new Date(birthdayDate);
+                    let bd = new Date(cakeOrJoinDayDate);
                     if (bd == 'Invalid Date') {
                         interaction.reply({ content: "I couldn't understand that date. Please use Month Day format (e.g. Apr 1 or 4/1).", ephemeral: true });
                         return;
                     } else {
                         let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-                        birthdayDate = months[bd.getMonth()] + " " + bd.getDate();
-                        let birthdayUpdateTarget = interaction.member
+                        cakeOrJoinDayDate = months[bd.getMonth()] + " " + bd.getDate();
+                        let cakeOrJoinDayUpdateTarget = interaction.member
                         if (target && (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.BotMaster) || interaction.member.roles.cache.has(snowflakes.roles.Whisper) || interaction.member.roles.cache.has(snowflakes.roles.SoaringWings))) {
-                            birthdayUpdateTarget = target.id  
+                            cakeOrJoinDayUpdateTarget = target.id  
                         } else if (target && target != interaction.member) {
                             return interaction.reply({ content: "You don't have permission to do that", ephemeral: true });
                         }
-                        await db.User.update(Module, { userID: birthdayUpdateTarget, cakeDay: birthdayDate })
+                        await db.User.updateCakeDay(Module, cakeOrJoinDayUpdateTarget, cakeOrJoinDayDate);
                         return interaction.reply({ content: "🎂", ephemeral: true });
                     }
                 } catch (e) {
@@ -136,7 +136,7 @@ Module
                     throw e;
                     return;
                 }
-            } else if (target && !birthdayDate) {
+            } else if (target && !cakeOrJoinDayDate) {
                 let targetBd = await db.User.get(target.id)
                 if(!targetBd) targetBd = await db.User.new(Module, target.id);
                 targetBd = targetBd.cakeDay

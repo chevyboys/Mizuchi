@@ -5,12 +5,12 @@
         {
             "type": 3,
             "name": "date",
-            "description": "the \"[month]/[day]\" of when your birthday is"
+            "description": "the \"[month]/[day]\" of when your cakeDay is"
         },
         {
             "type": 6,
             "name": "target",
-            "description": "see when this person's cake day is. Admins can use both date and target to set someone's birthday"
+            "description": "see when this person's cake day is. Admins can use both date and target to set someone's cakeDay"
         }
     ]
 }
