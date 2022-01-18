@@ -116,12 +116,9 @@ Module
                 let now = new Date(Date.now());
                 //return new Date(`${ userDbObj.cakeDay } ${ now.getFullYear() }`) > now;
                 let sortedUsers = users.filter(u => new Date(`${u.cakeDay} ${now.getFullYear()}`) > now).sort((a, b) => {
-                    if (new Date(`${a.cakeDay} ${now.getFullYear()}`) > new Date(`${b.cakeDay} ${now.getFullYear()}`)) {
-                        return -1;
-                    } else if (new Date(`${a.cakeDay} ${now.getFullYear()}`) < new Date(`${b.cakeDay} ${now.getFullYear()}`)) {
-                        return 1;
-                    }
-                    else return 0;
+                    let aCake = new Date(`${a.cakeDay} ${now.getFullYear()}`);
+                    let bCake = new Date(`${b.cakeDay} ${now.getFullYear()}`)
+                    return bCake - aCake;
                 })
 
                 let upcomingCakeUsers = sortedUsers.slice(0, 5).map(user => `<@${user.userID}> - ${user.cakeDay}`).join("\n")
