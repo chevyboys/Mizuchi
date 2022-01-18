@@ -5,18 +5,21 @@
     "earthTemple": "",
     "faq": "",
     "general": "",
+    "introductions": "",
     "modRequests": "",
+    "roles": "",
+    "rules": "",
     "transfer": ""
   },
   "emoji": {
     "messageContextMenu": {
-      "bookmark": "🔖",
-      "kesterBomb": "💣",
-      "pin": "📌",
-      "spoiler": "🤫"
+      "bookmark": "",
+      "kesterBomb": "",
+      "pin": "",
+      "spoiler": ""
     },
-    "upDawn": "⬆",
-    "unDawn": "↩"
+    "upDawn": "",
+    "unDawn": ""
   },
   "guilds": {
     "PrimaryServer": "",
@@ -26,6 +29,7 @@
   "roles": {
     "BotMaster": "",
     "Admin": "",
+    "CakeDay": "",
     "SoaringWings": "",
     "Whisper": "",
     "WorldMaker": "",

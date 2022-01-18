@@ -54,19 +54,7 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
     ),
   ];
   async function modRequestEmbed(message, interaction, user) {
-    let requestingUser = user ? message.guild.members.cache.get(user.id) || interaction.member : interaction.member;
-    let embed = u.embed({ color: 0xF0004C, author: message.member, timestamp: (message.editedAt ?? message.createdAt) })
-      .setTitle(`${modRequestFunctionName} request by ` + `${requestingUser.displayName}`)
-      .setColor(0xF0004C)
-      .setTimestamp()
-      .setAuthor(message.member.displayName + " " + modRequestFunctionEmoji, message.member.user.displayAvatarURL())
-      .setDescription(message.cleanContent)
-      .addField(`${modRequestFunctionName} requested by `, requestingUser.displayName)
-      .addField("Channel", message.channel.toString())
-      .addField("Jump to Post", `[Original Message](${message.url})`);
-    if (message.attachments?.size > 0)
-      embed.setImage(message.attachments?.first()?.url);
-    return embed;
+    u.modRequestEmbed(modRequestFunctionName, message, interaction, user, modRequestFunctionEmoji)
   }
 
   async function modRequestCard(message, interaction, user) {
