@@ -34,18 +34,20 @@ async function testcakeOrJoinDays(guild) {
             try {
                 let date = moment(cakeOrJoinDayPeep.cakeDay);
                 let member = await guild.members.cache.get(cakeOrJoinDayPeep.userID);
-
+                let sendString;
                 if (date && (date.month() == curDate.month()) && (date.date() == curDate.date())) {
                     let join = moment(member.joinedAt).subtract(0, "days");
                     if (join && (join.month() == curDate.month()) && (join.date() == curDate.date()) && (join.year() < curDate.year())) {
                         let years = curDate.year() - join.year();
                         try {
 
-                            guild.channels.cache.get(snowflakes.channels.general).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
+                           sendString = `${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`;
 
                         } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
                     }
-                    await guild.channels.cache.get(snowflakes.channels.general).send(`:birthday: :confetti_ball: :tada: Happy Cake Day, ${member}! :tada: :confetti_ball: :birthday:`);
+                    sendString = `:birthday: :confetti_ball: :tada: Happy Cake Day, ${member}!` + sendString + `:tada: :confetti_ball: :birthday:`
+                    await guild.channels.cache.get(snowflakes.channels.general).send(sendString);
+
                     u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.CakeDay);
                 }
                 else if (member.roles.cache.has(snowflakes.roles.CakeDay)) {
