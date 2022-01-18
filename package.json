@@ -14,6 +14,7 @@
   "license": "MIT",
   "homepage": "https://github.com/Gaiwecoor/icarus5#readme",
   "dependencies": {
+    "@dice-roller/rpg-dice-roller": "^5.1.0",
     "@discordjs/rest": "^0.1.0-canary.0",
     "augurbot": "github:gaiwecoor/augurbot#dev",
     "axios": "^0.21.1",
