@@ -6,12 +6,13 @@ let hasBeenInitialized = false;
 const con = mysql.createConnection(config.mySQL);
 const Augur = require("augurbot")
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-const days = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"]
+const days = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"]
 
 function cleanString(str) {
     return str.replace(/[\W_]+/g, " ");;
 }
-function assertIsSnowflake(snowflake) {
+async function assertIsSnowflake(snowflake) {
+    await snowflake;
     let discordEpoch = Date.parse("01 Jan 2015 00:00:00 GMT");
     let timestamp = new Date(Discord.SnowflakeUtil.timestampFrom(snowflake))
     if (!/^\d+$/.test(snowflake) || timestamp <= discordEpoch || timestamp > Date.now()) {
@@ -22,21 +23,20 @@ function assertIsSnowflake(snowflake) {
  * @param {string} string the string to check if it is in fact a cake day
 */
 function assertIsCakeDay(string) {
-    if (string.length == 6) {
+    if (string.length == 6 || string.length == 5 || string.length == 7) {
         let parts = string.split(" ");
-        if (parts.length == 2 && months.has(parts[0].replace(" ", "")) && days.has(parts[1].replace(" ", ""))) {
+        if (parts.length == 2 && months.includes(parts[0].replace(" ", "")) && days.includes(parts[1].replace(" ", ""))) {
             return true
         }
     }
-    return false
+    throw (string + ":" + JSON.stringify(string) + " is not a valid CakeDay")
 }
-
-function parseuserID(user) {
-    let userID = user.userID?.user?.id || user.userID?.userId || user.id || user.userID || user.Id || user;
+function parseUserID(user) {
+    let userID = user.id || user.userID?.user?.id || user.userID?.userId || user.userID || user.Id || user;
     if (!assertIsSnowflake(userID)) {
-        throw "INVALD DISCORD ID at Database.ParseUserID: " + JSON.stringify(user);
+        reject("INVALD DISCORD ID at Database.parseUserID: " + JSON.stringify(user));
     }
-    return userID;
+    else return userID;
 }
 
 let privateDataBaseActions = {
@@ -51,10 +51,13 @@ let privateDataBaseActions = {
                  * @param {number} [userDataBaseObject.totalXP] - the XP the user has in total
                  */
         update: async (Module, userDataBaseObject) => {
-            let userID = parseuserID(userDataBaseObject);
+            let userID = parseUserID(userDataBaseObject);
             let user = await DataBaseActions.User.get(userID)
             if (!user) {
                 user = await DataBaseActions.User.new(Module, userID);
+            }
+            if (user.roles && Array.isArray(user.roles)) {
+                user.roles = JSON.stringify(user.roles)
             }
             //only set prooperties that we already have in the database as a colum. If not specified, leave it the same.
             let query = `UPDATE users SET `
@@ -69,6 +72,7 @@ let privateDataBaseActions = {
 
                 }
             }
+
             query = query.slice(0, -1) + ` WHERE userID=${con.escape(userID)}`;
             console.log("User Update SQL command '" + query + "'")
             return new Promise((fulfill, reject) => {
@@ -88,10 +92,11 @@ let privateDataBaseActions = {
 let DataBaseActions = {
     User: {
         /** gets all the info a database has about a user, and returns it as a DataBaseUser object
-         * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userID - The ID of the user to find, or an object that has an ID;
+         * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userIdResolvable - The ID of the user to find, or an object that has an ID;
          */
-        get: (userID) => {
-            userID = parseuserID(userID);
+        get: async (userIdResolvable) => {
+            await userIdResolvable;
+            let userID = await parseUserID(userIdResolvable);
 
             return new Promise((fulfill, reject) => {
                 con.query("SELECT * FROM users WHERE userID=" + con.escape(userID), function (error, result) {
@@ -123,7 +128,7 @@ let DataBaseActions = {
          * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userID - The ID of the user to find, or an object that has an ID;
          */
         new: async (Module, userID) => {
-            userID = parseuserID(userID);
+            userID = parseUserID(userID);
             let exists = await DataBaseActions.User.get(userID)
             if (exists != null) return exists;
             else {
@@ -136,7 +141,7 @@ let DataBaseActions = {
                     let newMember = {
                         userID: userID,
                         username: username,
-                        cakeDay: assertIsCakeDay(cakeDay) ? cakeDay : null,
+                        cakeDay: assertIsCakeDay(cakeDay)? cakeDay : null,
                         currentXP: 0,
                         totalXP: 0,
                         roles: roles
@@ -158,8 +163,8 @@ let DataBaseActions = {
                 await privateDataBaseActions.User.update(Module, { id: guildMember.id, roles: JSON.stringify(guildMember.roles.cache.map(r => assertIsSnowflake(r.id) ? r.id : null)) })
             }
         },
-        updateCakeDay: async (Module, userID, cakeDay) => {
-            userID = parseuserID(userID) ? parseuserID : null;
+        updateCakeDay: async (Module, userIdResolvable, cakeDay) => {
+            userID = parseUserID(userIdResolvable) || null;
             await privateDataBaseActions.User.update(Module, { id: userID, cakeDay: assertIsCakeDay(cakeDay) ? cakeDay : null })
         }
     },

@@ -121,7 +121,7 @@ Module
                     } else {
                         let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
                         cakeOrJoinDayDate = months[bd.getMonth()] + " " + bd.getDate();
-                        let cakeOrJoinDayUpdateTarget = interaction.member
+                        let cakeOrJoinDayUpdateTarget = interaction.member.id
                         if (target && (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.BotMaster) || interaction.member.roles.cache.has(snowflakes.roles.Whisper) || interaction.member.roles.cache.has(snowflakes.roles.SoaringWings))) {
                             cakeOrJoinDayUpdateTarget = target.id  
                         } else if (target && target != interaction.member) {

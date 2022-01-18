@@ -95,6 +95,17 @@ const Module = new Augur.Module()
       msg.react("👌").catch(u.noop);
     },
     permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+  }).addCommand({
+    name: "dbgetall",
+    category: "Bot Admin",
+    hidden: true,
+    description: "This command loops through all members in the guild and attempts to add them to the database",
+    parseParams: true,
+    process: async (msg) => {
+      u.clean(msg, 0);
+      return msg.guild.members.cache.map(m => db.User.new(Module, m.id));
+    },
+    permissions: (msg) => Module.config.adminId.includes(msg.author.id)
   })
 
   .addEvent("ready", () => {

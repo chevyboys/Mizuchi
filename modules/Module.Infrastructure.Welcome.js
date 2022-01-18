@@ -66,7 +66,7 @@ const Module = new Augur.Module()
           "Greetings"
         ];
         let info1 = [
-          "I hope you brought pizza! \n Take a look at",
+          "I hope you brought pizza! \nTake a look at",
           "Take a peak at",
           "Take a look at",
           "Check out",
