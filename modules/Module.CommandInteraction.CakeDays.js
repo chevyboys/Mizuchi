@@ -115,10 +115,10 @@ Module
                 let users = await db.User.getMost();
                 let now = new Date(Date.now());
                 //return new Date(`${ userDbObj.cakeDay } ${ now.getFullYear() }`) > now;
-                let sortedUsers = users.filter(u => new Date(`${u.cakeDay} ${now.getFullYear()}`) > now).sort((a, b) => {
+                let sortedUsers = await users.filter(u => new Date(`${u.cakeDay} ${now.getFullYear()}`) > now).sort((a, b) => {
                     let aCake = new Date(`${a.cakeDay} ${now.getFullYear()}`);
                     let bCake = new Date(`${b.cakeDay} ${now.getFullYear()}`)
-                    return bCake - aCake;
+                    return aCake - bCake;
                 })
 
                 let upcomingCakeUsers = sortedUsers.slice(0, 5).map(user => `<@${user.userID}> - ${user.cakeDay}`).join("\n")
