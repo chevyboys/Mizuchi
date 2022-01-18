@@ -117,9 +117,9 @@ Module
                 //return new Date(`${ userDbObj.cakeDay } ${ now.getFullYear() }`) > now;
                 let sortedUsers = users.filter(u => new Date(`${u.cakeDay} ${now.getFullYear()}`) > now).sort((a, b) => {
                     if (new Date(`${a.cakeDay} ${now.getFullYear()}`) > new Date(`${b.cakeDay} ${now.getFullYear()}`)) {
-                        return -1;
-                    } else if (new Date(`${a.cakeDay} ${now.getFullYear()}`) < new Date(`${b.cakeDay} ${now.getFullYear()}`)) {
                         return 1;
+                    } else if (new Date(`${a.cakeDay} ${now.getFullYear()}`) < new Date(`${b.cakeDay} ${now.getFullYear()}`)) {
+                        return -1;
                     }
                     else return 0;
                 })
