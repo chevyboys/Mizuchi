@@ -123,7 +123,17 @@ let DataBaseActions = {
                 });
             });
         },
-
+        //Much more efficient then getAll()
+        getMost: () => {
+            let query = "SELECT * FROM `users` WHERE LENGTH(`roles`) > 25"
+            return new Promise((fulfill, reject) => {
+                con.query(query, function (error, result) {
+                    if (error) reject(error);
+                    else fulfill(JSON.parse(JSON.stringify(result)));
+                    console.log(result);
+                });
+            });
+        },
         /**
          * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userID - The ID of the user to find, or an object that has an ID;
          */

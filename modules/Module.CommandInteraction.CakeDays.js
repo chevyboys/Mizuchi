@@ -29,7 +29,7 @@ async function testcakeOrJoinDays(guild) {
             ":cake: "
         ];
 
-        let cakeOrJoinDayPeeps = (await db.User.getAll()).filter(user => user.cakeDay != null);
+        let cakeOrJoinDayPeeps = (await db.User.getMost()).filter(user => user.cakeDay != null);
         for (let cakeOrJoinDayPeep of cakeOrJoinDayPeeps) {
             try {
                 let date = moment(cakeOrJoinDayPeep.cakeDay);
@@ -112,10 +112,10 @@ Module
             } else {
                 let userCake = await db.User.get(interaction.member.id)
 
-                let users = await db.User.getAll();
+                let users = await db.User.getMost();
                 let now = new Date(Date.now());
                 //return new Date(`${ userDbObj.cakeDay } ${ now.getFullYear() }`) > now;
-                users.filter(u => new Date(`${u.cakeDay} ${now.getFullYear()}`) > now).sort((a, b) => {
+                let sortedUsers = users.filter(u => new Date(`${u.cakeDay} ${now.getFullYear()}`) > now).sort((a, b) => {
                     if (new Date(`${a.cakeDay} ${now.getFullYear()}`) > new Date(`${b.cakeDay} ${now.getFullYear()}`)) {
                         return -1;
                     } else if (new Date(`${a.cakeDay} ${now.getFullYear()}`) < new Date(`${b.cakeDay} ${now.getFullYear()}`)) {
@@ -124,7 +124,7 @@ Module
                     else return 0;
                 })
 
-                let upcomingCakeUsers = users.slice(0, 5).map(user => `<@${user.userID}> - ${user.cakeDay}`).join("\n")
+                let upcomingCakeUsers = sortedUsers.slice(0, 5).map(user => `<@${user.userID}> - ${user.cakeDay}`).join("\n")
                 let userCakeString;
                 if (!userCake) {
                     userCakeString = "You haven't told me when your cakeDay is yet. To set it, use '/cakeday date'"
