@@ -19,7 +19,7 @@ const Module = new Augur.Module()
       let bot = member.client;
 
       let user = await db.User.get(member.id);
-      let general = guild.channels.cache.get(snowflakes.channels.general); // #general
+      let general = guild.channels.cache.get(snowflakes.channels.introductions); // #introductions
       let welcomeChannel = guild.channels.cache.get(snowflakes.channels.introductions); // #welcome
       let modLogs = guild.channels.cache.get(snowflakes.channels.modRequests); // #mod-logs
 
@@ -90,7 +90,7 @@ const Module = new Augur.Module()
       modLogs.send({ content: "User joined", embeds: [embed] });
 
       if (!member.user.bot)
-        general.send(welcomeString);
+        //general.send(welcomeString);
         u.noop();
 
     } catch (e) { u.errorHandler(e, "New Member Add"); }
