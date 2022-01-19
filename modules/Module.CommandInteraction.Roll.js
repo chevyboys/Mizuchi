@@ -3,13 +3,27 @@ const Augur = require("augurbot"),
     snowflakes = require('../config/snowflakes.json');
 const { DiceRoll } = require('@dice-roller/rpg-dice-roller');
 const Discord = require("discord.js");
+const Registrar = require("../utils/Utils.CommandRegistrar");
 let helpURL = "https://dice-roller.github.io/documentation/guide/notation/"
 
+/**
+ * Trims a field to a specific length
+ * @param {string} field 
+ * @param {number} maxLength 
+ * @returns the field trimmed to the specified length, with a ... on the end if the feild needed to be trimmed
+ */
+function trimField(field, maxLength) {
+    let preparedField = field.trim()
+    if (preparedField.length > maxLength) {
+        trimmedField = preparedField.slice(0, maxLength - 3) + "..."
+    } else trimmedField = preparedField;
+    return trimmedField;
+}
 
 //Functions to do with building the Dice Roll help UI
 let diceEmbed = (titleModifier) => {
     let embed = u.embed({}, true)
-        .setAuthor({ name: "Dice Roll " + (titleModifier || ""), iconURL: "https://www.freeiconspng.com/uploads/black-dice-d20-icon-15.png", url: helpURL })
+        .setAuthor({ name: trimField("Dice Roll " + (titleModifier || ""), 255), iconURL: "https://www.freeiconspng.com/uploads/black-dice-d20-icon-15.png", url: helpURL })
         .setColor("#4682B4")
         .setURL(helpURL)
         .setFooter({ text: "For more information and more advanced rolling options, see " + helpURL })
@@ -58,7 +72,7 @@ let mathRollHelpExampleString = () => {
     let validMathFormated = validMath.map(example => exampleFormater(example))
     let validMathString = validMathFormated.join("") + "\n"
 
-    return  validMathString + `\`${["abs", "ceil", "cos", "exp", "floor", "log", "max", "min", "pow", "round", "sign", "sin", "sqrt", "tan"].join("()`, `")}()\``
+    return validMathString + `\`${["abs", "ceil", "cos", "exp", "floor", "log", "max", "min", "pow", "round", "sign", "sin", "sqrt", "tan"].join("()`, `")}()\``
 }
 
 let replyWithRollHelp = (interaction) => {
@@ -71,59 +85,101 @@ let replyWithRollHelp = (interaction) => {
     })
 
 }
+/**
+ * Takes a discord interaction with the dice string option or "help", and returns a random result.
+ * @param {Discord.Interaction} interaction 
+ * @param {boolean} [hiddenResponse = false] Set to true if you want the reaction to be ephemeral
+ * @returns null
+ */
 
+let rollProcess = (interaction, hiddenResponse = false) => {
+    {
+        let diceString = interaction?.options?.get("dice")?.value;
+        if (!diceString || diceString == "" || diceString.toLowerCase() == "help") {
+            return replyWithRollHelp(interaction)
+        } else {
+            try {
+                let diceRoll = new DiceRoll(diceString)
+                diceRoll.notation
+                let DiceResultString = "";
+                let DiceResultStringPrefix = "```"
+                let embed = diceEmbed(diceRoll.notation)
+                switch (diceRoll.total) {
+                    case diceRoll.minTotal:
+                        DiceResultStringPrefix += "diff\n- ";
+                        embed.setColor("#FF0000")
+                        break;
+                    case diceRoll.maxTotal:
+                        DiceResultStringPrefix += "css\n";
+                        embed.setColor("#00FF00")
+                        break;
+
+                    default:
+                        break;
+                }
+                let DiceResultFormattingLength = 4096 - (DiceResultStringPrefix + 3)
+                DiceResultString = DiceResultStringPrefix + trimField(diceRoll.total, DiceResultFormattingLength) + "```";
+
+                embed.setDescription(DiceResultString)
+                embed.setFooter({ text: trimField(`${diceRoll.output.replace(`${diceRoll.notation}:`, "")}`, 2048) })
+                interaction.reply({
+                    embeds: [embed],
+                    ephemeral: hiddenResponse
+                })
+
+
+            } catch (error) {
+                if (error.toString().indexOf("SyntaxError: Expected") > -1) {
+                    return replyWithRollHelp(interaction)
+                }
+                else throw error;
+            }
+        }
+    }
+}
 
 
 const Module = new Augur.Module()
     .addInteractionCommand({
         name: "roll",
         guildId: snowflakes.guilds.PrimaryServer,
-        /**
-         * Takes a discord interaction with the dice string option or "help", and returns a random result
-         * @param {Discord.interaction} interaction 
-         */
         process: async (interaction) => {
-            let diceString = interaction?.options?.get("dice")?.value;
-            if (!diceString || diceString == "" || diceString.toLowerCase() == "help") {
-                return replyWithRollHelp(interaction)
-            } else {
-                try {
-                    let diceRoll = new DiceRoll(diceString)
-                    diceRoll.notation
-                    let DiceResultString = "";
-                    let DiceResultStringPrefix = "```"
-                    let embed = diceEmbed(diceRoll.notation)
-                    switch (diceRoll.total) {
-                        case diceRoll.minTotal:
-                            DiceResultStringPrefix += "diff\n- ";
-                            embed.setColor("#FF0000")
-                            break;
-                        case diceRoll.maxTotal:
-                            DiceResultStringPrefix += "css\n";
-                            embed.setColor("#00FF00")
-                            break;
-
-                        default:
-                            break;
-                    }
-                    DiceResultString = DiceResultStringPrefix + diceRoll.total + "```";
-
-                    embed.setDescription(DiceResultString)
-                    embed.setFooter({ text: `${diceRoll.output.replace(`${diceRoll.notation}:`, "")}` })
-                    interaction.reply({
-                        embeds: [embed],
-                    })
-
-
-                } catch (error) {
-                    if (error.toString().indexOf("SyntaxError: Expected") > -1) {
-                        return replyWithRollHelp(interaction)
-                    }
-                    else throw error;
-                }
-            }
+            rollProcess(interaction);
+        }
+    }).addInteractionCommand({
+        name: "gmroll",
+        guildId: snowflakes.guilds.PrimaryServer,
+        process: async (interaction) => {
+            rollProcess(interaction, true);
         }
     });
+
+//Register commands
+let commands = [
+    new Registrar.SlashCommandBuilder()
+        .setName("roll")
+        .setDescription("roles a dice of any reasonable size")
+        .addStringOption(option =>
+            option
+                .setName("dice")
+                .setDescription("The dice you want to roll. If you aren't sure how, instead enter 'help'")
+                .setRequired(true)
+        ),
+    new Registrar.SlashCommandBuilder()
+        .setName("gmroll")
+        .setDescription("roles a dice of any reasonable size")
+        .addStringOption(option =>
+            option
+                .setName("dice")
+                .setDescription("The dice you want to roll in private. If you aren't sure how, instead enter 'help'")
+                .setRequired(true)
+        ),
+]
+
+Module.addEvent("ready", async () => {
+    await Registrar.registerGuildCommands(Module, commands)
+});
+
 
 
 module.exports = Module;
