@@ -16,7 +16,14 @@ function IsJsonString(str) {
     return true;
 }
 
+let hasRegisteredCommandsThisRun = false
+
 const registrar = {
+    getCommandId: async (Module, commandName) => {
+        let guild = await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
+        guild.commands.cache.find((k, v) => v.name == commandName)
+
+    },
     /**
      * Registers a guild application command to the primary guild
      * @param {Augur.Module} Module The Augur Module that is registering the commands
@@ -25,6 +32,9 @@ const registrar = {
      */
 
     registerGuildCommands: async (Module, commandArray) => {
+        // Register API version with the token
+        const rest = new REST({ version: '9' }).setToken(Module.config.token);
+
         let notJsonCommandArray;
         let parsedCommandArray;
         //ensure object, rather than JSON string
@@ -39,16 +49,14 @@ const registrar = {
             if (commandArray instanceof Discord.ApplicationCommand) {
                 parsedCommandArray = [notJsonCommandArray];
             } else parsedCommandArray = notJsonCommandArray;
-        }
+        } else parsedCommandArray = notJsonCommandArray;
         //parsedCommandArray should now be an array, rather than a JSON string or individual object. Now we can start registering commands:
-        let guild = await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
-        let primaryGuildCommands = await guild.commands.fetch();
-        let commandMap = parsedCommandArray.map(command => command.toJSON());
-        // Register API version with the token
-        let rest = new REST({ version: '9' }).setToken(Module.config.token);
-
         // Push the commands to discord (GUILD specific)
-        let registeredCommands = await rest.put(Routes.applicationGuildCommands(Module.client.user.id, snowflakes.guilds.PrimaryServer), { body: commands });
+        let registeredCommands = []
+        for (const command of parsedCommandArray) {
+            command.toJSON()
+            registeredCommands.push(await rest.post(Routes.applicationGuildCommands(Module.client.user.id, snowflakes.guilds.PrimaryServer), { body: command }));
+        } 
         return registeredCommands;
     },
     /**

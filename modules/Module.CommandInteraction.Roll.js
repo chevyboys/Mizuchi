@@ -13,7 +13,7 @@ let helpURL = "https://dice-roller.github.io/documentation/guide/notation/"
  * @returns the field trimmed to the specified length, with a ... on the end if the feild needed to be trimmed
  */
 function trimField(field, maxLength) {
-    let preparedField = field.trim()
+    let preparedField = field.toString().trim()
     if (preparedField.length > maxLength) {
         trimmedField = preparedField.slice(0, maxLength - 3) + "..."
     } else trimmedField = preparedField;
@@ -131,28 +131,14 @@ let rollProcess = (interaction, hiddenResponse = false) => {
             } catch (error) {
                 if (error.toString().indexOf("SyntaxError: Expected") > -1) {
                     return replyWithRollHelp(interaction)
+                } else if(error.toString().indexOf("RangeError: qty must be between 1 and 999") > -1) {
+                    return interaction.reply({content: "I only have 999 dice sets. I can't roll more dice than that", ephemeral:true})
                 }
                 else throw error;
             }
         }
     }
 }
-
-
-const Module = new Augur.Module()
-    .addInteractionCommand({
-        name: "roll",
-        guildId: snowflakes.guilds.PrimaryServer,
-        process: async (interaction) => {
-            rollProcess(interaction);
-        }
-    }).addInteractionCommand({
-        name: "gmroll",
-        guildId: snowflakes.guilds.PrimaryServer,
-        process: async (interaction) => {
-            rollProcess(interaction, true);
-        }
-    });
 
 //Register commands
 let commands = [
@@ -175,10 +161,30 @@ let commands = [
                 .setRequired(true)
         ),
 ]
-
+const Module = new Augur.Module()
 Module.addEvent("ready", async () => {
-    await Registrar.registerGuildCommands(Module, commands)
+    commandResponse = await Registrar.registerGuildCommands(Module, commands)
 });
+
+
+//Run commands
+Module.addInteractionCommand({
+        name: "roll",
+        guildId: snowflakes.guilds.PrimaryServer,
+        //commandId: async () => await Registrar.getCommandId(Module, "roll"),
+        process: async (interaction) => {
+            rollProcess(interaction);
+        }
+    }).addInteractionCommand({
+        name: "gmroll",
+        guildId: snowflakes.guilds.PrimaryServer,
+        //commandId: async () => await Registrar.getCommandId(Module, "gmroll"),
+        process: async (interaction) => {
+            rollProcess(interaction, true);
+        }
+    });
+
+
 
 
 
