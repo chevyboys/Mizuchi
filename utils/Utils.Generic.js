@@ -136,9 +136,10 @@ const utils = {
   /**
    * Returns a MessageEmbed with basic values preset, such as color and timestamp.
    * @param {any} data The data object to pass to the MessageEmbed constructor.
+   * @param {boolean} [suppressTimeStamp = false] 
    *   You can override the color and timestamp here as well.
    */
-  embed: function (data = {}) {
+  embed: function (data = {}, suppressTimeStamp = false) {
     if (data?.author instanceof Discord.GuildMember) {
       data.author = {
         name: data.author.displayName,
@@ -152,7 +153,7 @@ const utils = {
     }
     const embed = new Discord.MessageEmbed(data);
     if (!data?.color) embed.setColor(config.color);
-    if (!data?.timestamp) embed.setTimestamp();
+    if (!data?.timestamp && !suppressTimeStamp) embed.setTimestamp();
     return embed;
   },
   /**

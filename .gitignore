@@ -17,3 +17,4 @@ faq/*.json
 faq/*
 package-lock.json
 config/snowflakes.json
+package-lock.json

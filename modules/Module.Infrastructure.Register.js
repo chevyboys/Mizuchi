@@ -82,7 +82,11 @@ const Module = new Augur.Module()
         rest = new REST({ version: '9' }).setToken(Module.config.token);
 
         // Push the commands to discord (GUILD specific)
-        tt = await rest.put(Routes.applicationGuildCommands(Module.client.user.id, snowflakes.guilds.PrimaryServer), { body: commands });
+        let tt = []
+        for (const command of commands) {
+            tt.push(await rest.post(Routes.applicationGuildCommands(Module.client.user.id, snowflakes.guilds.PrimaryServer), { body: command }));
+        } 
+    
 
         // Restrict transfer command
         await restrict(tt[1], [snowflakes.roles.Admin, snowflakes.roles.WorldMaker])
