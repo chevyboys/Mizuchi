@@ -150,7 +150,7 @@ const Module = new Augur.Module()
       return setInterval(async () => {
         //SQL will time out if we don't send a keep alive. In order to do this, we will get the bot from the database, and have it overwrite its own entry with identical data
         let myself = await db.User.get(Module.client.user.id);
-        await db.User.updateCakeDay(Module, myself.userID, myself.cakeDay);
+        await db.User.updateCakeDay(myself.userID, myself.cakeDay);
       }, hours * secondsInAnHour * 1000);
     } catch (error) { u.errorHandler(error, "Blog Clockwork"); }
   })
