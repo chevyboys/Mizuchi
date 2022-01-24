@@ -7,6 +7,8 @@ const con = mysql.createConnection(config.mySQL);
 const Augur = require("augurbot")
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 const days = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"]
+let client;
+
 
 function cleanString(str) {
     return str.replace(/[\W_]+/g, " ");;
@@ -39,22 +41,60 @@ function parseUserID(user) {
     else return userID;
 }
 
+
+/**
+ * @member 
+ */
+class DbUserObject {
+    userID = "";
+    username = "";
+    cakeDay = "";
+    currentXP = 0;
+    totalXP = 0;
+    roles = [];
+
+    /**
+     * Creates a DbUserObject
+     * @param {Object} constructionObj the basic construction object
+     * @param {Discord.Snowflake} constructionObj.userID the user or member id of the person to store
+     * @param {string} constructionObj.username //a cleaned version of the username. Stored only for convinence, should not be referenced.
+     * @param {string} constructionObj.cakeDay // A cakeDay string e.g. Jan 01
+     * @param {number} [constructionObj.currentXP = 0] // Does nothing currently. Will be ignored
+     * @param {number} [constructionObj.totalXP = 0] // Does nothing currently. Will be ignored
+     * @param {Discord.Role.Id[]} constructionObj.roles // An array of the roles the discord member has
+     */
+
+    constructor(constructionObj) {
+        this.userID = parseUserID(constructionObj.userID);
+        this.username = cleanString(constructionObj.username);
+        this.cakeDay = assertIsCakeDay(constructionObj.cakeDay) ? constructionObj.cakeDay : null;
+        this.currentXP = 0;
+        this.totalXP = 0;
+        let parsedRoles;
+        if(typeof constructionObj.roles === 'string' || constructionObj.roles instanceof String) {
+            parsedRoles = JSON.parse(constructionObj.roles)
+        }
+        else parsedRoles = constructionObj.roles
+        this.roles = parsedRoles.map(r => r.id ? (assertIsSnowflake(r.id) ? r.id : null) : (assertIsSnowflake(r) ? r : null));
+    }
+}
+
 let privateDataBaseActions = {
     User: {
+        UserObject: DbUserObject,
         /**
                  * Update will find a user and update their records, or if the user doesn't exist, it will create them, then update them
-                 * @param {Augur.Module} Module - The Module this is being executed in. 
                  * @param {Object} userDataBaseObject - An object containing member variables named each collum you wish to change for the user, with the values equalling the new value.
                  * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userDataBaseObject.userID - The ID of the user to find, or an object that has an ID;
                  * @param {string} [userDataBaseObject.cakeDay] - the MM-DD formatted day to celebrate this person
                  * @param {number} [userDataBaseObject.currentXP] - the XP the user has in the current season
                  * @param {number} [userDataBaseObject.totalXP] - the XP the user has in total
                  */
-        update: async (Module, userDataBaseObject) => {
+        update: async (userDataBaseObject) => {
             let userID = parseUserID(userDataBaseObject);
             let user = await DataBaseActions.User.get(userID)
             if (!user) {
-                user = await DataBaseActions.User.new(Module, userID);
+                user = await DataBaseActions.User.new(userID);
             }
             if (user.roles && Array.isArray(user.roles)) {
                 user.roles = JSON.stringify(user.roles)
@@ -93,7 +133,8 @@ let DataBaseActions = {
     User: {
         /** gets all the info a database has about a user, and returns it as a DataBaseUser object
          * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userIdResolvable - The ID of the user to find, or an object that has an ID;
-         */
+         * @returns {DbUserObject} the database user object for the user, if it exists 
+        */
         get: async (userIdResolvable) => {
             await userIdResolvable;
             let userID = await parseUserID(userIdResolvable);
@@ -106,52 +147,65 @@ let DataBaseActions = {
                         console.log(JSON.stringify(user));
                         user.roles = JSON.parse(user.roles)
                         if (error) reject(error);
-                        else fulfill(user);
+                        else fulfill(new DbUserObject(user));
                         console.log(result);
                     }
 
                 });
             });
         },
+        /** gets all the info a database has about all users, and returns it as a DataBaseUser object array
+         * @returns {DbUserObject[]} the database user objects if they exist
+        */
         getAll: () => {
             let query = `SELECT * FROM users`
             return new Promise((fulfill, reject) => {
                 con.query(query, function (error, result) {
                     if (error) reject(error);
-                    else fulfill(JSON.parse(JSON.stringify(result)));
-                    console.log(result);
+                    else {
+                        let arrayOfUsers = JSON.parse(JSON.stringify(result));
+                        let returnableArray = arrayOfUsers.map(user => new DbUserObject(user));
+                        fulfill(returnableArray);
+                        console.log(returnableArray);
+                    }
                 });
             });
         },
-        //Much more efficient then getAll()
+        /** gets all the info a database has about all users who have at least one non-everyone role, and returns it as a DataBaseUser object array
+         * @returns {DbUserObject[]} the database user objects if they exist
+        */
         getMost: () => {
             let query = "SELECT * FROM `users` WHERE LENGTH(`roles`) > 25"
             return new Promise((fulfill, reject) => {
                 con.query(query, function (error, result) {
                     if (error) reject(error);
-                    else fulfill(JSON.parse(JSON.stringify(result)));
-                    console.log(result);
+                    else {
+                        let arrayOfUsers = JSON.parse(JSON.stringify(result));
+                        let returnableArray = arrayOfUsers.map(user =>  new DbUserObject(user));
+                        fulfill(returnableArray);
+                        console.log(returnableArray);
+                    }
                 });
             });
         },
         /**
          * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userID - The ID of the user to find, or an object that has an ID;
          */
-        new: async (Module, userID) => {
+        new: async (userID) => {
             userID = parseUserID(userID);
             let exists = await DataBaseActions.User.get(userID)
             if (exists != null) return exists;
             else {
                 return new Promise((fulfill, reject) => {
-                    let cakeDay = (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(userID).joinedAt;
-                    let username = cleanString(Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).displayName);
-                    let roles = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).roles.cache.map(r => assertIsSnowflake(r.id) ? r.id : null);
+                    let cakeDay = (client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(userID).joinedAt;
+                    let username = cleanString(client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).displayName);
+                    let roles = client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).roles.cache.map(r => assertIsSnowflake(r.id) ? r.id : null);
                     cakeDay = months[cakeDay.getMonth()] + " " + cakeDay.getDate();
 
                     let newMember = {
                         userID: userID,
                         username: username,
-                        cakeDay: assertIsCakeDay(cakeDay)? cakeDay : null,
+                        cakeDay: assertIsCakeDay(cakeDay) ? cakeDay : null,
                         currentXP: 0,
                         totalXP: 0,
                         roles: roles
@@ -168,17 +222,18 @@ let DataBaseActions = {
                 })
             };
         },
-        updateRoles: async (Module, guildMember) => {
+        updateRoles: async (guildMember) => {
             if (assertIsSnowflake(guildMember.id)) {
-                await privateDataBaseActions.User.update(Module, { id: guildMember.id, roles: JSON.stringify(guildMember.roles.cache.map(r => assertIsSnowflake(r.id) ? r.id : null)) })
+                return await privateDataBaseActions.User.update({ id: guildMember.id, roles: JSON.stringify(guildMember.roles.cache.map(r => assertIsSnowflake(r.id) ? r.id : null)) })
             }
         },
-        updateCakeDay: async (Module, userIdResolvable, cakeDay) => {
+        updateCakeDay: async (userIdResolvable, cakeDay) => {
             userID = parseUserID(userIdResolvable) || null;
-            await privateDataBaseActions.User.update(Module, { id: userID, cakeDay: assertIsCakeDay(cakeDay) ? cakeDay : null })
+            return await privateDataBaseActions.User.update({ id: userID, cakeDay: assertIsCakeDay(cakeDay) ? cakeDay : null })
         }
     },
-    init: () => {
+    init: (Module) => {
+        client = Module.client;
         if (!hasBeenInitialized) {
             con.connect(function (err) {
                 if (err) throw err;
