@@ -34,23 +34,22 @@ async function testcakeOrJoinDays(guild) {
             try {
                 let date = moment(cakeOrJoinDayPeep.cakeDay);
                 let member = await guild.members.cache.get(cakeOrJoinDayPeep.userID);
-                let sendString;
+                let sendString = "";
                 if (date && (date.month() == curDate.month()) && (date.date() == curDate.date())) {
-                    let join = moment(member.joinedAt).subtract(0, "days");
+                    let join = member ? moment(member.joinedAt).subtract(0, "days") : curDate;
                     if (join && (join.month() == curDate.month()) && (join.date() == curDate.date()) && (join.year() < curDate.year())) {
                         let years = curDate.year() - join.year();
                         try {
-
-                           sendString = `${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`;
+                            sendString = `**${cakeOrJoinDayPeep.username}** has been part of the server for ${years > 0 ? years : 1} ${(years > 1 ? "years" : "year")}! Glad you're with us!`;
 
                         } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
                     }
-                    sendString = `:birthday: :confetti_ball: :tada: Happy Cake Day, ${member}!` + sendString + `:tada: :confetti_ball: :birthday:`
+                    sendString = `:birthday: :confetti_ball: :tada: Happy Cake Day, **${cakeOrJoinDayPeep.username}**!` + sendString + `:tada: :confetti_ball: :birthday:`
                     await guild.channels.cache.get(snowflakes.channels.general).send(sendString);
 
-                    u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.CakeDay);
+                    if (member) u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.CakeDay);
                 }
-                else if (member.roles.cache.has(snowflakes.roles.CakeDay)) {
+                else if (member && member.roles.cache.has(snowflakes.roles.CakeDay)) {
                     u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.CakeDay, true);
                 }
             } catch (e) { u.errorHandler(e, "Birthay Send"); continue; }
@@ -61,7 +60,7 @@ async function testcakeOrJoinDays(guild) {
 
 Module
     .addCommand({
-        name: "happycakeOrJoinDay",
+        name: "happycakeday",
         description: "It's your cakeDay!?",
         syntax: "<@user>", hidden: true,
         process: async (msg) => {
@@ -97,7 +96,7 @@ Module
                         } else if (target && target != interaction.member) {
                             return interaction.reply({ content: "You don't have permission to do that", ephemeral: true });
                         }
-                        await db.User.updateCakeDay(Module, cakeOrJoinDayUpdateTarget, cakeOrJoinDayDate);
+                        await db.User.updateCakeDay(cakeOrJoinDayUpdateTarget, cakeOrJoinDayDate);
                         return interaction.reply({ content: "🎂", ephemeral: true });
                     }
                 } catch (e) {
@@ -108,9 +107,10 @@ Module
                 }
             } else if (target && !cakeOrJoinDayDate) {
                 let targetBd = await db.User.get(target.id)
-                if (!targetBd) targetBd = await db.User.new(Module, target.id);
+                if (!targetBd) targetBd = await db.User.new(target.id);
                 targetBd = targetBd.cakeDay
-                return interaction.reply({ content: `<@${target.id}>'s cake day is ${targetBd}`, ephemeral: true })
+                let targetName = (await interaction.guild.members.fetch(target.id)).displayName
+                return interaction.reply({ content: `${targetName}'s cake day is ${targetBd}`, ephemeral: true })
             } else {
                 let userCake = await db.User.get(interaction.member.id)
 
@@ -122,8 +122,7 @@ Module
                     let bCake = new Date(`${b.cakeDay} ${now.getFullYear()}`)
                     return aCake - bCake;
                 })
-
-                let upcomingCakeUsers = sortedUsers.slice(0, 5).map(user => `<@${user.userID}> - ${user.cakeDay}`).join("\n")
+                let upcomingCakeUsers = sortedUsers.slice(0, 5).map(user => `${user.username} - ${user.cakeDay}`).join("\n")
                 let userCakeString;
                 if (!userCake) {
                     userCakeString = "You haven't told me when your cakeDay is yet. To set it, use '/cakeday date'"
@@ -133,7 +132,7 @@ Module
                     .setTitle("Upcoming Cake Days:")
                     .setDescription("```" + userCakeString + "```" + upcomingCakeUsers)
                     .setColor("#ea596e");
-                interaction.reply({ embeds: [embed], ephemeral: true, allowedMentions: {parse: ['users']} });
+                interaction.reply({ embeds: [embed], ephemeral: true, allowedMentions: { parse: ['users'] } });
 
 
             }

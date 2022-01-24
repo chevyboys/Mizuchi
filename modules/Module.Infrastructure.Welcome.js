@@ -85,7 +85,7 @@ const Module = new Augur.Module()
         welcomeString = `${u.rand(welcome)}, ${member}! ${u.rand(info1)} <#${snowflakes.channels.rules}> ${u.rand(info2)}. ${u.rand(info3)}\n\nHead over to <#${snowflakes.channels.roles}> if you'd like to opt in to roles, and be sure to check out our FAQ and spoiler policy`;
         embed.setTitle(member.displayName + " has joined the server.");
 
-        db.User.new(Module, member);
+        db.User.new(member);
       }
       modLogs.send({ content: "User joined", embeds: [embed] });
 

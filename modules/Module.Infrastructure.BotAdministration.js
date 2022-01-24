@@ -111,7 +111,8 @@ const Module = new Augur.Module()
   .addEvent("ready", () => {
     //When the bot is fully online, fetch all the discord members, since it will only autofetch for small servers and we want them all.
     Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.fetch();
-    db.init();
+    //Connect to the DB as well, and set up the DB.utils file
+    db.init(Module);
   }).addEvent("guildMemberUpdate", async (oldMember, newMember) => {
     if (newMember.guild.id == snowflakes.guilds.PrimaryServer) {
       if (newMember.roles.cache.size > oldMember.roles.cache.size) {
@@ -139,6 +140,19 @@ const Module = new Augur.Module()
     } catch (e) {
       u.errorHandler(e, "Error in botAdmin.setInit.");
     }
+  })
+  //Database Keep alive
+  .setClockwork(() => {
+    const secondsInAMinute = 60
+    const secondsInAnHour = 60 * secondsInAMinute;
+    const hours = 6
+    try {
+      return setInterval(async () => {
+        //SQL will time out if we don't send a keep alive. In order to do this, we will get the bot from the database, and have it overwrite its own entry with identical data
+        let myself = await db.User.get(Module.client.user.id);
+        await db.User.updateCakeDay(Module, myself.userID, myself.cakeDay);
+      }, hours * secondsInAnHour * 1000);
+    } catch (error) { u.errorHandler(error, "Blog Clockwork"); }
   })
   .setUnload(() => true);
 
