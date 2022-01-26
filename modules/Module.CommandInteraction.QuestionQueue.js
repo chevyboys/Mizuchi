@@ -89,11 +89,11 @@ async function deleteQuestion(interaction, targetId) {
 
         } catch (error) {
             if (error.toString().indexOf("Unknown Message") > -1) {
-                u.errorLog("That question has been deleted")
+                u.errorHandler("That question has been deleted")
             }
         }
 
-        if (m) m.delete().catch(err => u.errorLog(`ERR: Insufficient permissions to delete messages.`));
+        if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
     }
 
 }
@@ -113,7 +113,7 @@ async function ask(interaction) {
         //Akn
         await interaction.react("👍");
         u.clean(interaction, 3);
-    } 
+    }
     if (askedRecently.has(interaction.user.id)) {
         interaction.reply({ content: "Wait a few hours before asking again. - <@" + interaction.user + ">\nYour question was: " + (interaction.options ? interaction.options.get("question").value : interaction.cleanContent), ephemeral: true });
     } else {
@@ -123,7 +123,7 @@ async function ask(interaction) {
         } catch (error) {
             u.noop();
         }
-        
+
 
         // Write JSON
         let data = {
@@ -297,14 +297,18 @@ const Module = new Augur.Module()
             // Load data
             files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
             rawData = [];
+            
             for (i = 0; i < files.length; i++) {
                 data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
-                rawData.push({
-                    file: files[i],
-                    fetch: data.fetch,
-                    string: `<@${data.details.asker}>: ${data.details.question}`,
-                    votes: data.system.votes
-                });
+                //ensure data has minimum required feilds.
+                if (data && data.system && data.system.votes && data.fetch && data.details && data.details.asker && data.details.question) {
+                    rawData.push({
+                        file: files[i],
+                        fetch: data.fetch,
+                        string: `<@${data.details.asker}>: ${data.details.question}`,
+                        votes: data.system.votes
+                    });
+                }
             }
 
             // Sort
@@ -330,22 +334,23 @@ const Module = new Augur.Module()
             while (strings.length > 2000) {
                 interaction.channel.send({ content: strings.substring(0, 2000) });
                 strings = strings.substring(2000);
-            }
+            }   
             interaction.reply({ content: `${strings}` });
 
             // Delete vote messages
             c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
             for (i = 0; i < accepted.length; i++) {
                 fs.unlinkSync(`./data/${accepted[i].file}`);
+                let m = false;
                 try {
                     m = await c.messages.fetch(accepted[i].fetch.message);
                 } catch (error) {
                     if (error.toString().indexOf("Unknown Message") > -1) {
-                        u.errorLog("That question has been deleted")
+                        u.errorHandler("That question has been deleted")
                     }
                 }
 
-                if (m) m.delete().catch(err => u.errorLog(`ERR: Insufficient permissions to delete messages.`));
+                if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
             }
 
         }
