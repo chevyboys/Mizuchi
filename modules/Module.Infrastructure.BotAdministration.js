@@ -103,7 +103,7 @@ const Module = new Augur.Module()
     parseParams: true,
     process: async (msg) => {
       u.clean(msg, 0);
-      return msg.guild.members.cache.map(m => db.User.new(Module, m.id));
+      return msg.guild.members.cache.map(m => db.User.new(m.id));
     },
     permissions: (msg) => Module.config.adminId.includes(msg.author.id)
   })
@@ -118,12 +118,12 @@ const Module = new Augur.Module()
       if (newMember.roles.cache.size > oldMember.roles.cache.size) {
         // Role added
         try {
-          await db.User.updateRoles(Module, newMember);
+          await db.User.updateRoles(newMember);
         } catch (error) { u.errorHandler(error, "Update Roles on Role Add"); }
       } else if (newMember.roles.cache.size < oldMember.roles.cache.size) {
         // Role removed
         try {
-          await db.User.updateRoles(Module, newMember);
+          await db.User.updateRoles(newMember);
         } catch (error) { u.errorHandler(error, "Update Roles on Role Remove"); }
       }
     }
