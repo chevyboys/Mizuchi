@@ -1,0 +1,46 @@
+{
+    "channels": {
+      "ask": "891849956871270470",
+      "blogAnnouncements": "891799669368311828",
+      "earthTemple": "891846251048497162",
+      "faq": "915273971769958460",
+      "general": "879564414225907734",
+      "introductions": "891799648732336168",
+      "modRequests": "932605608488734750",
+      "roles": "891799690662801438",
+      "rules": "884562867767087124",
+      "transfer": "891850058587320400"
+    },
+    "emoji": {
+        "messageContextMenu": {
+            "bookmark": "🔖",
+            "kesterBomb": "💣",
+            "pin": "📌",
+            "spoiler": "🤫"
+          },
+      "upDawn": "⬆",
+      "unDawn": "⬇"
+    },
+    "guilds": {
+      "PrimaryServer": "879564413751918593",
+      "ClimbersCourt": "443421134109671424",
+      "TestServer": "879564413751918593"
+    },
+    "roles": {
+      "BotMaster": "886098530148691978",
+      "Admin": "879564673568088066",
+      "CakeDay": "932604412139024404",
+      "SoaringWings": "879564897820741632",
+      "Whisper": "879564778048200754",
+      "WorldMaker": "936034815403237456",
+      "Updates": {
+        "BotUpdates": "936034906432237680",
+        "MetaUpdates": "936034987768180736",
+        "TTRPGUpdates": "936035080508407828",
+        "BookUpdates": "936035154491736095",
+        "BlogUpdates": "936035222020034690",
+        "AllUpdates": "936035285593120859",
+        "RoleplayingUpdates": "936035351934418965"
+      }
+    }
+  }
