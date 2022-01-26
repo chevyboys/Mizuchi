@@ -43,7 +43,13 @@ function parseUserID(user) {
 
 
 /**
- * @member 
+ * An object representing the user object in the database
+ * @member {Discord.Snowflake} userID the user or member id of the person to store
+ * @member {string} username //a cleaned version of the username. Stored only for convinence, should not be referenced.
+ * @member {string} cakeDay // A cakeDay string e.g. Jan 01
+ * @member {number} currentXP = 0] // Does nothing currently. Will be ignored
+ * @member {number} totalXP = 0] // Does nothing currently. Will be ignored
+ * @member {Discord.Role.Id[]} roles // An array of the roles the discord member has
  */
 class DbUserObject {
     userID = "";
@@ -71,11 +77,31 @@ class DbUserObject {
         this.currentXP = 0;
         this.totalXP = 0;
         let parsedRoles;
-        if(typeof constructionObj.roles === 'string' || constructionObj.roles instanceof String) {
+        if (typeof constructionObj.roles === 'string' || constructionObj.roles instanceof String) {
             parsedRoles = JSON.parse(constructionObj.roles)
         }
         else parsedRoles = constructionObj.roles
         this.roles = parsedRoles.map(r => r.id ? (assertIsSnowflake(r.id) ? r.id : null) : (assertIsSnowflake(r) ? r : null));
+    }
+    /**
+     * Gets this user from the database
+     * @returns {DbUserObject} the database user object for the user, if it exists 
+     */
+    get = async () => { return await DataBaseActions.User.get(this.userID); }
+    /**
+     * sets cakeday for a user to a specific date
+     * @param {string} cakeDay 
+     * @returns {Object} the result of the database update
+     */
+    updateCakeDay = async (cakeDay) => { return await DataBaseActions.User.updateCakeDay(this.userID, cakeDay) };
+    /**
+     * Updates the roles array for a guild member
+     * @returns {Object} the result of the database update
+     */
+    updateRoles = async () => {
+        let guild = await client.guilds.fetch(snowflakes.guilds.PrimaryServer)
+        let member = await guild.members.fetch()
+        return await DataBaseActions.User.updateRoles(member);
     }
 }
 
@@ -114,12 +140,10 @@ let privateDataBaseActions = {
             }
 
             query = query.slice(0, -1) + ` WHERE userID=${con.escape(userID)}`;
-            console.log("User Update SQL command '" + query + "'")
             return new Promise((fulfill, reject) => {
                 con.query(query, function (error, result) {
                     if (error) reject(error);
                     else fulfill(user);
-                    console.log(result);
                 });
 
             })
@@ -144,11 +168,9 @@ let DataBaseActions = {
                     let user = JSON.parse(JSON.stringify(result))[0];
                     if (!user || user == undefined) fulfill(null);
                     else {
-                        console.log(JSON.stringify(user));
                         user.roles = JSON.parse(user.roles)
                         if (error) reject(error);
                         else fulfill(new DbUserObject(user));
-                        console.log(result);
                     }
 
                 });
@@ -166,7 +188,6 @@ let DataBaseActions = {
                         let arrayOfUsers = JSON.parse(JSON.stringify(result));
                         let returnableArray = arrayOfUsers.map(user => new DbUserObject(user));
                         fulfill(returnableArray);
-                        console.log(returnableArray);
                     }
                 });
             });
@@ -181,15 +202,14 @@ let DataBaseActions = {
                     if (error) reject(error);
                     else {
                         let arrayOfUsers = JSON.parse(JSON.stringify(result));
-                        let returnableArray = arrayOfUsers.map(user =>  new DbUserObject(user));
+                        let returnableArray = arrayOfUsers.map(user => new DbUserObject(user));
                         fulfill(returnableArray);
-                        console.log(returnableArray);
                     }
                 });
             });
         },
         /**
-         * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userID - The ID of the user to find, or an object that has an ID;
+         * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake|DbUserObject.userID|DbUserObject)} userID - The ID of the user to find, or an object that has an ID;
          */
         new: async (userID) => {
             userID = parseUserID(userID);
@@ -212,26 +232,41 @@ let DataBaseActions = {
                     }
 
                     let sql = `INSERT INTO \`users\` (\`userID\`, \`username\`, \`cakeDay\`, \`currentXP\`, \`totalXP\`, \`roles\`) VALUES (${con.escape(newMember.userID)}, ${con.escape(newMember.username)}, ${con.escape(newMember.cakeDay)}, ${con.escape(newMember.currentXP)}, ${con.escape(newMember.totalXP)}, ${con.escape(JSON.stringify(newMember.roles))})`;
-                    console.log(sql);
                     con.query(sql, function (error, result) {
                         if (error) reject(error);
                         else fulfill(newMember);
-                        console.log(result);
                     });
 
                 })
             };
         },
+        /**
+         * Updates a guild member's roles listed in the database
+         * @param {Discord.guildMember} guildMember 
+         *  @returns {Object} the result of the database update 
+         */
         updateRoles: async (guildMember) => {
             if (assertIsSnowflake(guildMember.id)) {
                 return await privateDataBaseActions.User.update({ id: guildMember.id, roles: JSON.stringify(guildMember.roles.cache.map(r => assertIsSnowflake(r.id) ? r.id : null)) })
             }
         },
+        /**
+         * Updates a guild member's cakeday listed in the database
+         * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake|DbUserObject.userID|DbUserObject)} userIdResolvable the user id or an object containing it in a resolvable form
+         * @param {string} cakeDay the cakeday string
+         * @returns 
+         */
         updateCakeDay: async (userIdResolvable, cakeDay) => {
             userID = parseUserID(userIdResolvable) || null;
             return await privateDataBaseActions.User.update({ id: userID, cakeDay: assertIsCakeDay(cakeDay) ? cakeDay : null })
         }
     },
+    /**
+     * Initiates the database connection
+     * @param {Object} Module
+     * @param {Discord.Client} Module.client the only required member of a module object in order to initialize the database
+     * @returns 
+     */
     init: (Module) => {
         client = Module.client;
         if (!hasBeenInitialized) {
