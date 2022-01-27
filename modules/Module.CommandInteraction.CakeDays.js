@@ -10,7 +10,9 @@ const Augur = require("augurbot"),
 
 async function celebrate() {
     let guild = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
-    if (moment().hours() == 9) {
+    const TargetUSTime = 5
+    const modifierToConvertToBotTime = 7;
+    if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
         testcakeOrJoinDays(guild).catch(error => u.errorHandler(error, "Test cakeOrJoinDays"));
     }
 }
