@@ -15,6 +15,8 @@ async function celebrate() {
     }
 }
 
+
+
 async function testcakeOrJoinDays(guild) {
     try {
         if (!guild || guild == undefined) guild = await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer)
@@ -30,22 +32,25 @@ async function testcakeOrJoinDays(guild) {
         ];
 
         let cakeOrJoinDayPeeps = (await db.User.getMost()).filter(user => user.cakeDay != null);
+        let messageContentArray = []
         for (let cakeOrJoinDayPeep of cakeOrJoinDayPeeps) {
+
             try {
                 let date = moment(cakeOrJoinDayPeep.cakeDay);
                 let member = await guild.members.cache.get(cakeOrJoinDayPeep.userID);
+                cakeOrJoinDayPeep.username = member?.displayName || cakeOrJoinDayPeep.username;
                 let sendString = "";
                 if (date && (date.month() == curDate.month()) && (date.date() == curDate.date())) {
                     let join = member ? moment(member.joinedAt).subtract(0, "days") : curDate;
                     if (join && (join.month() == curDate.month()) && (join.date() == curDate.date()) && (join.year() < curDate.year())) {
                         let years = curDate.year() - join.year();
                         try {
-                            sendString = `**${cakeOrJoinDayPeep.username}** has been part of the server for ${years > 0 ? years : 1} ${(years > 1 ? "years" : "year")}! Glad you're with us!`;
+                            sendString = ` **${cakeOrJoinDayPeep.username}** has been part of the server for ${years > 0 ? years : 1} ${(years > 1 ? "years" : "year")}! Glad you're with us!`;
 
                         } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
                     }
-                    sendString = `:birthday: :confetti_ball: :tada: Happy Cake Day, **${cakeOrJoinDayPeep.username}**!` + sendString + `:tada: :confetti_ball: :birthday:`
-                    await guild.channels.cache.get(snowflakes.channels.general).send(sendString);
+                    messageContentArray.push(`:birthday: :confetti_ball: :tada: Happy Cake Day, **${cakeOrJoinDayPeep.username}**!` + sendString + `:tada: :confetti_ball: :birthday:`);
+
 
                     if (member) u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.CakeDay);
                 }
@@ -54,6 +59,21 @@ async function testcakeOrJoinDays(guild) {
                 }
             } catch (e) { u.errorHandler(e, "Birthay Send"); continue; }
         }
+
+
+        arrayOfMessagesToSend = [];
+        while (messageContentArray.join("\n").length > 800) {
+            let thisMessageToSend = [];
+            for (let index = 0; thisMessageToSend.join("\n").length < 800; index++) {
+                thisMessageToSend.push(messageContentArray.shift())
+            }
+            arrayOfMessagesToSend.push(thisMessageToSend);
+        }
+        arrayOfMessagesToSend.push(messageContentArray)
+        for (const message of arrayOfMessagesToSend) {
+            await guild.channels.cache.get(snowflakes.channels.general).send(message.join("\n"));
+        }
+
     } catch (e) { u.errorHandler(e, "cakeOrJoinDay Error"); }
 }
 
