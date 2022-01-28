@@ -20,11 +20,15 @@ async function pinMsgApprove(inputObject) {
 async function pinMsgOverride(inputObject) {
     let messages = await inputObject.target.channel.messages.fetchPinned().catch(u.noop);
     if (messages?.size == 50) return inputObject.interaction.editReply({ content: `${inputObject.user}, I was unable to pin the message since the channel pin limit has been reached.`, ephemeral: true });
-    else inputObject.target.pin(`Requested by ${inputObject.user.username}`);
+    else await inputObject.target.pin(`Requested by ${inputObject.user.username}`);
     if (!inputObject.interaction instanceof Discord.Message) {
         inputObject.interaction.editReply({ content: `I have pinned the message for you`, ephemeral: true });
     } else {
-        inputObject.interaction.react("👍");
+        try {
+            inputObject.interaction.react("👍");
+        } catch {
+            u.noop();
+        }
     }
 
 }
