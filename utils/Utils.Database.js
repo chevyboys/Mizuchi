@@ -165,12 +165,16 @@ let DataBaseActions = {
 
             return new Promise((fulfill, reject) => {
                 con.query("SELECT * FROM users WHERE userID=" + con.escape(userID), function (error, result) {
-                    let user = JSON.parse(JSON.stringify(result))[0];
-                    if (!user || user == undefined) fulfill(null);
-                    else {
-                        user.roles = JSON.parse(user.roles)
-                        if (error) reject(error);
-                        else fulfill(new DbUserObject(user));
+                    if (!result || result == undefined) {
+                        reject("No user with that ID was found")
+                    } else {
+                        let user = JSON.parse(JSON.stringify(result))[0];
+                        if (!user || user == undefined) fulfill(null);
+                        else {
+                            user.roles = JSON.parse(user.roles)
+                            if (error) reject(error);
+                            else fulfill(new DbUserObject(user));
+                        }
                     }
 
                 });
