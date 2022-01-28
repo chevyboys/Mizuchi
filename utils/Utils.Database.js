@@ -128,7 +128,7 @@ let privateDataBaseActions = {
             //only set prooperties that we already have in the database as a colum. If not specified, leave it the same.
             let query = `UPDATE users SET `
             for (const property in user) {
-                if (property != "userID") {
+                if (property != "userID" && typeof user[property] != "function") {
                     user[property] = userDataBaseObject[property] || user[property];
                     if (typeof user[property] === 'string' || user[property] instanceof String) {
                         query = query + ` ${property} = ${con.escape(user[property])},`
