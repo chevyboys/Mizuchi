@@ -103,7 +103,6 @@ Module
             let cakeOrJoinDayDate = (interaction.options.get("date")) ? (interaction.options.get("date")).value.trim().replace(/<+.*>\s*/gm, "") : null
             let target = interaction.options.getMember("target")
             if (cakeOrJoinDayDate) {
-                console.log(`"${cakeOrJoinDayDate}"`);
                 try {
                     let bd = new Date(cakeOrJoinDayDate);
                     if (bd == 'Invalid Date') {
