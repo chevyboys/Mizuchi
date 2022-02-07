@@ -8,7 +8,10 @@ const Augur = require("augurbot"),
   }
 
 const Module = new Augur.Module()
-  .addEvent("guildMemberAdd", async (member) => {
+  .addEvent("messageCreate", async (msg) => {
+
+    if(msg.type != "GUILD_MEMBER_JOIN" && !msg.author.bot) return;
+    let member = await msg.guild.members.fetch(msg.author);
     try {
       //Make sure we are in the primary server
       if (member.guild.id != snowflakes.guilds.PrimaryServer) return;
@@ -38,16 +41,19 @@ const Module = new Augur.Module()
 
       if (user) { // Member is returning
 
-        //Disabled, since Duke wants to use Dyno for now.
-        /*let toAdd = user.roles.filter(role => (
+        let toAdd = user.roles.filter(role => (
           guild.roles.cache.has(role) &&
           !guild.roles.cache.get(role).managed &&
           //put any roles we *don't* want to prompt for here
           ![snowflakes.guilds.PrimaryServer].includes(role) &&
           !member.roles.cache.has(role)
         ));
-        if (user.roles.length > 0) u.addRoles(guild.members.cache.get(Module.client.user.id), member, toAdd);*/
-
+        if (user.roles.length > 0) 
+        try {
+          u.addRoles(member, toAdd);
+        } catch (err) {
+          u.log (err);
+        }
         //give other bots time to add roles if they are going to do so.
         await delay(3000);
         let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
@@ -89,7 +95,7 @@ const Module = new Augur.Module()
       } 
 
       if (!member.user.bot)
-        //general.send(welcomeString);
+        general.send({content: welcomeString, allowedMentions: {users: [member.user.id] }});
         u.noop();
 
     } catch (e) { u.errorHandler(e, "New Member Add"); }
