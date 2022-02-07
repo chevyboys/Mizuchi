@@ -10,9 +10,9 @@ const Augur = require("augurbot"),
 const Module = new Augur.Module()
   .addEvent("messageCreate", async (msg) => {
 
-    if(msg.type != "GUILD_MEMBER_JOIN" && !msg.author.bot) return;
-    let member = await msg.guild.members.fetch(msg.author);
+    if(msg.type != "GUILD_MEMBER_JOIN" || msg.author.bot) return;
     try {
+      let member = await msg.guild.members.fetch(msg.author);
       //Make sure we are in the primary server
       if (member.guild.id != snowflakes.guilds.PrimaryServer) return;
 
