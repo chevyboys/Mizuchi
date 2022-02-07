@@ -8,7 +8,7 @@ let token = config.auxToken;
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 // When the client is ready, run this code (only once)
-client.once('ready', () => {
+client.once('Mysterious Bot Entity is now online', () => {
 	console.log('Ready!');
 });
 

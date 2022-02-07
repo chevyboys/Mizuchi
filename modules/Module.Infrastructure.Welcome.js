@@ -86,8 +86,7 @@ const Module = new Augur.Module()
         embed.setTitle(member.displayName + " has joined the server.");
 
         db.User.new(member);
-      }
-      modLogs.send({ content: "User joined", embeds: [embed] });
+      } 
 
       if (!member.user.bot)
         //general.send(welcomeString);

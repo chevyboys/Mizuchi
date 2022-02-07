@@ -275,7 +275,7 @@ let DataBaseActions = {
         client = Module.client;
         if (!hasBeenInitialized) {
             con.connect(function (err) {
-                if (err) throw err;
+                if (err && !err.toString.indexOf("Cannot enqueue Handshake after already enqueuing a Handshake") > -1 ) throw err;
                 console.log("Connected to DataBase!");
             })
             hasBeenInitialized = true;
