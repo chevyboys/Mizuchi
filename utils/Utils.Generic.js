@@ -1,9 +1,11 @@
+const { AugurClient } = require("augurbot");
 const Discord = require("discord.js"),
   config = require("../config/config.json"),
-  snowflakes = require("../config/snowflakes.json")
+  snowflakes = require("../config/snowflakes.json"),
 
-const errorLog = new Discord.WebhookClient(config.error);
-
+  errorLog = new Discord.WebhookClient(config.error);
+const rolesClient = require("./Utils.RolesLogin");
+let RolesLoggedIn = false;
 /**
  * @typedef {Object} ParsedInteraction
  * @property {String} command - The command issued, represented as a string.
@@ -70,19 +72,27 @@ function parseInteraction(inter) {
 }
 
 const utils = {
-  addRoles: async (client, member, roles, takeRoleInsteadOfGive) => {
-    if (client.permissionsIn(snowflakes.channels.earthTemple).toArray().includes("MANAGE_ROLES")) {
-      member.roles.add(roles)
-    } else {
-      if (!Array.isArray(roles)) {
-        roles = [roles];
+  addRoles: async (member, roles, takeRoleInsteadOfGive = false) => {
+
+    const guild = await rolesClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
+    const rolesClientMember = await guild.members.fetch(member.id);
+    const channel = await guild.channels.fetch(snowflakes.channels.general);
+    if (!Array.isArray(roles)) {
+      roles = [roles];
+    }
+    if (channel.permissionsFor(snowflakes.users.roleBot).toArray().includes("MANAGE_ROLES")) {
+      if(takeRoleInsteadOfGive){
+        rolesClientMember.roles.remove(roles)
       }
-      let embed = await utils.modRequestEmbed("Role Request", { member: member, guild: member.guild, createdAt: Date.now(), cleanContent: " Dummy Text" }, { member: member }, client)
+      await rolesClientMember.roles.add(roles);
+    } else {
+
+      let embed = await utils.modRequestEmbed("Role Request", { member: rolesClientMember, guild: rolesClientMember.guild, createdAt: Date.now(), cleanContent: " Dummy Text" }, { member: rolesClientMember }, rolesClient)
       if (roles.length < 1) {
         return;
       }
       embed.setDescription(`${member.displayName} needs to ${takeRoleInsteadOfGive ? "have the following role(s) removed" : "be given the following role(s)"}:\n>>> <@&${roles.join(">\n<@&")}>`);
-      await member.guild.channels.cache.get(snowflakes.channels.modRequests).send({ embeds: [embed] });
+      await rolesClientMember.guild.channels.cache.get(snowflakes.channels.modRequests).send({ embeds: [embed] });
     }
   },
   /**
@@ -162,12 +172,15 @@ const utils = {
    * @param {Error} error The error to report.
    * @param {any} message Any Discord.Message, Discord.Interaction, or text string.
    */
-  errorHandler: function (error, message = null) {
+  errorHandler: function (error, message = null, botName = null) {
     if (!error || (error.name === "AbortError")) return;
 
     console.error(Date());
 
     const embed = utils.embed().setTitle(error.name ? error.name : "Warning");
+    if (botName) {
+      embed.setTitle("Mysterious Test Entity:" + (error.name ? error.name : "Warning"));
+    }
 
     if (message instanceof Discord.Message) {
       const loc = (message.guild ? `${message.guild?.name} > ${message.channel?.name}` : "DM");
