@@ -223,6 +223,14 @@ const Module = new Augur.Module()
                 }
             } catch (e) { u.errorHandler(e, msg); }
         }
-    });
+    })
+    .addEvent("messageCreate", async (msg) => {
+        for (const UpdateRole of Object.values(snowflakes.roles.Updates)) {
+            if(msg.mentions.roles.has(UpdateRole) && !msg.mentions.roles.has(snowflakes.roles.Updates.AllUpdates)){
+                return msg.reply({content: "<@&" + snowflakes.roles.Updates.AllUpdates + ">", allowedMentions: {roles: [snowflakes.roles.Updates.AllUpdates]} })
+            }
+        }
+      });
+    
 
 module.exports = Module;
