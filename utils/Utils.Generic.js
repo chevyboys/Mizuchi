@@ -80,7 +80,7 @@ const utils = {
     if (!Array.isArray(roles)) {
       roles = [roles];
     }
-    if (channel.permissionsFor(snowflakes.users.roleBot).toArray().includes("MANAGE_ROLES")) {
+    if (channel.permissionsFor(snowflakes.users.roleBot)?.toArray().includes("MANAGE_ROLES")) {
       if(takeRoleInsteadOfGive){
         rolesClientMember.roles.remove(roles)
       }
