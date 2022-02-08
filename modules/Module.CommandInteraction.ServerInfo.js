@@ -76,7 +76,7 @@ const Registrar = require("../utils/Utils.CommandRegistrar");
 let commands = [
     new Registrar.SlashCommandBuilder()
         .setName("repo")
-        .setDescription("roles a dice of any reasonable size")
+        .setDescription("shows helpful links for the bot's info")
 ]
 Module.addEvent("ready", async () => {
     commandResponse = await Registrar.registerGuildCommands(Module, commands)
