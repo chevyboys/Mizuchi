@@ -70,13 +70,54 @@ const Module = new Augur.Module()
         }
 
     })
+    .addInteractionCommand({
+        name: "links",
+        guildId: snowflakes.guilds.PrimaryServer,
+        process: async (interaction) => {
+            let components = new MessageActionRow()
+                .addComponents(
+                    new MessageButton({
+                        disabled: false,
+                        label: "The Author's Blog",
+                        style: "LINK",
+                        url: "https://andrewkrowe.wordpress.com/"
+                    }))
+                .addComponents(
+                    new MessageButton({
+                        disabled: false,
+                        label: "The Wiki",
+                        style: "LINK",
+                        url: "https://wydds.wiki/"
+                    }))
 
+                .addComponents(
+                    new MessageButton({
+                        disabled: false,
+                        label: "The Code",
+                        style: "LINK",
+                        url: "https://github.com/chevyboys/Mizuchi"
+                    }))
+                .addComponents(
+                    new MessageButton({
+                        disabled: false,
+                        label: "Adorable Cockatrices",
+                        style: "LINK",
+                        url: "https://www.youtube.com/watch?v=bxqLsrlakK8"
+                    }));
+
+            await interaction.reply({ content: "**__Cool things to check out:__**", components: [components], ephemeral: false });
+        }
+
+    })
 const Registrar = require("../utils/Utils.CommandRegistrar");
 //Register commands
 let commands = [
     new Registrar.SlashCommandBuilder()
         .setName("repo")
-        .setDescription("shows helpful links for the bot's info")
+        .setDescription("shows helpful links for the bot's info"),
+    new Registrar.SlashCommandBuilder()
+        .setName("links")
+        .setDescription("shows helpful links to things around the fandom")
 ]
 Module.addEvent("ready", async () => {
     commandResponse = await Registrar.registerGuildCommands(Module, commands)
