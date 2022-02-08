@@ -54,7 +54,7 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
     ),
   ];
   async function modRequestEmbed(message, interaction, user) {
-    u.modRequestEmbed(modRequestFunctionName, message, interaction, user, modRequestFunctionEmoji)
+    return await u.modRequestEmbed(modRequestFunctionName, message, interaction, user, modRequestFunctionEmoji)
   }
 
   async function modRequestCard(message, interaction, user) {

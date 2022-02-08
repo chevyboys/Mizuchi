@@ -5,7 +5,6 @@ const Discord = require("discord.js"),
 
   errorLog = new Discord.WebhookClient(config.error);
 const rolesClient = require("./Utils.RolesLogin");
-let RolesLoggedIn = false;
 /**
  * @typedef {Object} ParsedInteraction
  * @property {String} command - The command issued, represented as a string.
@@ -121,7 +120,7 @@ const utils = {
     await utils.wait(t);
     if (msg instanceof Discord.CommandInteraction) {
       msg.deleteReply().catch(utils.noop);
-    } else if ((msg instanceof Discord.Message) && (msg.deletable && !msg.deleted)) {
+    } else if ((msg instanceof Discord.Message) && (msg.deletable)) {
       msg.delete().catch(utils.noop);
     }
     return Promise.resolve(msg);
@@ -231,8 +230,8 @@ const utils = {
       .setTitle(`${modRequestFunctionName} request by ` + `${requestingUser.displayName}`)
       .setColor(0xF0004C)
       .setTimestamp()
-      .setAuthor({ name: `${message.member.displayName} ${modRequestFunctionEmoji ? modRequestFunctionEmoji : ""}`, iconURL: message.member.user.displayAvatarURL() })
-      .setDescription(`- ${message.cleanContent} `)
+      .setAuthor({ name: `${message.member?.displayName || interaction.member?.displayName || requestingUser?.username} ${modRequestFunctionEmoji ? modRequestFunctionEmoji : ""}`, iconURL: message.member.user.displayAvatarURL() })
+      .setDescription(`Message: ${message.cleanContent || message} `)
       .addField(`${modRequestFunctionName} requested by `, requestingUser.displayName)
     if (message.channel) embed.addField("Channel", message.channel.toString())
     if (message.url) embed.addField("Jump to Post", `[Original Message](${message.url})`);
