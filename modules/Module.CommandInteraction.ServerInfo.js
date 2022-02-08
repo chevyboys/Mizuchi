@@ -5,6 +5,7 @@ const snowflakes = require('../config/snowflakes.json');
 
 
 let memeLinks = [
+    "https://cdn.discordapp.com/attachments/697869453605601352/880556213589389402/Confused_Math_Corin.jpg",
     "https://cdn.discordapp.com/attachments/697869453605601352/933133090249908234/Iceberg_26122021104304.jpg",
     "https://cdn.discordapp.com/attachments/697869453605601352/931422425919389756/received_269847078157064.jpeg",
     "https://cdn.discordapp.com/attachments/697869453605601352/924898168607494165/SPOILER_aged_like_fine_wine.png",
