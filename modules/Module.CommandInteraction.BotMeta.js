@@ -93,7 +93,8 @@ const Module = new Augur.Module()
 async function alertDiscordStatus(override) {
     let discordStatus = await axios.get("https://srhpyqt94yxb.statuspage.io/api/v2/summary.json");
     let incidents = discordStatus.data.incidents;
-    if (!override && !incidents && incidents != previousDiscordIncident) return;
+    if (!override) return;
+    if ((incidents.length < 1  || incidents == previousDiscordIncident)) return;
     previousDiscordIncident = incidents;
     let fakeInteraction = { guild: Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer), client: Module.client, };
     let channel = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.cache.get(snowflakes.channels.earthTemple);
