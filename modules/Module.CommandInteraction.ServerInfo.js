@@ -134,7 +134,13 @@ const Module = new Augur.Module()
                         style: "LINK",
                         url: "https://wydds.wiki/"
                     }))
-
+                .addComponents(
+                    new MessageButton({
+                        disabled: false,
+                        label: "The Perfect Stranger Discord Server",
+                        style: "LINK",
+                        url: "https://discord.gg/VMmtJsRNZ2"
+                    }))
                 .addComponents(
                     new MessageButton({
                         disabled: false,
