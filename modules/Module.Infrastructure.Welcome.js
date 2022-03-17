@@ -1,14 +1,15 @@
 const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic"),
   db = require("../utils/Utils.Database"),
-  snowflakes = require("../config/snowflakes.json")
+  snowflakes = require("../config/snowflakes.json");
+const fs = require('fs');
 
 function delay(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 
 let welcomeStringCommandOverride = (welcomeMsgObject) => {
-  const overrideObject = require("../data/welcome/welcomeOveride.json");
+  let overrideObject = JSON.parse(fs.readFileSync(`./data/welcome/welcomeOveride.json`));
   switch (overrideObject.type) {
     case "disabled":
       return welcomeMsgObject;
@@ -22,9 +23,9 @@ let welcomeStringCommandOverride = (welcomeMsgObject) => {
       welcomeMsgObject.content = overrideObject.welcomeString;
       return welcomeMsgObject;
     case "embed":
-      welcomeMsgObject.embeds = [u.embed().setColor("#55aaFF").setAuthor({name: overrideObject.embedTitle, iconURL:overrideObject.embedImgUrl}).setDescription(overrideObject.welcomeString)]
+      welcomeMsgObject.embeds = [u.embed().setColor("#55aaFF").setAuthor({ name: overrideObject.embedTitle, iconURL: overrideObject.embedImgUrl }).setDescription(overrideObject.welcomeString)]
       return welcomeMsgObject;
-      default: throw new Error(`Improper welcome string override type. ${overrideObject.type} is not one of ${JSON.stringify(overrideObject.validTypes)}`);
+    default: throw new Error(`Improper welcome string override type. ${overrideObject.type} is not one of ${JSON.stringify(overrideObject.validTypes)}`);
   }
 }
 
@@ -119,5 +120,130 @@ const Module = new Augur.Module()
 
     } catch (e) { u.errorHandler(e, "New Member Add"); }
   });
+
+const Registrar = require("../utils/Utils.CommandRegistrar");
+//Register commands
+let commands = [
+  new Registrar.SlashCommandBuilder()
+    .setName("welcome")
+    .setDescription("shows helpful links for the bot's info")
+    .addSubcommand(
+      new Registrar.SlashCommandSubcommandBuilder()
+        .setName("embed")
+        .setDescription("Appends and Embed to welcome messages until they are reset")
+        .addStringOption(new Registrar.SlashCommandStringOption()
+          .setName("title")
+          .setDescription("The title of the embed")
+          .setRequired(true)
+        )
+        .addStringOption(new Registrar.SlashCommandStringOption()
+          .setName("image-url")
+          .setDescription("The url of the image")
+          .setRequired(true)
+        )
+        .addStringOption(new Registrar.SlashCommandStringOption()
+          .setName("description")
+          .setDescription("the description of the embed")
+          .setRequired(true)
+        )
+    )
+    .addSubcommand(
+      new Registrar.SlashCommandSubcommandBuilder()
+        .setName("override")
+        .setDescription("Replaces the welcome message")
+        .addStringOption(new Registrar.SlashCommandStringOption()
+          .setName("text")
+          .setDescription("The text to adjust welcome messages with")
+          .setRequired(true)
+        )
+
+    )
+    .addSubcommand(
+      new Registrar.SlashCommandSubcommandBuilder()
+        .setName("append")
+        .setDescription("Adds text to the end of welcome messages")
+        .addStringOption(new Registrar.SlashCommandStringOption()
+          .setName("text")
+          .setDescription("The text to adjust welcome messages with")
+          .setRequired(true)
+        )
+
+    )
+    .addSubcommand(
+      new Registrar.SlashCommandSubcommandBuilder()
+        .setName("prepend")
+        .setDescription("Adds text to the end of welcome messages")
+        .addStringOption(new Registrar.SlashCommandStringOption()
+          .setName("text")
+          .setDescription("The text to adjust welcome messages with")
+          .setRequired(true)
+        )
+
+    )
+    .addSubcommand(
+      new Registrar.SlashCommandSubcommandBuilder()
+        .setName("reset")
+        .setDescription("Resets welcome messages to be the default")
+    )
+]
+Module.addEvent("ready", async () => {
+  let commandResponse = await Registrar.registerGuildCommands(Module, commands)
+}).addInteractionCommand({
+  name: "welcome",
+  guildId: snowflakes.guilds.PrimaryServer,
+  process: async (interaction) => {
+    let member = interaction.member;
+    let subCommand = interaction.options._subcommand;
+    let subCommandOptions = interaction.options._hoistedOptions;
+    let isAppropriateInteraction = interaction.type == "APPLICATION_COMMAND" && interaction.commandName == "welcome"
+    let isAllowed = interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.Whisper) || interaction.member.roles.cache.has(snowflakes.roles.BotMaster)
+    if (!isAllowed || !isAppropriateInteraction) return;
+    else {
+      
+      let data = {
+        welcomeString: "",
+        type: "",
+        embedTitle: "",
+        embedImgUrl: "",
+        validTypes: [
+          "prepend",
+          "embed",
+          "append",
+          "insert",
+          "override",
+          "disabled"
+        ]
+      }
+      data.type = subCommand
+      switch (subCommand) {
+        case "append":
+          data.welcomeString = subCommandOptions[0].value
+          break;
+        case "embed":
+          data.welcomeString = subCommandOptions[2].value
+          data.embedImgUrl = subCommandOptions[1].value
+          data.embedTitle = subCommandOptions[0].value
+          break;
+        case "override":
+          data.welcomeString = subCommandOptions[0].value
+          break;
+        case "prepend":
+          data.welcomeString =  subCommandOptions[0].value
+          break;
+        case "reset":
+          data.type = "disabled"
+          break;
+
+        default: throw new Error("How did you even get here, this shouldn't be possible.");
+          break;
+      }
+      fs.writeFileSync(`./data/welcome/welcomeOveride.json`, JSON.stringify(data, null, 4));
+      let welcomeString = "You have successfully edited the welcome message. This is an example of the new welcome message."
+      interaction.reply(welcomeStringCommandOverride({ content: welcomeString, allowedMentions: { users: [member.user.id] }, ephemeral: true }))
+
+      console.log("welcome message modified");
+    }
+  }
+});
 
 module.exports = Module;

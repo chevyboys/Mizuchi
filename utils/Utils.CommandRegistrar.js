@@ -4,7 +4,7 @@ const Discord = require("discord.js"),
     { Routes } = require('discord-api-types/v9'),
     u = require("../utils/Utils.Generic"),
     fs = require('fs'),
-    { SlashCommandBuilder } = require('@discordjs/builders'),
+    { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandStringOption } = require('@discordjs/builders'),
     { REST, DiscordAPIError } = require('@discordjs/rest');
 
 function IsJsonString(str) {
@@ -86,7 +86,8 @@ const registrar = {
         await command.permissions.add({ permissions });
     },
     SlashCommandBuilder: SlashCommandBuilder,
-
+    SlashCommandSubcommandBuilder: SlashCommandSubcommandBuilder,
+    SlashCommandStringOption: SlashCommandStringOption,
 
 };
 
