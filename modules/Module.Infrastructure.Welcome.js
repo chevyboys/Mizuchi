@@ -3,14 +3,36 @@ const Augur = require("augurbot"),
   db = require("../utils/Utils.Database"),
   snowflakes = require("../config/snowflakes.json")
 
-  function delay(time) {
-    return new Promise(resolve => setTimeout(resolve, time));
+function delay(time) {
+  return new Promise(resolve => setTimeout(resolve, time));
+}
+
+let welcomeStringCommandOverride = (welcomeMsgObject) => {
+  const overrideObject = require("../data/welcome/welcomeOveride.json");
+  switch (overrideObject.type) {
+    case "disabled":
+      return welcomeMsgObject;
+    case "prepend":
+      welcomeMsgObject.content = overrideObject.welcomeString + "\n" + welcomeMsgObject.content;
+      return welcomeMsgObject;
+    case "append":
+      welcomeMsgObject.content = welcomeMsgObject.content + "\n" + overrideObject.welcomeString;
+      return welcomeMsgObject;
+    case "override":
+      welcomeMsgObject.content = overrideObject.welcomeString;
+      return welcomeMsgObject;
+    case "embed":
+      welcomeMsgObject.embeds = [u.embed().setColor("#55aaFF").setAuthor({name: overrideObject.embedTitle, iconURL:overrideObject.embedImgUrl}).setDescription(overrideObject.welcomeString)]
+      return welcomeMsgObject;
+      default: throw new Error(`Improper welcome string override type. ${overrideObject.type} is not one of ${JSON.stringify(overrideObject.validTypes)}`);
   }
+}
+
 
 const Module = new Augur.Module()
   .addEvent("messageCreate", async (msg) => {
 
-    if(msg.type != "GUILD_MEMBER_JOIN" || msg.author.bot) return;
+    if (msg.type != "GUILD_MEMBER_JOIN" || msg.author.bot) return;
     try {
       let member = await msg.guild.members.fetch(msg.author);
       //Make sure we are in the primary server
@@ -25,9 +47,6 @@ const Module = new Augur.Module()
       let general = guild.channels.cache.get(snowflakes.channels.introductions); // #introductions
       let welcomeChannel = guild.channels.cache.get(snowflakes.channels.introductions); // #welcome
       let modLogs = guild.channels.cache.get(snowflakes.channels.modRequests); // #mod-logs
-
-
-
 
       //Notify Mods that a new user is here
       let embed = u.embed()
@@ -48,17 +67,17 @@ const Module = new Augur.Module()
           ![snowflakes.guilds.PrimaryServer].includes(role) &&
           !member.roles.cache.has(role)
         ));
-        if (user.roles.length > 0) 
-        try {
-          u.addRoles(member, toAdd);
-        } catch (err) {
-          u.log (err);
-        }
+        if (user.roles.length > 0)
+          try {
+            u.addRoles(member, toAdd);
+          } catch (err) {
+            u.log(err);
+          }
         //give other bots time to add roles if they are going to do so.
         await delay(3000);
         let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
         if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
-        
+
         embed.setTitle(member.displayName + " has rejoined the server.")
           .addField("Roles", roleString);
         welcomeString = `Welcome back, ${member}! Glad to see you again.`;
@@ -92,11 +111,11 @@ const Module = new Augur.Module()
         embed.setTitle(member.displayName + " has joined the server.");
 
         db.User.new(member);
-      } 
+      }
 
       if (!member.user.bot)
-        general.send({content: welcomeString, allowedMentions: {users: [member.user.id] }});
-        u.noop();
+        general.send(welcomeStringCommandOverride({ content: welcomeString, allowedMentions: { users: [member.user.id] } }));
+      u.noop();
 
     } catch (e) { u.errorHandler(e, "New Member Add"); }
   });

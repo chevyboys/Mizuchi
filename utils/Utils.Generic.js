@@ -72,7 +72,9 @@ function parseInteraction(inter) {
 
 const utils = {
   addRoles: async (member, roles, takeRoleInsteadOfGive = false) => {
-
+    try {
+      
+    
     const guild = await rolesClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
     const rolesClientMember = await guild.members.fetch(member.id);
     const channel = await guild.channels.fetch(snowflakes.channels.general);
@@ -93,6 +95,9 @@ const utils = {
       embed.setDescription(`${member.displayName} needs to ${takeRoleInsteadOfGive ? "have the following role(s) removed" : "be given the following role(s)"}:\n>>> <@&${roles.join(">\n<@&")}>`);
       await rolesClientMember.guild.channels.cache.get(snowflakes.channels.modRequests).send({ embeds: [embed] });
     }
+  } catch (error) {
+      utils.errorLog(error);
+  }
   },
   /**
    * If a command is run in a channel that doesn't want spam, returns #bot-lobby so results can be posted there.
