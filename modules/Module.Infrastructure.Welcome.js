@@ -107,7 +107,7 @@ const Module = new Augur.Module()
           "How'd you find us?",
           "How far have you gotten in the books?"
         ];
-        welcomeString = `${u.rand(welcome)}, ${member}! ${u.rand(info1)} <#${snowflakes.channels.rules}> ${u.rand(info2)}. ${u.rand(info3)}\n\nHead over to <#${snowflakes.channels.roles}> if you'd like to opt in to roles, and be sure to check out our FAQ and spoiler policy`;
+        welcomeString = `${u.rand(welcome)}, ${member}! ${u.rand(info1)} <#${snowflakes.channels.rules}> ${u.rand(info2)}. ${u.rand(info3)}\n\nHead over to <#${snowflakes.channels.roles}> if you'd like to opt in to roles, and be sure to check out our <#${snowflakes.channels.faq}> and <#${snowflakes.channels.spoilerPolicy}>`;
         embed.setTitle(member.displayName + " has joined the server.");
 
         db.User.new(member);
