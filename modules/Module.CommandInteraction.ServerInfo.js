@@ -160,6 +160,15 @@ const Module = new Augur.Module()
         }
 
     })
+    .addInteractionCommand({
+        name: "tone",
+        guildId: snowflakes.guilds.PrimaryServer,
+        process: async (interaction) => {
+            let toneTags = ['/cb = clickbait', '/cp = copypasta', '/f = fake', '/gen or /g = genuine', '/hj = half-joking', '/hyp = hyperbole', '/ij = inside joke', '/j = joking', '/l or /ly = lyrics', '/lh = light-hearted', '/li = literally', '/lu = a little upset', '/m = metaphorically', '/neg or /nc = negative connotation', '/neu = neutral connotation', '/nm = not mad', '/nsrs = non-serious', '/p = platonic', '/pc = positive connotation', '/r = romantic', '/rh or /rt = rhetorical question', '/s = sarcastic', '/srs = serious', '/t = teasing', '/vent = venting']
+            await interaction.reply({ content: "**__Tone Tags:__**\n" + toneTags.join("\n"), ephemeral: false });
+        }
+
+    })
 const Registrar = require("../utils/Utils.CommandRegistrar");
 //Register commands
 let commands = [
@@ -168,7 +177,10 @@ let commands = [
         .setDescription("shows helpful links for the bot's info"),
     new Registrar.SlashCommandBuilder()
         .setName("links")
-        .setDescription("shows helpful links to things around the fandom")
+        .setDescription("shows helpful links to things around the fandom"),
+    new Registrar.SlashCommandBuilder()
+        .setName("tone")
+        .setDescription("shows example tone tags")
 ]
 Module.addEvent("ready", async () => {
     commandResponse = await Registrar.registerGuildCommands(Module, commands)
