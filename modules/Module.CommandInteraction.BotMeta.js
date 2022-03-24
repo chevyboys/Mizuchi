@@ -240,8 +240,8 @@ Module
         category: "Fun",
         hidden: true,
         process: (msg, suffix) => {
-            if (msg.deletable && (suffix.indexOf("-x") > -1) && (msg.client.config.adminId.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id)) msg.delete();
-            msg.channel.send(suffix.replace("-x", ""));
+            if (msg.deletable && (msg.client.config.adminId.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id)) msg.delete();
+            msg.channel.send(suffix);
         },
         permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
     })
