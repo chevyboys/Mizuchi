@@ -54,12 +54,12 @@ async function testcakeOrJoinDays(guild) {
                     messageContentArray.push(`:birthday: :confetti_ball: :tada: Happy Cake Day, **${cakeOrJoinDayPeep.username}**!` + sendString + `:tada: :confetti_ball: :birthday:`);
 
 
-                    if (member) u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.CakeDay);
+                    if (member) u.addRoles(member, snowflakes.roles.CakeDay);
                 }
                 else if (member && member.roles.cache.has(snowflakes.roles.CakeDay)) {
-                    u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.CakeDay, true);
+                    u.addRoles(member, snowflakes.roles.CakeDay, true);
                 }
-            } catch (e) { u.errorHandler(e, "Birthay Send"); continue; }
+            } catch (e) { if (e.toString().indexOf("Deprecation warning: value provided is not in a recognized RFC2822 or ISO format.") < 0) u.errorHandler(e, "Birthay Send"); continue; }
         }
 
 
