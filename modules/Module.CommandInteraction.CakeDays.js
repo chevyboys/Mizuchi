@@ -47,19 +47,19 @@ async function testcakeOrJoinDays(guild) {
                     if (join && (join.month() == curDate.month()) && (join.date() == curDate.date()) && (join.year() < curDate.year())) {
                         let years = curDate.year() - join.year();
                         try {
-                            sendString = ` **${cakeOrJoinDayPeep.username}** has been part of the server for ${years > 0 ? years : 1} ${(years > 1 ? "years" : "year")}! Glad you're with us!`;
+                            sendString = ` **They have been part of the server for ${years > 0 ? years : 1} ${(years > 1 ? "years" : "year")}! Glad you're with us!`;
 
                         } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
                     }
                     messageContentArray.push(`:birthday: :confetti_ball: :tada: Happy Cake Day, **${cakeOrJoinDayPeep.username}**!` + sendString + `:tada: :confetti_ball: :birthday:`);
 
 
-                    if (member) u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.CakeDay);
+                    if (member) u.addRoles(member, snowflakes.roles.CakeDay);
                 }
                 else if (member && member.roles.cache.has(snowflakes.roles.CakeDay)) {
-                    u.addRoles(guild.members.cache.get(Module.client.user.id), member, snowflakes.roles.CakeDay, true);
+                    u.addRoles(member, snowflakes.roles.CakeDay, true);
                 }
-            } catch (e) { u.errorHandler(e, "Birthay Send"); continue; }
+            } catch (e) { if (e.toString().indexOf("Deprecation warning: value provided is not in a recognized RFC2822 or ISO format.") < 0) u.errorHandler(e, "Birthay Send"); continue; }
         }
 
 
