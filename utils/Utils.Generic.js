@@ -76,16 +76,17 @@ const utils = {
       
     
     const guild = await rolesClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
-    const rolesClientMember = await guild.members.fetch(member.id);
+    const rolesClientMember = await guild.members.fetch(member.id ? member.id : member);
     const channel = await guild.channels.fetch(snowflakes.channels.general);
+    let rolesArray;
     if (!Array.isArray(roles)) {
-      roles = [roles];
-    }
+      rolesArray = [roles];
+    } else rolesArray = roles;
     if (channel.permissionsFor(snowflakes.users.roleBot)?.toArray().includes("MANAGE_ROLES")) {
       if(takeRoleInsteadOfGive){
-        rolesClientMember.roles.remove(roles)
+        await rolesClientMember.roles.remove(rolesArray);
       }
-      await rolesClientMember.roles.add(roles);
+      else await rolesClientMember.roles.add(rolesArray);
     } else {
 
       let embed = await utils.modRequestEmbed("Role Request", { member: rolesClientMember, guild: rolesClientMember.guild, createdAt: Date.now(), cleanContent: " Dummy Text" }, { member: rolesClientMember }, rolesClient)
@@ -96,7 +97,7 @@ const utils = {
       await rolesClientMember.guild.channels.cache.get(snowflakes.channels.modRequests).send({ embeds: [embed] });
     }
   } catch (error) {
-      utils.errorLog(error);
+      utils.errorHandler(error);
   }
   },
   /**
