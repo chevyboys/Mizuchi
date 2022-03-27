@@ -55,3 +55,5 @@ old/utils/Utils.ContextMenu.Message.ModCard.js
 old/utils/Utils.Database.js
 old/utils/Utils.Generic.js
 old/utils/Utils.RolesLogin.js
+.yarn
+yarn.lock
