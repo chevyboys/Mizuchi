@@ -1,0 +1,402 @@
+  {
+  "Acolyte": {
+    "id": "863554637361053717",
+    "tower": "Tortoise",
+    "description": "",
+    "manaTypes": [
+      "Life",
+      "Water",
+      "Perception"
+    ]
+  },
+  "Champion": {
+    "id": "863554729741254677",
+    "tower": "Tortoise",
+    "description": "",
+    "manaTypes": [
+      "Enhancement",
+      "Water",
+      "Mental"
+    ]
+  },
+  "Cloudcaller": {
+    "id": "863554777488687134",
+    "tower": "Tortoise",
+    "description": "",
+    "manaTypes": [
+      "",
+      "",
+      ""
+    ]
+  },
+  "Illusionist": {
+    "id": "863554781065510952",
+    "tower": "Tortoise",
+    "description": "",
+    "manaTypes": [
+      "Perception",
+      "Light",
+      "Earth"
+    ]
+  },
+  "Seer": {
+    "id": "863554783263326219",
+    "tower": "Tortoise",
+    "description": "",
+    "manaTypes": [
+      "Mental",
+      "Light",
+      "Death"
+    ]
+  },
+  "Soulblade": {
+    "id": "863554785739407360",
+    "tower": "Tortoise",
+    "description": "A Soulblade creates contracts with monsters, binding them to items such as weapons or jewelry.",
+    "manaTypes": [
+      "Light",
+      "Life",
+      "Transference"
+    ]
+  },
+  "Wavewalker": {
+    "id": "863554787874177054",
+    "tower": "Tortoise",
+    "description": "",
+    "manaTypes": [
+      "Water",
+      "Mental",
+      "Transference"
+    ]
+  },
+  "Wayfarer": {
+    "id": "863554950487474186",
+    "tower": "Tortoise",
+    "description": "",
+    "manaTypes": [
+      "Air",
+      "Mental",
+      "Transference"
+    ]
+  },
+  "Analyst": {
+    "id": "863555384609341470",
+    "tower": "Tiger",
+    "description": "",
+    "manaTypes": [
+      "Mental",
+      "Umbral",
+      "Transference"
+    ]
+  },
+  "Architect": {
+    "id": "863555391052185600",
+    "tower": "Tiger",
+    "description": "",
+    "manaTypes": [
+      "Perception",
+      "Umbral",
+      "Enhancement"
+    ]
+  },
+  "Biomancer": {
+    "id": "863555393971290152",
+    "tower": "Tiger",
+    "description": "",
+    "manaTypes": [
+      "Life",
+      "Mental",
+      "Light"
+    ]
+  },
+  "Controller": {
+    "id": "863555396630478848",
+    "tower": "Tiger",
+    "description": "",
+    "manaTypes": [
+      "Perception",
+      "Enhancement",
+      "Umbral"
+    ]
+  },
+  "Forgemaster": {
+    "id": "863555398967230474",
+    "tower": "Tiger",
+    "description": "",
+    "manaTypes": [
+      "Fire",
+      "Earth",
+      "Enhancement"
+    ]
+  },
+  "Illuminator": {
+    "id": "863555401135554591",
+    "tower": "Tiger",
+    "description": "",
+    "manaTypes": [
+      "Light",
+      "Water",
+      "Air"
+    ]
+  },
+  "Sentinel": {
+    "id": "863555403266654239",
+    "tower": "Tiger",
+    "description": "",
+    "manaTypes": [
+      "Earth",
+      "Mental",
+      "Enhancement"
+    ]
+  },
+  "Transmuter": {
+    "id": "863555406466514974",
+    "tower": "Tiger",
+    "description": "",
+    "manaTypes": [
+      "Earth",
+      "Water",
+      "Air"
+    ]
+  },
+  "Diviner": {
+    "id": "863555877625659424",
+    "tower": "Serpent",
+    "description": "",
+    "manaTypes": [
+      "Mental",
+      "Enhancement",
+      "Water"
+    ]
+  },
+  "Elementalist": {
+    "id": "863555891492028448",
+    "tower": "Serpent",
+    "description": "",
+    "manaTypes": [
+      "Fire",
+      "Air",
+      "Water"
+    ]
+  },
+  "Enchanter": {
+    "id": "863555894653616148",
+    "tower": "Serpent",
+    "description": "",
+    "manaTypes": [
+      "Transference",
+      "Mental",
+      "Light"
+    ]
+  },
+  "Guardian": {
+    "id": "863555897199820840",
+    "tower": "Serpent",
+    "description": "",
+    "manaTypes": [
+      "Enhancement",
+      "Life",
+      "Earth"
+    ]
+  },
+  "Mender": {
+    "id": "863555901288742922",
+    "tower": "Serpent",
+    "description": "",
+    "manaTypes": [
+      "Life",
+      "Earth",
+      "Water"
+    ]
+  },
+  "Shadow": {
+    "id": "863555903580143657",
+    "tower": "Serpent",
+    "description": "",
+    "manaTypes": [
+      "Umbral",
+      "Enhancement",
+      "Death"
+    ]
+  },
+  "Shaper": {
+    "id": "863555906469625866",
+    "tower": "Serpent",
+    "description": "",
+    "manaTypes": [
+      "Earth",
+      "Enhancement",
+      "Perception"
+    ]
+  },
+  "Summoner": {
+    "id": "863555909858230313",
+    "tower": "Serpent",
+    "description": "",
+    "manaTypes": [
+      "Air",
+      "Transference",
+      "Life"
+    ]
+  },
+  "Conjurer": {
+    "id": "863556574605475870",
+    "tower": "Pheonix",
+    "description": "",
+    "manaTypes": [
+      "Life",
+      "Umbral",
+      "Mental"
+    ]
+  },
+  "Dancer": {
+    "id": "863556610395602954",
+    "tower": "Pheonix",
+    "description": "",
+    "manaTypes": [
+      "Mental",
+      "Water",
+      "Air"
+    ]
+  },
+  "Mesmer": {
+    "id": "863556612672192535",
+    "tower": "Pheonix",
+    "description": "",
+    "manaTypes": [
+      "Perception",
+      "Death",
+      "Umbral"
+    ]
+  },
+  "Purifier": {
+    "id": "863556614904479745",
+    "tower": "Pheonix",
+    "description": "",
+    "manaTypes": [
+      "Light",
+      "Fire",
+      "Mental"
+    ]
+  },
+  "Pyromancer": {
+    "id": "863556617253290056",
+    "tower": "Pheonix",
+    "description": "",
+    "manaTypes": [
+      "Fire",
+      "Death",
+      "Umbral"
+    ]
+  },
+  "Shapeshifter": {
+    "id": "863556619382816770",
+    "tower": "Pheonix",
+    "description": "",
+    "manaTypes": [
+      "Perception",
+      "Earth",
+      "Life"
+    ]
+  },
+  "Spellsinger": {
+    "id": "863556622189985833",
+    "tower": "Pheonix",
+    "description": "",
+    "manaTypes": [
+      "Air",
+      "Perception",
+      "Light"
+    ]
+  },
+  "Swordmaster": {
+    "id": "863556624308633660",
+    "tower": "Pheonix",
+    "description": "",
+    "manaTypes": [
+      "Enhancement",
+      "Fire",
+      "Earth"
+    ]
+  },
+  "Assassin": {
+    "id": "863557106908004392",
+    "tower": "Hydra",
+    "description": "",
+    "manaTypes": [
+      "Umbral",
+      "Water",
+      "Death"
+    ]
+  },
+  "Commander": {
+    "id": "863557109974433822",
+    "tower": "Hydra",
+    "description": "",
+    "manaTypes": [
+      "Fire",
+      "Umbral",
+      "Air"
+    ]
+  },
+  "Executioner": {
+    "id": "863557112541085696",
+    "tower": "Hydra",
+    "description": "",
+    "manaTypes": [
+      "Death",
+      "Enhancement",
+      "Earth"
+    ]
+  },
+  "Juggernaut": {
+    "id": "863557114387234816",
+    "tower": "Hydra",
+    "description": "",
+    "manaTypes": [
+      "Transference",
+      "Fire",
+      "Earth"
+    ]
+  },
+  "Legionnaire": {
+    "id": "863557117008412672",
+    "tower": "Hydra",
+    "description": "",
+    "manaTypes": [
+      "Light",
+      "Air",
+      "Fire"
+    ]
+  },
+  "Saboteur": {
+    "id": "863557119324454922",
+    "tower": "Hydra",
+    "description": "",
+    "manaTypes": [
+      "Umbral",
+      "Earth",
+      "Fire"
+    ]
+  },
+  "Scourge": {
+    "id": "863557122196504616",
+    "tower": "Hydra",
+    "description": "",
+    "manaTypes": [
+      "Death",
+      "Air",
+      "Water"
+    ]
+  },
+  "Shieldbreaker": {
+    "id": "863557125024120842",
+    "tower": "Hydra",
+    "description": "",
+    "manaTypes": [
+      "Death",
+      "Transference",
+      "Fire"
+    ]
+  }
+}

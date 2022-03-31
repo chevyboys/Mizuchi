@@ -18,6 +18,7 @@ faq/*
 package-lock.json
 config/snowflakes.json
 package-lock.json
+<<<<<<< HEAD
 old/bot.js
 old/foreverBot.js
 old/Judgement/Attunement Roles Utils.js
@@ -302,3 +303,5 @@ old/utils/Utils.RolesLogin.js
 .yarn/cache/yallist-npm-4.0.0-b493d9e907-343617202a.zip
 .yarn/cache/zod-npm-3.14.3-017856a688-55fb4feb51.zip
 .yarn/releases/yarn-3.2.0.cjs
+=======
+>>>>>>> parent of fe0ddc5... move old things out
