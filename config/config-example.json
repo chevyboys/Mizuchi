@@ -1,21 +1,41 @@
 {
-  "AdminIds": [
-      ""
-  ],
-  "Webhooks": {
-      "error": {
-          "url": ""
-      },
-      "kesterBombs": {
-          "url": ""
-      },
-      "blogPosts": {
-          "url": ""
-      }
+  "adminId": [""],
+  "api": {
+    "google": {
+      "clientId": "",
+      "clientSecret" : "",
+      "redirect": ""
+    },
+    "snipcart": "",
+    "steam": ""
   },
-  "prefix": "!",
-  "Tokens": {
-      "primary": "",
-      "secondary": ""
-  }
+  "color": [248, 154, 34],
+  "error": {
+    "url": ""
+  },
+  "kesterBombs": {
+    "url": ""
+  },
+  "blogPosts": {
+    "url": ""
+  },
+  "events": [
+    "channelCreate",
+    "channelUpdate",
+    "guildMemberAdd",
+    "guildMemberRemove",
+    "guildMemberUpdate",
+    "interactionCreate",
+    "messageCreate",
+    "messageReactionAdd",
+    "messageReactionRemove",
+    "messageUpdate",
+    "ready",
+    "threadCreate",
+    "userUpdate"
+  ],
+  "climbersCourt": "",
+  "ownerId": "",
+  "prefix": "&",
+  "token": ""
 }
