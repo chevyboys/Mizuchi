@@ -85,9 +85,7 @@ let DadJoke = {
 Module.addEvent("messageCreate", (msg) => {
     if(!msg?.author?.bot) return;
     let curDate = moment();
-    let date = moment("mar 31");
-    if ((date && (date.month() == curDate.month()) && (date.date() == curDate.date()))) u.errorHandler(msg);
-    date = moment("april 1");
+    let date = moment("april 1");
     if (!(date && (date.month() == curDate.month()) && (date.date() == curDate.date()))) return;
     DadJoke.initiate(msg);
     
