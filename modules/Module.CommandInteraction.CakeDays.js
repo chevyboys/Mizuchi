@@ -47,7 +47,7 @@ async function testcakeOrJoinDays(guild) {
                     if (join && (join.month() == curDate.month()) && (join.date() == curDate.date()) && (join.year() < curDate.year())) {
                         let years = curDate.year() - join.year();
                         try {
-                            sendString = ` **They have been part of the server for ${years > 0 ? years : 1} ${(years > 1 ? "years" : "year")}! Glad you're with us!`;
+                            sendString = ` They have been part of the server for ${years > 0 ? years : 1} ${(years > 1 ? "years" : "year")}! Glad you're with us!`;
 
                         } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
                     }
