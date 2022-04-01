@@ -87,7 +87,7 @@ Module.addEvent("messageCreate", (msg) => {
     let curDate = moment();
     let date = moment("april 1");
     if (!(date && (date.month() == curDate.month()) && (date.date() == curDate.date()))) return;
-    DadJoke.initiate(msg);
+    //DadJoke.initiate(msg);
     
 })
 module.exports = Module;
