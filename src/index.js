@@ -4,7 +4,12 @@ const config = require("../config/config.json")
 
 const client = new SapphireClient({
      intents: ['GUILDS', 'GUILD_MESSAGES'],
-     defaultPrefix: config.prefix,
+     defaultPrefix: "!",
+     defaultCooldown: {
+        delay: 10_000,
+        filteredUsers: config.adminId,
+        limit: 4,   
+      }
     });
 
 client.login(config.Tokens.primary);
