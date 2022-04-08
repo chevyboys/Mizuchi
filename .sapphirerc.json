@@ -1,5 +1,4 @@
 {
-  "$schema": "https://raw.githubusercontent.com/sapphiredev/cli/main/templates/schemas/.sapphirerc.scheme.json",
   "projectLanguage": "js",
   "locations": {
     "base": "src",

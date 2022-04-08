@@ -13,4 +13,4 @@ const client = new SapphireClient({
     });
 
 client.login(config.Tokens.primary);
-console.log("Login Successful");
+console.log("logged in");

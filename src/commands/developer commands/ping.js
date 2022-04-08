@@ -13,9 +13,9 @@ class PingCommand extends Command {
       requiredClientPermissions: [],
     });
   }
-  async messageRun(msg) {
-    const msgOriginal = await msg.channel.send('Ping?');
-    const content = `Pong! Bot Latency ${Math.round(this.container.client.ws.ping)}ms. API Latency ${msgOriginal.createdTimestamp - msg.createdTimestamp}ms.`;
+  async messageRun(message) {
+    const msg = await message.channel.send('Ping?');
+    const content = `Pong! Bot Latency ${Math.round(this.container.client.ws.ping)}ms. API Latency ${msg.createdTimestamp - message.createdTimestamp}ms.`;
     return msg.edit(content);
   }
 
