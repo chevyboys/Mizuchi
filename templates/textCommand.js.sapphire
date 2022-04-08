@@ -1,0 +1,29 @@
+{
+  "category": "commands"
+}
+---
+const { Command, CommandOptionsRunTypeEnum } = require('@sapphire/framework');
+const u = require('../../utilities/General');
+
+class {{name}}Command extends Command {
+  constructor(context, options) {
+    super(context, {
+      ...options,
+      name: 'ping',
+      aliases: [],
+      description: "",
+      preconditions: [],
+      runIn: CommandOptionsRunTypeEnum.GuildAny,
+      requiredUserPermissions: [],
+      requiredClientPermissions: [],
+    });
+  }
+  async messageRun(message, args) {
+    
+  }
+
+}
+
+module.exports = {
+  {{name}}Command
+};
