@@ -1,10 +1,10 @@
 {
   "name": "tavare",
-  "version": "1.1.0",
+  "version": "3.0.0",
   "description": "Custom Discord bot for the Climber's Court",
-  "main": "foreverBot.js",
+  "main": "/src/index.js",
   "scripts": {
-    "test": "node bot.js"
+    "test": "/src/index.js"
   },
   "repository": {
     "type": "git",
@@ -42,5 +42,6 @@
     "extends": "eslint:recommended",
     "rules": []
   },
-  "nodeVersion": "17.1.0"
+  "nodeVersion": "17.1.0",
+  "packageManager": "yarn@3.2.0"
 }
