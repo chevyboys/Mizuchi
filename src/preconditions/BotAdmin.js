@@ -6,7 +6,10 @@ class BotAdminPrecondition extends Precondition {
     run(message) {
         return Config.AdminIds.includes(message.author.id)
             ? this.ok()
-            : this.error({ message: 'Only the bot administrators can use this command!' });
+            : this.error({ message: 'Only the bot administrators can use this command!',
+            context: { silent: true }
+         });
+
     }
 }
 

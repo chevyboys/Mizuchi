@@ -2,9 +2,9 @@
   "name": "tavare",
   "version": "3.0.0",
   "description": "Custom Discord bot for the Climber's Court",
-  "main": "/src/index.js",
+  "main": "node src/index.js",
   "scripts": {
-    "test": "/src/index.js"
+    "test": "node src/index.js"
   },
   "repository": {
     "type": "git",
