@@ -1,33 +1,21 @@
 {
-  "adminId": [""],
-  "api": {
-    "snipcart": "",
-    "steam": ""
-  },
-  "applicationId": "",
-  "color": [248, 154, 34],
-  "error": {
-    "url": ""
-  },
-  "events": [
-    "channelCreate",
-    "channelUpdate",
-    "guildBanAdd",
-    "guildMemberAdd",
-    "guildMemberRemove",
-    "guildMemberUpdate",
-    "interactionCreate",
-    "messageCreate",
-    "messageReactionAdd",
-    "messageReactionRemove",
-    "messageUpdate",
-    "presenceUpdate",
-    "ready",
-    "threadCreate",
-    "userUpdate"
+  "AdminIds": [
+      ""
   ],
-  "ldsg": "96335850576556032",
-  "ownerId": "111232201848295424",
+  "Webhooks": {
+      "error": {
+          "url": ""
+      },
+      "kesterBombs": {
+          "url": ""
+      },
+      "blogPosts": {
+          "url": ""
+      }
+  },
   "prefix": "!",
-  "token": ""
+  "Tokens": {
+      "primary": "",
+      "secondary": ""
+  }
 }

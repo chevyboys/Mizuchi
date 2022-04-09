@@ -1,0 +1,46 @@
+{
+  "channels": {
+    "ask": "",
+    "blogAnnouncements": "",
+    "earthTemple": "",
+    "faq": "",
+    "general": "",
+    "introductions": "",
+    "modRequests": "",
+    "roles": "",
+    "rules": "",
+    "transfer": ""
+  },
+  "emoji": {
+    "messageContextMenu": {
+      "bookmark": "",
+      "kesterBomb": "",
+      "pin": "",
+      "spoiler": ""
+    },
+    "upDawn": "",
+    "unDawn": ""
+  },
+  "guilds": {
+    "PrimaryServer": "",
+    "ClimbersCourt": "",
+    "TestServer": ""
+  },
+  "roles": {
+    "BotMaster": "",
+    "Admin": "",
+    "CakeDay": "",
+    "SoaringWings": "",
+    "Whisper": "",
+    "WorldMaker": "",
+    "Updates": {
+      "BotUpdates": "",
+      "MetaUpdates": "",
+      "TTRPGUpdates": "",
+      "BookUpdates": "",
+      "BlogUpdates": "",
+      "AllUpdates": "",
+      "RoleplayingUpdates": ""
+    }
+  }
+}

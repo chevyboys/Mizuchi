@@ -1,0 +1,12 @@
+Each of the standard preconditions whos filename contains a "+" will test for a role in the Heirarchy and all above it. 
+
+Role Heirarchy:
+Bot Administrators - People entrusted with OP level privilages. The kind of people you trust to run arbitrary code, so basically only the bot owner
+Server Administrators - People you trust with the permissons to manage large swaths of servers, including access to sensative data about the servers
+Server Moderators - People who have authority to moderate other members
+Server Bot Master - People who regulate the bots on a server but do not have administrative level access
+Server Guides - Trusted community members who can't moderate, but have a level of respect within the community
+
+Other preconditions
+Bot Maintanence - People who help set up the bot, Bot Masters and Administrators
+
