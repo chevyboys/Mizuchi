@@ -1,5 +1,7 @@
 const Discord = require("discord.js");
-const snowflakes = require("../../config/snowflakes.json")
+const snowflakes = require("../../config/snowflakes.json"),
+    config = require("../../config/config.json"),
+    errorLog = new Discord.WebhookClient(config.Webhooks.error);
 
 /**
  * @class 
@@ -26,8 +28,8 @@ class GeneralUtils {
      */
     static client;
     static color() {
-        if(!this.client) return "#000000"
-        const guild = this.client.guilds.cache.get(snowflakes.guilds.PrimaryServer) || this.client.Guilds.fetch(snowflakes.guilds.PrimaryServer);
+        if (!this.client) return "#000000"
+        const guild = this.client.guilds.cache.get(snowflakes.guilds.PrimaryServer) || this.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
         const botMember = guild.members.cache.get(this.client.user.id) || guild.members.fetch(this.client.user.id)
         return botMember.displayHexColor;
     }
@@ -50,7 +52,7 @@ class GeneralUtils {
             };
         }
         const embed = new Discord.MessageEmbed(data);
-        if (!data?.color) embed.setColor( this.color());
+        if (!data?.color) embed.setColor(this.color());
         if (!data?.timestamp && !suppressTimeStamp) embed.setTimestamp();
         return embed;
     }
@@ -61,16 +63,17 @@ class GeneralUtils {
   * @param {Discord.Message|Discord.Interaction|string} message Any Discord.Message, Discord.Interaction, or text string.
   */
     static errorHandler(error, message = null) {
-
+        
         if (!error || (error.name === "AbortError")) return;
+        let fromConsole = error.fromConsole? error.fromConsole : false
+        if(fromConsole) error = error.error || error;
+        if(!fromConsole) console.error(Date());
 
-        console.error(Date());
-
-        const embed = GeneralUtils.embed().setTitle(error.name ? error.name : "Warning");
+        const embed = GeneralUtils.embed().setTitle(error.name ? error.name : "Warning").setColor("ORANGE");
 
         if (message instanceof Discord.Message) {
             const loc = (message.guild ? `${message.guild?.name} > ${message.channel?.name}` : "DM");
-            console.error(`${message.author.username} in ${loc}: ${message.cleanContent}`);
+            if(!fromConsole) console.error(`${message.author.username} in ${loc}: ${message.cleanContent}`);
 
             message.channel.send("I've run into an error. I've let my devs know.")
                 .then(GeneralUtils.clean);
@@ -79,7 +82,7 @@ class GeneralUtils {
                 .addField("Command", message.cleanContent || "`undefined`", true);
         } else if (message instanceof Discord.Interaction) {
             const loc = (message.guild ? `${message.guild?.name} > ${message.channel?.name}` : "DM");
-            console.error(`Interaction by ${message.user.username} in ${loc}`);
+            if(!fromConsole) console.error(`Interaction by ${message.user.username} in ${loc}`);
 
             message[((message.deferred || message.replied) ? "editReply" : "reply")]({ content: "I've run into an error. I've let my devs know.", ephemeral: true }).catch(GeneralUtils.noop);
             embed.addField("User", message.user?.username, true)
@@ -93,17 +96,27 @@ class GeneralUtils {
             }
             embed.addField("Interaction", descriptionLines.join("\n"));
         } else if (typeof message === "string") {
-            console.error(message);
+            if(!fromConsole) console.error(message);
             embed.addField("Message", message);
         }
 
-        console.trace(error);
+        if(!fromConsole)  console.trace(error);
 
         let stack = (error.stack ? error.stack : error.toString());
         if (stack.length > 4096) stack = stack.slice(0, 4000);
 
         embed.setDescription(stack);
         errorLog.send({ embeds: [embed] });
+    }
+    /**
+     * logs something to the console and webhook
+     * @param {string} message the message to send in the logs
+     */
+    static log(message) {
+        //console.log(message)
+        message = message.toString();
+        if (message.length > 255) message = message.slice(0, 255);
+        return errorLog.send({embeds: [this.embed({}, true).setTitle(message)]})
     }
     /**
   * This task is extremely complicated.
@@ -116,6 +129,7 @@ class GeneralUtils {
     static noop() {
         // No-op, do nothing
     }
+    static outputStream
     /**
    * Returns a promise that will fulfill after the given amount of time.
    * If awaited, will block for the given amount of time.

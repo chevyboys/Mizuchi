@@ -18,6 +18,7 @@
     "@sapphire/framework": "^2.4.1",
     "@sapphire/plugin-api": "^3.2.0",
     "@sapphire/plugin-editable-commands": "^1.2.0",
+    "@sapphire/plugin-logger": "^2.2.1",
     "@sapphire/plugin-subcommands": "^2.2.0",
     "discord-api-types": "^0.30.0",
     "discord.js": "^13.6.0",
