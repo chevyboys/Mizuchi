@@ -1,3 +1,4 @@
+const Discord = require("discord.js")
 
 GeneralUtils = {
     /**
@@ -7,13 +8,24 @@ GeneralUtils = {
      * @returns 
      */
     clean: async function (msg, t = 20) {
-        await utils.wait(t);
+        await GeneralUtils.wait(t);
         if (msg instanceof Discord.CommandInteraction) {
-            msg.deleteReply().catch(utils.noop);
+            msg.deleteReply().catch(GeneralUtils.noop);
         } else if ((msg instanceof Discord.Message) && (msg.deletable)) {
-            msg.delete().catch(utils.noop);
+            msg.delete().catch(GeneralUtils.noop);
         }
         return Promise.resolve(msg);
+    },
+    /**
+  * This task is extremely complicated.
+  * You need to understand it perfectly to use it.
+  * It took millenia to perfect, and will take millenia
+  * more to understand, even for scholars.
+  *
+  * It does literally nothing.
+  * */
+    noop: () => {
+        // No-op, do nothing
     },
     /**
    * Returns a promise that will fulfill after the given amount of time.
