@@ -36,7 +36,6 @@ let start = async () => {
     await client.login(config.Tokens.primary);
     await client.guilds.fetch(snowflakes.guilds.PrimaryServer);
     U.client = client;
-    console.log("Login Successful");
 }
 start()
 
