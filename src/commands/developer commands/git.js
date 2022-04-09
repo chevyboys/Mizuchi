@@ -11,7 +11,7 @@ class GitCommand extends Command {
       preconditions: ["BotAdmin"],
       runIn: CommandOptionsRunTypeEnum.GuildAny,
       requiredUserPermissions: [],
-      requiredClientPermissions: [],
+      requiredClientPermissions: ["SEND_MESSAGES"],
     });
   }
   /**

@@ -10,7 +10,7 @@ class PingCommand extends Command {
       preconditions: ["BotMaintenance"],
       runIn: CommandOptionsRunTypeEnum.GuildAny,
       requiredUserPermissions: [],
-      requiredClientPermissions: [],
+      requiredClientPermissions: ["SEND_MESSAGES"],
     });
   }
   async messageRun(msg) {
