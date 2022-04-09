@@ -39,7 +39,7 @@
     "parserOptions": {
       "ecmaVersion": 2021
     },
-    "extends": "eslint:recommended",
+    "extends": "@sapphire",
     "rules": []
   },
   "nodeVersion": "17.1.0",

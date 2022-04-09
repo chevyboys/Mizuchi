@@ -16,7 +16,7 @@ class PingCommand extends Command {
   async messageRun(msg) {
     const msgOriginal = await msg.channel.send('Ping?');
     const content = `Pong! Bot Latency ${Math.round(this.container.client.ws.ping)}ms. API Latency ${msgOriginal.createdTimestamp - msg.createdTimestamp}ms.`;
-    return msg.edit(content);
+    return msgOriginal.edit(content);
   }
 
 }
