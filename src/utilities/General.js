@@ -27,9 +27,10 @@ class GeneralUtils {
      * @type {Discord.client} client
      */
     static client;
+    static PrimaryServer;
     static color() {
         if (!this.client) return "#000000"
-        const guild = this.client.guilds.cache.get(snowflakes.guilds.PrimaryServer) || this.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
+        const guild = PrimaryServery || this.client.guilds.cache.get(snowflakes.guilds.PrimaryServer) || this.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
         const botMember = guild.members.cache.get(this.client.user.id) || guild.members.fetch(this.client.user.id)
         return botMember.displayHexColor;
     }
@@ -108,6 +109,7 @@ class GeneralUtils {
         embed.setDescription(stack);
         errorLog.send({ embeds: [embed] });
     }
+    static errorLog = errorLog;
     /**
      * logs something to the console and webhook
      * @param {string} message the message to send in the logs
@@ -129,7 +131,7 @@ class GeneralUtils {
     static noop() {
         // No-op, do nothing
     }
-    static outputStream
+    
     /**
    * Returns a promise that will fulfill after the given amount of time.
    * If awaited, will block for the given amount of time.
