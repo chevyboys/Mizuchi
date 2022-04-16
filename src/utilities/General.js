@@ -30,7 +30,7 @@ class GeneralUtils {
     static PrimaryServer;
     static color() {
         if (!this.client) return "#000000"
-        const guild = PrimaryServery || this.client.guilds.cache.get(snowflakes.guilds.PrimaryServer) || this.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
+        const guild = GeneralUtils.PrimaryServery || this.client.guilds.cache.get(snowflakes.guilds.PrimaryServer) || this.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
         const botMember = guild.members.cache.get(this.client.user.id) || guild.members.fetch(this.client.user.id)
         return botMember.displayHexColor;
     }
