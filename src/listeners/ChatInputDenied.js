@@ -6,7 +6,7 @@ class CommandDeniedListener extends Listener {
     super(context, {
       ...options,
       once: false,
-      event: 'ChatInputCommandDenied'
+      event: 'chatInputCommandDenied'
     });
   }
   run(error, { interaction }) {

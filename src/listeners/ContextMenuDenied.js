@@ -6,7 +6,7 @@ class CommandDeniedListener extends Listener {
     super(context, {
       ...options,
       once: false,
-      event: 'ContextMenuCommandDenied'
+      event: 'contextMenuCommandDenied'
     });
   }
   run(error, { interaction }) {
