@@ -1,16 +1,11 @@
-const { Precondition } = require('@sapphire/framework'),
-    Config = require("../../config/config.json"),
+const build = require("../utilities/Preconditions").build,
     Snowflakes = require("../../config/snowflakes.json")
 
-class ServerAdminPrecondition extends Precondition {
-
-    run(message) {
-        return (Config.AdminIds.includes(message.author.id) || message.member?.roles.cache.has(Snowflakes.roles.Admin) || message.member?.permissions.has("ADMINISTRATOR") )
-            ? this.ok()
-            : this.error({ message: 'Only the bot owner, or server administrators can use this command!' });
-    }
-}
+let CustomPrecondition = build({
+    AllowedRoleResolvableArray: [Snowflakes.roles.Admin],
+    rejectionMessage: "Only the bot masters and server administration can do that",
+})
 
 module.exports = {
-    ServerAdminPrecondition
+    CustomPrecondition
 };
