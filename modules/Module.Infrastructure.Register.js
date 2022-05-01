@@ -27,7 +27,8 @@ let restrict = async (command, allowedRoles) => {
         }
         permissions.push(perms)
     }
-    await command.permissions.add({ permissions });
+    return "We can't do this anymore"
+    //await command.permissions.add({ permissions });
 }
 
 const Module = new Augur.Module()

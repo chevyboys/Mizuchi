@@ -1,6 +1,7 @@
 {
   "channels": {
     "ask": "",
+    "questionDiscussion": "",
     "blogAnnouncements": "",
     "earthTemple": "",
     "faq": "",
@@ -30,6 +31,7 @@
     "BotMaster": "",
     "Admin": "",
     "CakeDay": "",
+    "LARPer": "",
     "SoaringWings": "",
     "Whisper": "",
     "WorldMaker": "",
