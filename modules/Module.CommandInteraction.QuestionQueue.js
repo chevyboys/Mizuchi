@@ -62,7 +62,7 @@ async function deleteQuestion(interaction, targetId) {
     }
     target = [target];
     //permissions check
-    if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && interaction.user.id != asker) {
+    if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && !interaction.member.roles.cache.has(snowflakes.roles.LARPer) && interaction.user.id != asker) {
         interaction.reply({ content: "Radiance cannot permit you to do that", ephemeral: true });
         return;
     }
@@ -72,11 +72,21 @@ async function deleteQuestion(interaction, targetId) {
         return;
     }
 
-    interaction.reply({ content: `I have removed ${target[0].string ? target[0].string : target[0]}`, ephemeral: true });
+    //allow LARPers to remove questions that have already been asked
+    if (interaction.member.roles.cache.has(snowflakes.roles.LARPer)) {
+        interaction.reply({ content: `I have moved ${target[0].string ? target[0].string : target[0]} to the question discussion channel`, ephemeral: true });
+        let newResponseChannel = interaction.guild.channels.cache.get(snowflakes.channels.questionDiscussion)
+        let newEmbed = interaction.message.embeds[0]
+        newResponseChannel.send({content: `<@${asker}>, ${interaction.member.displayName} flagged your question as either already answered, or answerable by the community. They should provide you with more information as a response to this message.`, embeds:[newEmbed], allowedMentions: {parse: ["users"]} })
+    }
 
-    //allow the asker to send again
-    if (askedRecently.has(asker)) {
-        askedRecently.delete(asker);
+    else {
+        interaction.reply({ content: `I have removed ${target[0].string ? target[0].string : target[0]}`, ephemeral: true });
+
+        //allow the asker to send again
+        if (askedRecently.has(asker)) {
+            askedRecently.delete(asker);
+        }
     }
 
 
@@ -297,7 +307,7 @@ const Module = new Augur.Module()
             // Load data
             files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
             rawData = [];
-            
+
             for (i = 0; i < files.length; i++) {
                 data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
                 //ensure data has minimum required feilds.
@@ -334,7 +344,7 @@ const Module = new Augur.Module()
             while (strings.length > 2000) {
                 interaction.channel.send({ content: strings.substring(0, 2000) });
                 strings = strings.substring(2000);
-            }   
+            }
             interaction.reply({ content: `${strings}` });
 
             // Delete vote messages
