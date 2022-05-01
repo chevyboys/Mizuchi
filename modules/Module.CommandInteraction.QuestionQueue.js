@@ -20,7 +20,7 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, bu
 
             new MessageButton()
                 .setCustomId('voteCheck')
-                .setLabel(`${(data.system.votes == 0 || !data.system.votes) ? 1 : data.system.votes}`)
+                .setLabel(`${(data.system.IDs.length == 0 || !data.system.IDs.length) ? 1 : data.system.IDs.length}`)
                 .setStyle(buttonTwoStyle || "SECONDARY")
                 .setEmoji(buttonTwoEmoji || ''),
 
@@ -52,7 +52,7 @@ async function deleteQuestion(interaction, targetId) {
             file: files[i],
             fetch: data.fetch,
             string: `<@${data.details.asker}>: ${data.details.question}`,
-            votes: data.system.votes
+            votes: data.system.IDs.length
         });
     }
     let target = rawData.find(msg => msg.fetch.message == targetId);
@@ -147,7 +147,6 @@ async function ask(interaction) {
                 message: ""
             },
             system: {
-                votes: 1,
                 IDs: [
                     Module.client.user.id
                 ],
@@ -177,7 +176,6 @@ async function ask(interaction) {
                 message: msg.id
             },
             system: {
-                votes: 1,
                 IDs: [
                     Module.client.user.id
                 ],
@@ -189,7 +187,7 @@ async function ask(interaction) {
         fs.writeFileSync(`./data/${msg.id}.json`, JSON.stringify(data, null, 4));
 
         // Adds the user to the set so that they can't ask for a few hours
-        if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper)) {
+        if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster)) {
             askedRecently.add(interaction.user.id);
             setTimeout(() => {
                 // Removes the user from the set after 3 hours
@@ -221,7 +219,6 @@ const Module = new Augur.Module()
                 msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
 
             } else {
-                data.system.votes += 1;
                 data.system.IDs.push(interaction.user.id);
                 fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
             }
@@ -261,7 +258,10 @@ const Module = new Augur.Module()
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
             row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
-            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+
+            let author = interaction.guild.members.cache.get(data.details.asker)
+            
+            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question).setAuthor({name:author.displayName, iconURL: author.displayAvatarURL() })], components: [row] });
 
             // Respond
             interaction.deferUpdate();
@@ -276,7 +276,6 @@ const Module = new Augur.Module()
 
             // Already voted?
             if (data.system.IDs.includes(interaction.user.id)) {
-                data.system.votes -= 1;
                 data.system.IDs = data.system.IDs.filter((id) => (id != interaction.user.id && id != null));
                 fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
             } else {
@@ -311,12 +310,12 @@ const Module = new Augur.Module()
             for (i = 0; i < files.length; i++) {
                 data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
                 //ensure data has minimum required feilds.
-                if (data && data.system && data.system.votes && data.fetch && data.details && data.details.asker && data.details.question) {
+                if (data && data.system && data.system.IDs && data.fetch && data.details && data.details.asker && data.details.question) {
                     rawData.push({
                         file: files[i],
                         fetch: data.fetch,
                         string: `<@${data.details.asker}>: ${data.details.question}`,
-                        votes: data.system.votes
+                        votes: data.system.IDs.length
                     });
                 }
             }
@@ -390,7 +389,7 @@ const Module = new Augur.Module()
                     file: files[i],
                     fetch: data.fetch,
                     string: `<@${data.details.asker}>: ${data.details.question}`,
-                    votes: data.system.votes
+                    votes: data.system.IDs.length
                 });
             }
 
@@ -406,7 +405,7 @@ const Module = new Augur.Module()
 
             for (i = 0; i < numberOfQuestions; i++) {
                 if (sorted[i]) {
-                    statEmbed.addField("Top Question " + i + ":" + "( " + sorted[i].votes + " votes)", sorted[i].string.substring(0, 1000));
+                    statEmbed.addField("Top Question " + (i + 1) + ":" + "( " + sorted[i].votes + " votes)", sorted[i].string.substring(0, 1000));
                 }
             }
             // Send
