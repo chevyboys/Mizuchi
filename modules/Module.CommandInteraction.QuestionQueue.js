@@ -261,7 +261,7 @@ const Module = new Augur.Module()
 
             let author = interaction.guild.members.cache.get(data.details.asker)
             
-            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question).setAuthor({name:author.displayName, iconURL: author.displayAvatarURL() })], components: [row] });
+            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question).setAuthor({name: author ? author.displayName : "unknown user", iconURL: author? author.displayAvatarURL() : "https://www.seekpng.com/png/full/9-96714_question-mark-png-question-mark-black-png.png"})], components: [row] });
 
             // Respond
             interaction.deferUpdate();
