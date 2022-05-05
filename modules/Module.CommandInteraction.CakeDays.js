@@ -44,8 +44,8 @@ async function testcakeOrJoinDays(guild) {
                 let sendString = "";
                 if (date && (date.month() == curDate.month()) && (date.date() == curDate.date())) {
                     let join = member ? moment(member.joinedAt).subtract(0, "days") : curDate;
+                    let years = curDate.year() - join.year();
                     if (join && (join.month() == curDate.month()) && (join.date() == curDate.date()) && (join.year() < curDate.year())) {
-                        let years = curDate.year() - join.year();
                         try {
                             sendString = ` They have been part of the server for ${years > 0 ? years : 1} ${(years > 1 ? "years" : "year")}! Glad you're with us!`;
 
@@ -54,7 +54,7 @@ async function testcakeOrJoinDays(guild) {
                     messageContentArray.push(`:birthday: :confetti_ball: :tada: Happy Cake Day, **${cakeOrJoinDayPeep.username}**!` + sendString + `:tada: :confetti_ball: :birthday:`);
 
 
-                    if (member) u.addRoles(member, snowflakes.roles.CakeDay);
+                    if (member && years != 0) u.addRoles(member, snowflakes.roles.CakeDay);
                 }
                 else if (member && member.roles.cache.has(snowflakes.roles.CakeDay)) {
                     u.addRoles(member, snowflakes.roles.CakeDay, true);
@@ -73,7 +73,7 @@ async function testcakeOrJoinDays(guild) {
         }
         arrayOfMessagesToSend.push(messageContentArray)
         for (const message of arrayOfMessagesToSend) {
-            await guild.channels.cache.get(snowflakes.channels.general).send(message.join("\n"));
+            //await guild.channels.cache.get(snowflakes.channels.general).send(message.join("\n"));
         }
 
     } catch (e) { u.errorHandler(e, "cakeOrJoinDay Error"); }
