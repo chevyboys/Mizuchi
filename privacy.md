@@ -3,7 +3,6 @@ We don't give your data to anyone else (unless we are required to by law).
 We store data only to improve the user experience of people using this bot. 
 and example of data we store:
 - Discord user id - So we can respond to your commands and keep your data all together in case you want it removed
-- Cakeday (either a server join date or a date the user specifies if they want to change it) - On an opt in basis only, and you can opt out at any time. We need to store this info for our cakeday system to function
 - Roles a user has had - Stored so that if you leave and rejoin, you don't have to remember all the roles you used to have, the bot will just give them back to you
 - message metadata (e.g. when the last time you sent a message was) - Lets us do things like make sure we delete your data if you haven't done anything in a while
 
