@@ -93,7 +93,7 @@ const utils = {
           if (stack.indexOf("DiscordAPIError: Missing Permissions") > -1) {
             let embed = utils.embed({
               color: config.color,
-              title: `I couldn't give ${member.displayName} a role`,
+              title: `I couldn't ${takeRoleInsteadOfGive? 'remove' : 'grant'} a role ${takeRoleInsteadOfGive? 'from' : 'to '} ${member.displayName} `,
               author: {
                 name: member.displayName,
                 icon_url: member.displayAvatarURL(),
@@ -101,7 +101,7 @@ const utils = {
               description: `I don't have permission to ${takeRoleInsteadOfGive? 'remove' : 'grant'} the <@&${rolesArray[0]}> role ${takeRoleInsteadOfGive? 'from' : 'to '} <@${member.id}>. Please ${takeRoleInsteadOfGive? 'remove' : 'grant'} that to them on my behalf.`,
               timestamp: new Date().toISOString(),
               footer: {
-                text: `Role ${takeRoleInsteadOfGive? 'remove' : 'grant'} Permission Denied`,
+                text: `Role ${takeRoleInsteadOfGive? 'Remove' : 'Grant'} Permission Denied`,
               },
             
             }
