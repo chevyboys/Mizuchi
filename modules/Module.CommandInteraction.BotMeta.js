@@ -8,7 +8,7 @@ const snowflakes = require('../config/snowflakes.json');
 const Discord = require("discord.js")
 let previousDiscordIncident;
 
-async function setBotStatus({clientuser, type, status, url}){
+async function setBotStatus({clientuser, type, status, url}){s
     clientuser.setActivity({ type: type.toUpperCase(), url: url, name: status.trim() });
 
 }
