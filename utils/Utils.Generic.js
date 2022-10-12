@@ -138,7 +138,13 @@ const utils = {
    */
   cleanInteraction: async function (interaction, t = 2000) {
     await utils.wait(t);
-    interaction.deleteReply();
+    try {
+      interaction.deleteReply();
+    } catch (error) {
+      console.log("could not delete interaction reply")
+      console.error(error);
+    }
+    
   },
   /**
    * Shortcut to Discord.Collection. See docs there for reference.
