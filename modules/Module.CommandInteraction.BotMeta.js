@@ -241,7 +241,7 @@ Module
                     if (str.indexOf("youtube") > -1 || str.indexOf("twitch") > -1) return match ? match[1] || match[0] : null;
                     else return null;
                 }
-                url = isURL(interaction?.options?.get("url")?.value) || interaction?.options?.get("url")?.value;
+                url = interaction?.options?.get("url")?.value; //isURL(interaction?.options?.get("url")?.value);
                 if(!url) return interaction.reply({content: "That URL is not valid, streaming requires a valid youtube or twitch url", ephemeral: true})
             }
             await setBotStatus({
