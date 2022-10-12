@@ -248,7 +248,7 @@ Module
                 type: interaction?.options?.get("type")?.value, 
                 status:interaction?.options?.get("status")?.value, 
                 url: url })
-            return interaction.reply({content: `The bot's status has been set to ${interaction?.options?.get("type")?.value} ${interaction?.options?.get("status")?.value}`, ephemeral: true})
+            return interaction.reply({content: `The bot's status has been set to ${interaction?.options?.get("type")?.value} ${interaction?.options?.get("status")?.value}${url? "\nfor the url " + url : ""}`, ephemeral: true})
         }
 
     })
