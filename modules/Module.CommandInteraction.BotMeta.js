@@ -8,7 +8,11 @@ const snowflakes = require('../config/snowflakes.json');
 const Discord = require("discord.js")
 let previousDiscordIncident;
 
+async function setBotStatus(interaction, type, status, url){
 
+    await interaction.client.user.setActivity({ type: type.toUpperCase(), url: url, name: status.trim() });
+
+}
 /**
  * Sends discord's current status as reported by the discord API
  * @param {(Discord.Message|Discord.Interaction)} interaction the interaction that this is responding to
@@ -213,15 +217,7 @@ Module
                 command = command.toUpperCase();
                 let url = false;
                 if (command == "STREAMING") {
-
-                    //detect if URL
-                    const args = suffix.trim().split(/s/);
-                    //Determine if a string is a url
-                    function isURL(str) {
-                        const urlMatch = /<?(https?:\/\/\S+)>?/;
-                        const match = urlMatch.exec(str);
-                        return match ? match[1] : null;
-                    }
+                    
                     url = isURL(suffix);
                     msg.client.user.setActivity({ type: command.toUpperCase(), url: url, name: suffix.replace(url, "").replace("  ", " ").trim() });
                 }
@@ -232,6 +228,28 @@ Module
             msg.react("👌");
         },
         permissions: (msg) => (Module.config.adminId.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin))
+    }).addInteractionCommand({
+        name: "status",
+        guildId: snowflakes.guilds.PrimaryServer,
+        process: async (interaction) => {
+            let url = null
+            if (url && interaction?.options?.get("type")?.value == "streaming") {
+                function isURL(str) {
+                    const urlMatch = /<?(https?:\/\/\S+)>?/;
+                    const match = urlMatch.exec(str);
+                    return match ? match[1] : null;
+                }
+                url = isURL(interaction?.options?.get("url")?.value)
+                if(url == null) return interaction.reply({content: "That URL is not valid, streaming requires a valid url", ephemeral: true})
+            }
+            await setBotStatus({
+                interaction: interaction, 
+                type: interaction?.options?.get("type")?.value, 
+                status:interaction?.options?.get("status")?.value, 
+                url: url })
+            return interaction.reply({content: `The bot's status has been set to ${interaction?.options?.get("type")?.value} ${interaction?.options?.get("status")?.value}`})
+        }
+
     })
     .addCommand({
         name: "say",
