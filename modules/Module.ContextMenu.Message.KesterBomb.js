@@ -31,7 +31,7 @@ async function kesterBomb(inputObject) {
     newMessage.components = msg.components;
     //Use the target's Avatar and Name
     newMessage.username = msg.member.displayName;
-    newMessage.avatarURL = msg.member.avatarURL()
+    newMessage.avatarURL = inputObject.interaction?.member.avatarURL({format:'png'}) || msg.member.avatarURL({format:'png'});  
 
     const kesterBombHook = new Discord.WebhookClient(config.kesterBombs)
     kesterBombHook.send(newMessage)
