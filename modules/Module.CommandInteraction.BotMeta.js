@@ -247,10 +247,10 @@ Module
             await setBotStatus({
                 clientuser: Module.client.user, 
                 type: interaction?.options?.get("type")?.value, 
-                status:interaction?.options?.get("status")?.value, 
-                url: url })
+                status: interaction?.options?.get("status")?.value, 
+                url: interaction?.options?.get("url")?.value })
                 
-            return interaction.reply({content: `The bot's status has been set to ${interaction?.options?.get("type")?.value} ${interaction?.options?.get("status")?.value}${url? "\nfor the url " + url : ""}`, ephemeral: true})
+            return interaction.reply({content: `The bot's status has been set to ${interaction?.options?.get("type")?.value} ${interaction?.options?.get("status")?.value}${interaction?.options?.get("url")?.value? "\nfor the url " + interaction?.options?.get("url")?.value : ""}`, ephemeral: true})
         }
 
     })
