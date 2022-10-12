@@ -39,7 +39,7 @@
       {
         "type": 3,
         "name": "url",
-        "description": "the url (only works for streaming)"
+        "description": "the twitch or youtube url (only works for streaming)"
       }
     ]
   }
