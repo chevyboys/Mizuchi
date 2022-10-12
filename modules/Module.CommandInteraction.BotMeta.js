@@ -237,11 +237,11 @@ Module
                 function isURL(str) {
                     const urlMatch = /<?(https?:\/\/\S+)>?/;
                     const match = urlMatch.exec(str);
-                    if (str.indexOf("youtube") > -1 || str.indexOf("twitch") > -1) return match ? match[1] : null;
+                    if (str.indexOf("youtube") > -1 || str.indexOf("twitch") > -1) return match ? match[1] || match[0] : null;
                     else return null;
                 }
-                url = isURL(interaction?.options?.get("url")?.value)
-                if(url == null) return interaction.reply({content: "That URL is not valid, streaming requires a valid youtube or twitch url", ephemeral: true})
+                url = isURL(interaction?.options?.get("url")?.value);
+                if(!url) return interaction.reply({content: "That URL is not valid, streaming requires a valid youtube or twitch url", ephemeral: true})
             }
             await setBotStatus({
                 clientuser: Module.client.user, 
