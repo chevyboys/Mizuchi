@@ -232,6 +232,7 @@ Module
         name: "status",
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
+            console.log(JSON.stringify(interaction.options.map()), 0, 2);
             let url = null
             if (url && interaction?.options?.get("type")?.value.toLowerCase().indexOf("stream") > -1) {
                 function isURL(str) {
@@ -248,6 +249,7 @@ Module
                 type: interaction?.options?.get("type")?.value, 
                 status:interaction?.options?.get("status")?.value, 
                 url: url })
+                
             return interaction.reply({content: `The bot's status has been set to ${interaction?.options?.get("type")?.value} ${interaction?.options?.get("status")?.value}${url? "\nfor the url " + url : ""}`, ephemeral: true})
         }
 
