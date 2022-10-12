@@ -98,7 +98,7 @@ const utils = {
                 name: member.displayName,
                 icon_url: member.displayAvatarURL(),
               },
-              description: `I don't have permission to ${takeRoleInsteadOfGive? 'remove' : 'grant'} the <@&${roles[0]}> role ${takeRoleInsteadOfGive? 'from' : 'to '} <@${member.id}>. Please ${takeRoleInsteadOfGive? 'remove' : 'grant'} that to them on my behalf.`,
+              description: `I don't have permission to ${takeRoleInsteadOfGive? 'remove' : 'grant'} the <@&${rolesArray[0]}> role ${takeRoleInsteadOfGive? 'from' : 'to '} <@${member.id}>. Please ${takeRoleInsteadOfGive? 'remove' : 'grant'} that to them on my behalf.`,
               timestamp: new Date().toISOString(),
               footer: {
                 text: `Role ${takeRoleInsteadOfGive? 'remove' : 'grant'} Permission Denied`,
