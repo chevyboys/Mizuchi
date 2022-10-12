@@ -8,9 +8,9 @@ const snowflakes = require('../config/snowflakes.json');
 const Discord = require("discord.js")
 let previousDiscordIncident;
 
-async function setBotStatus(interaction, type, status, url){
-
-    await interaction.client.user.setActivity({ type: type.toUpperCase(), url: url, name: status.trim() });
+async function setBotStatus(client, type, status, url){
+    
+    await client.user.setActivity({ type: type.toUpperCase(), url: url, name: status.trim() });
 
 }
 /**
@@ -243,7 +243,7 @@ Module
                 if(url == null) return interaction.reply({content: "That URL is not valid, streaming requires a valid url", ephemeral: true})
             }
             await setBotStatus({
-                interaction: interaction, 
+                client: Module.client, 
                 type: interaction?.options?.get("type")?.value, 
                 status:interaction?.options?.get("status")?.value, 
                 url: url })
