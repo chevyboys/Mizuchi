@@ -106,7 +106,7 @@ const utils = {
             
             }
           )
-          message.client.channels.cache.get(snowflakes.channels.modRequests).send({ content: `<@&${snowflakes.roles.Whisper}>`, embeds: [embed], allowedMentions:{roles:[snowflakes.roles.Whisper]} });
+          guild.channels.cache.get(snowflakes.channels.modRequests).send({ content: `<@&${snowflakes.roles.Whisper}>`, embeds: [embed], allowedMentions:{roles:[snowflakes.roles.Whisper]} });
         }
         else utils.errorHandler(error);
         
