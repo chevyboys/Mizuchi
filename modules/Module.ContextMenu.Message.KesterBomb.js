@@ -30,7 +30,7 @@ async function kesterBomb(inputObject) {
         newMessage.files = [msg.attachments?.first()?.url]
     newMessage.components = msg.components;
     //Use the target's Avatar and Name
-    newMessage.username = msg.member.displayName;
+    newMessage.username = inputObject.interaction?.member.displayName || msg.member.displayName;
     newMessage.avatarURL = inputObject.interaction?.member.avatarURL({format:'png'}) || msg.member.avatarURL({format:'png'});  
 
     const kesterBombHook = new Discord.WebhookClient(config.kesterBombs)
