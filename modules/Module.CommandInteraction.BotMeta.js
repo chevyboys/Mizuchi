@@ -10,7 +10,7 @@ let previousDiscordIncident;
 
 async function setBotStatus(clientuser, type, status, url){
     
-    Clientuser.setActivity({ type: type.toUpperCase(), url: url, name: status.trim() });
+    clientuser.setActivity({ type: type.toUpperCase(), url: url, name: status.trim() });
 
 }
 /**
