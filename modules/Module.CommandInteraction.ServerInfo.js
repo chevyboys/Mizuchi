@@ -2,6 +2,7 @@ const Augur = require("augurbot"),
     u = require("../utils/Utils.Generic");
 const { BaseMessageComponent, MessageButton, MessageActionRow } = require("discord.js");
 const snowflakes = require('../config/snowflakes.json');
+let config = require("../config/config.json");
 
 
 let memeLinks = [
@@ -64,7 +65,7 @@ const Module = new Augur.Module()
 
             let color = whisperRole.hexColor;
 
-            let embed = u.embed().setTitle("Current Climbers Court Staff Members:").setDescription(`<@&${snowflakes.roles.Admin}>:` + "```" + Admin + "```\n\n" + `<@&${snowflakes.roles.Whisper}>:` + "```" + Mod + "```\n\n" + `<@&${snowflakes.roles.SoaringWings}>:` + "```" + SW + "```\n\n\n\n").setColor(color);
+            let embed = u.embed().setTitle("Current Climbers Court Staff Members:").setDescription(`<@&${snowflakes.roles.Admin}>:` + "```" + Admin + "```\n\n" + `<@&${snowflakes.roles.Whisper}>:` + "```" + Mod + "```\n\n" + `<@&${snowflakes.roles.SoaringWings}>:` + "```" + SW + "```\n\n\n\n").addFields([{name: "Join our staff:", value: config.staffApplicationLink? config.staffApplicationLink : "```No Staff Application link is available at this time```" }]).setColor(color);
 
             interaction.editReply({ embeds: [embed] });
         }
