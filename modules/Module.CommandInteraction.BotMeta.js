@@ -232,7 +232,7 @@ Module
         name: "status",
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
-            console.log(JSON.stringify(interaction.options.map()), 0, 2);
+            console.log(JSON.stringify(interaction.options), 0, 2);
             let url = null
             if (url && interaction?.options?.get("type")?.value.toLowerCase().indexOf("stream") > -1) {
                 function isURL(str) {
