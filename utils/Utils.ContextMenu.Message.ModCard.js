@@ -60,7 +60,7 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
   async function modRequestCard(message, interaction, user) {
     try {
       let embed = await modRequestEmbed(message, interaction, user)
-      let content = `<@${snowflakes.roles.Whisper}>`;
+      let content = `<@&${snowflakes.roles.Whisper}>`;
       let card = await message.client.channels.cache.get(snowflakes.channels.modRequests).send({ content: content, embeds: [embed], components: (modRequestActions) });
       return card;
     } catch (error) { u.errorHandler(error, `${modRequestFunctionName} Card Reaction`); }
