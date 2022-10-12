@@ -233,7 +233,7 @@ Module
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
             let url = null
-            if (url && interaction?.options?.get("type")?.value == "streaming") {
+            if (url && interaction?.options?.get("type")?.value.toLowerCase().indexOf("stream") > -1) {
                 function isURL(str) {
                     const urlMatch = /<?(https?:\/\/\S+)>?/;
                     const match = urlMatch.exec(str);
