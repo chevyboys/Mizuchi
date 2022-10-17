@@ -220,7 +220,7 @@ async function editQuestion(interaction, targetId) {
         .setCustomId('editQuestionModalInput')
         .setLabel("New Question Text")
         .setMaxLength(1000)
-        .setPlaceholder(target[0].string)
+        .setPlaceholder(target[0].string.trim(0, 99))
         // Paragraph means multiple lines of text.
         .setStyle("PARAGRAPH");
     const firstActionRow = new MessageActionRow().addComponents(newQuestionInput);
