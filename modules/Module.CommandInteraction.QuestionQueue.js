@@ -554,7 +554,11 @@ const Module = new Augur.Module()
 
             let statEmbed = u.embed().setTitle("Question Queue Stats").setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000")
             let page = interaction?.options?.get("page")?.value || 1
-            let numberOfQuestions = 5
+
+            let numberOfQuestions = 5;
+
+            if (page < 1) page = 1;
+
             // Load data
             files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
             rawData = [];
@@ -577,7 +581,7 @@ const Module = new Augur.Module()
                 interaction.reply({ embeds: [statEmbed] });
                 return
             }
-
+            if (page > Math.ceil(sorted.length / numberOfQuestions)) page = Math.ceil(sorted.length / numberOfQuestions);
             for (i = page * numberOfQuestions - numberOfQuestions; i < page * numberOfQuestions; i++) {
                 if (sorted[i]) {
                     statEmbed.addField("Top Question " + (i + 1) + ":" + "( " + sorted[i].votes + " votes)", sorted[i].string.substring(0, 1000));
