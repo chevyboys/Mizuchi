@@ -53,6 +53,15 @@ const Module = new Augur.Module()
                         .setRequired(false)
                 ),
             new SlashCommandBuilder()
+                .setName('transfer')
+                .setDescription('Get the 5 most popular questions!')
+                .addIntegerOption(option =>
+                    option
+                        .setName('questions')
+                        .setDescription('The number of questions to transfer')
+                        .setRequired(false)
+                ),
+            new SlashCommandBuilder()
                 .setName('question-remove')
                 .setDescription('Remove a question from the question queue')
                 .addStringOption(option =>

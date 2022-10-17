@@ -553,7 +553,7 @@ const Module = new Augur.Module()
         process: async (interaction) => {
 
             let statEmbed = u.embed().setTitle("Question Queue Stats").setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000")
-
+            let page = interaction?.options?.get("page")?.value || 1
             let numberOfQuestions = 5
             // Load data
             files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
@@ -578,11 +578,12 @@ const Module = new Augur.Module()
                 return
             }
 
-            for (i = 0; i < numberOfQuestions; i++) {
+            for (i = page * numberOfQuestions - numberOfQuestions; i < page * numberOfQuestions; i++) {
                 if (sorted[i]) {
                     statEmbed.addField("Top Question " + (i + 1) + ":" + "( " + sorted[i].votes + " votes)", sorted[i].string.substring(0, 1000));
                 }
             }
+            statEmbed.setFooter({ text: `Page ${page} of ${Math.ceil(sorted.length / numberOfQuestions)}` });
             // Send
             interaction.reply({ embeds: [statEmbed] });
         }

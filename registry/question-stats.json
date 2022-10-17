@@ -1,5 +1,11 @@
 {
-    "name": "question-stats",
-    "description": "gets question queue stats",
-    "options": []
-  }
+  "name": "question-stats",
+  "description": "gets question queue stats",
+  "options": [
+    {
+      "type": 4,
+      "name": "page",
+      "description": "the page to select from, default 1"
+    }
+  ]
+}
