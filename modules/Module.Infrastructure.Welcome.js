@@ -3,6 +3,7 @@ const Augur = require("augurbot"),
   db = require("../utils/Utils.Database"),
   snowflakes = require("../config/snowflakes.json");
 const fs = require('fs');
+const CakedayOptButtons = require("../utils/Utils.CakedayOptButtons")
 
 function delay(time) {
   return new Promise(resolve => setTimeout(resolve, time));
@@ -115,7 +116,7 @@ const Module = new Augur.Module()
       }
 
       if (!member.user.bot)
-        general.send(welcomeStringCommandOverride({ content: welcomeString, allowedMentions: { users: [member.user.id] } }));
+        general.send(welcomeStringCommandOverride({ content: welcomeString, allowedMentions: { users: [member.user.id] }, components: CakedayOptButtons }));
       u.noop();
 
     } catch (e) { u.errorHandler(e, "New Member Add"); }

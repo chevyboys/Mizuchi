@@ -11,6 +11,11 @@
             "type": 6,
             "name": "target",
             "description": "see when this person's cake day is. Admins can use both date and target to set someone's cakeDay"
+        },
+        {
+            "type": 5,
+            "name": "opt-out",
+            "description": "set to true to opt-out of cakeday announcements, set to false to opt-in"
         }
     ]
 }

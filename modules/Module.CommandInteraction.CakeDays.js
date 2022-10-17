@@ -1,16 +1,17 @@
 const e = require("express");
-
+const optButtons = require("../utils/Utils.CakedayOptButtons")
 const Augur = require("augurbot"),
     u = require("../utils/Utils.Generic"),
     snowflakes = require('../config/snowflakes.json'),
     db = require("../utils/Utils.Database"),
     moment = require("moment"),
+
     Module = new Augur.Module();
 
 
 async function celebrate() {
     let guild = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
-    const TargetUSTime = 5
+    const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
     const modifierToConvertToBotTime = 7;
     if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
         testcakeOrJoinDays(guild).catch(error => u.errorHandler(error, "Test cakeOrJoinDays"));
@@ -33,7 +34,7 @@ async function testcakeOrJoinDays(guild) {
             ":cake: "
         ];
 
-        let cakeOrJoinDayPeeps = (await db.User.getMost()).filter(user => user.cakeDay != null);
+        let cakeOrJoinDayPeeps = (await db.User.getMost()).filter(user => user.cakeDay != null && user.cakeDay != "opt-out");
         let messageContentArray = []
         for (let cakeOrJoinDayPeep of cakeOrJoinDayPeeps) {
 
@@ -70,11 +71,17 @@ async function testcakeOrJoinDays(guild) {
                 thisMessageToSend.push(messageContentArray.shift())
             }
             arrayOfMessagesToSend.push(thisMessageToSend);
+            arrayOfMessagesToSend.push();
         }
         arrayOfMessagesToSend.push(messageContentArray)
         for (const message of arrayOfMessagesToSend) {
-            //await guild.channels.cache.get(snowflakes.channels.general).send(message.join("\n"));
+            await guild.channels.cache.get(snowflakes.channels.general).send(message.join("\n"));
         }
+        guild.channels.cache.get(snowflakes.channels.general).send({
+            content: "To opt-out of these, use `/cakeday opt-out or click the button below`",
+            components: optButtons
+
+        })
 
     } catch (e) { u.errorHandler(e, "cakeOrJoinDay Error"); }
 }
@@ -102,7 +109,18 @@ Module
         process: async (interaction) => {
             let cakeOrJoinDayDate = (interaction.options.get("date")) ? (interaction.options.get("date")).value.trim().replace(/<+.*>\s*/gm, "") : null
             let target = interaction.options.getMember("target")
-            if (cakeOrJoinDayDate) {
+            if (interaction.options.get("opt-out") || interaction.options.get("date").toLowerCase() == "opt-out") {
+                //IF the opt-out option is true, or the date is set to opt out
+                let cakeOrJoinDayUpdateTarget = interaction.member.id;
+                if (target && (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.BotMaster) || interaction.member.roles.cache.has(snowflakes.roles.Whisper) || interaction.member.roles.cache.has(snowflakes.roles.SoaringWings))) {
+                    cakeOrJoinDayUpdateTarget = target.id;
+                } else if (target && target != interaction.member) {
+                    return interaction.reply({ content: "You don't have permission to do that", ephemeral: true });
+                }
+                await db.User.updateCakeDay(cakeOrJoinDayUpdateTarget, "opt-out");
+                return interaction.reply({ content: "opt-out successful", ephemeral: true });
+            }
+            else if (cakeOrJoinDayDate) {
                 try {
                     let bd = new Date(cakeOrJoinDayDate);
                     if (bd == 'Invalid Date') {
@@ -131,14 +149,22 @@ Module
                 if (!targetBd) targetBd = await db.User.new(target.id);
                 targetBd = targetBd.cakeDay
                 let targetName = (await interaction.guild.members.fetch(target.id)).displayName
-                return interaction.reply({ content: `${targetName}'s cake day is ${targetBd}`, ephemeral: true })
+
+                if (targetBd.indexOf("opt") > -1) {
+                    return interaction.reply({ content: `${targetName} has opted out of cakeday participation`, ephemeral: true })
+                }
+                else return interaction.reply({ content: `${targetName}'s cake day is ${targetBd}`, ephemeral: true })
             } else {
                 let userCake = await db.User.get(interaction.member.id)
+                if (userCake.cakeDay.indexOf("opt") > -1) {
+                    userCake = null;
+                }
+
 
                 let users = await db.User.getMost();
                 let now = new Date(Date.now());
                 //return new Date(`${ userDbObj.cakeDay } ${ now.getFullYear() }`) > now;
-                let sortedUsers = await users.filter(u => new Date(`${u.cakeDay} ${now.getFullYear()}`) > now).sort((a, b) => {
+                let sortedUsers = await users.filter(u => u.cakeDay.indexOf("opt") > -1 && new Date(`${u.cakeDay} ${now.getFullYear()}`) > now).sort((a, b) => {
                     let aCake = new Date(`${a.cakeDay} ${now.getFullYear()}`);
                     let bCake = new Date(`${b.cakeDay} ${now.getFullYear()}`)
                     return aCake - bCake;
@@ -158,6 +184,27 @@ Module
 
             }
         }
-    })
+    }).addInteractionHandler({
+        customId: "cakedayopt-out",
+        process: async (interaction) => {
+            await db.User.updateCakeDay(interaction.member.id, "opt-out");
+            return interaction.reply({ content: "opt-out successful", ephemeral: true });
+        }
+    }).addInteractionHandler({
+        customId: "cakedayopt-in",
+        process: async (interaction) => {
+            let joinedAt = (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(userID).joinedAt
+            await db.User.updateCakeDay(interaction.member.id, joinedAt);
+            return interaction.reply({ content: "opt-in successful, your cake day has been set to your server join date", ephemeral: true });
+        }
+    }).addInteractionHandler({
+        customId: "cakedayinfo",
+        process: async (interaction) => {
+            let targetBd = await db.User.get(interaction.member.id)
+            if (!targetBd) targetBd = await db.User.new(target.id);
+            targetBd = targetBd.cakeDay
+            return interaction.reply({ content: "Cakedays are a once a year celebration of you joining the server. You can set this to a custom date with the /cakeday command, or leave it as your server join date. Those who opt-in get a special color and bonus xp for 24 hours on the day they select. \n\nTo ensure privacy, this feature was developed by members of this server to be absolutely sure your cakeday won't be used for anything but celebrating you, on this server. \n\nYour cakeday is currently set to " + targetBd, ephemeral: true });
+        }
+    });
 
 module.exports = Module;
