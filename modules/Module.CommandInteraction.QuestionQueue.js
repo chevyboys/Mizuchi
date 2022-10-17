@@ -421,13 +421,15 @@ const Module = new Augur.Module()
 
             // Already voted?
             if (data.system.IDs.includes(interaction.user.id)) {
-                msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("SECONDARY", "SUCCESS", "SECONDARY", "✅", data)
-                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
+                interaction.reply({ content: "You have already voted for that question", ephemeral: true })
+                //msg = await interaction.channel.messages.fetch(interaction.message.id);
+                //row = questionRowButtons("SECONDARY", "SUCCESS", "SECONDARY", "✅", data)
+                //msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
             } else {
-                msg = await interaction.channel.messages.fetch(interaction.message.id);
-                row = questionRowButtons("SECONDARY", "DANGER", "SECONDARY", "❌", data);
-                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
+                interaction.reply({ content: "You have not voted for that question", ephemeral: true })
+                //msg = await interaction.channel.messages.fetch(interaction.message.id);
+                //row = questionRowButtons("SECONDARY", "DANGER", "SECONDARY", "❌", data);
+                //msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
             }
 
             // Update message with new count
@@ -439,7 +441,7 @@ const Module = new Augur.Module()
             msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question).setAuthor({ name: author ? author.displayName : "unknown user", iconURL: author ? author.displayAvatarURL() : "https://www.seekpng.com/png/full/9-96714_question-mark-png-question-mark-black-png.png" })], components: row });
 
             // Respond
-            interaction.deferUpdate();
+            //interaction.deferUpdate();
         }
     })
     .addInteractionHandler({
