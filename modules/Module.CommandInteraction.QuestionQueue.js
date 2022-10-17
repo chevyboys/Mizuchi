@@ -4,39 +4,56 @@ const Augur = require("augurbot"),
 const fs = require('fs');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { REST, DiscordAPIError } = require('@discordjs/rest');
+const { ModalBuilder } = require('discord.js');
 const { Routes } = require('discord-api-types/v9');
-const { Message, MessageButton, MessageActionRow } = require('discord.js');
+const { Message, MessageButton, MessageActionRow, Modal, TextInputComponent, PartialModalActionRow } = require('discord.js');
 const askedRecently = new Set();
 
 function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, buttonTwoEmoji, data) {
-    return new MessageActionRow()
-        .addComponents(
-            //add the upvote button
-            new MessageButton()
-                .setCustomId('upVoteQuestion')
-                .setLabel(``)
-                .setStyle(buttonOneStyle || "SECONDARY")
-                .setEmoji(snowflakes.emoji.upDawn),
+    return [
+        new MessageActionRow()
+            .addComponents(
+                //add the upvote button
+                new MessageButton()
+                    .setCustomId('upVoteQuestion')
+                    .setLabel(``)
+                    .setStyle(buttonOneStyle || "SECONDARY")
+                    .setEmoji(snowflakes.emoji.upDawn),
 
-            new MessageButton()
-                .setCustomId('voteCheck')
-                .setLabel(`${(data.system.IDs.length == 0 || !data.system.IDs.length) ? 1 : data.system.IDs.length}`)
-                .setStyle(buttonTwoStyle || "SECONDARY")
-                .setEmoji(buttonTwoEmoji || ''),
+                new MessageButton()
+                    .setCustomId('voteCheck')
+                    .setLabel(`${(data.system.IDs.length == 0 || !data.system.IDs.length) ? 1 : data.system.IDs.length}`)
+                    .setStyle(buttonTwoStyle || "SECONDARY")
+                    .setEmoji(buttonTwoEmoji || ''),
 
-            //add the check vote status button
-            new MessageButton()
-                .setCustomId('unvoteQuestion')
-                .setLabel("")
-                .setStyle(buttonThreeStyle || "SECONDARY")
-                .setEmoji(snowflakes.emoji.unDawn),
+                //add the check vote status button
+                new MessageButton()
+                    .setCustomId('unvoteQuestion')
+                    .setLabel("")
+                    .setStyle(buttonThreeStyle || "SECONDARY")
+                    .setEmoji(snowflakes.emoji.unDawn),
 
-            new MessageButton()
-                .setCustomId("deleteQuestion")
-                .setEmoji("🗑")
-                .setStyle("SECONDARY")
+            ),
+        new MessageActionRow()
+            .addComponents(
+                new MessageButton()
+                    .setCustomId("editQuestion")
+                    .setEmoji("🖊")
+                    .setStyle("SECONDARY"),
 
-        )
+                new MessageButton()
+                    .setCustomId("deleteQuestion")
+                    .setEmoji("🗑")
+                    .setStyle("SECONDARY"),
+
+                new MessageButton()
+                    .setCustomId("moveQuestion")
+                    .setEmoji("📤")
+                    .setStyle("SECONDARY")
+
+
+            )
+    ]
 }
 
 async function deleteQuestion(interaction, targetId) {
@@ -62,7 +79,7 @@ async function deleteQuestion(interaction, targetId) {
     }
     target = [target];
     //permissions check
-    if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && !interaction.member.roles.cache.has(snowflakes.roles.LARPer) && interaction.user.id != asker) {
+    if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && interaction.user.id != asker) {
         interaction.reply({ content: "Radiance cannot permit you to do that", ephemeral: true });
         return;
     }
@@ -70,14 +87,6 @@ async function deleteQuestion(interaction, targetId) {
     if (rawData.length == 0) {
         interaction.reply({ content: `There are no questions to delete! Check back later.`, ephemeral: true });
         return;
-    }
-
-    //allow LARPers to remove questions that have already been asked
-    if (interaction.member.roles.cache.has(snowflakes.roles.LARPer)) {
-        interaction.reply({ content: `I have moved ${target[0].string ? target[0].string : target[0]} to the question discussion channel`, ephemeral: true });
-        let newResponseChannel = interaction.guild.channels.cache.get(snowflakes.channels.questionDiscussion)
-        let newEmbed = interaction.message.embeds[0]
-        newResponseChannel.send({content: `<@${asker}>, ${interaction.member.displayName} flagged your question as either already answered, or answerable by the community. They should provide you with more information as a response to this message.`, embeds:[newEmbed], allowedMentions: {parse: ["users"]} })
     }
 
     else {
@@ -108,9 +117,122 @@ async function deleteQuestion(interaction, targetId) {
 
 }
 
+async function moveQuestion(interaction, targetId) {
+
+    // Load data
+    files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+    let rawData = [];
+    let asker;
+    for (i = 0; i < files.length; i++) {
+        data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+        if (data.fetch.message == targetId) asker = data.details.asker;
+        rawData.push({
+            file: files[i],
+            fetch: data.fetch,
+            string: `<@${data.details.asker}>: ${data.details.question}`,
+            votes: data.system.IDs.length
+        });
+    }
+    let target = rawData.find(msg => msg.fetch.message == targetId);
+    if (target == undefined) {
+        interaction.reply({ content: `There are no questions with that ID in my memory crystals`, ephemeral: true });
+        return
+    }
+    target = [target];
+    //permissions check
+    if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.CommunityGuide) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && !interaction.member.roles.cache.has(snowflakes.roles.LARPer) && interaction.user.id != asker) {
+        interaction.reply({ content: "Radiance cannot permit you to do that", ephemeral: true });
+        return;
+    }
+    // Check
+    if (rawData.length == 0) {
+        interaction.reply({ content: `There are no questions to move! Check back later.`, ephemeral: true });
+        return;
+    }
+
+    //Move to #question-queue    
+    interaction.reply({ content: `I have moved ${target[0].string ? target[0].string : target[0]} to the question discussion channel`, ephemeral: true });
+    let newResponseChannel = interaction.guild.channels.cache.get(snowflakes.channels.questionDiscussion)
+    let newEmbed = interaction.message.embeds[0]
+    newResponseChannel.send({ content: `<@${asker}>, ${interaction.member.displayName} flagged your question as either already answered, or answerable by the community. They should provide you with more information as a response to this message.`, embeds: [newEmbed], allowedMentions: { parse: ["users"] } })
+
+
+    //allow the asker to send again
+    if (askedRecently.has(asker)) {
+        askedRecently.delete(asker);
+    }
+
+
+    // Delete vote messages
+    c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
+    for (i = 0; i < target.length; i++) {
+        fs.unlinkSync(`./data/${target[i].file}`);
+        try {
+            m = await c.messages.fetch(target[i].fetch.message);
+
+        } catch (error) {
+            if (error.toString().indexOf("Unknown Message") > -1) {
+                u.errorHandler("That question has been deleted")
+            }
+        }
+
+        if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
+    }
+
+}
+
+async function editQuestion(interaction, targetId) {
+    // Load data
+    files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+    let rawData = [];
+    let asker;
+    for (i = 0; i < files.length; i++) {
+        data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+        if (data.fetch.message == targetId) asker = data.details.asker;
+        rawData.push({
+            file: files[i],
+            fetch: data.fetch,
+            string: `${data.details.question}`,
+            votes: data.system.IDs.length
+        });
+    }
+    let target = rawData.find(msg => msg.fetch.message == targetId);
+    if (target == undefined) {
+        interaction.reply({ content: `There are no questions with that ID in my memory crystals`, ephemeral: true });
+        return
+    }
+    target = [target];
+    //permissions check
+    if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && !interaction.member.roles.cache.has(snowflakes.roles.LARPer) && interaction.user.id != asker) {
+        interaction.reply({ content: "Radiance cannot permit you to do that", ephemeral: true });
+        return;
+    }
+    // Check
+    if (rawData.length == 0) {
+        interaction.reply({ content: `There are no questions to edit! Check back later.`, ephemeral: true });
+        return;
+    }
+
+
+    const modal = new Modal()
+        .setCustomId("editQuestionModal")
+        .setTitle("Edit Question");
+
+    const newQuestionInput = new TextInputComponent()
+        .setCustomId('editQuestionModalInput')
+        .setLabel("New Question Text")
+        .setMaxLength(1000)
+        .setPlaceholder(target[0].string)
+        // Paragraph means multiple lines of text.
+        .setStyle("PARAGRAPH");
+    const firstActionRow = new MessageActionRow().addComponents(newQuestionInput);
+    modal.addComponents(firstActionRow);
+    await interaction.showModal(modal);
+}
+
 
 async function ask(interaction) {
-    const hoursBetweenQuestions = 3;
+    const hoursBetweenQuestions = 72;
 
     if (interaction instanceof Message) {
         // correct channel?
@@ -163,7 +285,7 @@ async function ask(interaction) {
             .setTimestamp()
             .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
         let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data)
-        let msg = await interaction.guild.channels.cache.get(snowflakes.channels.ask).send({ embeds: [embed], components: [row] });
+        let msg = await interaction.guild.channels.cache.get(snowflakes.channels.ask).send({ embeds: [embed], components: row });
 
         data = {
             details: {
@@ -216,7 +338,7 @@ const Module = new Augur.Module()
             if (data.system.IDs.includes(interaction.user.id)) {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
                 row = questionRowButtons("DANGER", "SECONDARY", "SECONDARY", "", data);
-                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
 
             } else {
                 data.system.IDs.push(interaction.user.id);
@@ -226,7 +348,7 @@ const Module = new Augur.Module()
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
             row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
-            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
 
             // Respond
             interaction.deferUpdate();
@@ -237,6 +359,59 @@ const Module = new Augur.Module()
             let target = [interaction.message.id];
             deleteQuestion(interaction, target);
         }
+
+    }).addInteractionHandler({
+        customId: "editQuestion",
+        process: async (interaction) => {
+            let target = [interaction.message.id];
+            editQuestion(interaction, target);
+        }
+
+    }).addInteractionHandler({
+        customId: "moveQuestion",
+        process: async (interaction) => {
+            let target = [interaction.message.id];
+            moveQuestion(interaction, target);
+        }
+
+    }).addInteractionHandler({
+        customId: "editQuestionModal",
+        process: async (interaction) => {
+            let targetId = [interaction.message.id];
+            let newText = interaction.components[0].components[0].value;
+            // Load data
+            files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+            let target;
+            let asker;
+            let data;
+            for (i = 0; i < files.length; i++) {
+                data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+                if (data.fetch.message == targetId) {
+                    asker = data.details.asker
+                    target = data;
+                };
+            }
+            if (target == undefined) {
+                interaction.reply({ content: `There are no questions with that ID in my memory crystals`, ephemeral: true });
+                return
+            }
+
+            //-----------------------
+            target.details.question = newText;
+
+            fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
+            let msg = await interaction.channel.messages.fetch(interaction.message.id);
+            let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
+
+            let author = interaction.guild.members.cache.get(target.details.asker)
+
+            msg.edit({ embeds: [msg.embeds[0].setDescription(target.details.question).setAuthor({ name: author ? author.displayName : "unknown user", iconURL: author ? author.displayAvatarURL() : "https://www.seekpng.com/png/full/9-96714_question-mark-png-question-mark-black-png.png" })], components: row });
+
+            // Respond
+            interaction.deferUpdate();
+
+        }
+
     }).addInteractionHandler({
         customId: "voteCheck",
         process: async (interaction) => {
@@ -248,11 +423,11 @@ const Module = new Augur.Module()
             if (data.system.IDs.includes(interaction.user.id)) {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
                 row = questionRowButtons("SECONDARY", "SUCCESS", "SECONDARY", "✅", data)
-                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
             } else {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
                 row = questionRowButtons("SECONDARY", "DANGER", "SECONDARY", "❌", data);
-                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
             }
 
             // Update message with new count
@@ -260,8 +435,8 @@ const Module = new Augur.Module()
             row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
 
             let author = interaction.guild.members.cache.get(data.details.asker)
-            
-            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question).setAuthor({name: author ? author.displayName : "unknown user", iconURL: author? author.displayAvatarURL() : "https://www.seekpng.com/png/full/9-96714_question-mark-png-question-mark-black-png.png"})], components: [row] });
+
+            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question).setAuthor({ name: author ? author.displayName : "unknown user", iconURL: author ? author.displayAvatarURL() : "https://www.seekpng.com/png/full/9-96714_question-mark-png-question-mark-black-png.png" })], components: row });
 
             // Respond
             interaction.deferUpdate();
@@ -281,13 +456,13 @@ const Module = new Augur.Module()
             } else {
                 msg = await interaction.channel.messages.fetch(interaction.message.id);
                 row = questionRowButtons("SECONDARY", "SECONDARY", "DANGER", "", data);
-                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+                msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
             }
 
             // Update message with new count
             msg = await interaction.channel.messages.fetch(interaction.message.id);
             row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
-            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: [row] });
+            msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
 
             // Respond
             interaction.deferUpdate();
