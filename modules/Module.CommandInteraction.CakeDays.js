@@ -109,7 +109,7 @@ Module
         process: async (interaction) => {
             let cakeOrJoinDayDate = (interaction.options.get("date")) ? (interaction.options.get("date")).value.trim().replace(/<+.*>\s*/gm, "") : null
             let target = interaction.options.getMember("target")
-            if (interaction.options.getBoolean("opt-out") || interaction.options.get("date").toLowerCase() == "opt-out") {
+            if (interaction.options.getBoolean("opt-out") || interaction.options.get("date")?.toLowerCase() == "opt-out") {
                 //IF the opt-out option is true, or the date is set to opt out
                 let cakeOrJoinDayUpdateTarget = interaction.member.id;
                 if (target && (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.BotMaster) || interaction.member.roles.cache.has(snowflakes.roles.Whisper) || interaction.member.roles.cache.has(snowflakes.roles.SoaringWings))) {
