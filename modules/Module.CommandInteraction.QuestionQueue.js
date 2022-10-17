@@ -2,11 +2,8 @@ const Augur = require("augurbot"),
     u = require("../utils/Utils.Generic"),
     snowflakes = require('../config/snowflakes.json');
 const fs = require('fs');
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { REST, DiscordAPIError } = require('@discordjs/rest');
-const { ModalBuilder } = require('discord.js');
 const { Routes } = require('discord-api-types/v9');
-const { Message, MessageButton, MessageActionRow, Modal, TextInputComponent, PartialModalActionRow } = require('discord.js');
+const { Message, MessageButton, MessageActionRow, Modal, TextInputComponent } = require('discord.js');
 const askedRecently = new Set();
 
 function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, buttonTwoEmoji, data) {
@@ -174,6 +171,7 @@ async function moveQuestion(interaction, targetId) {
             if (error.toString().indexOf("Unknown Message") > -1) {
                 u.errorHandler("That question has been deleted")
             }
+            else throw error;
         }
 
         if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
