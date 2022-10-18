@@ -25,7 +25,7 @@ async function assertIsSnowflake(snowflake) {
  * @param {string} string the string to check if it is in fact a cake day
 */
 function assertIsCakeDay(string) {
-    if(string == "opt-out") return true;
+    if (string == "opt-out") return true;
     if (string.length == 6 || string.length == 5 || string.length == 7) {
         let parts = string.split(" ");
         if (parts.length == 2 && months.includes(parts[0].replace(" ", "")) && days.includes(parts[1].replace(" ", ""))) {
@@ -225,7 +225,7 @@ let DataBaseActions = {
                     let cakeDay = "opt-out";
                     let username = cleanString(client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).displayName);
                     let roles = client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).roles.cache.map(r => assertIsSnowflake(r.id) ? r.id : null);
-                    cakeDay = months[cakeDay.getMonth()] + " " + cakeDay.getDate();
+                    //cakeDay = months[cakeDay.getMonth()] + " " + cakeDay.getDate();
 
                     let newMember = {
                         userID: userID,
@@ -276,7 +276,7 @@ let DataBaseActions = {
         client = Module.client;
         if (!hasBeenInitialized) {
             con.connect(function (err) {
-                if (err && !err.toString().indexOf("Cannot enqueue Handshake after already enqueuing a Handshake") > -1 ) throw err;
+                if (err && !err.toString().indexOf("Cannot enqueue Handshake after already enqueuing a Handshake") > -1) throw err;
                 console.log("Connected to DataBase!");
             })
             hasBeenInitialized = true;
