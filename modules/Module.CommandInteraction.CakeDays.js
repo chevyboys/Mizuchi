@@ -190,7 +190,7 @@ Module
             let targetBd = await db.User.get(interaction.member.id)
             if (!targetBd) targetBd = await db.User.new(interaction.member.id);
             targetBd = targetBd.cakeDay
-            if (targetBd.cakeDay.indexOf("opt-out" > -1)) {
+            if (targetBd.indexOf("opt-out" > -1)) {
                 return interaction.reply({ content: "You have to be opted in to opt out", ephemeral: true });
             } else {
                 await db.User.updateCakeDay(interaction.member.id, "opt-out");
@@ -203,7 +203,7 @@ Module
             let targetBd = await db.User.get(interaction.member.id)
             if (!targetBd) targetBd = await db.User.new(interaction.member.id);
             targetBd = targetBd.cakeDay
-            if (targetBd.cakeDay.indexOf("opt-out" > -1)) {
+            if (targetBd.indexOf("opt-out" > -1)) {
                 let joinedAt = (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(interaction.member.id).joinedAt
                 let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
                 let cakeOrJoinDayDate = months[joinedAt.getMonth()] + " " + joinedAt.getDate();
