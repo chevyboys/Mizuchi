@@ -1,4 +1,3 @@
-const e = require("express");
 const optButtons = require("../utils/Utils.CakedayOptButtons")
 const Augur = require("augurbot"),
     u = require("../utils/Utils.Generic"),
