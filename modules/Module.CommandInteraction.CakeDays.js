@@ -190,7 +190,7 @@ Module
             let targetBd = await db.User.get(interaction.member.id)
             if (!targetBd) targetBd = await db.User.new(interaction.member.id);
             targetBd = targetBd.cakeDay
-            if (targetBd.indexOf("opt-out" > -1)) {
+            if (!targetBd.indexOf("opt-out" > -1)) {
                 return interaction.reply({ content: "You have to be opted in to opt out", ephemeral: true });
             } else {
                 await db.User.updateCakeDay(interaction.member.id, "opt-out");
