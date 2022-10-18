@@ -492,7 +492,7 @@ const Module = new Augur.Module()
     }).addInteractionHandler({
         customId: "editQuestion",
         process: async (interaction) => {
-            let target = [interaction.message.id];
+            let target = interaction.message.id;
             editQuestion(interaction, target);
         }
 
@@ -506,7 +506,7 @@ const Module = new Augur.Module()
     }).addInteractionHandler({
         customId: "editQuestionModal",
         process: async (interaction) => {
-            let targetId = [interaction.message.id];
+            let targetId = interaction.message.id;
             let newText = interaction.components[0].components[0].value;
             // Load data
             files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
@@ -516,7 +516,7 @@ const Module = new Augur.Module()
             for (i = 0; i < files.length; i++) {
                 data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
                 if (data.fetch.message == targetId) {
-                    asker = data.details.asker
+                    asker = data.details.asker;
                     target = data;
                 };
             }
