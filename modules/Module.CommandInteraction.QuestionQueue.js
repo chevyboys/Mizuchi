@@ -528,9 +528,9 @@ const Module = new Augur.Module()
             //-----------------------
             target.details.question = newText;
 
-            fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
+            fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(target, null, 4));
             let msg = await interaction.channel.messages.fetch(interaction.message.id);
-            let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
+            let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", target);
 
             let author = interaction.guild.members.cache.get(target.details.asker)
 
