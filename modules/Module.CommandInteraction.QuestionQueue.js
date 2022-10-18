@@ -440,8 +440,8 @@ const Module = new Augur.Module()
                 if (subcommand === "ask") {
                     await ask(interaction);
                 } else if (subcommand === "transfer") {
-                    if(interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.WorldMaker))
-                    await processTransfer(interaction);
+                    if (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.WorldMaker))
+                        await processTransfer(interaction);
                     else interaction.reply("Unfortunetly, you don't have permission to do that");
                 } else if (subcommand === "stats") {
                     await processStats(interaction)
