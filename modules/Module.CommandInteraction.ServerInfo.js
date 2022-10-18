@@ -19,7 +19,7 @@ let memeLinks = [
     "https://i.imgflip.com/5frirx.jpg",
     "https://cdn.discordapp.com/attachments/697869453605601352/879162753451958333/image0.jpg",
     "https://cdn.discordapp.com/attachments/697869453605601352/881772517772124160/unknown.png",
-    "“https://cdn.discordapp.com/attachments/697869453605601352/882118059983249408/Untitled-1.jpg",
+    "https://cdn.discordapp.com/attachments/697869453605601352/882118059983249408/Untitled-1.jpg",
     "https://cdn.discordapp.com/attachments/697869453605601352/885528399232254002/unknown.png",
     "https://cdn.discordapp.com/attachments/697869453605601352/856364802817261578/152124081788493360.png",
     "https://cdn.discordapp.com/attachments/697869453605601352/856363710990123038/152124081788493360.png",
@@ -65,7 +65,7 @@ const Module = new Augur.Module()
 
             let color = whisperRole.hexColor;
 
-            let embed = u.embed().setTitle("Current Climbers Court Staff Members:").setDescription(`<@&${snowflakes.roles.Admin}>:` + "```" + Admin + "```\n\n" + `<@&${snowflakes.roles.Whisper}>:` + "```" + Mod + "```\n\n" + `<@&${snowflakes.roles.SoaringWings}>:` + "```" + SW + "```\n\n\n\n").addFields([{name: "Join our staff:", value: config.staffApplicationLink? config.staffApplicationLink : "```No Staff Application link is available at this time```" }]).setColor(color);
+            let embed = u.embed().setTitle("Current Climbers Court Staff Members:").setDescription(`<@&${snowflakes.roles.Admin}>:` + "```" + Admin + "```\n\n" + `<@&${snowflakes.roles.Whisper}>:` + "```" + Mod + "```\n\n" + `<@&${snowflakes.roles.SoaringWings}>:` + "```" + SW + "```\n\n\n\n").addFields([{ name: "Join our staff:", value: config.staffApplicationLink ? config.staffApplicationLink : "```No Staff Application link is available at this time```" }]).setColor(color);
 
             interaction.editReply({ embeds: [embed] });
         }
