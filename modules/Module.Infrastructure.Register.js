@@ -36,39 +36,41 @@ const Module = new Augur.Module()
         // Build slash commands
         commands = [
             new SlashCommandBuilder()
-                .setName('ask')
-                .setDescription('Ask a question!')
-                .addStringOption(option =>
-                    option
-                        .setName('question')
-                        .setDescription('Your question!')
-                        .setRequired(true)),
-            new SlashCommandBuilder()
-                .setName('transfer')
-                .setDescription('Get the 5 most popular questions!')
-                .addIntegerOption(option =>
-                    option
-                        .setName('questions')
-                        .setDescription('The number of questions to transfer')
-                        .setRequired(false)
+                .setName('question')
+                .setDescription('Interact with our Questions Queue')
+                .addSubcommand(subcommand =>
+                    subcommand
+                        .setName('ask')
+                        .setDescription('Ask a question!')
+                        .addStringOption(option =>
+                            option
+                                .setName('question')
+                                .setDescription('Your question!')
+                                .setRequired(true)
+                        )
+                )
+                .addSubcommand(subcommand =>
+                    subcommand
+                        .setName('transfer')
+                        .setDescription('Get the 5 most popular questions!')
+                        .addIntegerOption(option =>
+                            option
+                                .setName('questions')
+                                .setDescription('The number of questions to transfer')
+                                .setRequired(false)
+                        ),
+                ).addSubcommand(subcommand =>
+                    subcommand
+                        .setName('stats')
+                        .setDescription('Get the question queue stats')
+                        .addIntegerOption(option =>
+                            option
+                                .setName('page')
+                                .setDescription('The page to select from, default 1')
+                                .setRequired(false)
+                        ),
                 ),
-            new SlashCommandBuilder()
-                .setName('transfer')
-                .setDescription('Get the 5 most popular questions!')
-                .addIntegerOption(option =>
-                    option
-                        .setName('questions')
-                        .setDescription('The number of questions to transfer')
-                        .setRequired(false)
-                ),
-            new SlashCommandBuilder()
-                .setName('question-remove')
-                .setDescription('Remove a question from the question queue')
-                .addStringOption(option =>
-                    option
-                        .setName('id')
-                        .setDescription('The id of the question you would like to nuke')
-                        .setRequired(true)),
+
             new SlashCommandBuilder()
                 .setName("judgement")
                 .setDescription("Begin your journey to find your attunement."),
