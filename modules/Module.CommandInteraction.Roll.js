@@ -3,7 +3,6 @@ const Augur = require("augurbot"),
     snowflakes = require('../config/snowflakes.json');
 const { DiceRoll } = require('@dice-roller/rpg-dice-roller');
 const Discord = require("discord.js");
-const Registrar = require("../utils/Utils.CommandRegistrar");
 let helpURL = "https://dice-roller.github.io/documentation/guide/notation/"
 
 /**
@@ -148,14 +147,12 @@ const Module = new Augur.Module()
 Module.addInteractionCommand({
         name: "roll",
         guildId: snowflakes.guilds.PrimaryServer,
-        //commandId: async () => await Registrar.getCommandId(Module, "roll"),
         process: async (interaction) => {
             rollProcess(interaction);
         }
     }).addInteractionCommand({
         name: "gmroll",
         guildId: snowflakes.guilds.PrimaryServer,
-        //commandId: async () => await Registrar.getCommandId(Module, "gmroll"),
         process: async (interaction) => {
             rollProcess(interaction, true);
         }

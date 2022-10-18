@@ -1,8 +1,6 @@
 const Augur = require("augurbot"),
     u = require("../utils/Utils.Generic"),
     snowflakes = require('../config/snowflakes.json');
-const Discord = require("discord.js");
-const Registrar = require("../utils/Utils.CommandRegistrar");
 const Module = new Augur.Module
 const fs = require('fs');
 
@@ -67,7 +65,6 @@ let  endThank = async () => {
 Module.addInteractionCommand({
     name: "thank",
     guildId: snowflakes.guilds.PrimaryServer,
-    //commandId: async () => await Registrar.getCommandId(Module, "roll"),
     process: async (interaction) => {
         thankProcess(interaction);
     }
