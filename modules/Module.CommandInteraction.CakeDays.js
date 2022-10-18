@@ -52,10 +52,10 @@ async function testcakeOrJoinDays(guild) {
 
                         } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
                     }
-                    messageContentArray.push(`:birthday: :confetti_ball: :tada: Happy Cake Day, **${cakeOrJoinDayPeep.username}**!` + sendString + `:tada: :confetti_ball: :birthday:`);
-
-
-                    if (member && years != 0) u.addRoles(member, snowflakes.roles.CakeDay);
+                    if (join && ((join.month() != curDate.month()) || (join.date() != curDate.date()) || (join.year() != curDate.year()))) {
+                        u.addRoles(member, snowflakes.roles.CakeDay);
+                        messageContentArray.push(`:birthday: :confetti_ball: :tada: Happy Cake Day, **${cakeOrJoinDayPeep.username}**!` + sendString + `:tada: :confetti_ball: :birthday:`);
+                    }
                 }
                 else if (member && member.roles.cache.has(snowflakes.roles.CakeDay)) {
                     u.addRoles(member, snowflakes.roles.CakeDay, true);
