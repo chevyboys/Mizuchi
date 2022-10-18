@@ -141,31 +141,8 @@ let rollProcess = (interaction, hiddenResponse = false) => {
 }
 
 //Register commands
-let commands = [
-    new Registrar.SlashCommandBuilder()
-        .setName("roll")
-        .setDescription("roles a dice of any reasonable size")
-        .addStringOption(option =>
-            option
-                .setName("dice")
-                .setDescription("The dice you want to roll. If you aren't sure how, instead enter 'help'")
-                .setRequired(true)
-        ),
-    new Registrar.SlashCommandBuilder()
-        .setName("gmroll")
-        .setDescription("roles a dice of any reasonable size")
-        .addStringOption(option =>
-            option
-                .setName("dice")
-                .setDescription("The dice you want to roll in private. If you aren't sure how, instead enter 'help'")
-                .setRequired(true)
-        ),
-]
-const Module = new Augur.Module()
-Module.addEvent("ready", async () => {
-    commandResponse = await Registrar.registerGuildCommands(Module, commands)
-});
 
+const Module = new Augur.Module()
 
 //Run commands
 Module.addInteractionCommand({
