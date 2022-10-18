@@ -193,7 +193,7 @@ Module
     }).addInteractionHandler({
         customId: "cakedayopt-in",
         process: async (interaction) => {
-            let joinedAt = (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(userID).joinedAt
+            let joinedAt = (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(interaction.member.id).joinedAt
             let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
             let cakeOrJoinDayDate = months[joinedAt.getMonth()] + " " + joinedAt.getDate();
             await db.User.updateCakeDay(interaction.member.id, cakeOrJoinDayDate);
