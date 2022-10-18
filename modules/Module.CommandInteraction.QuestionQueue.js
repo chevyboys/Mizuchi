@@ -1,8 +1,8 @@
 const Augur = require("augurbot"),
     u = require("../utils/Utils.Generic"),
-    snowflakes = require('../config/snowflakes.json');
+    config = require("../config/config.json")
+snowflakes = require('../config/snowflakes.json');
 const fs = require('fs');
-const { Routes } = require('discord-api-types/v9');
 const { Message, MessageButton, MessageActionRow, Modal, TextInputComponent } = require('discord.js');
 const askedRecently = new Set();
 
@@ -177,6 +177,32 @@ async function moveQuestion(interaction, targetId) {
         if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
     }
 
+}
+
+async function checkForDuplicates() {
+    let files = fs.readdirSync("./data/").filter(x => x.endsWith(".json"));
+    let uniqueQuestions = [];
+    let duplicates = [];
+    for (i = 0; i < files.length; i++) {
+        data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+        if (uniqueQuestions.includes(data.details.question)) {
+            duplicates.push(files[i] + ":" + data.details.question);
+        } else {
+            uniqueQuestions.push(data.details.question);
+        }
+
+    }
+    for (let index = 0; index < duplicates.length; index++) {
+        const element = duplicates[index];
+        for (i = 0; i < files.length; i++) {
+            data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+            if (!duplicates.includes(files[index] + ":" + data.details.question) && data.details.question == element) {
+                duplicates.push(files[index] + ":" + data.details.question);
+            }
+
+        }
+    }
+    return duplicates;
 }
 
 async function editQuestion(interaction, targetId) {
@@ -436,6 +462,8 @@ const Module = new Augur.Module()
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
             try {
+                let duplicates = await checkForDuplicates()
+                if (duplicates.length > 0) u.errorLog.send({ content: `<@${config.ownerId}> **Warning: duplicate questions in question queue files.**\n\n\n${duplicates.join("\n")}`.slice(0, 1950) })
                 const subcommand = interaction.options.getSubcommand(true);
                 if (subcommand === "ask") {
                     await ask(interaction);

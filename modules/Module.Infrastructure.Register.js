@@ -50,6 +50,8 @@ const Module = new Augur.Module()
                 .setDescription("Veiw a list of tone tags"),
             new SlashCommandBuilder().setName("repo")
                 .setDescription("Veiw my code!"),
+            new SlashCommandBuilder().setName("links")
+                .setDescription("Handy links to things around the fandom"),
             new SlashCommandBuilder()
                 .setName("judgement")
                 .setDescription("Begin your journey to find your attunement."),
