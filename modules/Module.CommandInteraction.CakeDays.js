@@ -187,17 +187,29 @@ Module
     }).addInteractionHandler({
         customId: "cakedayopt-out",
         process: async (interaction) => {
-            await db.User.updateCakeDay(interaction.member.id, "opt-out");
-            return interaction.reply({ content: "opt-out successful", ephemeral: true });
+            let targetBd = await db.User.get(interaction.member.id)
+            if (!targetBd) targetBd = await db.User.new(interaction.member.id);
+            targetBd = targetBd.cakeDay
+            if (targetBd.cakeDay.indexOf("opt-out" > -1)) {
+                return interaction.reply({ content: "You have to be opted in to opt out", ephemeral: true });
+            } else {
+                await db.User.updateCakeDay(interaction.member.id, "opt-out");
+                return interaction.reply({ content: "Opt-out successful", ephemeral: true });
+            }
         }
     }).addInteractionHandler({
         customId: "cakedayopt-in",
         process: async (interaction) => {
-            let joinedAt = (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(interaction.member.id).joinedAt
-            let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-            let cakeOrJoinDayDate = months[joinedAt.getMonth()] + " " + joinedAt.getDate();
-            await db.User.updateCakeDay(interaction.member.id, cakeOrJoinDayDate);
-            return interaction.reply({ content: "opt-in successful, your cake day has been set to your server join date", ephemeral: true });
+            let targetBd = await db.User.get(interaction.member.id)
+            if (!targetBd) targetBd = await db.User.new(interaction.member.id);
+            targetBd = targetBd.cakeDay
+            if (targetBd.cakeDay.indexOf("opt-out" > -1)) {
+                let joinedAt = (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(interaction.member.id).joinedAt
+                let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+                let cakeOrJoinDayDate = months[joinedAt.getMonth()] + " " + joinedAt.getDate();
+                await db.User.updateCakeDay(interaction.member.id, cakeOrJoinDayDate);
+                return interaction.reply({ content: "Opt-in successful, your cake day has been set to your server join date", ephemeral: true });
+            } else return interaction.reply({ content: "You have already opted-in to cakedays, your current cakeday is " + targetBd, ephemeral: true });
         }
     }).addInteractionHandler({
         customId: "cakedayinfo",
