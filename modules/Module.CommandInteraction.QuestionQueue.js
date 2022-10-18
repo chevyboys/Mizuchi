@@ -317,13 +317,144 @@ async function ask(interaction) {
     }
 }
 
+async function processTransfer(interaction) {
+
+    // correct channel?
+    if (interaction.channel.id != snowflakes.channels.transfer) {
+        await interaction.reply({ content: `You can't do that here. Try in <#${snowflakes.channels.transfer}>`, ephemeral: true });
+        return;
+    }
+    let numberOfQuestions = interaction?.options?.get("questions")?.value || 5
+    // Load data
+    files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+    rawData = [];
+
+    for (i = 0; i < files.length; i++) {
+        data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+        //ensure data has minimum required feilds.
+        if (data && data.system && data.system.IDs && data.fetch && data.details && data.details.asker && data.details.question) {
+            rawData.push({
+                file: files[i],
+                fetch: data.fetch,
+                string: `<@${data.details.asker}>: ${data.details.question}`,
+                votes: data.system.IDs.length
+            });
+        }
+    }
+
+    // Sort
+    sorted = rawData.sort((a, b) => (a.votes < b.votes) ? 1 : -1);
+
+    // Check
+    if (sorted.length == 0) {
+        interaction.reply({ content: `There are no questions to answer! Check back later.` });
+        return
+    }
+
+    // Format
+    strings = [];
+    accepted = [];
+    for (i = 0; i < numberOfQuestions; i++) {
+        if (sorted[i]) {
+            strings.push(sorted[i].string);
+            accepted.push(sorted[i]);
+        }
+    }
+    strings = strings.join(`\n\n`);
+    // Send
+    while (strings.length > 2000) {
+        interaction.channel.send({ content: strings.substring(0, 2000) });
+        strings = strings.substring(2000);
+    }
+    interaction.reply({ content: `${strings}` });
+
+    // Delete vote messages
+    c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
+    for (i = 0; i < accepted.length; i++) {
+        fs.unlinkSync(`./data/${accepted[i].file}`);
+        let m = false;
+        try {
+            m = await c.messages.fetch(accepted[i].fetch.message);
+        } catch (error) {
+            if (error.toString().indexOf("Unknown Message") > -1) {
+                u.errorHandler("That question has been deleted")
+            }
+        }
+
+        if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
+    }
+
+}
+
+async function processStats(interaction) {
+    {
+
+        let statEmbed = u.embed().setTitle("Question Queue Stats").setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000")
+        let page = interaction?.options?.get("page")?.value || 1
+
+        let numberOfQuestions = 5;
+
+        if (page < 1) page = 1;
+
+        // Load data
+        files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+        rawData = [];
+        for (i = 0; i < files.length; i++) {
+            data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+            rawData.push({
+                file: files[i],
+                fetch: data.fetch,
+                string: `<@${data.details.asker}>: ${data.details.question}`,
+                votes: data.system.IDs.length
+            });
+        }
+
+        // Sort
+        sorted = rawData.sort((a, b) => (a.votes < b.votes) ? 1 : -1);
+        statEmbed.addField("Total questions", "`" + sorted.length + "`");
+        // Check
+        if (sorted.length == 0) {
+            statEmbed.addField("Top Questions:", "`There are no questions in the Queue`")
+            interaction.reply({ embeds: [statEmbed] });
+            return
+        }
+        if (page > Math.ceil(sorted.length / numberOfQuestions)) page = Math.ceil(sorted.length / numberOfQuestions);
+        for (i = page * numberOfQuestions - numberOfQuestions; i < page * numberOfQuestions; i++) {
+            if (sorted[i]) {
+                statEmbed.addField("Top Question " + (i + 1) + ":" + "( " + sorted[i].votes + " votes)", sorted[i].string.substring(0, 1000));
+            }
+        }
+        statEmbed.setFooter({ text: `Page ${page} of ${Math.ceil(sorted.length / numberOfQuestions)}` });
+        // Send
+        return interaction.reply({ embeds: [statEmbed] });
+    }
+}
 
 const Module = new Augur.Module()
     .addInteractionCommand({
-        name: "ask",
+        name: "question",
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
-            ask(interaction);
+            try {
+                const subcommand = interaction.options.getSubcommand(true);
+                if (subcommand === "ask") {
+                    await ask(interaction);
+                } else if (subcommand === "transfer") {
+                    if (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.WorldMaker))
+                        await processTransfer(interaction);
+                    else interaction.reply({ content: "Unfortunetly, you don't have permission to do that", ephemeral: true });
+                } else if (subcommand === "stats") {
+                    await processStats(interaction)
+                } else {
+                    interaction.reply({
+                        content: "Well, this is embarrasing. I don't know what you asked for.",
+                        ephemeral: true
+                    });
+                    u.errorHandler(Error("Unknown Question Interaction Subcommand"), interaction);
+                }
+            } catch (error) {
+                u.errorHandler(error, interaction);
+            }
         }
     }).addInteractionHandler({
         customId: "upVoteQuestion",
@@ -441,8 +572,7 @@ const Module = new Augur.Module()
             // Respond
             //interaction.deferUpdate();
         }
-    })
-    .addInteractionHandler({
+    }).addInteractionHandler({
         customId: "unvoteQuestion",
         process: async (interaction) => {
             // Check & Load data
@@ -467,131 +597,6 @@ const Module = new Augur.Module()
             // Respond
             interaction.deferUpdate();
         }
-    }).addInteractionCommand({
-        name: "transfer",
-        guildId: snowflakes.guilds.PrimaryServer,
-        process: async (interaction) => {
-
-            // correct channel?
-            if (interaction.channel.id != snowflakes.channels.transfer) {
-                await interaction.reply({ content: `You can't do that here. Try in <#${snowflakes.channels.transfer}>`, ephemeral: true });
-                return;
-            }
-            let numberOfQuestions = interaction?.options?.get("questions")?.value || 5
-            // Load data
-            files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
-            rawData = [];
-
-            for (i = 0; i < files.length; i++) {
-                data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
-                //ensure data has minimum required feilds.
-                if (data && data.system && data.system.IDs && data.fetch && data.details && data.details.asker && data.details.question) {
-                    rawData.push({
-                        file: files[i],
-                        fetch: data.fetch,
-                        string: `<@${data.details.asker}>: ${data.details.question}`,
-                        votes: data.system.IDs.length
-                    });
-                }
-            }
-
-            // Sort
-            sorted = rawData.sort((a, b) => (a.votes < b.votes) ? 1 : -1);
-
-            // Check
-            if (sorted.length == 0) {
-                interaction.reply({ content: `There are no questions to answer! Check back later.` });
-                return
-            }
-
-            // Format
-            strings = [];
-            accepted = [];
-            for (i = 0; i < numberOfQuestions; i++) {
-                if (sorted[i]) {
-                    strings.push(sorted[i].string);
-                    accepted.push(sorted[i]);
-                }
-            }
-            strings = strings.join(`\n\n`);
-            // Send
-            while (strings.length > 2000) {
-                interaction.channel.send({ content: strings.substring(0, 2000) });
-                strings = strings.substring(2000);
-            }
-            interaction.reply({ content: `${strings}` });
-
-            // Delete vote messages
-            c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
-            for (i = 0; i < accepted.length; i++) {
-                fs.unlinkSync(`./data/${accepted[i].file}`);
-                let m = false;
-                try {
-                    m = await c.messages.fetch(accepted[i].fetch.message);
-                } catch (error) {
-                    if (error.toString().indexOf("Unknown Message") > -1) {
-                        u.errorHandler("That question has been deleted")
-                    }
-                }
-
-                if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
-            }
-
-        }
-
-    }).addInteractionCommand({
-        name: "question-remove",
-        guildId: snowflakes.guilds.PrimaryServer,
-        process: async (interaction) => {
-            let targetId = interaction?.options?.get("id")?.value;
-            deleteQuestion(interaction, targetId)
-        }
-
-    }).addInteractionCommand({
-        name: "question-stats",
-        guildId: snowflakes.guilds.PrimaryServer,
-        process: async (interaction) => {
-
-            let statEmbed = u.embed().setTitle("Question Queue Stats").setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000")
-            let page = interaction?.options?.get("page")?.value || 1
-
-            let numberOfQuestions = 5;
-
-            if (page < 1) page = 1;
-
-            // Load data
-            files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
-            rawData = [];
-            for (i = 0; i < files.length; i++) {
-                data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
-                rawData.push({
-                    file: files[i],
-                    fetch: data.fetch,
-                    string: `<@${data.details.asker}>: ${data.details.question}`,
-                    votes: data.system.IDs.length
-                });
-            }
-
-            // Sort
-            sorted = rawData.sort((a, b) => (a.votes < b.votes) ? 1 : -1);
-            statEmbed.addField("Total questions", "`" + sorted.length + "`");
-            // Check
-            if (sorted.length == 0) {
-                statEmbed.addField("Top Questions:", "`There are no questions in the Queue`")
-                interaction.reply({ embeds: [statEmbed] });
-                return
-            }
-            if (page > Math.ceil(sorted.length / numberOfQuestions)) page = Math.ceil(sorted.length / numberOfQuestions);
-            for (i = page * numberOfQuestions - numberOfQuestions; i < page * numberOfQuestions; i++) {
-                if (sorted[i]) {
-                    statEmbed.addField("Top Question " + (i + 1) + ":" + "( " + sorted[i].votes + " votes)", sorted[i].string.substring(0, 900));
-                }
-            }
-            statEmbed.setFooter({ text: `Page ${page} of ${Math.ceil(sorted.length / numberOfQuestions)}` });
-            // Send
-            interaction.reply({ embeds: [statEmbed] });
-        }
-
     }).addEvent("messageCreate", async (msg) => {
         if (msg.author.bot || msg.channel.id != snowflakes.channels.ask) return;
         ask(msg);

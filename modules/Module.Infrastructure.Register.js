@@ -7,68 +7,49 @@ const { Routes } = require('discord-api-types/v9');
 const { Client, MessageEmbed, Intents, MessageButton, MessageActionRow } = require('discord.js');
 const snowflakes = require('../config/snowflakes.json');
 
-
-let restrict = async (command, allowedRoles) => {
-    // Restrict transfer command
-    command = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)?.commands.fetch(command.id);
-    permissions = [
-        {
-            id: snowflakes.guilds.PrimaryServer,
-            type: 'ROLE',
-            permission: false,
-        }
-
-    ];
-    for (const role of allowedRoles) {
-        let perms = {
-            id: role,
-            type: 'ROLE',
-            permission: true,
-        }
-        permissions.push(perms)
-    }
-    return "We can't do this anymore"
-    //await command.permissions.add({ permissions });
-}
-
 const Module = new Augur.Module()
     .addEvent("ready", async () => {
         // Build slash commands
         commands = [
             new SlashCommandBuilder()
-                .setName('ask')
-                .setDescription('Ask a question!')
-                .addStringOption(option =>
-                    option
-                        .setName('question')
-                        .setDescription('Your question!')
-                        .setRequired(true)),
-            new SlashCommandBuilder()
-                .setName('transfer')
-                .setDescription('Get the 5 most popular questions!')
-                .addIntegerOption(option =>
-                    option
-                        .setName('questions')
-                        .setDescription('The number of questions to transfer')
-                        .setRequired(false)
+                .setName('question')
+                .setDescription('Interact with our Questions Queue')
+                .addSubcommand(subcommand =>
+                    subcommand
+                        .setName('ask')
+                        .setDescription('Ask a question!')
+                        .addStringOption(option =>
+                            option
+                                .setName('question')
+                                .setDescription('Your question!')
+                                .setRequired(true)
+                        )
+                )
+                .addSubcommand(subcommand =>
+                    subcommand
+                        .setName('transfer')
+                        .setDescription('Get the 5 most popular questions!')
+                        .addIntegerOption(option =>
+                            option
+                                .setName('questions')
+                                .setDescription('The number of questions to transfer')
+                                .setRequired(false)
+                        ),
+                ).addSubcommand(subcommand =>
+                    subcommand
+                        .setName('stats')
+                        .setDescription('Get the question queue stats')
+                        .addIntegerOption(option =>
+                            option
+                                .setName('page')
+                                .setDescription('The page to select from, default 1')
+                                .setRequired(false)
+                        ),
                 ),
-            new SlashCommandBuilder()
-                .setName('transfer')
-                .setDescription('Get the 5 most popular questions!')
-                .addIntegerOption(option =>
-                    option
-                        .setName('questions')
-                        .setDescription('The number of questions to transfer')
-                        .setRequired(false)
-                ),
-            new SlashCommandBuilder()
-                .setName('question-remove')
-                .setDescription('Remove a question from the question queue')
-                .addStringOption(option =>
-                    option
-                        .setName('id')
-                        .setDescription('The id of the question you would like to nuke')
-                        .setRequired(true)),
+            new SlashCommandBuilder().setName("tone")
+                .setDescription("Veiw a list of tone tags"),
+            new SlashCommandBuilder().setName("repo")
+                .setDescription("Veiw my code!"),
             new SlashCommandBuilder()
                 .setName("judgement")
                 .setDescription("Begin your journey to find your attunement."),
@@ -96,6 +77,8 @@ const Module = new Augur.Module()
 
         ].map(command => command.toJSON());
 
+        u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Reading Commands, preparing to register")] });
+
         let registryFiles = fs.readdirSync('./registry/');
         let dummyFetch = (await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer)).commands.fetch();
         let guild = await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
@@ -103,34 +86,16 @@ const Module = new Augur.Module()
         for (const file of registryFiles) {
             if (file.indexOf(".js") > -1) {
                 let fileToRegister = file;
-                if (!commandCache.filter(c => c.name == file.name).size > 0) {
-                    const commandData = require(`../registry/${fileToRegister}`);
-                    commands.push(commandData);
-                }
+                const commandData = require(`../registry/${fileToRegister}`);
+                commands.push(commandData);
             }
         }
-        // Register API version with the token
-        rest = new REST({ version: '9' }).setToken(Module.config.token);
-        console.log("registering commands, please wait")
-        // Push the commands to discord (GUILD specific)
-        let tt = []
-        for (const command of commands) {
-            console.log("registering " + command.name)
-            tt.push(await rest.post(Routes.applicationGuildCommands(Module.client.user.id, snowflakes.guilds.PrimaryServer), { body: command }));
-        }
 
-        console.log("Restricting Commands 1")
-        // Restrict transfer command
-        await restrict(tt[1], [snowflakes.roles.Admin, snowflakes.roles.WorldMaker])
-        console.log("Restricting Commands 2")
-        //restrict the question remove command
-        await restrict(tt[2], [snowflakes.roles.Admin, snowflakes.roles.Whisper, snowflakes.roles.BotMaster])
-        console.log("Restricting Commands 3")
-        //restrict judgement while in development
-        await restrict(tt[3], [snowflakes.roles.Admin, snowflakes.roles.Whisper, snowflakes.roles.BotMaster, snowflakes.roles.SoaringWings])
-        console.log("Restricting Commands 4")
-        //restrict thank
-        await restrict(tt.find(command => command.name.indexOf("thank") > -1), [snowflakes.roles.Admin, snowflakes.roles.Whisper, snowflakes.roles.BotMaster])
+        console.log("registering commands, please wait");
+        u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Registering Commands")] });
+        // Push the commands to discord (GUILD specific)
+        await guild.commands.set(commands)
+
         console.log("command registration complete")
         u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Command Registration Complete!")] });
     });
