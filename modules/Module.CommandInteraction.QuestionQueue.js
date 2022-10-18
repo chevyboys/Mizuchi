@@ -584,7 +584,7 @@ const Module = new Augur.Module()
             if (page > Math.ceil(sorted.length / numberOfQuestions)) page = Math.ceil(sorted.length / numberOfQuestions);
             for (i = page * numberOfQuestions - numberOfQuestions; i < page * numberOfQuestions; i++) {
                 if (sorted[i]) {
-                    statEmbed.addField("Top Question " + (i + 1) + ":" + "( " + sorted[i].votes + " votes)", sorted[i].string.substring(0, 1000));
+                    statEmbed.addField("Top Question " + (i + 1) + ":" + "( " + sorted[i].votes + " votes)", sorted[i].string.substring(0, 900));
                 }
             }
             statEmbed.setFooter({ text: `Page ${page} of ${Math.ceil(sorted.length / numberOfQuestions)}` });
