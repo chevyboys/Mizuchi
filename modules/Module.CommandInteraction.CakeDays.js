@@ -136,7 +136,7 @@ Module
                             return interaction.reply({ content: "You don't have permission to do that", ephemeral: true });
                         }
                         await db.User.updateCakeDay(cakeOrJoinDayUpdateTarget, cakeOrJoinDayDate);
-                        return interaction.reply({ content: "🎂", ephemeral: true });
+                        return interaction.reply({ content: "🎂 Cakeday set to " + cakeOrJoinDayDate + " 🎂", ephemeral: true });
                     }
                 } catch (e) {
 
