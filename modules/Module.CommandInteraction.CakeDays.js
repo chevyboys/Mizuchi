@@ -78,7 +78,7 @@ async function testcakeOrJoinDays(guild) {
             await guild.channels.cache.get(snowflakes.channels.general).send(message.join("\n"));
         }
         guild.channels.cache.get(snowflakes.channels.general).send({
-            content: "To opt-out of these, use `/cakeday opt-out or click the button below`",
+            content: "To opt-out of these, use `/cakeday opt-out` or click the button below",
             components: optButtons
 
         })

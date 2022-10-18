@@ -5,20 +5,20 @@ const components = [
             //add the upvote button
             new MessageButton()
                 .setCustomId('cakedayopt-in')
-                .setLabel(`opt-in to cakeday`)
+                .setLabel(`Opt-in to Cakedays!`)
                 .setStyle("SECONDARY"),
 
             //add the check vote status button
             new MessageButton()
                 .setCustomId('cakedayopt-out')
-                .setLabel("opt-out of cakeday")
+                .setLabel("Opt-out of Cakedays")
                 .setStyle("SECONDARY"),
 
             new MessageButton()
                 .setCustomId('cakedayinfo')
                 .setLabel("")
                 .setStyle("SECONDARY")
-                .setEmoji("❔"),
+                .setEmoji("ℹ"),
         )
 ]
 module.exports = components;
