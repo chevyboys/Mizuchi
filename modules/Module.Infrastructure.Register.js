@@ -94,6 +94,15 @@ const Module = new Augur.Module()
                         .setDescription("The dice you want to roll in private. If you aren't sure how, instead enter 'help'")
                         .setRequired(true)
                 ),
+            new SlashCommandBuilder()
+            .setName("pulse")
+            .setDescription("Get's the bot's and discord's pulse")
+            .addBooleanOption(option =>
+                option
+                    .setName("verbose")
+                    .setDescription("set to true if you want lots of extra info")
+                    .setRequired(false)
+            )
         ].map(command => command.toJSON());
 
         u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Reading Commands, preparing to register")] });

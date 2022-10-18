@@ -292,23 +292,7 @@ Module
         }
     });
 
-
-const Registrar = require("../utils/Utils.CommandRegistrar");
-//Register commands
-let commands = [
-    new Registrar.SlashCommandBuilder()
-        .setName("pulse")
-        .setDescription("Get's the bot's and discord's pulse")
-        .addBooleanOption(option =>
-            option
-                .setName("verbose")
-                .setDescription("set to true if you want lots of extra info")
-                .setRequired(false)
-        )
-]
-Module.addEvent("ready", async () => {
-    let commandResponse = await Registrar.registerGuildCommands(Module, commands)
-}).setClockwork(() => {
+Module.setClockwork(() => {
     try {
         return setInterval(alertDiscordStatus, 10 * 60 * 1000);
     } catch (e) { u.errorHandler(e, "cakeOrJoinDay Clockwork Error"); }
