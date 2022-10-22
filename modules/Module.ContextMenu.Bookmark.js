@@ -10,7 +10,6 @@ const snowflakes = require('../config/snowflakes.json');
 function memberHasSensativeData(member) {
     if (!snowflakes.roles.SensativeDataHolders) return false
     else if (!member || member == null || !member.roles) return true;
-    else if (snowflakes.roles.SensativeDataHolders)
     else return snowflakes.roles.SensativeDataHolders.some(r => (member.roles.cache.has(r.id)))
 }
 
