@@ -3,7 +3,6 @@ const Augur = require("augurbot"),
     snowflakes = require('../config/snowflakes.json');
 const { DiceRoll } = require('@dice-roller/rpg-dice-roller');
 const Discord = require("discord.js");
-const Registrar = require("../utils/Utils.CommandRegistrar");
 let helpURL = "https://dice-roller.github.io/documentation/guide/notation/"
 
 /**
@@ -141,44 +140,19 @@ let rollProcess = (interaction, hiddenResponse = false) => {
 }
 
 //Register commands
-let commands = [
-    new Registrar.SlashCommandBuilder()
-        .setName("roll")
-        .setDescription("roles a dice of any reasonable size")
-        .addStringOption(option =>
-            option
-                .setName("dice")
-                .setDescription("The dice you want to roll. If you aren't sure how, instead enter 'help'")
-                .setRequired(true)
-        ),
-    new Registrar.SlashCommandBuilder()
-        .setName("gmroll")
-        .setDescription("roles a dice of any reasonable size")
-        .addStringOption(option =>
-            option
-                .setName("dice")
-                .setDescription("The dice you want to roll in private. If you aren't sure how, instead enter 'help'")
-                .setRequired(true)
-        ),
-]
-const Module = new Augur.Module()
-Module.addEvent("ready", async () => {
-    commandResponse = await Registrar.registerGuildCommands(Module, commands)
-});
 
+const Module = new Augur.Module()
 
 //Run commands
 Module.addInteractionCommand({
         name: "roll",
         guildId: snowflakes.guilds.PrimaryServer,
-        //commandId: async () => await Registrar.getCommandId(Module, "roll"),
         process: async (interaction) => {
             rollProcess(interaction);
         }
     }).addInteractionCommand({
         name: "gmroll",
         guildId: snowflakes.guilds.PrimaryServer,
-        //commandId: async () => await Registrar.getCommandId(Module, "gmroll"),
         process: async (interaction) => {
             rollProcess(interaction, true);
         }

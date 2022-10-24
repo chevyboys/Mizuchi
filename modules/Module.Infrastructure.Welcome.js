@@ -127,7 +127,7 @@ const Registrar = require("../utils/Utils.CommandRegistrar");
 let commands = [
   new Registrar.SlashCommandBuilder()
     .setName("welcome")
-    .setDescription("shows helpful links for the bot's info")
+    .setDescription("Edits the server greeting.")
     .addSubcommand(
       new Registrar.SlashCommandSubcommandBuilder()
         .setName("embed")
@@ -189,6 +189,7 @@ let commands = [
 ]
 Module.addEvent("ready", async () => {
   let commandResponse = await Registrar.registerGuildCommands(Module, commands)
+  console.log("Registered /welcome")
 }).addInteractionCommand({
   name: "welcome",
   guildId: snowflakes.guilds.PrimaryServer,

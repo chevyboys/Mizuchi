@@ -170,21 +170,5 @@ const Module = new Augur.Module()
         }
 
     })
-const Registrar = require("../utils/Utils.CommandRegistrar");
-//Register commands
-let commands = [
-    new Registrar.SlashCommandBuilder()
-        .setName("repo")
-        .setDescription("shows helpful links for the bot's info"),
-    new Registrar.SlashCommandBuilder()
-        .setName("links")
-        .setDescription("shows helpful links to things around the fandom"),
-    new Registrar.SlashCommandBuilder()
-        .setName("tone")
-        .setDescription("shows example tone tags")
-]
-Module.addEvent("ready", async () => {
-    commandResponse = await Registrar.registerGuildCommands(Module, commands)
-});
 
 module.exports = Module;
