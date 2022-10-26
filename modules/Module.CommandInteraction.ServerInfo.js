@@ -132,7 +132,7 @@ const Module = new Augur.Module()
                     new MessageButton({
                         disabled: true,
                         label: "The Wiki",
-                        style: "DANGER",
+                        style: "LINK",
                         url: "https://andrewkrowe.wordpress.com/"
                     }))
                 .addComponents(
