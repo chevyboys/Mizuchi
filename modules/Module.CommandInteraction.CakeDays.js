@@ -62,7 +62,7 @@ async function testcakeOrJoinDays(guild) {
             } catch (e) { if (e.toString().indexOf("Deprecation warning: value provided is not in a recognized RFC2822 or ISO format.") < 0) u.errorHandler(e, "Birthay Send"); continue; }
         }
 
-
+        if (messageContentArray.length == 0) return;
         arrayOfMessagesToSend = [];
         while (messageContentArray.join("\n").length > 800) {
             let thisMessageToSend = [];
