@@ -39,8 +39,10 @@ class Participant {
 
 
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
-    if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot) {
-        let message = reaction.message;
+    let message = reaction.message;
+    let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+    if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
+
         const member = message.member;
         try {
             const index = cache.findIndex(element => user == element.user);
@@ -50,7 +52,11 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
                 // incase this is changed later instead of if statments
                 switch (userCount.count) {
                     case 5:
-                        u.addRoles(member, snowflakes.roles.specter);
+                        u.addRoles(member, snowflakes.roles.Holiday);
+                        channel.send({
+                            content: `<@${user.id}> has caught a bunch of specters and is now a <@&${snowflakes.roles.Holiday}>`,
+                            allowedMentions: { parse: ["users"] }
+                        });
                         break;
 
                 }
@@ -58,7 +64,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
             } else {
                 cache.push(new Participant(user));
             }
-            let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+
             channel.send({
                 content: `<@${user.id}> captured a Specter in <#${message.channel.id}>`,
                 allowedMentions: { parse: ["users"] }
