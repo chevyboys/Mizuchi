@@ -43,7 +43,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
     if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
 
-        const member = message.member;
+        const member = message.guild.members.cache.get(user.id);
         try {
             const index = cache.findIndex(element => user == element.user);
             if (index != -1) {
