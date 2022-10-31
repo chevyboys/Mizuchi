@@ -11,21 +11,56 @@ const holidays = [
     }
 ]
 
+// on server shutdown this cache should be written to database and also be cleared at the end of event (with database clear too)
+cache = [];
+class Participant {
+    #_user;
+    #_count = 1;
 
+    constructor(user) {
+        this.#_user = user;
+    }
 
+    updateCount() {
+        count++;
+    }
 
+    get count() {
+        return this.#_count;
+    }
+
+    get user() {
+        return this.#_user;
+    }
+  }
+  
 
 
 
 
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
-    if (reaction.emoji.name == holidays[0] && !user.bot) {
+    if (reaction.emoji.toString().toLowerCase() == `<:${holidays[0]}>` && !user.bot) {
         let message = reaction.message;
         try {
-            //nora handles a user "catching" a specter here
-            //Should remove bot reaction
-            //shold give shout out message
-            //feel free to have fun with it.
+            const index = cache.findIndex(element => user == element.user);
+            if (index != undefined) {
+                const userCount = cache[index];
+                
+              userCount.updateCount();
+              // incase this is changed later instead of if statments
+              switch(userCount.count) {
+                case 5:
+                    //update role here
+                    break;
+            
+              }
+
+            } else {
+                cache.push(new Participant(user));
+
+                // trigger message here
+            }
+
         } catch (error) { u.errorHandler(error, "Holliday reaction error"); }
     }
 }).addEvent("messageCreate", (msg) => {
