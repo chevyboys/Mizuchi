@@ -11,21 +11,59 @@ const holidays = [
     }
 ]
 
+// on server shutdown this cache should be written to database and also be cleared at the end of event (with database clear too)
+let cache = [];
+class Participant {
+    #_user;
+    #_count = 1;
 
+    constructor(user) {
+        this.#_user = user;
+    }
 
+    updateCount() {
+        this.#_count++;
+    }
+
+    get count() {
+        return this.#_count;
+    }
+
+    get user() {
+        return this.#_user;
+    }
+}
 
 
 
 
 
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
-    if (reaction.emoji.name == holidays[0] && !user.bot) {
+    if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot) {
         let message = reaction.message;
+        const member = message.member;
         try {
-            //nora handles a user "catching" a specter here
-            //Should remove bot reaction
-            //shold give shout out message
-            //feel free to have fun with it.
+            const index = cache.findIndex(element => user == element.user);
+            if (index != -1) {
+                const userCount = cache[index];
+                userCount.updateCount();
+                // incase this is changed later instead of if statments
+                switch (userCount.count) {
+                    case 5:
+                        u.addRoles(member, snowflakes.roles.specter);
+                        break;
+
+                }
+
+            } else {
+                cache.push(new Participant(user));
+            }
+            let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+            channel.send({
+                content: `<@${user.id}> captured a Specter in <#${message.channel.id}>`,
+                allowedMentions: { parse: ["users"] }
+            });
+            reaction.users.remove(message.client.user.id);
         } catch (error) { u.errorHandler(error, "Holliday reaction error"); }
     }
 }).addEvent("messageCreate", (msg) => {
