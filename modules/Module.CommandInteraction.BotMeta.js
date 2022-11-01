@@ -235,7 +235,7 @@ Module
         syntax: "[game]",
         aliases: ["streaming", "watching", "listening"],
         process: (msg, suffix) => {
-            msg.client.user.setAvatar('./avatar/' + (suffix ? suffix.trim() : "base.png"))
+            msg.client.user.setAvatar(('./avatar/' + (suffix ? suffix.trim() : "base.png")))
             msg.react("👌");
         },
         permissions: (msg) => (Module.config.adminId.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin) || msg.member.roles.cache.has(snowflakes.roles.BotMaster))
