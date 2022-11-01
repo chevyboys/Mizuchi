@@ -41,7 +41,7 @@ class Participant {
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
     let message = reaction.message;
     let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
-    if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
+    if (false && (reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
 
         const member = message.guild.members.cache.get(user.id);
         try {
@@ -77,7 +77,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         msg.author &&
         !msg.webhookId &&
         !msg.author.bot &&
-        Math.floor(Math.random() * 30) > 28 //this should be a 1 in 30 chance
+        Math.floor(Math.random() * 1000) > 999 //this should be a 1 in 30 chance
     ) {
         msg.react(holidays[0].emoji)
     }
