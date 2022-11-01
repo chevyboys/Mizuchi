@@ -8,7 +8,7 @@ const snowflakes = require('../config/snowflakes.json');
 const Discord = require("discord.js")
 let previousDiscordIncident;
 
-async function setBotStatus({clientuser, type, status, url}){
+async function setBotStatus({ clientuser, type, status, url }) {
     clientuser.setActivity({ type: type.toUpperCase(), url: url, name: status.trim() });
 
 }
@@ -97,14 +97,14 @@ async function alertDiscordStatus(override) {
     let discordStatus = await axios.get("https://srhpyqt94yxb.statuspage.io/api/v2/summary.json");
     let incidents = discordStatus.data.incidents;
     if (!override) return;
-    if ((incidents.length < 1  || incidents == previousDiscordIncident)) return;
+    if ((incidents.length < 1 || incidents == previousDiscordIncident)) return;
     previousDiscordIncident = incidents;
     let fakeInteraction = { guild: Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer), client: Module.client, };
     let channel = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.cache.get(snowflakes.channels.earthTemple);
     let msgOptions = await sendDiscordStatus(fakeInteraction)
     msgOptions.content = `<@${Module.config.ownerId}><@398556120714706956>\n**Warning: Discord Status API reports ongoing issues**`
-    msgOptions.allowedMentions = {parse: ["users"]},
-    await channel.send(msgOptions);
+    msgOptions.allowedMentions = { parse: ["users"] },
+        await channel.send(msgOptions);
 }
 
 Module
@@ -216,7 +216,7 @@ Module
                 command = command.toUpperCase();
                 let url = false;
                 if (command == "STREAMING") {
-                    
+
                     url = isURL(suffix);
                     msg.client.user.setActivity({ type: command.toUpperCase(), url: url, name: suffix.replace(url, "").replace("  ", " ").trim() });
                 }
@@ -224,6 +224,18 @@ Module
 
             }
             else msg.client.user.setActivity("");
+            msg.react("👌");
+        },
+        permissions: (msg) => (Module.config.adminId.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin))
+    }).addCommand({
+        name: "avatar",
+        category: "Bot Admin",
+        hidden: true,
+        description: "Set playing status",
+        syntax: "[game]",
+        aliases: ["streaming", "watching", "listening"],
+        process: (msg, suffix) => {
+            msg.client.user.setAvatar('./avatar/' + suffix.trim())
             msg.react("👌");
         },
         permissions: (msg) => (Module.config.adminId.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin))
@@ -241,15 +253,16 @@ Module
                     else return null;
                 }
                 url = interaction?.options?.get("url")?.value; //isURL(interaction?.options?.get("url")?.value);
-                if(!url) return interaction.reply({content: "That URL is not valid, streaming requires a valid youtube or twitch url", ephemeral: true})
+                if (!url) return interaction.reply({ content: "That URL is not valid, streaming requires a valid youtube or twitch url", ephemeral: true })
             }
             await setBotStatus({
-                clientuser: Module.client.user, 
-                type: interaction?.options?.get("type")?.value, 
-                status: interaction?.options?.get("status")?.value, 
-                url: interaction?.options?.get("url")?.value })
-                
-            return interaction.reply({content: `The bot's status has been set to ${interaction?.options?.get("type")?.value} ${interaction?.options?.get("status")?.value}${interaction?.options?.get("url")?.value? "\nfor the url " + interaction?.options?.get("url")?.value : ""}`, ephemeral: true})
+                clientuser: Module.client.user,
+                type: interaction?.options?.get("type")?.value,
+                status: interaction?.options?.get("status")?.value,
+                url: interaction?.options?.get("url")?.value
+            })
+
+            return interaction.reply({ content: `The bot's status has been set to ${interaction?.options?.get("type")?.value} ${interaction?.options?.get("status")?.value}${interaction?.options?.get("url")?.value ? "\nfor the url " + interaction?.options?.get("url")?.value : ""}`, ephemeral: true })
         }
 
     })
