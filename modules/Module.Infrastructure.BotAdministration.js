@@ -36,6 +36,39 @@ const Module = new Augur.Module()
     }
   })
   .addCommand({
+    name: "emoji",
+    category: "Bot Admin",
+    description: "Shows all custom emoji in the server where it is used",
+    hidden: true,
+    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+    process: async (msg) => {
+      emoji = msg.guild.emojis.cache.map(e => e.toString() + "" + e.toString() + "");
+      let arrayOfMessagesToSend = [];
+      while (emoji.join("\n").length > 800) {
+        let thisMessageToSend = [];
+        for (let index = 0; thisMessageToSend.join("\n").length < 800; index++) {
+          thisMessageToSend.push(emoji.shift())
+        }
+        arrayOfMessagesToSend.push(thisMessageToSend);
+
+      }
+      arrayOfMessagesToSend.push(emoji)
+      for (const message of arrayOfMessagesToSend) {
+        await msg.channel.send(message.join("\n"));
+      }
+    }
+  }).addCommand({
+    name: "roleid",
+    category: "Bot Admin",
+    description: "gets the id for a role based on name",
+    hidden: true,
+    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+    process: async (msg, suffix) => {
+      let roles = msg.guild.roles.cache.map((r) => { return { name: r.name.trim().toLowerCase().replaceAll(" ", ""), id: r.id } }).filter(r => suffix.trim().toLowerCase().replaceAll(" ", "").indexOf(r.name) > -1).map(r => `${r.name} : ${r.id}`);
+      msg.reply(roles.join("\n"));
+    }
+  })
+  .addCommand({
     name: "git",
     category: "Bot Admin",
     description: "git pull or git stash",
@@ -111,7 +144,7 @@ const Module = new Augur.Module()
   .addEvent("ready", () => {
     //When the bot is fully online, fetch all the discord members, since it will only autofetch for small servers and we want them all.
     Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.fetch();
-    
+
   }).addEvent("guildMemberUpdate", async (oldMember, newMember) => {
     if (newMember.guild.id == snowflakes.guilds.PrimaryServer) {
       if (newMember.roles.cache.size > oldMember.roles.cache.size) {
