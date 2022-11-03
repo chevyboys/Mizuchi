@@ -36,7 +36,7 @@ let welcomeStringCommandOverride = (welcomeMsgObject) => {
  * @param {*} member 
  */
 function welcomeEscapeSequencesParse(string, member) {
-  let parsed1 = string.replaceAll("[name]", "[honorific]" + member.displayName);
+  let parsed1 = string.replaceAll("[name]", "[honorific] " + member.displayName);
   let parsed2 = parsed1.replaceAll("[intentionally blank]", "");
   let parsed3;
   for (const key in snowflakes.channels) {
@@ -51,7 +51,7 @@ function welcomeEscapeSequencesParse(string, member) {
       parsed3 = parsed3.replaceAll(`[@${key.toLowerCase()}]`, `<@&${element}>`)
     }
   }
-  return parsed3;
+  return parsed3.replaceAll("[comma]", ",");
 }
 
 let lastHonorific;
@@ -69,9 +69,9 @@ async function generateWelcomeObject(member) {
   let Honorific = u.rand(rawWelcome.filter(row => row.Honorific && row.Honorific != "" && row.Honorific != lastHonorific).map(row => welcomeEscapeSequencesParse(row.Honorific, member))).toLowerCase();
   lastHonorific = Honorific;
   let welcomeObject = {
-    Greeting: u.rand(rawWelcome.filter(row => row.Greeting && row.Greeting != "" && row.Greeting != lastGreeting).map(row => welcomeEscapeSequencesParse(row.Greeting, member))).replaceAll('[honorific] ', Honorific),
-    Prompt: u.rand(rawWelcome.filter(row => row.Prompt && row.Prompt != "" && row.Prompt != lastPrompt).map(row => welcomeEscapeSequencesParse(row.Prompt, member))).replaceAll('[honorific] ', Honorific),
-    Directions: u.rand(rawWelcome.filter(row => row.Directions && row.Directions != "" && row.Directions != lastDirections).map(row => welcomeEscapeSequencesParse(row.Directions, member))).replaceAll('[honorific] ', Honorific),
+    Greeting: u.rand(rawWelcome.filter(row => row.Greeting && row.Greeting != "" && row.Greeting != lastGreeting).map(row => welcomeEscapeSequencesParse(row.Greeting, member))).replaceAll('[honorific]', Honorific),
+    Prompt: u.rand(rawWelcome.filter(row => row.Prompt && row.Prompt != "" && row.Prompt != lastPrompt).map(row => welcomeEscapeSequencesParse(row.Prompt, member))).replaceAll('[honorific]', Honorific),
+    Directions: u.rand(rawWelcome.filter(row => row.Directions && row.Directions != "" && row.Directions != lastDirections).map(row => welcomeEscapeSequencesParse(row.Directions, member))).replaceAll('[honorific]', Honorific),
   }
   //assert that we don't immedietly duplicate
   lastGreeting = welcomeObject.Greeting.replaceAll(member.displayName, "[name]").replaceAll(Honorific, "").replaceAll("  ", " ");
