@@ -14,8 +14,8 @@ function convertCSVToJSON(rawResult) {
     const cells = row.split(",");
     let parsedRow = {};
     for (let j = 0; j < columns.length; j++) {
-      const column = columns[j];
-      const cell = cells[j];
+      const column = columns[j].trim();
+      const cell = cells[j].trim();
       parsedRow[column] = cell;
     }
     data.push(parsedRow);
