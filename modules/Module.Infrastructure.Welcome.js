@@ -1,9 +1,10 @@
 const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic"),
   db = require("../utils/Utils.Database"),
-  snowflakes = require("../config/snowflakes.json");
+  gs = require("../utils/Utils.GetGoogleSheetsAsJson");
+snowflakes = require("../config/snowflakes.json");
 const fs = require('fs');
-const CakedayOptButtons = require("../utils/Utils.CakedayOptButtons")
+const CakedayOptButtons = require("../utils/Utils.CakedayOptButtons");
 
 function delay(time) {
   return new Promise(resolve => setTimeout(resolve, time));
@@ -29,6 +30,55 @@ let welcomeStringCommandOverride = (welcomeMsgObject) => {
     default: throw new Error(`Improper welcome string override type. ${overrideObject.type} is not one of ${JSON.stringify(overrideObject.validTypes)}`);
   }
 }
+/**
+ * 
+ * @param {string} string 
+ * @param {*} member 
+ */
+function welcomeEscapeSequencesParse(string, member) {
+  let parsed1 = string.replaceAll("[name]", "[honorific]" + member.displayName);
+  let parsed2 = parsed1.replaceAll("[intentionally blank]", "");
+  let parsed3;
+  for (const key in snowflakes.channels) {
+    if (Object.hasOwnProperty.call(snowflakes.channels, key)) {
+      const element = snowflakes.channels[key];
+      parsed3 = parsed2.replaceAll(`[#${key.toLowerCase()}]`, `<#${element}>`)
+    }
+  }
+  for (const key in snowflakes.roles) {
+    if (Object.hasOwnProperty.call(snowflakes.roles, key)) {
+      const element = snowflakes.roles[key];
+      parsed3 = parsed3.replaceAll(`[@${key.toLowerCase()}]`, `<@&${element}>`)
+    }
+  }
+  return parsed3;
+}
+
+let lastHonorific;
+let lastGreeting;
+let lastPrompt;
+let lastDirections;
+
+/**
+ * returns an object containing a Greetings, Prompt, and Directions strings using a google sheet
+ * @param {Member} member 
+ * @returns {object}
+ */
+async function generateWelcomeObject(member) {
+  const rawWelcome = await gs(snowflakes.sheets.welcome);
+  let Honorific = u.rand(rawWelcome.filter(row => row.Honorific && row.Honorific != "" && row.Honorific != lastHonorific).map(row => welcomeEscapeSequencesParse(row.Honorific, member))).toLowerCase();
+  lastHonorific = Honorific;
+  let welcomeObject = {
+    Greeting: u.rand(rawWelcome.filter(row => row.Greeting && row.Greeting != "" && row.Greeting != lastGreeting).map(row => welcomeEscapeSequencesParse(row.Greeting, member))).replaceAll('[honorific] ', Honorific),
+    Prompt: u.rand(rawWelcome.filter(row => row.Prompt && row.Prompt != "" && row.Prompt != lastPrompt).map(row => welcomeEscapeSequencesParse(row.Prompt, member))).replaceAll('[honorific] ', Honorific),
+    Directions: u.rand(rawWelcome.filter(row => row.Directions && row.Directions != "" && row.Directions != lastDirections).map(row => welcomeEscapeSequencesParse(row.Directions, member))).replaceAll('[honorific] ', Honorific),
+  }
+  //assert that we don't immedietly duplicate
+  lastGreeting = welcomeObject.Greeting.replaceAll(member.displayName, "[name]").replaceAll(Honorific, "").replaceAll("  ", " ");
+  lastPrompt = welcomeObject.Prompt;
+  lastDirections = welcomeObject.Directions;
+  return welcomeObject;
+}
 
 
 const Module = new Augur.Module()
@@ -43,11 +93,8 @@ const Module = new Augur.Module()
 
       //set up common variables we will need in a bit
       let guild = member.guild;
-      let bot = member.client;
-
       let user = await db.User.get(member.id);
-      let general = guild.channels.cache.get(snowflakes.channels.introductions); // #introductions
-      let welcomeChannel = guild.channels.cache.get(snowflakes.channels.introductions); // #welcome
+      let introductions = guild.channels.cache.get(snowflakes.channels.introductions); // #introductions
       let modLogs = guild.channels.cache.get(snowflakes.channels.modRequests); // #mod-logs
 
       //Notify Mods that a new user is here
@@ -81,46 +128,26 @@ const Module = new Augur.Module()
         if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
 
         embed.setTitle(member.displayName + " has rejoined the server.")
-          .addField("Roles", roleString);
+          .addFields([{ name: "Roles", value: roleString }]);
         welcomeString = `Welcome back, ${member}! Glad to see you again.`;
 
       } else { // Member is new
-        let welcome = [
-          "Welcome",
-          "Hi there",
-          "Glad to have you here",
-          "Hello there",
-          "Greetings"
-        ];
-        let info1 = [
-          "I hope you brought pizza! \nTake a look at",
-          "Take a peek at",
-          "Take a look at",
-          "Check out",
-          "Head on over to"
-        ];
-        let info2 = [
-          "to get started",
-          "for some basic community rules",
-          "and join in the chat"
-        ];
-        let info3 = [
-          "What brings you our way?",
-          "How'd you find us?",
-          "How far have you gotten in the books?"
-        ];
-        welcomeString = `${u.rand(welcome)}, ${member}! ${u.rand(info1)} <#${snowflakes.channels.rules}> ${u.rand(info2)}. ${u.rand(info3)}\n\nHead over to <#${snowflakes.channels.roles}> if you'd like to opt in to roles, and be sure to check out our <#${snowflakes.channels.faq}> and <#${snowflakes.channels.spoilerPolicy}>`;
+        const welcome = await generateWelcomeObject(member);
+        welcomeString = `${welcome.Greeting} ${welcome.Prompt}\n\n${welcome.Directions}`.replaceAll("  ", " ");
         embed.setTitle(member.displayName + " has joined the server.");
 
         db.User.new(member);
       }
 
-      if (!member.user.bot)
-        general.send(welcomeStringCommandOverride({ content: welcomeString, allowedMentions: { users: [member.user.id] }, components: CakedayOptButtons }));
-      u.noop();
+      if (!member.user.bot) {
+        modLogs.send({ embeds: [embed] });
+        introductions.send(welcomeStringCommandOverride({ content: welcomeString, allowedMentions: { users: [member.user.id] }, components: CakedayOptButtons }));
+
+      }
 
     } catch (e) { u.errorHandler(e, "New Member Add"); }
   });
+
 
 const Registrar = require("../utils/Utils.CommandRegistrar");
 //Register commands
@@ -201,7 +228,7 @@ Module.addEvent("ready", async () => {
     let isAllowed = interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.Whisper) || interaction.member.roles.cache.has(snowflakes.roles.BotMaster)
     if (!isAllowed || !isAppropriateInteraction) return;
     else {
-      
+
       let data = {
         welcomeString: "",
         type: "",
@@ -230,7 +257,7 @@ Module.addEvent("ready", async () => {
           data.welcomeString = subCommandOptions[0].value
           break;
         case "prepend":
-          data.welcomeString =  subCommandOptions[0].value
+          data.welcomeString = subCommandOptions[0].value
           break;
         case "reset":
           data.type = "disabled"
