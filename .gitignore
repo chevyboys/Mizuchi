@@ -12,7 +12,6 @@ data/*
 faq/*.json
 # For Visual Studio's temp directory
 .vs/
-.vscode/launch.json
 .forever/
 faq/*
 package-lock.json

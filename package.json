@@ -34,7 +34,7 @@
     "turndown": "^7.1.1"
   },
   "devDependencies": {
-    "eslint": "^7.32.0",
+    "eslint": "^8.26.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.24.1",
     "eslint-plugin-node": "^11.1.0",
@@ -42,14 +42,18 @@
   },
   "eslintConfig": {
     "env": {
-      "node": true,
-      "es6": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 2021
-    },
-    "extends": "eslint:recommended",
-    "rules": []
+      "commonjs": true,
+      "es2022": true,
+      "node": true
+  },
+  "extends": "standard",
+  "overrides": [
+  ],
+  "parserOptions": {
+      "ecmaVersion": 13
+  },
+  "rules": {
+  }
   },
   "nodeVersion": "17.1.0"
 }
