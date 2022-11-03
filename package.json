@@ -46,7 +46,7 @@
       "es2022": true,
       "node": true
   },
-  "extends": "standard",
+  "extends": "eslint:recommended",
   "overrides": [
   ],
   "parserOptions": {
