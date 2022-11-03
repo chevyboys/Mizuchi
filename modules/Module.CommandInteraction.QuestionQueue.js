@@ -6,6 +6,8 @@ const fs = require('fs');
 const { Message, MessageButton, MessageActionRow, Modal, TextInputComponent } = require('discord.js');
 const askedRecently = new Set();
 
+const canAnswerQuestions = interaction => (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.WorldMaker))
+
 function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, buttonTwoEmoji, data) {
     return [
         new MessageActionRow()
@@ -151,7 +153,13 @@ async function moveQuestion(interaction, targetId) {
     interaction.reply({ content: `I have moved ${target[0].string ? target[0].string : target[0]} to the question discussion channel`, ephemeral: true });
     let newResponseChannel = interaction.guild.channels.cache.get(snowflakes.channels.questionDiscussion)
     let newEmbed = interaction.message.embeds[0]
-    newResponseChannel.send({ content: `<@${asker}>, ${interaction.member.displayName} flagged your question as either already answered, or answerable by the community. They should provide you with more information as a response to this message.`, embeds: [newEmbed], allowedMentions: { parse: ["users"] } })
+    let components = new MessageActionRow().addComponents(
+        new MessageButton()
+            .setCustomId('qqaRecycle')//qqa stands for question queue answer
+            .setStyle('SECONDARY')
+            .setLabel('Return to Question Queue')
+    )
+    newResponseChannel.send({ content: `<@${asker}>, ${interaction.member.displayName} flagged your question as either already answered, or answerable by the community. They should provide you with more information as a response to this message.`, embeds: [newEmbed], allowedMentions: { parse: ["users"] }, components: [components] })
 
 
     //allow the asker to send again
@@ -255,7 +263,7 @@ async function editQuestion(interaction, targetId) {
 }
 
 
-async function ask(interaction) {
+async function ask(interaction, bypassWait) {
     const hoursBetweenQuestions = 72;
 
     if (interaction instanceof Message) {
@@ -270,12 +278,12 @@ async function ask(interaction) {
         await interaction.react("👍");
         u.clean(interaction, 3);
     }
-    if (askedRecently.has(interaction.user.id)) {
+    if (askedRecently.has(interaction.user.id) && !bypassWait) {
         interaction.reply({ content: "Wait a few hours before asking again. - <@" + interaction.user + ">\nYour question was: " + (interaction.options ? interaction.options.get("question").value : interaction.cleanContent), ephemeral: true });
     } else {
         // Akn
         try {
-            u.clean(await interaction.reply({ content: 'Thank you. Your question has been registered.', ephemeral: true }));
+            u.clean(await interaction.reply({ content: 'The Question Has been registered', ephemeral: true }));
         } catch (error) {
             u.noop();
         }
@@ -343,6 +351,47 @@ async function ask(interaction) {
     }
 }
 
+function transferAnswerComponents(identifier) {
+    return [new MessageActionRow().addComponents(
+        new MessageButton()
+            .setCustomId('qqa' + identifier)//qqa stands for question queue answer
+            .setStyle('PRIMARY')
+            .setLabel('Click to Answer'),
+        new MessageButton()
+            .setCustomId('RAFO')//qqa stands for question queue answer
+            .setStyle('DANGER')
+            .setLabel('Click to RAFO'),
+        new MessageButton()
+            .setCustomId('qqaRecycle')//qqa stands for question queue answer
+            .setStyle('SECONDARY')
+            .setLabel('Click to Answer another time'),
+
+    )]
+}
+async function processRecycleButton(interaction) {
+    if (!canAnswerQuestions(interaction) && !interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.CommunityGuide) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && !interaction.member.roles.cache.has(snowflakes.roles.LARPer))
+        return interaction.reply({ content: "I'm sorry, you can't do that", ephemeral: true })
+    else {
+        interaction.channel = interaction.guild.channels.cache.get(snowflakes.channels.ask);
+        interaction.user = interaction.message.mentions.parsedUsers.first();
+        interaction.options = null;
+        interaction.cleanContent = interaction.message.embeds[0].description;
+        await ask(interaction, true);
+        try {
+            await interaction.message.delete();
+        }
+        catch (e) {
+            try {
+                await interaction.message.edit({ components: [] });
+            }
+            catch (e) {
+                u.noop()
+            }
+        }
+    }
+
+}
+
 async function processTransfer(interaction) {
 
     // correct channel?
@@ -362,7 +411,8 @@ async function processTransfer(interaction) {
             rawData.push({
                 file: files[i],
                 fetch: data.fetch,
-                string: `<@${data.details.asker}>: ${data.details.question}`,
+                asker: await interaction.guild.members.fetch(data.details.asker) || data.details.asker,
+                question: data.details.question,
                 votes: data.system.IDs.length
             });
         }
@@ -374,25 +424,38 @@ async function processTransfer(interaction) {
     // Check
     if (sorted.length == 0) {
         interaction.reply({ content: `There are no questions to answer! Check back later.` });
-        return
+        return;
     }
-
+    interaction.reply({ ephemeral: true, content: "👌" });
     // Format
-    strings = [];
+    messages = [];
     accepted = [];
     for (i = 0; i < numberOfQuestions; i++) {
         if (sorted[i]) {
-            strings.push(sorted[i].string);
-            accepted.push(sorted[i]);
+            accepted[i] = sorted[i];
+            interaction.guild.channels.cache.get(snowflakes.channels.transfer).send({
+                content: "<@" + (sorted[i].asker.id || sorted[i].asker) + ">",
+                embeds: [
+                    u.embed()
+                        .setAuthor(
+                            {
+                                name: sorted[i].asker.displayName || sorted[i].asker,
+                                iconURL: sorted[i].asker.avatarURL() || undefined
+                            }
+                        )
+                        .setDescription(sorted[i].question)
+                        .setFooter({ text: "Votes: " + sorted[i].votes })
+                        .setColor(sorted[i].asker.displayHexColor || "#03cafc")
+                ],
+                components: transferAnswerComponents(i),
+                allowedMentions: {
+                    parse: ['users']
+                }
+            })
         }
     }
-    strings = strings.join(`\n\n`);
-    // Send
-    while (strings.length > 2000) {
-        interaction.channel.send({ content: strings.substring(0, 2000) });
-        strings = strings.substring(2000);
-    }
-    interaction.reply({ content: `${strings}` });
+
+
 
     // Delete vote messages
     c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
@@ -410,6 +473,47 @@ async function processTransfer(interaction) {
         if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
     }
 
+}
+
+async function processQQAButtonModalMaker(interaction) {
+    const modal = new Modal()
+        .setCustomId("answerQuestionModal")
+        .setTitle("Answer Question");
+
+    const newQuestionInput = new TextInputComponent()
+        .setCustomId('answerQuestionModalInput')
+        .setLabel("Answer")
+        .setMaxLength(4000)
+        .setPlaceholder(interaction.message.embeds[0].description.toString().slice(0, 99))
+        // Paragraph means multiple lines of text.
+        .setStyle("PARAGRAPH");
+    const firstActionRow = new MessageActionRow().addComponents(newQuestionInput);
+    return modal.addComponents(firstActionRow);
+
+}
+
+function worldmakerReplyEmbed(interaction) {
+    return u.embed().setAuthor({
+        name: interaction.member.displayName,
+        iconURL: interaction.member.avatarURL() || interaction.member.user.avatarURL()
+    }).setColor(interaction.member.displayHexColor)
+}
+
+async function processqqaButton(interaction) {
+    if (canAnswerQuestions(interaction)) {
+        await interaction.showModal(await processQQAButtonModalMaker(interaction));
+    }
+    else interaction.reply({ content: "I'm sorry, but you don't have access to that.", ephemeral: true })
+}
+
+async function processRAFOButton(interaction) {
+    if (canAnswerQuestions(interaction)) {
+        let embeds = interaction.message.embeds;
+        embeds[0].setColor("#ED4245");
+        embeds.push(worldmakerReplyEmbed(interaction).setDescription("You're going to have to read and find out on that one I'm afraid."))
+        interaction.update({ embeds: embeds, components: [] })
+    }
+    else interaction.reply({ content: "I'm sorry, but you don't have access to that.", ephemeral: true })
 }
 
 async function processStats(interaction) {
@@ -468,7 +572,7 @@ const Module = new Augur.Module()
                 if (subcommand === "ask") {
                     await ask(interaction);
                 } else if (subcommand === "transfer") {
-                    if (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.WorldMaker))
+                    if (canAnswerQuestions(interaction))
                         await processTransfer(interaction);
                     else interaction.reply({ content: "Unfortunetly, you don't have permission to do that", ephemeral: true });
                 } else if (subcommand === "stats") {
@@ -570,6 +674,21 @@ const Module = new Augur.Module()
         }
 
     }).addInteractionHandler({
+        customId: "answerQuestionModal",
+        process: async (interaction) => {
+            if (canAnswerQuestions(interaction)) {
+                let answer = interaction.components[0].components[0].value;
+                let embeds = interaction.message.embeds;
+                embeds[0].setColor("#5865F2#")
+                embeds.push(worldmakerReplyEmbed(interaction).setDescription(answer))
+                interaction.update({ embeds: embeds, components: [] })
+            }
+            else interaction.reply({ content: "Unfortunetly, you don't have permission to do that", ephemeral: true });
+
+
+        }
+
+    }).addInteractionHandler({
         customId: "voteCheck",
         process: async (interaction) => {
             // Check & Load data
@@ -628,7 +747,13 @@ const Module = new Augur.Module()
     }).addEvent("messageCreate", async (msg) => {
         if (msg.author.bot || msg.channel.id != snowflakes.channels.ask) return;
         ask(msg);
-    });
+    }).addInteractionHandler({ customId: `qqa0`, process: processqqaButton })
+    .addInteractionHandler({ customId: `qqa1`, process: processqqaButton })
+    .addInteractionHandler({ customId: `qqa2`, process: processqqaButton })
+    .addInteractionHandler({ customId: `qqa3`, process: processqqaButton })
+    .addInteractionHandler({ customId: `qqa4`, process: processqqaButton })
+    .addInteractionHandler({ customId: `RAFO`, process: processRAFOButton })
+    .addInteractionHandler({ customId: `qqaRecycle`, process: processRecycleButton });
 
 
 module.exports = Module;
