@@ -1,14 +1,7 @@
 {
-
-  "[json]" : {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-    "editor.formatOnSave": true
-  },
-
   "[javascript]" : {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.defaultFormatter": "vscode.typescript-language-features",
     "editor.formatOnSave": true
   },
-  "eslint.format.enable": true,
   "eslint.enable": true,
 }
