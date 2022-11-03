@@ -64,7 +64,7 @@ const Module = new Augur.Module()
     hidden: true,
     permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member.roles.cache.has(snowflakes.roles.BotMaster),
     process: async (msg, suffix) => {
-      let roles = msg.guild.roles.cache.map((r) => { return { name: r.name.trim().toLowerCase().replaceAll(" ", ""), id: r.id } }).filter(r => suffix.trim().toLowerCase().replaceAll(" ", "").indexOf(r.name) > -1).map(r => `${r.name} : ${r.id}`);
+      let roles = msg.guild.roles.cache.map((r) => { return { name: r.name.trim().toLowerCase().replaceAll(" ", ""), id: r.id } }).filter(r => suffix.trim().toLowerCase().replaceAll(" ", "").indexOf(r.name) > -1 || r.name.indexOf(suffix.trim().toLowerCase().replaceAll(" ", "")) > -1).map(r => `${r.name} : ${r.id}`);
       msg.reply(roles.length > 0 ? roles.join("\n") : "I can't find that role");
     }
   })
