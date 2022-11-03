@@ -30,7 +30,7 @@ let thankProcess = async (interaction) => {
     let userPmEmbed = u.embed()
         .setColor(interaction.guild.roles.cache.get(snowflakes.roles.Helper).hexColor)
         .setAuthor({ iconURL: interaction.member.displayAvatarURL(), name: interaction.member.displayName + " has sent you a thank you!" })
-        .setDescription(`Thank you for helping out the staff members of ${interaction.guild.name}! Your efforts were noticed by the staff, and the ${interaction.guild.roles.cache.get(snowflakes.roles.Helper).name} role was given to you for ${days} day(s)! \n Thank you so much! You will also recieve a 10% boost to the ammount of XP you earn in that time. Keep up the good work!\n\n`)
+        .setDescription(`Thank you for helping out the staff members of ${interaction.guild.name}! Your efforts were noticed by the staff, and the ${interaction.guild.roles.cache.get(snowflakes.roles.Helper).name} role was given to you for ${days} day(s)! \n Thank you so much! You will also recieve a 10% boost to the amount of XP you earn in that time. Keep up the good work!\n\n`)
         .addField(interaction.member.displayName + "'s listed reason:", "```" + reason + "```")
 
     try {
@@ -40,7 +40,7 @@ let thankProcess = async (interaction) => {
     }
 }
 
-let  endThank = async () => {
+let endThank = async () => {
     let files = fs.readdirSync(`./data/helpers/`).filter(x => x.endsWith(`.json`));
     let rawData = [];
     let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
@@ -72,5 +72,5 @@ Module.addInteractionCommand({
     try {
         return setInterval(endThank, 60 * 60 * 1000);
     } catch (e) { u.errorHandler(e, "end thank clockwork error"); }
-}).addEvent("ready", async () => {await endThank()});
+}).addEvent("ready", async () => { await endThank() });
 module.exports = Module;
