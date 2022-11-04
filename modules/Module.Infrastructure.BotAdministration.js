@@ -114,12 +114,10 @@ const Module = new Augur.Module()
     description: "This command reloads one or more modules. Good for loading in small fixes.",
     info: "Use the command without a suffix to reload all Module files.\n\nUse the command with the module name (including the `.js`) to reload a specific file.",
     parseParams: true,
-    process: (msg, ...files) => {
+    process: (msg) => {
       u.clean(msg);
-      const fs = require("fs"),
-        path = require("path");
-      if (files.length === 0) files = fs.readdirSync('./modules/').filter(file => file.endsWith(".js"));
-
+      const fs = require("fs");
+      let files = fs.readdirSync('./modules/').filter(file => file.endsWith(".js"));
       for (const file of files) {
         try {
           msg.client.moduleHandler.reload('./modules/' + file);
