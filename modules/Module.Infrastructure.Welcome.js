@@ -68,7 +68,6 @@ let lastDirections;
 async function generateWelcomeObject(member) {
   const rawWelcome = await gs(snowflakes.sheets.welcome);
   let Honorific = u.rand(rawWelcome.filter(row => row.Honorific && row.Honorific != "" && row.Honorific != lastHonorific).map(row => welcomeEscapeSequencesParse(row.Honorific, member))).toLowerCase();
-  lastHonorific = Honorific;
   let welcomeObject = {
     Greeting: u.rand(rawWelcome.filter(row => row.Greeting && row.Greeting != "" && row.Greeting != lastGreeting).map(row => welcomeEscapeSequencesParse(row.Greeting, member))).replaceAll('[honorific]', Honorific),
     Prompt: u.rand(rawWelcome.filter(row => row.Prompt && row.Prompt != "" && row.Prompt != lastPrompt).map(row => welcomeEscapeSequencesParse(row.Prompt, member))).replaceAll('[honorific]', Honorific),
@@ -78,6 +77,7 @@ async function generateWelcomeObject(member) {
   lastGreeting = welcomeObject.Greeting.replaceAll(member.displayName, "[name]").replaceAll(Honorific, "").replaceAll("  ", " ");
   lastPrompt = welcomeObject.Prompt;
   lastDirections = welcomeObject.Directions;
+  lastHonorific = Honorific;
   return welcomeObject;
 }
 
