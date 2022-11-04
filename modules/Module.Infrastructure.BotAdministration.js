@@ -118,11 +118,11 @@ const Module = new Augur.Module()
       u.clean(msg);
       const fs = require("fs"),
         path = require("path");
-      if (files.length === 0) files = fs.readdirSync(path.resolve(__dirname)).filter(file => file.endsWith(".js"));
+      if (files.length === 0) files = fs.readdirSync(path.resolve('./modules/')).filter(file => file.endsWith(".js"));
 
       for (const file of files) {
         try {
-          msg.client.moduleHandler.reload(path.resolve(__dirname, file));
+          msg.client.moduleHandler.reload(path.resolve('./modules/', file));
         } catch (error) { msg.client.errorHandler(error, msg); }
       }
       msg.react("👌").catch(u.noop);
