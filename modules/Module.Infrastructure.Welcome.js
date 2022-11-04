@@ -2,7 +2,7 @@ const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic"),
   db = require("../utils/Utils.Database"),
   gs = require("../utils/Utils.GetGoogleSheetsAsJson");
-snowflakes = require("../config/snowflakes.json");
+const snowflakes = require("../config/snowflakes.json");
 const fs = require('fs');
 const CakedayOptButtons = require("../utils/Utils.CakedayOptButtons");
 
@@ -30,28 +30,29 @@ let welcomeStringCommandOverride = (welcomeMsgObject) => {
     default: throw new Error(`Improper welcome string override type. ${overrideObject.type} is not one of ${JSON.stringify(overrideObject.validTypes)}`);
   }
 }
+
+
+
+
 /**
  * 
  * @param {string} string 
  * @param {*} member 
  */
-function welcomeEscapeSequencesParse(string, member) {
-  let parsed1 = string.replaceAll("[name]", "[honorific] " + member.displayName);
-  let parsed2 = parsed1.replaceAll("[intentionally blank]", "");
-  let parsed3;
-  for (const key in snowflakes.channels) {
-    if (Object.hasOwnProperty.call(snowflakes.channels, key)) {
-      const element = snowflakes.channels[key];
-      parsed3 = parsed2.replaceAll(`[#${key.toLowerCase()}]`, `<#${element}>`)
-    }
-  }
-  for (const key in snowflakes.roles) {
-    if (Object.hasOwnProperty.call(snowflakes.roles, key)) {
-      const element = snowflakes.roles[key];
-      parsed3 = parsed3.replaceAll(`[@${key.toLowerCase()}]`, `<@&${element}>`)
-    }
-  }
-  return parsed3.replaceAll("[comma]", ",");
+async function welcomeEscapeSequencesParse(string, member) {
+  let parsed = string.replaceAll("[name]", "[honorific] " + member.displayName)
+    .replaceAll("[comma]", ",")
+    .replaceAll("[intentionally blank]", "")
+    .replaceAll("[@Moderator]", `<@&${snowflakes.roles.Moderator}>`)
+    .replaceAll("[@CommunityGuide]", `<@&${snowflakes.roles.CommunityGuide}>`)
+    .replaceAll("[@Admin]", `<@&${snowflakes.roles.Admin}>`)
+    .replaceAll("[#roles]", `<#${snowflakes.channels.roles}>`)
+    .replaceAll("[#rules]", `<#${snowflakes.channels.rules}>`)
+    .replaceAll("[#general]", `<#${snowflakes.channels.general}>`)
+    .replaceAll("[#faq]", `<#${snowflakes.channels.faq}>`)
+    .replaceAll("[#general]", `<#${snowflakes.channels.general}>`)
+    .replaceAll("[#spoilerPolicy]", `<#${snowflakes.channels.spoilerPolicy}>`)
+  return parsed;
 }
 
 let lastHonorific;
