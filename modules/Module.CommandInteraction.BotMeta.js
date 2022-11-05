@@ -275,7 +275,7 @@ Module
     process: (msg, suffix) => {
       if (msg.deletable && (msg.client.config.adminId.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id)) msg.delete();
       let files = msg.attachments ? Array.from(msg.attachments.values()).map(v => v.attachment) : null
-      msg.channel.send({ content: suffix, embeds: msg.embeds, files: files, reply: { messageReference: msg.reference.messageId } });
+      msg.channel.send({ content: suffix, embeds: msg.embeds, files: files, reply: { messageReference: msg.reference?.messageId || null } });
     },
     permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
   })
