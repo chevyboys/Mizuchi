@@ -15,6 +15,8 @@ function shhh(msg) {
 const emojis = new Discord.Collection([
   [snowflakes.roles.BotMaster, snowflakes.emoji.bot],    // BotMasters - botIcon
   ["197050381270777857", snowflakes.emoji.upDawn], // Kritta - updawn
+  ["1026370344497463307", "<:aayara:787628807237402654>"] //vae'kes - Aayara
+
 ]);
 
 async function tavareSawThatPing(msg) {
