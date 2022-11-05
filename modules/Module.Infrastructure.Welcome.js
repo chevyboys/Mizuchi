@@ -39,7 +39,7 @@ let welcomeStringCommandOverride = (welcomeMsgObject) => {
  * @param {string} string 
  * @param {*} member 
  */
-async function welcomeEscapeSequencesParse(string, member) {
+function welcomeEscapeSequencesParse(string, member) {
   let parsed = string.replaceAll("[name]", "[honorific] " + member.displayName)
     .replaceAll("[comma]", ",")
     .replaceAll("[intentionally blank]", "")
