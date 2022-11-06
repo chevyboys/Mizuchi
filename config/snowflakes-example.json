@@ -31,9 +31,9 @@
     "BotMaster": "",
     "Admin": "",
     "CakeDay": "",
+    "CommunityGuide": "",
     "LARPer": "",
-    "SoaringWings": "",
-    "Whisper": "",
+    "Moderator": "",
     "WorldMaker": "",
     "Updates": {
       "BotUpdates": "",
@@ -44,5 +44,8 @@
       "AllUpdates": "",
       "RoleplayingUpdates": ""
     }
+  },
+  "sheets": {
+    "welcome": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSn9qxbr18xyfnBOgWwr5pJ3upIwAfSodAfspWhWqKIaH0ZsfEQYxy5LonwD21oLm8Rah5en7-GK2bW/pub?gid=0&single=true&output=csv"
   }
 }

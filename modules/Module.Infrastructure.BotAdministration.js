@@ -22,7 +22,7 @@ const Module = new Augur.Module()
         process.exit();
       } catch (e) { u.errorHandler(e, msg); }
     },
-    permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
   })
   .addCommand({
     name: "ping",
@@ -125,7 +125,7 @@ const Module = new Augur.Module()
       }
       msg.react("👌").catch(u.noop);
     },
-    permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
   }).addCommand({
     name: "dbgetall",
     category: "Bot Admin",
@@ -136,7 +136,7 @@ const Module = new Augur.Module()
       u.clean(msg, 0);
       return msg.guild.members.cache.map(m => db.User.new(m.id));
     },
-    permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
   })
 
   .addEvent("ready", () => {
@@ -166,9 +166,6 @@ const Module = new Augur.Module()
       if (!reload) {
         u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Login successful. Intializing, please wait.")] });
       }
-      let snowflakes = require("../config/snowflakes.json");
-      Module.config.channels = snowflakes.channels;
-      Module.config.roles = snowflakes.roles;
     } catch (e) {
       u.errorHandler(e, "Error in botAdmin.setInit.");
     }

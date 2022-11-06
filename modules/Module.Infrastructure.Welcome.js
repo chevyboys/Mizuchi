@@ -226,7 +226,7 @@ Module.addEvent("ready", async () => {
     let subCommand = interaction.options._subcommand;
     let subCommandOptions = interaction.options._hoistedOptions;
     let isAppropriateInteraction = interaction.type == "APPLICATION_COMMAND" && interaction.commandName == "welcome"
-    let isAllowed = interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.Whisper) || interaction.member.roles.cache.has(snowflakes.roles.BotMaster)
+    let isAllowed = interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.Moderator) || interaction.member.roles.cache.has(snowflakes.roles.BotMaster)
     if (!isAllowed || !isAppropriateInteraction) return;
     else {
 

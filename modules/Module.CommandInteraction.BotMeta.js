@@ -129,7 +129,7 @@ Module
           .setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : "."))
           .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
         let categories;
-        if (Module.config.adminId.includes(msg.author.id)) {
+        if (Module.config.AdminIds.includes(msg.author.id)) {
           categories = commands
             .filter(c => c.category != "General")
             .map(c => c.category)
@@ -148,10 +148,10 @@ Module
 
         let i = 1;
         for (let category of categories) {
-          if ((category == "Bot Admin" && msg.client.config.adminId.includes(msg.author.id)) || category != "Bot Admin" && category != "General" && category != "Server Admin" || (category == "Server Admin" && msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"]))) {
+          if ((category == "Bot Admin" && msg.client.config.AdminIds.includes(msg.author.id)) || category != "Bot Admin" && category != "General" && category != "Server Admin" || (category == "Server Admin" && msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"]))) {
             embed.addField(`${category}`, `᲼`);
           }
-          for (let [name, command] of commands.filter(c => c.category == category && (!c.hidden || msg.client.config.adminId.includes(msg.author.id))).sort((a, b) => a.name.localeCompare(b.name))) {
+          for (let [name, command] of commands.filter(c => c.category == category && (!c.hidden || msg.client.config.AdminIds.includes(msg.author.id))).sort((a, b) => a.name.localeCompare(b.name))) {
             embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
             if (i == 20) {
               try {
@@ -168,7 +168,7 @@ Module
             }
             i++;
           }
-          if ((category == "Bot Admin" && msg.client.config.adminId.includes(msg.author.id)) || category != "Bot Admin" && category != "General") {
+          if ((category == "Bot Admin" && msg.client.config.AdminIds.includes(msg.author.id)) || category != "Bot Admin" && category != "General") {
             embed.addField(`᲼`, `᲼`);
           }
         }
@@ -226,7 +226,7 @@ Module
       else msg.client.user.setActivity("");
       msg.react("👌");
     },
-    permissions: (msg) => (Module.config.adminId.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin))
+    permissions: (msg) => (Module.config.AdminIds.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin))
   }).addCommand({
     name: "avatar",
     category: "Bot Admin",
@@ -238,7 +238,7 @@ Module
       msg.client.user.setAvatar(('./avatar/' + (suffix ? suffix.trim() : "base.png")))
       msg.react("👌");
     },
-    permissions: (msg) => (Module.config.adminId.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin) || msg.member.roles.cache.has(snowflakes.roles.BotMaster))
+    permissions: (msg) => (Module.config.AdminIds.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin) || msg.member.roles.cache.has(snowflakes.roles.BotMaster))
   }).addInteractionCommand({
     name: "status",
     guildId: snowflakes.guilds.PrimaryServer,
@@ -273,7 +273,7 @@ Module
     category: "Fun",
     hidden: true,
     process: (msg, suffix) => {
-      if (msg.deletable && (msg.client.config.adminId.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id)) msg.delete();
+      if (msg.deletable && (msg.client.config.AdminIds.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id)) msg.delete();
       let files = msg.attachments ? Array.from(msg.attachments.values()).map(v => v.attachment) : null
       msg.channel.send({ content: suffix, embeds: msg.embeds, files: files, reply: { messageReference: msg.reference?.messageId || null } });
     },

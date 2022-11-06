@@ -1,24 +1,24 @@
 {
-  "adminId": [""],
-  "api": {
-    "google": {
-      "clientId": "",
-      "clientSecret" : "",
-      "redirect": ""
+  "AdminIds": [
+    ""
+  ],
+  "Webhooks": {
+    "error": {
+      "url": ""
     },
-    "snipcart": "",
-    "steam": ""
+    "kesterBombs": {
+      "url": ""
+    },
+    "blogPosts": {
+      "url": ""
+    }
   },
-  "color": [248, 154, 34],
-  "error": {
-    "url": ""
-  },
-  "kesterBombs": {
-    "url": ""
-  },
-  "blogPosts": {
-    "url": ""
-  },
+  "prefix": "",
+  "color": [
+    248,
+    154,
+    34
+  ],
   "events": [
     "channelCreate",
     "channelUpdate",
@@ -34,8 +34,13 @@
     "threadCreate",
     "userUpdate"
   ],
-  "climbersCourt": "",
+  "mySQL": {
+    "host": "",
+    "user": "",
+    "password": "",
+    "database": ""
+  },
   "ownerId": "",
-  "prefix": "&",
-  "token": ""
+  "token": "",
+  "auxToken": ""
 }

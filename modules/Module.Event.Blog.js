@@ -7,7 +7,7 @@ const TurndownService = require('turndown')
 const Discord = require("discord.js");
 
 
-const blogWebHook = new Discord.WebhookClient(config.blogPosts);
+const blogWebHook = new Discord.WebhookClient(config.Webhooks.blogPosts);
 const parser = new Parser();
 const turndownService = new TurndownService();
 const blogLink = "https://andrewkrowe.wordpress.com/feed/";
@@ -55,7 +55,7 @@ Module.setClockwork(() => {
       blogHandler(true);
     } catch (e) { u.errorHandler(e, msg); }
   },
-  permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+  permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
 }).setInit((data) => { if (data) feed = data })
   .setUnload(() => { return feed });
 

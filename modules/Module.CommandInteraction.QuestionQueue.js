@@ -78,7 +78,7 @@ async function deleteQuestion(interaction, targetId) {
   }
   target = [target];
   //permissions check
-  if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && interaction.user.id != asker) {
+  if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Moderator) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && interaction.user.id != asker) {
     interaction.reply({ content: "Radiance cannot permit you to do that", ephemeral: true });
     return;
   }
@@ -139,7 +139,7 @@ async function moveQuestion(interaction, targetId) {
   }
   target = [target];
   //permissions check
-  if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.CommunityGuide) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && !interaction.member.roles.cache.has(snowflakes.roles.LARPer) && interaction.user.id != asker) {
+  if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Moderator) && !interaction.member.roles.cache.has(snowflakes.roles.CommunityGuide) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && !interaction.member.roles.cache.has(snowflakes.roles.LARPer) && interaction.user.id != asker) {
     interaction.reply({ content: "Radiance cannot permit you to do that", ephemeral: true });
     return;
   }
@@ -235,7 +235,7 @@ async function editQuestion(interaction, targetId) {
   }
   target = [target];
   //permissions check
-  if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && !interaction.member.roles.cache.has(snowflakes.roles.LARPer) && interaction.user.id != asker) {
+  if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Moderator) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && !interaction.member.roles.cache.has(snowflakes.roles.LARPer) && interaction.user.id != asker) {
     interaction.reply({ content: "Radiance cannot permit you to do that", ephemeral: true });
     return;
   }
@@ -341,7 +341,7 @@ async function ask(interaction, bypassWait) {
     fs.writeFileSync(`./data/${msg.id}.json`, JSON.stringify(data, null, 4));
 
     // Adds the user to the set so that they can't ask for a few hours
-    if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster)) {
+    if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Moderator) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster)) {
       askedRecently.add(interaction.user.id);
       setTimeout(() => {
         // Removes the user from the set after 3 hours
@@ -369,7 +369,7 @@ function transferAnswerComponents(identifier) {
   )]
 }
 async function processRecycleButton(interaction) {
-  if (!canAnswerQuestions(interaction) && !interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Whisper) && !interaction.member.roles.cache.has(snowflakes.roles.CommunityGuide) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && !interaction.member.roles.cache.has(snowflakes.roles.LARPer))
+  if (!canAnswerQuestions(interaction) && !interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Moderator) && !interaction.member.roles.cache.has(snowflakes.roles.CommunityGuide) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster) && !interaction.member.roles.cache.has(snowflakes.roles.LARPer))
     return interaction.reply({ content: "I'm sorry, you can't do that", ephemeral: true })
   else {
     interaction.channel = interaction.guild.channels.cache.get(snowflakes.channels.ask);
