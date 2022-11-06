@@ -1,15 +1,18 @@
 {
   "channels": {
     "ask": "",
-    "questionDiscussion": "",
+    "botSpam": "",
     "blogAnnouncements": "",
     "earthTemple": "",
     "faq": "",
     "general": "",
     "introductions": "",
-    "modRequests": "",
     "roles": "",
     "rules": "",
+    "modRequests": "",
+    "questionDiscussion": "",
+    "secret": "",
+    "spoilerPolicy": "",
     "transfer": ""
   },
   "emoji": {
@@ -20,7 +23,9 @@
       "spoiler": ""
     },
     "upDawn": "",
-    "unDawn": ""
+    "unDawn": "",
+    "specter": "",
+    "bot": ""
   },
   "guilds": {
     "PrimaryServer": "",
@@ -30,11 +35,16 @@
   "roles": {
     "BotMaster": "",
     "Admin": "",
-    "CakeDay": "",
-    "CommunityGuide": "",
+    "Helper": "",
+    "Holiday": "",
     "LARPer": "",
+    "SoaringWings": "",
+    "CommunityGuide": "",
+    "CakeDay": "",
+    "Whisper": "",
     "Moderator": "",
     "WorldMaker": "",
+    "SensativeDataHolders": [],
     "Updates": {
       "BotUpdates": "",
       "MetaUpdates": "",
@@ -44,6 +54,9 @@
       "AllUpdates": "",
       "RoleplayingUpdates": ""
     }
+  },
+  "users": {
+    "roleBot": ""
   },
   "sheets": {
     "welcome": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSn9qxbr18xyfnBOgWwr5pJ3upIwAfSodAfspWhWqKIaH0ZsfEQYxy5LonwD21oLm8Rah5en7-GK2bW/pub?gid=0&single=true&output=csv"
