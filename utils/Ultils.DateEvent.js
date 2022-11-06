@@ -2,8 +2,8 @@ const EventEmitter = require('events');
 const Queue = require('Utils.Queue.js')
 
 class DateEmitter extends EventEmitter {
-  static _dateEvents;
-  static _eventQueue = new Queue();
+  static #_dateEvents;
+  static #_eventQueue = new Queue();
   constructor(date, event) {
     super()
     this._dateEvents.push({ date, event });

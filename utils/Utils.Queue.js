@@ -1,15 +1,17 @@
 
+
 class Queue {
   #items = [];
   #headIndex = 0;
   #tailIndex = 0;
 
   //Todo: modify this to accept an optional array or single item.
-  constructor() { }
+  constructor() { console.log('called'); }
 
   enqueue(item) {
-    this.#items[this.#tailIndex] = item;
+    this.#items.push(item);
     this.#tailIndex++;
+    console.log(this.#items);
   }
 
   dequeue() {
@@ -32,4 +34,20 @@ class Queue {
   }
 }
 
-module.export = Queue;
+class PriorityQueue extends Queue {
+
+  constructor() { super(); }
+
+  enqueue() {
+
+  }
+
+
+
+
+}
+
+module.exports = {
+  Queue,
+  PriorityQueue
+}

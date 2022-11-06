@@ -37,7 +37,7 @@ class Participant {
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
   let message = reaction.message;
   let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
-  if (false && (reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
+  if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
 
     const member = message.guild.members.cache.get(user.id);
     try {
