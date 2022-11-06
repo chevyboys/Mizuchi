@@ -152,73 +152,8 @@ const Module = new Augur.Module()
 
 const Registrar = require("../utils/Utils.CommandRegistrar");
 //Register commands
-let commands = [
-  new Registrar.SlashCommandBuilder()
-    .setName("welcome")
-    .setDescription("Edits the server greeting.")
-    .addSubcommand(
-      new Registrar.SlashCommandSubcommandBuilder()
-        .setName("embed")
-        .setDescription("Appends and Embed to welcome messages until they are reset")
-        .addStringOption(new Registrar.SlashCommandStringOption()
-          .setName("title")
-          .setDescription("The title of the embed")
-          .setRequired(true)
-        )
-        .addStringOption(new Registrar.SlashCommandStringOption()
-          .setName("image-url")
-          .setDescription("The url of the image")
-          .setRequired(true)
-        )
-        .addStringOption(new Registrar.SlashCommandStringOption()
-          .setName("description")
-          .setDescription("the description of the embed")
-          .setRequired(true)
-        )
-    )
-    .addSubcommand(
-      new Registrar.SlashCommandSubcommandBuilder()
-        .setName("override")
-        .setDescription("Replaces the welcome message")
-        .addStringOption(new Registrar.SlashCommandStringOption()
-          .setName("text")
-          .setDescription("The text to adjust welcome messages with")
-          .setRequired(true)
-        )
 
-    )
-    .addSubcommand(
-      new Registrar.SlashCommandSubcommandBuilder()
-        .setName("append")
-        .setDescription("Adds text to the end of welcome messages")
-        .addStringOption(new Registrar.SlashCommandStringOption()
-          .setName("text")
-          .setDescription("The text to adjust welcome messages with")
-          .setRequired(true)
-        )
-
-    )
-    .addSubcommand(
-      new Registrar.SlashCommandSubcommandBuilder()
-        .setName("prepend")
-        .setDescription("Adds text to the end of welcome messages")
-        .addStringOption(new Registrar.SlashCommandStringOption()
-          .setName("text")
-          .setDescription("The text to adjust welcome messages with")
-          .setRequired(true)
-        )
-
-    )
-    .addSubcommand(
-      new Registrar.SlashCommandSubcommandBuilder()
-        .setName("reset")
-        .setDescription("Resets welcome messages to be the default")
-    )
-]
-Module.addEvent("ready", async () => {
-  let commandResponse = await Registrar.registerGuildCommands(Module, commands)
-  console.log("Registered /welcome")
-}).addInteractionCommand({
+Module.addInteractionCommand({
   name: "welcome",
   guildId: snowflakes.guilds.PrimaryServer,
   process: async (interaction) => {
@@ -288,7 +223,7 @@ Module.addEvent("ready", async () => {
       lastHonorific: lastHonorific,
       lastGreeting: lastGreeting,
       lastPrompt: lastPrompt,
-      lastDirections: data.lastDirections
+      lastDirections: lastDirections
     }
   });;
 
