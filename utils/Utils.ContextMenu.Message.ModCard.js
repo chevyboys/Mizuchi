@@ -19,7 +19,7 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
   Module.reactionHandlers = Module.reactionHandlers || [];
   let modRequestFunctionName = modRequestFunctionNameParam;
   let modRequestFunctionEmoji = modRequestFunctionEmojiParam;
-  Module.reactionHandlers.push({emoji: modRequestFunctionEmojiParam, approvedCallback: approvedCallback, overrideCallback: overrideCallback})
+  Module.reactionHandlers.push({ emoji: modRequestFunctionEmojiParam, approvedCallback: approvedCallback, overrideCallback: overrideCallback })
   /*async function handleReaction(reaction, user, reactionHandler){
       message = reaction.message;
       if (message.guild?.id != snowflakes.guilds.PrimaryServer || user.bot) return;
@@ -60,8 +60,8 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
   async function modRequestCard(message, interaction, user) {
     try {
       let embed = await modRequestEmbed(message, interaction, user)
-      let content = `<@&${snowflakes.roles.Whisper}>`;
-      let card = await message.client.channels.cache.get(snowflakes.channels.modRequests).send({ content: content, embeds: [embed], components: (modRequestActions), allowedMentions:{roles:[snowflakes.roles.Whisper]} });
+      let content = `<@&${snowflakes.roles.Moderator}>`;
+      let card = await message.client.channels.cache.get(snowflakes.channels.modRequests).send({ content: content, embeds: [embed], components: (modRequestActions), allowedMentions: { roles: [snowflakes.roles.Moderator] } });
       return card;
     } catch (error) { u.errorHandler(error, `${modRequestFunctionName} Card Reaction`); }
   }
@@ -95,7 +95,7 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
           interaction: interaction,
           Module: Module
         }
-        if(activeRequest.reactionEmoji){
+        if (activeRequest.reactionEmoji) {
           Module.reactionHandlers.find(r => {
             return r.emoji == activeRequest.reactionEmoji
           }).approvedCallback(interactionHandlerInputObject);
@@ -163,16 +163,16 @@ modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam,
     })
     .addInteractionHandler({ customId: `${modRequestFunctionName}Approve`, process: processCardAction })
     .addInteractionHandler({ customId: `${modRequestFunctionName}Reject`, process: processCardAction })
-    /*.addEvent("messageReactionAdd", async (reaction, user) => {
-      if(Module.reactionHandlers.filter(r => {
+  /*.addEvent("messageReactionAdd", async (reaction, user) => {
+    if(Module.reactionHandlers.filter(r => {
+      return r.emoji == reaction.emoji.name
+    }).length > 0) {
+      let reactionHandler = Module.reactionHandlers.find(r => {
         return r.emoji == reaction.emoji.name
-      }).length > 0) {
-        let reactionHandler = Module.reactionHandlers.find(r => {
-          return r.emoji == reaction.emoji.name
-        })
-        handleReaction(reaction, user, reactionHandler)
-      }
-    });*/
+      })
+      handleReaction(reaction, user, reactionHandler)
+    }
+  });*/
 }
 
 module.exports = modRequest;

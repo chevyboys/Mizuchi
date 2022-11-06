@@ -55,17 +55,17 @@ const Module = new Augur.Module()
         guildId: snowflakes.guilds.PrimaryServer,
         process: async (interaction) => {
             await interaction.deferReply?.({ ephemeral: false });
-            let SW = await interaction.guild.members.cache.map((m) => { if (m.roles.cache.has(snowflakes.roles.SoaringWings)) return m.displayName || m.username }).filter(r => (r != null)).join(`\n`);
+            let SW = await interaction.guild.members.cache.map((m) => { if (m.roles.cache.has(snowflakes.roles.CommunityGuide)) return m.displayName || m.username }).filter(r => (r != null)).join(`\n`);
 
-            let Mod = await interaction.guild.members.cache.map((m) => { if (m.roles.cache.has(snowflakes.roles.Whisper) && !m.roles.cache.has(snowflakes.roles.Admin)) return m.displayName || m.username }).filter(r => (r != null)).join(`\n`);
+            let Mod = await interaction.guild.members.cache.map((m) => { if (m.roles.cache.has(snowflakes.roles.Moderator) && !m.roles.cache.has(snowflakes.roles.Admin)) return m.displayName || m.username }).filter(r => (r != null)).join(`\n`);
 
             let Admin = await interaction.guild.members.cache.map((m) => { if (m.roles.cache.has(snowflakes.roles.Admin)) return m.displayName || m.username }).filter(r => (r != null)).join(`\n`);
 
-            let whisperRole = (await interaction.guild.roles.cache.get(snowflakes.roles.Whisper));
+            let whisperRole = (await interaction.guild.roles.cache.get(snowflakes.roles.Moderator));
 
             let color = whisperRole.hexColor;
 
-            let embed = u.embed().setTitle("Current Climbers Court Staff Members:").setDescription(`<@&${snowflakes.roles.Admin}>:` + "```" + Admin + "```\n\n" + `<@&${snowflakes.roles.Whisper}>:` + "```" + Mod + "```\n\n" + `<@&${snowflakes.roles.SoaringWings}>:` + "```" + SW + "```\n\n\n\n").addFields([{ name: "Join our staff:", value: config.staffApplicationLink ? config.staffApplicationLink : "```No Staff Application link is available at this time```" }]).setColor(color);
+            let embed = u.embed().setTitle("Current Climbers Court Staff Members:").setDescription(`<@&${snowflakes.roles.Admin}>:` + "```" + Admin + "```\n\n" + `<@&${snowflakes.roles.Moderator}>:` + "```" + Mod + "```\n\n" + `<@&${snowflakes.roles.CommunityGuide}>:` + "```" + SW + "```\n\n\n\n").addFields([{ name: "Join our staff:", value: config.staffApplicationLink ? config.staffApplicationLink : "```No Staff Application link is available at this time```" }]).setColor(color);
 
             interaction.editReply({ embeds: [embed] });
         }

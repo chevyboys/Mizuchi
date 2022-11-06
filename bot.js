@@ -1,4 +1,4 @@
-const {AugurClient} = require("augurbot"),
+const { AugurClient } = require("augurbot"),
   config = require("./config/config.json"),
   u = require("./utils/Utils.Generic");
 
@@ -13,7 +13,7 @@ const client = new AugurClient(config, {
   commands: "./modules",
   errorHandler: u.errorHandler,
   parse: u.parse
-}).setMaxListeners(20);
+}).setMaxListeners(80);
 
 client.login();
 

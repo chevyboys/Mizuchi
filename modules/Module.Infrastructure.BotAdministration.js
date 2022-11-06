@@ -22,7 +22,7 @@ const Module = new Augur.Module()
         process.exit();
       } catch (e) { u.errorHandler(e, msg); }
     },
-    permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
   })
   .addCommand({
     name: "ping",
@@ -33,6 +33,39 @@ const Module = new Augur.Module()
     process: async (msg) => {
       let sent = await msg.reply({ content: 'Pinging...', allowedMentions: { repliedUser: false } });
       sent.edit({ content: `Pong! Took ${sent.createdTimestamp - (msg.editedTimestamp ? msg.editedTimestamp : msg.createdTimestamp)}ms`, allowedMentions: { repliedUser: false } });
+    }
+  })
+  .addCommand({
+    name: "emoji",
+    category: "Bot Admin",
+    description: "Shows all custom emoji in the server where it is used",
+    hidden: true,
+    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+    process: async (msg) => {
+      emoji = msg.guild.emojis.cache.map(e => e.toString() + "`" + e.toString() + "`");
+      let arrayOfMessagesToSend = [];
+      while (emoji.join("\n").length > 800) {
+        let thisMessageToSend = [];
+        for (let index = 0; thisMessageToSend.join("\n").length < 800; index++) {
+          thisMessageToSend.push(emoji.shift())
+        }
+        arrayOfMessagesToSend.push(thisMessageToSend);
+
+      }
+      arrayOfMessagesToSend.push(emoji)
+      for (const message of arrayOfMessagesToSend) {
+        await msg.channel.send(message.join("\n"));
+      }
+    }
+  }).addCommand({
+    name: "roleid",
+    category: "Bot Admin",
+    description: "gets the id for a role based on name",
+    hidden: true,
+    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+    process: async (msg, suffix) => {
+      let roles = msg.guild.roles.cache.map((r) => { return { name: r.name.trim().toLowerCase().replaceAll(" ", ""), id: r.id } }).filter(r => suffix.trim().toLowerCase().replaceAll(" ", "").indexOf(r.name) > -1 || r.name.indexOf(suffix.trim().toLowerCase().replaceAll(" ", "")) > -1).map(r => `${r.name} : ${r.id}`);
+      msg.reply(roles.length > 0 ? roles.join("\n") : "I can't find that role");
     }
   })
   .addCommand({
@@ -81,20 +114,18 @@ const Module = new Augur.Module()
     description: "This command reloads one or more modules. Good for loading in small fixes.",
     info: "Use the command without a suffix to reload all Module files.\n\nUse the command with the module name (including the `.js`) to reload a specific file.",
     parseParams: true,
-    process: (msg, ...files) => {
+    process: (msg) => {
       u.clean(msg);
-      const fs = require("fs"),
-        path = require("path");
-      if (files.length === 0) files = fs.readdirSync(path.resolve(__dirname)).filter(file => file.endsWith(".js"));
-
+      const fs = require("fs");
+      let files = fs.readdirSync('./modules/').filter(file => file.endsWith(".js"));
       for (const file of files) {
         try {
-          msg.client.moduleHandler.reload(path.resolve(__dirname, file));
+          msg.client.moduleHandler.reload('./modules/' + file);
         } catch (error) { msg.client.errorHandler(error, msg); }
       }
       msg.react("👌").catch(u.noop);
     },
-    permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
   }).addCommand({
     name: "dbgetall",
     category: "Bot Admin",
@@ -105,13 +136,13 @@ const Module = new Augur.Module()
       u.clean(msg, 0);
       return msg.guild.members.cache.map(m => db.User.new(m.id));
     },
-    permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
   })
 
   .addEvent("ready", () => {
     //When the bot is fully online, fetch all the discord members, since it will only autofetch for small servers and we want them all.
     Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.fetch();
-    
+
   }).addEvent("guildMemberUpdate", async (oldMember, newMember) => {
     if (newMember.guild.id == snowflakes.guilds.PrimaryServer) {
       if (newMember.roles.cache.size > oldMember.roles.cache.size) {
@@ -135,9 +166,6 @@ const Module = new Augur.Module()
       if (!reload) {
         u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Login successful. Intializing, please wait.")] });
       }
-      let snowflakes = require("../config/snowflakes.json");
-      Module.config.channels = snowflakes.channels;
-      Module.config.roles = snowflakes.roles;
     } catch (e) {
       u.errorHandler(e, "Error in botAdmin.setInit.");
     }

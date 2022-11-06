@@ -42,8 +42,7 @@
   "eslintConfig": {
     "env": {
       "commonjs": true,
-      "es2022": true,
-      "node": true
+      "es2022": true
     },
     "extends": "eslint:recommended",
     "overrides": [],
@@ -54,8 +53,8 @@
   },
   "nodeVersion": "17.1.0",
   "ava": {
-		"files": [
-			"tests/**/*"
+    "files": [
+      "tests/**/*"
     ],
     "verbose": true
   }
