@@ -1,5 +1,5 @@
 const snowflakes = require("../config/snowflakes.json");
-u = require("../../utils/Utils.Generic");
+u = require("../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
 const holidays = [
@@ -34,46 +34,51 @@ class Participant {
   }
 }
 
+
+
+
+
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
   let message = reaction.message;
   let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
-  if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
+  if (reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
 
-    const member = message.guild.members.cache.get(user.id);
-    try {
-      const index = cache.findIndex(element => user == element.user);
-      if (index != -1) {
-        const userCount = cache[index];
-        userCount.updateCount();
-        // incase this is changed later instead of if statments
-        switch (userCount.count) {
-          case 5:
-            u.addRoles(member, snowflakes.roles.Holiday);
-            channel.send({
-              content: `<@${user.id}> has caught a bunch of specters and is now a <@&${snowflakes.roles.Holiday}>`,
-              allowedMentions: { parse: ["users"] }
-            });
-            break;
+  const member = message.guild.members.cache.get(user.id);
+  try {
+    const index = cache.findIndex(element => user == element.user);
+    if (index != -1) {
+      const userCount = cache[index];
+      userCount.updateCount();
+      // incase this is changed later instead of if statments
+      switch (userCount.count) {
+        case 5:
+          u.addRoles(member, snowflakes.roles.Holiday);
+          channel.send({
+            content: `<@${user.id}> has caught a bunch of specters and is now a <@&${snowflakes.roles.Holiday}>`,
+            allowedMentions: { parse: ["users"] }
+          });
+          break;
 
-        }
-
-      } else {
-        cache.push(new Participant(user));
       }
 
-      channel.send({
-        content: `<@${user.id}> captured a Specter in <#${message.channel.id}>`,
-        allowedMentions: { parse: ["users"] }
-      });
-      reaction.users.remove(message.client.user.id);
-    } catch (error) { u.errorHandler(error, "Holliday reaction error"); }
-  }
+    } else {
+      cache.push(new Participant(user));
+    }
+
+    channel.send({
+      content: `<@${user.id}> captured a Specter in <#${message.channel.id}>`,
+      allowedMentions: { parse: ["users"] }
+    });
+    reaction.users.remove(message.client.user.id);
+  } catch (error) { u.errorHandler(error, "Holliday reaction error"); }
+}
 }).addEvent("messageCreate", (msg) => {
+  const odds = 1000;
   if (
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
-    Math.floor(Math.random() * 1000) > 999 //this should be a 1 in 30 chance
+    Math.floor(Math.random() * odds) > odds - 2
   ) {
     msg.react(holidays[0].emoji)
   }
