@@ -274,6 +274,22 @@ Module.addEvent("ready", async () => {
       console.log("welcome message modified");
     }
   }
-});
+}).setInit((data) => {
+  if (data) {
+    lastHonorific = data.lastHonorific;
+    lastGreeting = data.lastGreeting;
+    lastPrompt = data.lastPrompt;
+    lastDirections = data.lastDirections
+  }
+
+})
+  .setUnload(() => {
+    return {
+      lastHonorific: lastHonorific,
+      lastGreeting: lastGreeting,
+      lastPrompt: lastPrompt,
+      lastDirections: data.lastDirections
+    }
+  });;
 
 module.exports = Module;

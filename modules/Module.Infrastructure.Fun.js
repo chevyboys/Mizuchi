@@ -5,6 +5,7 @@ const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic")
 
 async function shhh(msg) {
+  if (!snowflakes.channels.secret) return;
   let content = msg.content.toLowerCase().replaceAll(" ", "").replaceAll("-", "").replaceAll("_", "")
   let channelName = msg.guild.channels.cache.get(snowflakes.channels.secret).name.toLowerCase().replaceAll(" ", "").replaceAll("-", "").replaceAll("_", "")
   if (content?.indexOf(snowflakes.channels.secret) > -1 || content?.indexOf(channelName) > -1) {
