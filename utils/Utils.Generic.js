@@ -1,9 +1,11 @@
 const { AugurClient } = require("augurbot");
 const Discord = require("discord.js"),
   config = require("../config/config.json"),
-  snowflakes = require("../config/snowflakes.json"),
+  snowflakes = require("../config/snowflakes.json");
 
-  errorLog = new Discord.WebhookClient(config.Webhooks.error);
+const errorLog = process.env.NODE_ENV == "test" ? { send(input) { console.error(input) } } : new Discord.WebhookClient(config.Webhooks.error);
+
+
 const rolesClient = require("./Utils.RolesLogin");
 /**
  * @typedef {Object} ParsedInteraction
