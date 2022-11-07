@@ -37,7 +37,8 @@
     "ava": "^5.0.1",
     "eslint": "^8.26.0",
     "eslint-plugin-import": "^2.24.1",
-    "eslint-plugin-node": "^11.1.0"
+    "eslint-plugin-node": "^11.1.0",
+    "rewire": "^6.0.0"
   },
   "eslintConfig": {
     "env": {
@@ -56,6 +57,9 @@
     "files": [
       "tests/**/*"
     ],
-    "verbose": true
+    "verbose": true,
+    "environmentVariables": {
+      "MY_ENVIRONMENT_VARIABLE": "test"
+    }
   }
 }
