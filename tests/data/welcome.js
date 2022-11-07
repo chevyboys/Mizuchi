@@ -1,5 +1,5 @@
 const snowflakes = require('../../config/snowflakes.json');
-const member = require('members.json');
+const member = require('./members.json');
 const welcomeData = {
   parseSentences: {
     input: [
