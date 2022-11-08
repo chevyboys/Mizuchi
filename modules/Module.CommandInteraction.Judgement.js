@@ -116,11 +116,11 @@ const Module = new Augur.Module()
   .addInteractionHandler({ customId: `spireHasBeenSelectedRetreat`, process: buildSelectSpire });
 
 
-let exports = () => {
+let exportDummy = () => {
   try {
     return require("../../judgement/src/IO/discord/Discord.IO.AugurModule")
   } catch (error) {
     return Module;
   }
 }
-module.exports = exports();
+module.exports = exportDummy();
