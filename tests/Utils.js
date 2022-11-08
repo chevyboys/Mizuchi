@@ -1,5 +1,6 @@
 const test = require('ava');
-const { Queue, PriorityQueue } = require('../utils/Utils.Data.js');
+const { Queue, PriorityQueue } = require('../utils/Utils.Data.js'),
+  DateEmitter = require('../utils/Ultils.DateEvent.js');
 const cats = require('./data/cats.json').cats;
 
 test('Queue', t => {
@@ -25,12 +26,13 @@ test('Priority Queue', t => {
     result.push(pqueue.pop());
   }
 
-  console.log([...numbers].sort((a, b) => b - a));
-
-
   pqueue.pop();
-  console.log(pqueue.items);
 
-  t.is([...numbers].sort((a, b) => b - a), result);
+  t.deepEqual([...numbers].sort((a, b) => b - a), result);
 
-})
+});
+
+test('DateEvent', t => {
+  const event = new DateEmitter(Date.now() + 1000, "myDate");
+
+});
