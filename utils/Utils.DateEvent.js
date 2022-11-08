@@ -51,12 +51,12 @@ class DateEmitter extends EventEmitter {
       } else {
         const date = Date.now();
         const delay = Date.prototype.getUTCHours(date) * 60 * 60 * 1000 + Date.prototype.getUTCMinutes(date) * 60 * 1000 + Date.prototype.getUTCSeconds(date) * 1000 + Date.prototype.getUTCMilliseconds(date);
-        DateEmitter.#timeoutID = setTimeout(this.queueEvent(), delay)
+        DateEmitter.#timeoutID = setTimeout(() => { this.queueEvent() }, delay)
       }
     } else {
       if (update && this.#isToday(event.date)) {
         clearTimeout(DateEmitter.#timeoutID);
-        DateEmitter.#timeoutID = setTimeout(this.#emitEvent(), Date.now() - event.date);
+        DateEmitter.#timeoutID = setTimeout(() => { this.#emitEvent() }, Date.now() - event.date);
       }
     }
   }
