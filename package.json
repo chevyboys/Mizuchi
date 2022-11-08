@@ -55,7 +55,8 @@
   "nodeVersion": "17.1.0",
   "ava": {
     "files": [
-      "tests/**/*"
+      "tests/**/*",
+      "!tests/data/**"
     ],
     "verbose": true,
     "environmentVariables": {

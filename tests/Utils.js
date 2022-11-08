@@ -1,7 +1,9 @@
 const test = require('ava');
 const { Queue, PriorityQueue } = require('../utils/Utils.Data.js'),
-  DateEmitter = require('../utils/Ultils.DateEvent.js');
+  { DateEmitter } = require('../utils/Utils.DateEvent.js');
 const cats = require('./data/cats.json').cats;
+
+
 
 test('Queue', t => {
   const queue = new Queue();
@@ -32,7 +34,19 @@ test('Priority Queue', t => {
 
 });
 
-test('DateEvent', t => {
-  const event = new DateEmitter(Date.now() + 1000, "myDate");
 
+
+test('DateEvent', t => {
+  const startDate = Date.now();
+  const event = new DateEmitter(startDate + 1000, "myDate");
+  let afterDate;
+  let testSwitch = false;
+  function testDate() {
+    t.is(true, testSwitch);
+  }
+  setTimeout(testDate(), 1000);
+  event.on('myDate', () => {
+    testSwitch = true;
+    // afterDate = 
+  })
 });
