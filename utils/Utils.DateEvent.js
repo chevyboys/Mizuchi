@@ -1,4 +1,4 @@
-const EventEmitter = require('events');
+const { EventEmitter, captureRejectionSymbol } = require('events');
 const { PriorityQueue } = require('./Utils.Data.js')
 
 class EventPacket {
@@ -31,7 +31,7 @@ class DateEmitter extends EventEmitter {
   static #eventQueue = new PriorityQueue((lhs, rhs) => { lhs.date < rhs.date });
 
   constructor(date, event, once = false) {
-    super()
+    super({ captureRejections: true });
     let packet = new EventPacket(date, event, once);
     DateEmitter.#eventQueue.push(packet);
     if (packet == DateEmitter.#eventQueue.peek()) {
@@ -47,7 +47,7 @@ class DateEmitter extends EventEmitter {
     if (DateEmitter.#timeoutID == undefined) {
 
       if (this.#isToday(event.date)) {
-        DateEmitter.#timeoutID = setTimeout(this.#emitEvent(), Date.now() - event.date);
+        DateEmitter.#timeoutID = setTimeout(() => { this.#emitEvent() }, Date.now() - event.date);
       } else {
         const date = Date.now();
         const delay = Date.prototype.getUTCHours(date) * 60 * 60 * 1000 + Date.prototype.getUTCMinutes(date) * 60 * 1000 + Date.prototype.getUTCSeconds(date) * 1000 + Date.prototype.getUTCMilliseconds(date);
@@ -61,6 +61,10 @@ class DateEmitter extends EventEmitter {
     }
   }
 
+  [captureRejectionSymbol](err, event, ...args) {
+    console.log('rejection happened for', event, 'with', err, ...args);
+  }
+
   #isToday(date) {
     return Date.now() - date <= 1000 * 60 * 60 * 24;
   }
@@ -69,7 +73,9 @@ class DateEmitter extends EventEmitter {
     const event = DateEmitter.#eventQueue.pop().event;
     this.emit(event);
     DateEmitter.#timeoutID = undefined;
-    this.queueEvent();
+    if (!DateEmitter.#eventQueue.isEmpty()) {
+      this.queueEvent();
+    }
   }
 }
 

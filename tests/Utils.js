@@ -48,5 +48,5 @@ test('DateEvent', t => {
   event.on('myDate', () => {
     testSwitch = true;
     // afterDate = 
-  })
+  });
 });
