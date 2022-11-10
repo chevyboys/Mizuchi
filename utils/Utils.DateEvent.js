@@ -36,7 +36,7 @@ class DateEmitter extends EventEmitter {
 
   constructor(date = undefined, event = undefined, callback = undefined, once = false) {
     super({ captureRejections: true });
-    if (date && event != undefined) {
+    if (date != undefined && event != undefined) {
       let packet = new EventPacket(date, event, callback, once);
       DateEmitter.#eventQueue.push(packet);
       if (packet == DateEmitter.#eventQueue.peek()) {
@@ -50,7 +50,7 @@ class DateEmitter extends EventEmitter {
   }
 
   push(date, event, callback, once = false) {
-    let packet = new EventPacket(date, event, once);
+    let packet = new EventPacket(date, event, callback, once);
     DateEmitter.#eventQueue.push(packet);
     if (packet == DateEmitter.#eventQueue.peek()) {
       this.queueEvent(true);
@@ -65,7 +65,7 @@ class DateEmitter extends EventEmitter {
     if (DateEmitter.#timeoutID == undefined) {
 
       if (this.#isToday(event.date)) {
-        DateEmitter.#timeoutID = setTimeout(() => { this.#emitEvent() }, Date.now() - event.date);
+        DateEmitter.#timeoutID = setTimeout(() => { this.#emitEvent() }, event.date - Date.now());
       } else {
         const date = Date.now();
         const delay = Date.prototype.getUTCHours(date) * 60 * 60 * 1000 + Date.prototype.getUTCMinutes(date) * 60 * 1000 + Date.prototype.getUTCSeconds(date) * 1000 + Date.prototype.getUTCMilliseconds(date);
@@ -74,7 +74,7 @@ class DateEmitter extends EventEmitter {
     } else {
       if (update && this.#isToday(event.date)) {
         clearTimeout(DateEmitter.#timeoutID);
-        DateEmitter.#timeoutID = setTimeout(() => { this.#emitEvent() }, Date.now() - event.date);
+        DateEmitter.#timeoutID = setTimeout(() => { this.#emitEvent() }, event.date - Date.now());
       }
     }
   }
