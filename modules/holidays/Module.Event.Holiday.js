@@ -1,25 +1,36 @@
 const Augur = require("augurbot"),
-  u = require("../../utils/Utils.Generic");
+  { DateEmitter } = require('../../utils/Utils.DateEvent');
+
 const snowflakes = require('../config/snowflakes.json');
 const fs = require('fs');
-const holidayFilePath = "./config/holidays.json",
-  moment = require("moment");
+const holidayData = "./config/holidays.json";
+
+
+
+const zip = (a, b) => a.map((k, i) => [k, b[i]]);
+
+
 const Module = new Augur.Module;
+const emitter = new DateEmitter();
 
-
-
-Module.addCommand({
-  name: "refreshholidays",
+Module.addEvent("ready", async () => {
+  holidayData.forEach((holiday) => {
+    emitter.push(holiday.date, "holiday", holiday.name);
+  })
+}).addCommand({
+  name: "refreshHolidays",
   description: "Syncs the config with the google sheets",
   hidden: true,
   process: async function (msg) {
     try {
-      // TODO
+      //get
+
+
     } catch (e) { u.errorHandler(e, msg); }
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 }).addCommand({
-  name: "sendholidaymsg",
+  name: "sendHolidaymsg",
   description: "Sends the holiday message in the current configuration.",
   hidden: true,
   process: async function (msg) {
@@ -29,7 +40,7 @@ Module.addCommand({
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 }).addCommand({
-  name: "startholiday",
+  name: "startHoliday",
   description: "Starts the holiday manually",
   hidden: true,
   process: async function (msg) {
@@ -38,7 +49,7 @@ Module.addCommand({
     } catch (e) { u.errorHandler(e, msg); }
   },
 }).addCommand({
-  name: "endholiday",
+  name: "endHoliday",
   description: "Ends the holiday manually",
   hidden: true,
   process: async function (msg) {
@@ -47,5 +58,11 @@ Module.addCommand({
     } catch (e) { u.errorHandler(e, msg); }
   },
 })
+
+emitter.on('holiday', (callback) => {
+  //execute start holiday here
+
+  startHoliday(callback);
+});
 
 module.exports = Module;
