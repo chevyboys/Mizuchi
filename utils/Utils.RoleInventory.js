@@ -10,7 +10,7 @@ const roleUtilities = {
     let role = roles.find(r => r.id == roleid && r.colorInventory != "");
     if (!role) return null;
     if (role.roleToInheritFrom != '') {
-      roleColorsProvided.push(...roleUtilities.getColorsProvidedByRole(role.roleToInheritFrom))
+      roleColorsProvided.push(...await roleUtilities.getColorsProvidedByRole(role.roleToInheritFrom))
     }
     if (role.colorInventory) {
       if (typeof role.colorInventory === 'string') roleColorsProvided.push(role.colorInventory);
@@ -30,7 +30,7 @@ const roleUtilities = {
     let role = roles.find(r => r.id == roleid && r.generalInventory != "");
     if (!role) return null;
     if (role.roleToInheritFrom != '') {
-      rolesProvided.push(...roleUtilities.getColorsProvidedByRole(role.roleToInheritFrom))
+      rolesProvided.push(... await roleUtilities.getColorsProvidedByRole(role.roleToInheritFrom))
     }
     if (role.generalInventory) {
       if (typeof role.generalInventory === 'string') rolesProvided.push(role.generalInventory);
