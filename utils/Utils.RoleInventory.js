@@ -22,7 +22,7 @@ const roleUtilities = {
   },
   getMemberColorInventory: async (member) => {
     const roles = await getGoogleSheetAsJSON(snowflakes.sheets.roles);
-    let memberRoles = member.roles.cache.filter(r => roles.filter(sheetRole => sheetRole.colorInventory).map(sr => sr.id).includes(r.id));
+    let memberRoles = member.roles.cache.sort((a, b) => a.comparePositionToRole(b)).filter(r => roles.filter(sheetRole => sheetRole.colorInventory).map(sr => sr.id).includes(r.id));
     let roleInventory = (await (await Promise.all(memberRoles.map((r) => roleUtilities.getColorsProvidedByRole(r.id, roles))))).flat();
     return [... new Set(roleInventory.flat(1))];
   },
