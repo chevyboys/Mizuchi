@@ -14,7 +14,7 @@ Module.addInteractionCommand({
     let embed = u.embed()
       .setTitle(interaction.member.displayName + "'s inventory")
       .setDescription(`__**Equipable Colors:**__\n${memberColorString}\n\n__**Other Equipable roles**__\n${memberSecondaryString}`);
-    interaction.reply({ embeds: embed });
+    interaction.reply({ embeds: [embed] });
   }
 })
 
