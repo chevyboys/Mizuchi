@@ -25,7 +25,7 @@ async function findCharacter(character) {
 async function buildMessage(index) {
 
   let out = "";
-  if (index) {
+  if (index != undefined) {
     const spoiler = new RegExp('\|\|');
 
     for (const [key, value] of Object.entries(characterInfo[index])) {
