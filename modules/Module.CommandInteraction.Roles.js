@@ -7,6 +7,7 @@ Module.addInteractionCommand({
   name: "inventory",
   guildId: snowflakes.guilds.PrimaryServer,
   process: async (interaction) => {
+    interaction.deferReply();
     let memberColors = await roleUtilities.getMemberColorInventory(interaction.member);
     let memberSecondary = await roleUtilities.getSecondaryInventory(interaction.member);
     let memberColorString = memberColors.map(c => `<@&${c}>` + interaction.member.roles.cache.has(c) ? " ✅" : "").join("\n");
