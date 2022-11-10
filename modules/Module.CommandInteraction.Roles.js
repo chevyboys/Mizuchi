@@ -13,7 +13,8 @@ Module.addInteractionCommand({
     let memberSecondaryString = memberSecondary.map(c => `<@&${c}>` + interaction.member.roles.cache.has(c) ? " ✅" : "").join("\n");
     let embed = u.embed()
       .setTitle(interaction.member.displayName + "'s inventory")
-      .setDescription(`__**Equipable Colors:**__\n${memberColorString}\n\n__**Other Equipable roles**__\n${memberSecondaryString}`)
+      .setDescription(`__**Equipable Colors:**__\n${memberColorString}\n\n__**Other Equipable roles**__\n${memberSecondaryString}`);
+    interaction.reply({ embeds: embed });
   }
 })
 
