@@ -4,7 +4,7 @@
   "description": "Custom Discord bot for the Climber's Court",
   "main": "bot.js",
   "scripts": {
-    "test": "node bot.js",
+    "test": "ava",
     "launch": "node bot.js",
     "debug": "node bot.js"
   },
@@ -34,26 +34,33 @@
     "turndown": "^7.1.1"
   },
   "devDependencies": {
+    "ava": "^5.0.1",
     "eslint": "^8.26.0",
-    "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.24.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.0"
+    "rewire": "^6.0.0"
   },
   "eslintConfig": {
     "env": {
       "commonjs": true,
-      "es2022": true,
-      "node": true
-  },
-  "extends": "eslint:recommended",
-  "overrides": [
-  ],
-  "parserOptions": {
+      "es2022": true
+    },
+    "extends": "eslint:recommended",
+    "overrides": [],
+    "parserOptions": {
       "ecmaVersion": 13
+    },
+    "rules": {}
   },
-  "rules": {
+  "nodeVersion": "17.1.0",
+  "ava": {
+    "files": [
+      "tests/**/*",
+      "!tests/data/**"
+    ],
+    "verbose": true,
+    "environmentVariables": {
+      "MY_ENVIRONMENT_VARIABLE": "test"
+    }
   }
-  },
-  "nodeVersion": "17.1.0"
 }
