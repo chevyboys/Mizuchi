@@ -5,9 +5,11 @@ class EventPacket {
   #event
   #date
   #once
-  constructor(date, event, once) {
+  #callback
+  constructor(date, event, callback, once) {
     this.#event = event;
     this.#date = date;
+    this.#callback = callback;
     this.#once = once;
   }
 
@@ -19,19 +21,35 @@ class EventPacket {
     return this.#date;
   }
 
+  get callback() {
+    return this.#callback;
+  }
+
   get once() {
     return this.#once;
   }
 }
 
-// do not make async, breakage will happen without thread synchronization
 class DateEmitter extends EventEmitter {
-  // static #nextJob;
   static #timeoutID;
   static #eventQueue = new PriorityQueue((lhs, rhs) => { lhs.date < rhs.date });
 
-  constructor(date, event, once = false) {
+  constructor(date = undefined, event = undefined, callback = undefined, once = false) {
     super({ captureRejections: true });
+    if (date && event != undefined) {
+      let packet = new EventPacket(date, event, callback, once);
+      DateEmitter.#eventQueue.push(packet);
+      if (packet == DateEmitter.#eventQueue.peek()) {
+        this.queueEvent(true);
+      } else {
+        this.queueEvent();
+      }
+    } else if (date || event == undefined) {
+      // throw soft error/warning 
+    }
+  }
+
+  push(date, event, callback, once = false) {
     let packet = new EventPacket(date, event, once);
     DateEmitter.#eventQueue.push(packet);
     if (packet == DateEmitter.#eventQueue.peek()) {
@@ -61,6 +79,10 @@ class DateEmitter extends EventEmitter {
     }
   }
 
+  static get events() {
+    return DateEmitter.#eventQueue.items;
+  }
+
   [captureRejectionSymbol](err, event, ...args) {
     console.log('rejection happened for', event, 'with', err, ...args);
   }
@@ -70,8 +92,9 @@ class DateEmitter extends EventEmitter {
   }
 
   #emitEvent() {
-    const event = DateEmitter.#eventQueue.pop().event;
-    this.emit(event);
+    const event = DateEmitter.#eventQueue.pop();
+
+    this.emit(event.event, event.callback);
     DateEmitter.#timeoutID = undefined;
     if (!DateEmitter.#eventQueue.isEmpty()) {
       this.queueEvent();
