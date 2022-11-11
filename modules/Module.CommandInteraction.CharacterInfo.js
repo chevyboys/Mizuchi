@@ -109,7 +109,7 @@ Module.setInit(async () => {
   characterInfo = await gs(snowflakes.sheets.characterInfo);
 }).addInteractionCommand({
   name: "character-info",
-  guildId: snowflakes.guilds.TestServer,
+  guildId: snowflakes.guilds.PrimaryServer,
   hidden: false,
   process: async (interaction) => {
     await interaction.deferReply?.({ ephemeral: false });
