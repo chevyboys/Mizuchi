@@ -88,43 +88,57 @@ async function buildMessage(index) {
 }
 
 async function extraInfo(interaction) {
-  const char = characterInfo.find(obj => {
-    return obj["Character Name"] == interaction.message.embeds[0].author.name;
-  })
+  try {
+    const char = characterInfo.find(obj => {
+      return obj["Character Name"] == interaction.message.embeds[0].author.name;
+    })
 
-  let button = interaction.message.components[0].components.find(obj => {
-    return obj.customId == interaction.customId;
-  });
+    let button = interaction.message.components[0].components.find(obj => {
+      return obj.customId == interaction.customId;
+    });
 
-  if (button.style != "LINK") {
-    button.disabled = true;
-  }
+    if (button.style != "LINK") {
+      button.disabled = true;
+    }
 
-  interaction.message.edit({ components: interaction.message.components })
-  interaction.reply({ content: char[interaction.customId] });
+    interaction.message.edit({ components: interaction.message.components })
+    interaction.reply({ content: char[interaction.customId] });
+  } catch (error) { u.errorHandler(error, "CharacterInfo extra info button interaction") }
+}
+
+async function updateCharacterInfo() {
+  characterInfo = await gs(snowflakes.sheets.characterInfo);
 }
 
 const Module = new Augur.Module();
 Module.setInit(async () => {
-  characterInfo = await gs(snowflakes.sheets.characterInfo);
+  updateCharacterInfo();
 }).addInteractionCommand({
   name: "character-info",
-  guildId: snowflakes.guilds.PrimaryServer,
+  guildId: snowflakes.guilds.TestServer,
   hidden: false,
   process: async (interaction) => {
-    await interaction.deferReply?.({ ephemeral: false });
-    const character = interaction?.options?.get("character")?.value;
+    try {
+      await interaction.deferReply?.({ ephemeral: false });
+      const character = interaction?.options?.get("character")?.value;
 
-    const embed = await buildMessage(await findCharacter(character));
-    // console.log(JSON.stringify(characterInfo));
-    interaction.editReply(embed);
+      const embed = await buildMessage(await findCharacter(character));
+      // console.log(JSON.stringify(characterInfo));
+      interaction.editReply(embed);
+    } catch (error) { u.errorHandler(error, "CharacterInfo character-info slash command") }
   }
 
 }).addInteractionHandler({
   customId: `*Description`, process: extraInfo
 }).addInteractionHandler({
   customId: `*Trivia`, process: extraInfo
-})
+}).setClockwork(
+  () => {
+    try {
+      return setInterval(updateCharacterInfo, 1000 * 60 * 60);
+    } catch (error) { u.errorHandler(error, "CharacterInfo Clockwork"); }
+  }
+)
 
 
 module.exports = Module;
