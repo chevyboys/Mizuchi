@@ -115,7 +115,7 @@ Module.setInit(async () => {
   updateCharacterInfo();
 }).addInteractionCommand({
   name: "character-info",
-  guildId: snowflakes.guilds.TestServer,
+  guildId: snowflakes.guilds.PrimaryServer,
   hidden: false,
   process: async (interaction) => {
     try {
