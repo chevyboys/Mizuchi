@@ -1,7 +1,7 @@
 const Augur = require("augurbot"),
   gs = require("../utils/Utils.GetGoogleSheetsAsJson.js"),
   u = require("../utils/Utils.Generic.js"),
-  { MessageActionRow, MessageButton, ButtonStyle } = require("discord.js");
+  { MessageActionRow, MessageButton } = require("discord.js");
 const snowflakes = require('../config/snowflakes.json');
 
 let characterInfo;
@@ -28,12 +28,13 @@ async function buildMessage(index) {
   let buttonRow = new MessageActionRow();
   let buttonEmpty = true;
   if (index != undefined) {
-    const spoiler = new RegExp('\|\|');
+    const spoiler = /\|\|/;
 
     for (const [key, value] of Object.entries(characterInfo[index])) {
       if (value && key != "Character Name" && !key.startsWith("_") && !key.startsWith("*")) {
-        const backticks = !spoiler.test(value) ? "```" : " ";
-        msg += "__**" + key + "**__\n" + backticks + value + " " + backticks + "\n";
+        const backticks = !spoiler.test(value) ? "```" : "   ";
+        const newLines = backticks == "```" ? "\n" : "\n\n";
+        msg += "**" + key + "**\n" + backticks + value + " " + backticks + newLines;
       }
 
       // ideally this should be in a different function buildButton but a bit of refactoring is required to not have two loops.
@@ -43,7 +44,7 @@ async function buildMessage(index) {
           buttonRow.addComponents(
             new MessageButton()
               .setCustomId(key)
-              .setLabel("Show " + key.split("*"))
+              .setLabel("Show " + key.slice(1))
               .setStyle("PRIMARY")
           );
         } else {
@@ -90,14 +91,16 @@ async function extraInfo(interaction) {
   const char = characterInfo.find(obj => {
     return obj["Character Name"] == interaction.message.embeds[0].author.name;
   })
-  console.log(char[interaction.customId])
 
+  let button = interaction.message.components[0].components.find(obj => {
+    return obj.customId == interaction.customId;
+  });
 
+  if (button.style != "LINK") {
+    button.disabled = true;
+  }
 
-  // interaction.components.forEach(element => {
-  //   element.set
-  // });
-  // interaction.deferReply(interaction);
+  interaction.message.edit({ components: interaction.message.components })
   interaction.reply({ content: char[interaction.customId] });
 }
 
