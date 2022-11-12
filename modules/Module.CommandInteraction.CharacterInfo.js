@@ -85,7 +85,9 @@ async function buildMessage(index) {
   }).setDescription(msg);
   if (characterInfo[index]["_Color Resolvable"])
     embed.setColor(characterInfo[index]["_Color Resolvable"]);
-
+  if (characterInfo[index]["_imageUrl"]) {
+    embed.setImage(characterInfo[index]["_imageUrl"])
+  }
   return { embeds: [embed], components: [buttonRow] };
 }
 
