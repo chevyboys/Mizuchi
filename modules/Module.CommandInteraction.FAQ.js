@@ -9,7 +9,7 @@ async function dynamicallyCreateButtons(faqsfile) {
   let rows = [];
   let rowi = 0;
   let faqId = 0;
-  let row = new MessageActionRow();;
+  let row = new MessageActionRow();
   for (const faq of faqsfile.qAndA) {
     if (faq.question.length > 80) {
       u.errorHandler("Question Length " + faq.question.length + " is over the warning threshold of 80 characters.\n" + "```Question error: " + faq.question + "```Length:" + faq.question.length)
@@ -56,9 +56,9 @@ async function updateFaqMessage(faqFile, faqFileName, Module) {
   let faqGuild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
   let faqChannel = await faqGuild.channels.fetch(snowflakes.channels.faq);
   let faqMsg = await faqChannel.messages.fetch(faqFile.messageId);
-  let embed = u.embed({ color: 0xF0004C, author: faqMsg.member })
-    .setTitle(`FAQ: ${faqFileName}`)
-    .setColor(faqMsg.member.displayHexColor)
+  //  let embed = u.embed({ color: 0xF0004C, author: faqMsg.member })
+  //  .setTitle(`FAQ: ${faqFileName}`)
+  // .setColor(faqMsg.member.displayHexColor)
   //.setTimestamp()
   //.setAuthor(faqMsg.member.displayName, faqMsg.member.user.displayAvatarURL())
   //.setDescription("Click any of the question buttons below to see the answer to the question.");

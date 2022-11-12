@@ -2,10 +2,10 @@ const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic"),
   snowflakes = require('../config/snowflakes.json'),
   { MessageActionRow, MessageButton, MessageSelectMenu } = require("discord.js"),
-  Attunements = require('../Judgement/AttunementRoles.json'),
+  //Attunements = require('../Judgement/AttunementRoles.json'),
   AUtils = require("../Judgement/Attunement Roles Utils")
 
-let activeAttunements = [];
+//let activeAttunements = [];
 
 //general helper functions
 let buildGenericEmbed = (interaction) => {
@@ -23,7 +23,7 @@ let buildSelectSpire = async (interaction, replyInsteadOfUpdate) => {
 let buildSpireSelectEmbed = (interaction) => {
   return buildGenericEmbed(interaction).setDescription("Your judgement begins. Please let us know which spire you will be entering. Be warned, this choice once made cannot be undone.")
 }
-let buildSpireSelectComponents = (interaction) => {
+let buildSpireSelectComponents = () => {
   let SelectMenuOptions = [];
   //buildSelectMenu
   for (const spire of AUtils.spires()) {
@@ -54,7 +54,7 @@ let buildSpireHasBeenSelectedEmbed = (interaction, spire) => {
   return buildGenericEmbed(interaction).setDescription(`You travel to the ${spire} spire.`)
 }
 let buildSpireHasBeenSelectedComponents = (interaction, spire) => {
-  row = new MessageActionRow()
+  let row = new MessageActionRow()
   row.addComponents(
     new MessageButton()
       .setCustomId(`spireHasBeenSelectedEnter`)
@@ -82,8 +82,8 @@ let buildSpireHasBeenSelected = async (interaction) => {
 let roomOneEmbed = (interaction) => {
   return buildGenericEmbed(interaction).setDescription(`The spire is currently closed`)
 }
-let roomOneComponents = (interaction) => {
-  row = new MessageActionRow()
+let roomOneComponents = () => {
+  let row = new MessageActionRow()
   row.addComponents(
     new MessageButton()
       .setCustomId(`spireHasBeenSelectedEnter`)
