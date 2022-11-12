@@ -4,6 +4,7 @@
   "description": "Custom Discord bot for the Climber's Court",
   "main": "bot.js",
   "scripts": {
+    "start": "nodemon bot.js"
     "test": "node bot.js",
     "launch": "node bot.js",
     "debug": "node bot.js"
