@@ -2,9 +2,6 @@
 
 const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic");
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
-const fs = require('fs');
 const snowflakes = require('../config/snowflakes.json');
 const db = require("../utils/Utils.Database");
 
@@ -42,7 +39,7 @@ const Module = new Augur.Module()
     hidden: true,
     permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member.roles.cache.has(snowflakes.roles.BotMaster),
     process: async (msg) => {
-      emoji = msg.guild.emojis.cache.map(e => e.toString() + "`" + e.toString() + "`");
+      let emoji = msg.guild.emojis.cache.map(e => e.toString() + "`" + e.toString() + "`");
       let arrayOfMessagesToSend = [];
       while (emoji.join("\n").length > 800) {
         let thisMessageToSend = [];

@@ -1,6 +1,7 @@
 const Module = new (require("augurbot")).Module;
 const roleUtilities = require("../utils/Utils.RoleInventory");
-const u = require("../utils/Utils.Generic")
+const u = require("../utils/Utils.Generic");
+const snowflakes = require("../config/snowflakes.json");
 
 
 Module.addInteractionCommand({
