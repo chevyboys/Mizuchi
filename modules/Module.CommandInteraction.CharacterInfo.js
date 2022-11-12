@@ -30,7 +30,8 @@ async function buildMessage(index) {
   if (index != undefined) {
     const spoiler = /\|\|/;
 
-    for (const [key, value] of Object.entries(characterInfo[index])) {
+    for (const [key, valueCommas] of Object.entries(characterInfo[index])) {
+      const value = valueCommas.replace("[comma]", ",");
       if (value && key != "Character Name" && !key.startsWith("_") && !key.startsWith("*")) {
         const backticks = !spoiler.test(value) ? "```" : "   ";
         const newLines = backticks == "```" ? "\n" : "\n\n";
@@ -76,6 +77,7 @@ async function buildMessage(index) {
     return { embeds: [u.embed().setTitle("Could not find character, feel free to add them yourself! \n If this message is a mistake contact Nora")], components: [buttonRow] };
   }
 
+
   const embed = u.embed().setAuthor({
     name: characterInfo[index]["Character Name"],
     url: characterInfo[index]["_wikiUrl"] || undefined,
@@ -101,8 +103,8 @@ async function extraInfo(interaction) {
       button.disabled = true;
     }
 
-    interaction.message.edit({ components: interaction.message.components })
-    interaction.reply({ content: char[interaction.customId] });
+    interaction.message.edit({ components: interaction.message.components });
+    interaction.reply({ content: char[interaction.customId].replace("[comma]", ",") });
   } catch (error) { u.errorHandler(error, "CharacterInfo extra info button interaction") }
 }
 
