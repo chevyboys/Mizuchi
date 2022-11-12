@@ -19,6 +19,7 @@ const Module = new Augur.Module()
             .setName('character')
             .setDescription('The character you are looking for')
             .setRequired(true)
+            .setAutocomplete(true)
         ),
       new SlashCommandBuilder()
         .setName('question')
