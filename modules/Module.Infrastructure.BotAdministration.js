@@ -133,8 +133,11 @@ const Module = new Augur.Module()
     description: "This command loops through all members in the guild and attempts to add them to the database",
     parseParams: true,
     process: async (msg) => {
-      u.clean(msg, 0);
-      return msg.guild.members.cache.map(m => db.User.new(m.id));
+
+      msg.guild.members.cache.map(m => db.User.new(m.id));
+      msg.react("🎚");
+      u.clean(msg, 10000);
+
     },
     permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
   })
