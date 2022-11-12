@@ -136,6 +136,8 @@ Module.setInit(async () => {
   customId: `*Description`, process: extraInfo
 }).addInteractionHandler({
   customId: `*Trivia`, process: extraInfo
+}).addInteractionHandler({
+  customId: `*Unconfirmed Theories`, process: extraInfo
 }).setClockwork(
   () => {
     try {
