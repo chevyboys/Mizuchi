@@ -25,6 +25,7 @@ async function testcakeOrJoinDays(guild) {
     const curDate = moment();
 
     // cakeOrJoinDay Blast
+    // eslint-disable-next-line no-unused-vars
     const flair = [
       ":tada: ",
       ":confetti_ball: ",
@@ -63,7 +64,7 @@ async function testcakeOrJoinDays(guild) {
     }
 
     if (messageContentArray.length == 0) return;
-    arrayOfMessagesToSend = [];
+    let arrayOfMessagesToSend = [];
     while (messageContentArray.join("\n").length > 800) {
       let thisMessageToSend = [];
       for (let index = 0; thisMessageToSend.join("\n").length < 800; index++) {
@@ -141,7 +142,6 @@ Module
 
           interaction.reply({ content: "It seems couldn't understand that date. Please use Month Day format (e.g. Apr 1 or 4/1).", ephemeral: true });
           throw e;
-          return;
         }
       } else if (target && !cakeOrJoinDayDate) {
         let targetBd = await db.User.get(target.id)
@@ -213,6 +213,7 @@ Module
   }).addInteractionHandler({
     customId: "cakedayinfo",
     process: async (interaction) => {
+      let target = interaction.options.getMember("target")
       let targetBd = await db.User.get(interaction.member.id)
       if (!targetBd) targetBd = await db.User.new(target.id);
       targetBd = targetBd.cakeDay

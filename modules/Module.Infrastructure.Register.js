@@ -12,6 +12,15 @@ const Module = new Augur.Module()
     // Build slash commands
     let commands = [
       new SlashCommandBuilder()
+        .setName("character-info")
+        .setDescription('Get character descriptions')
+        .addStringOption(option =>
+          option
+            .setName('character')
+            .setDescription('The character you are looking for')
+            .setRequired(true)
+        ),
+      new SlashCommandBuilder()
         .setName('question')
         .setDescription('Interact with our Questions Queue')
         .addSubcommand(subcommand =>

@@ -1,0 +1,5 @@
+{
+  "name": "inventory",
+  "description": "gets a list of equipable roles",
+  "options": []
+}
