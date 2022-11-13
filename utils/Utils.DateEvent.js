@@ -32,7 +32,7 @@ class EventPacket {
 
 class DateEmitter extends EventEmitter {
   static #timeoutID;
-  static #eventQueue = new PriorityQueue((lhs, rhs) => { lhs.date < rhs.date });
+  static #eventQueue = new PriorityQueue((lhs, rhs) => { return lhs.date < rhs.date; });
 
   constructor(date = undefined, event = undefined, callback = undefined, once = false) {
     super({ captureRejections: true });
