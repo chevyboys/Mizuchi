@@ -56,7 +56,7 @@ Module.addInteractionCommand({
 })
   .addInteractionHandler({
     customId: `InventoryRoleSelect`, process: async (interaction) => {
-      interaction.deferReply();
+      interaction.update({ content: "adjusting roles" })
       let memberColors = await roleUtilities.getMemberColorInventory(interaction.member);
       let color;
       if (interaction.values[0].toLowerCase().indexOf("random") > -1) color = memberColors[Math.floor(Math.random() * memberColors.length)]
@@ -64,7 +64,7 @@ Module.addInteractionCommand({
       await u.addRoles(interaction.member, memberColors, true);
       await u.addRoles(interaction.member, color);
 
-      interaction.editReply({ content: "You have successfully selected a role", components: roleMessageComponents(interaction, memberColors), ephemeral: true })
+      interaction.update({ content: "You have successfully selected a role", components: roleMessageComponents(interaction, memberColors), ephemeral: true })
     }
   })
 
