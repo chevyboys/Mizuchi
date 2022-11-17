@@ -389,9 +389,29 @@ const Module = new Augur.Module()
     description: "For armbaby",
     category: "Silly",
     process: async (msg) => {
+
+      let original;
+      let content = msg.cleanContent.split(" ");
+      content.shift();
+      let suffix = content.join(" ");
+      let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+      let match = urlexp.exec(suffix);
+
+      if (msg.attachments.size > 0) {
+        original = msg.attachments.first().url;
+      } else if (match) {
+        original = match[1];
+      } else {
+        original = (await u.getMention(msg, true) || msg.member).displayAvatarURL({ size: 256, format: "png" });
+      }
+
+      if (!supportedFormats.some(format => original.indexOf("." + format) > -1)) {
+        msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
+        return null;
+      }
       try {
         let image = await Jimp.read('https://cdn.discordapp.com/attachments/450079288201576478/730192818357665832/arm_baby.png');
-        let target = await Jimp.read((await u.getMention(msg, false)).displayAvatarURL({ format: 'png', size: 512 }));
+        let target = await Jimp.read(original);
         let mask = await Jimp.read('./storage/mask.png');
         image.scaleToFit(512, Jimp.AUTO, Jimp.RESIZE_HERMITE)
         const size = 320
