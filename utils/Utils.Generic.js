@@ -288,6 +288,32 @@ const utils = {
       embed.setImage(message.attachments?.first()?.url);
     return embed;
   },
+  getMention: async function (msg, getMember = true) {
+    try {
+      let { suffix } = utils.parse(msg);
+      if (msg.guild) {
+        let memberMentions = msg.mentions.members;
+        memberMentions.delete(msg.client.user.id);
+        if (memberMentions.size > 0) {
+          return (getMember ? memberMentions.first() : memberMentions.first().user);
+        } else if (suffix && /^(.*)#(\d{4})$/.test(suffix)) {
+          let member = msg.guild.members.cache.find(m => m.user.tag.toLowerCase() == suffix.toLowerCase());
+          return member;
+        } else if (suffix) {
+          let member = (await msg.guild.members.fetch({ query: suffix })).first();
+          if (member) return (getMember ? member : member.user);
+          else return undefined;
+        } else return (getMember ? msg.member : msg.author);
+      } else {
+        let userMentions = msg.mentions.users;
+        userMentions.delete(msg.client.user.id);
+        return userMentions.first() || msg.author;
+      }
+    } catch (error) {
+      utils.errorHandler(error, msg);
+      return null;
+    }
+  },
   /**
    * This task is extremely complicated.
    * You need to understand it perfectly to use it.
