@@ -55,15 +55,19 @@ async function composite(msg, suffix, compositeType, overrideImage) {
     let target;
     let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
     let match = urlexp.exec(suffix)
+    let attachment;
+    if (msg.attachments.size > 0) {
+      attachment = msg.attachments.first().url;
+    } else return msg.reply("You need to attach an image")
     if (match) {
       target = match[1];
     } else {
       target = (await u.getMention(msg, false) || msg.author).displayAvatarURL({ size: 512, format: "png" });
     }
-
+    if (overrideImage) attachment = overrideImage;
     try {
       let av = await Jimp.read(target);
-      let attachmentImage = await Jimp.read(overrideImage);
+      let attachmentImage = await Jimp.read(attachment);
       av.resize(512, 512)
       attachmentImage.scaleToFit(512, Jimp.AUTO, Jimp.RESIZE_BEZIER)
       av.composite(attachmentImage, 0, 0, {
@@ -77,6 +81,7 @@ async function composite(msg, suffix, compositeType, overrideImage) {
   } catch (e) { u.errorHandler(e, msg); }
 
 }
+
 
 
 const Module = new Augur.Module()
