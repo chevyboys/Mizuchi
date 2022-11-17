@@ -1,6 +1,6 @@
 const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic");
-const { BaseMessageComponent, MessageButton, MessageActionRow } = require("discord.js");
+const { MessageButton, MessageActionRow } = require("discord.js");
 const snowflakes = require('../config/snowflakes.json');
 let config = require("../config/config.json");
 
@@ -61,11 +61,31 @@ const Module = new Augur.Module()
 
       let Admin = interaction.guild.roles.cache.get(snowflakes.roles.Admin).members.map(m => m.displayName).sort().join("\n");
 
+      let botMasters = (await interaction.guild.roles.fetch(snowflakes.roles.BotMaster)).members.map(m => m.displayName).join("\n");
+
       let whisperRole = (interaction.guild.roles.cache.get(snowflakes.roles.Moderator));
 
       let color = whisperRole.hexColor;
 
-      let embed = u.embed().setTitle("Current Climbers Court Staff Members:").setDescription(`<@&${snowflakes.roles.Admin}>:` + "```" + Admin + "```\n\n" + `<@&${snowflakes.roles.Moderator}>:` + "```" + Mod + "```\n\n" + `<@&${snowflakes.roles.CommunityGuide}>:` + "```" + SW + "```\n\n\n\n").addFields([{ name: "Join our staff:", value: config.staffApplicationLink ? config.staffApplicationLink : "```No Staff Application link is available at this time```" }]).setColor(color);
+      let embed = u.embed()
+        .setTitle("Current " + interaction.guild.name + " Staff Members:")
+        .setDescription(
+          `<@&${snowflakes.roles.Admin}>:`
+          + "```" + Admin + "```\n\n"
+          + `<@&${snowflakes.roles.Moderator}>:`
+          + "```" + Mod + "```\n\n"
+          + `<@&${snowflakes.roles.CommunityGuide}>:`
+          + "```" + SW + "```\n\n"
+          + `<@&${snowflakes.roles.BotMaster}>:`
+          + "```" + botMasters + "```\n\n"
+          + "\n\n")
+        .addFields([
+          {
+            name: "Join our staff:",
+            value: config.staffApplicationLink ? config.staffApplicationLink : "```No Staff Application link is available at this time```"
+          }
+        ])
+        .setColor(color);
 
       interaction.editReply({ embeds: [embed] });
     }
