@@ -56,6 +56,7 @@ Module.addInteractionCommand({
 })
   .addInteractionHandler({
     customId: `InventoryRoleSelect`, process: async (interaction) => {
+      interaction.deferUpdate();
       let memberColors = await roleUtilities.getMemberColorInventory(interaction.member);
       let color;
       if (interaction.values[0].toLowerCase().indexOf("random") > -1) color = memberColors[Math.floor(Math.random() * memberColors.length)]
