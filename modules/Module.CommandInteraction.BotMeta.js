@@ -1,19 +1,17 @@
 /* This category is for commands useable by everyone that give information about the bot or specifically aid in the bots ability to be run on the server.
 */
-const fs = require('fs');
 const Augur = require("augurbot");
 const u = require("../utils/Utils.Generic");
 const axios = require("axios").default;
 const snowflakes = require('../config/snowflakes.json');
-const Discord = require("discord.js")
 let previousDiscordIncident;
 
-function isURL(str) {
+/*function isURL(str) {
   const urlMatch = /<?(https?:\/\/\S+)>?/;
   const match = urlMatch.exec(str);
   if (str.indexOf("youtube") > -1 || str.indexOf("twitch") > -1) return match ? match[1] || match[0] : null;
   else return null;
-}
+}*/
 
 async function setBotStatus({ clientuser, type, status, url }) {
   clientuser.setActivity({ type: type.toUpperCase(), url: url, name: status.trim() });
@@ -159,6 +157,7 @@ Module
           if ((category == "Bot Admin" && msg.client.config.AdminIds.includes(msg.author.id)) || category != "Bot Admin" && category != "General" && category != "Server Admin" || (category == "Server Admin" && msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"]))) {
             embed.addField(`${category}`, `᲼`);
           }
+          // eslint-disable-next-line no-unused-vars
           for (let [name, command] of commands.filter(c => c.category == category && (!c.hidden || msg.client.config.AdminIds.includes(msg.author.id))).sort((a, b) => a.name.localeCompare(b.name))) {
             embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
             if (i == 20) {
