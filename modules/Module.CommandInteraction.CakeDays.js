@@ -213,7 +213,6 @@ Module
   }).addInteractionHandler({
     customId: "cakedayinfo",
     process: async (interaction) => {
-      let target = interaction.options.getMember("target")
       let targetBd = await db.User.get(interaction.member.id)
       if (!targetBd) targetBd = await db.User.new(target.id);
       targetBd = targetBd.cakeDay
