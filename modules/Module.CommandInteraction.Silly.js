@@ -50,15 +50,11 @@ async function popart(msg, initialTransform) {
   } catch (error) { u.errorHandler(error, msg); }
 }
 
-async function composite(msg, suffix, compositeType) {
+async function composite(msg, suffix, compositeType, overrideImage) {
   try {
     let target;
     let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
     let match = urlexp.exec(suffix)
-    let attachment;
-    if (msg.attachments.size > 0) {
-      attachment = msg.attachments.first().url;
-    } else return msg.reply("You need to attach an image")
     if (match) {
       target = match[1];
     } else {
@@ -67,7 +63,7 @@ async function composite(msg, suffix, compositeType) {
 
     try {
       let av = await Jimp.read(target);
-      let attachmentImage = await Jimp.read(attachment);
+      let attachmentImage = await Jimp.read(overrideImage);
       av.resize(512, 512)
       attachmentImage.scaleToFit(512, Jimp.AUTO, Jimp.RESIZE_BEZIER)
       av.composite(attachmentImage, 0, 0, {
@@ -383,6 +379,27 @@ const Module = new Augur.Module()
     category: "Silly",
     process: async (msg, suffix) => {
       await composite(msg, suffix, Jimp.BLEND_ADD)
+    }
+  }).addCommand({
+    name: "ace",
+    description: "put an ace border on an image",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_SOURCE_OVER, "https://twibbon.blob.core.windows.net/twibbon/2017/173/a646f6a2-2e1d-4913-a988-58c15abf94c0.png")
+    }
+  }).addCommand({
+    name: "pride",
+    description: "put a pride border on an image",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_SOURCE_OVER, "https://www.pngkey.com/png/full/117-1172719_border-with-the-rainbows-colors-for-any-lgbt.png")
+    }
+  }).addCommand({
+    name: "christmas",
+    description: "put a christmas border on an image",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_SOURCE_OVER, "https://i.pinimg.com/originals/76/fc/32/76fc32aff9ad61caa2f2a72b8a8256b1.png")
     }
   }).addCommand({
     name: "armbaby",
