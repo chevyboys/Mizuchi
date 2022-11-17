@@ -60,7 +60,7 @@ Module.addInteractionCommand({
       let memberColors = await roleUtilities.getMemberColorInventory(interaction.member);
       let color;
       if (interaction.values[0].toLowerCase().indexOf("random") > -1) color = memberColors[Math.floor(Math.random() * memberColors.length)]
-      else color = interaction.values[0];
+      else color = interaction.values[0].toString();
       console.log(color)
       u.addRoles(interaction.member, memberColors, true).then(() => u.addRoles(interaction.member, interaction.member.roles.resolve(color)));
       interaction.editReply({ content: "You have successfully selected a role", ephemeral: true })
