@@ -59,10 +59,10 @@ Module.addInteractionCommand({
       interaction.deferReply?.({ ephemeral: true });
       let memberColors = await roleUtilities.getMemberColorInventory(interaction.member);
       let color;
-      if (interaction.values[0].toLowerCase().indexOf("random") > -1) color = memberColors[Math.floor(Math.random() * memberColors.length)]
-      else color = interaction.values[0].toString();
+      if (interaction.values[0].toLowerCase().indexOf("random") > -1) color = await interaction.guild.roles.cache.get(`${memberColors[Math.floor(Math.random() * memberColors.length)]}`);
+      else color = await interaction.guild.roles.cache.get(`${interaction.values[0]}`);
       console.log(color)
-      u.addRoles(interaction.member, memberColors, true).then(() => u.addRoles(interaction.member, interaction.member.roles.resolve(color)));
+      u.addRoles(interaction.member, memberColors, true).then(() => u.addRoles(interaction.member,));
       interaction.editReply({ content: "You have successfully selected a role", ephemeral: true })
     }
   })
