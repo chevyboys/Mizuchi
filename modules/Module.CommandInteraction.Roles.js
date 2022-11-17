@@ -64,7 +64,7 @@ Module.addInteractionCommand({
       await u.addRoles(interaction.member, memberColors, true);
       await u.addRoles(interaction.member, color);
 
-      interaction.update({ content: "You have successfully selected a role", components: roleMessageComponents(interaction, memberColors), ephemeral: true })
+      interaction.editReply({ content: "You have successfully selected a role", components: roleMessageComponents(interaction, memberColors), ephemeral: true })
     }
   })
 
