@@ -63,7 +63,7 @@ Module.addInteractionCommand({
       else color = await interaction.guild.roles.cache.get(`${interaction.values[0]}`);
       console.log(color.id)
       await u.addRoles(interaction.member, memberColors, true)
-      await u.addRoles(interaction.member, color.id);
+      //await u.addRoles(interaction.member, color.id);
       interaction.editReply({ content: "You have successfully selected a role", ephemeral: true })
     }
   })
