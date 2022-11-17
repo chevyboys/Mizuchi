@@ -69,7 +69,7 @@ async function composite(msg, suffix, compositeType) {
       let av = await Jimp.read(target);
       let attachmentImage = await Jimp.read(attachment);
       av.resize(512, 512)
-      attachmentImage.resize(512, 512)
+      attachmentImage.scaleToFit(512, Jimp.AUTO, Jimp.RESIZE_BEZIER)
       av.composite(attachmentImage, 0, 0, {
         mode: compositeType || Jimp.BLEND_MULTIPLY
 
