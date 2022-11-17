@@ -77,7 +77,7 @@ const Module = new Augur.Module()
 
       let cmd;
       if (suffix.toLowerCase().indexOf("pull") > -1) {
-        cmd = spawn("git", ["pull"], { cwd: process.cwd() });
+        cmd = spawn("git", ["pull", "origin", "main"], { cwd: process.cwd() });
       }
       else if (suffix.indexOf("stash") > -1) {
         cmd = spawn("git", ["stash"], { cwd: process.cwd() });
