@@ -20,7 +20,7 @@ async function popart(msg, initialTransform) {
     } else if (match) {
       original = match[1];
     } else {
-      original = (await u.getMention(msg, false) || msg.author).displayAvatarURL({ size: 256, format: "png" });
+      original = (await u.getMention(msg, true) || msg.member).displayAvatarURL({ size: 256, format: "png" });
     }
 
     if (!supportedFormats.some(format => original.indexOf("." + format) > -1)) {
@@ -110,7 +110,7 @@ const Module = new Augur.Module()
         let embed = u.embed()
           .setAuthor(name)
           .setDescription(u.escapeText(name) + "'s Avatar")
-          .setImage(user.displayAvatarURL({ size: 512, dynamic: true }));
+          .setImage(msg.member.displayAvatarURL({ size: 512, dynamic: true }));
         msg.channel.send({ embeds: [embed] });
       } catch (error) { u.errorHandler(error, msg); }
     },
@@ -316,10 +316,10 @@ const Module = new Augur.Module()
     name: "personal",
     description: "For when you take something personally",
     category: "Silly",
-    process: async (msg, suffix) => {
+    process: async (msg) => {
       try {
         let image = await Jimp.read('https://cdn.discordapp.com/attachments/789694239197626371/808446253737181244/personal.png');
-        let target = await Jimp.read(suffix?.toLowerCase() == 'ldsg' ? 'https://cdn.discordapp.com/attachments/762899042363113482/808707034983170138/UH1D8seS_400x400.png' : (await u.getMention(msg, false)).displayAvatarURL({ format: 'png', size: 512 }));
+        let target = await Jimp.read((await u.getMention(msg, false)).displayAvatarURL({ format: 'png', size: 512 }));
         let mask = await Jimp.read('./storage/mask.png');
         mask.resize(350, 350);
         target.resize(350, 350);
@@ -383,6 +383,26 @@ const Module = new Augur.Module()
     category: "Silly",
     process: async (msg, suffix) => {
       await composite(msg, suffix, Jimp.BLEND_ADD)
+    }
+  }).addCommand({
+    name: "armbaby",
+    description: "For armbaby",
+    category: "Silly",
+    process: async (msg) => {
+      try {
+        let image = await Jimp.read('https://cdn.discordapp.com/attachments/450079288201576478/730192818357665832/arm_baby.png');
+        let target = await Jimp.read((await u.getMention(msg, false)).displayAvatarURL({ format: 'png', size: 512 }));
+        let mask = await Jimp.read('./storage/mask.png');
+        image.scaleToFit(512, Jimp.AUTO, Jimp.RESIZE_HERMITE)
+        const size = 320
+        mask.resize(size, size);
+        mask.blur(5);
+        target.resize(size, size);
+        target.mask(mask);
+        image.blit(target, 180, 175);
+        await msg.channel.send({ files: [await image.getBufferAsync(Jimp.MIME_PNG)] });
+
+      } catch (e) { u.errorHandler(e, msg); }
     }
   });
 
