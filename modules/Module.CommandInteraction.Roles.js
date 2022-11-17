@@ -3,6 +3,8 @@ const roleUtilities = require("../utils/Utils.RoleInventory");
 const u = require("../utils/Utils.Generic");
 const snowflakes = require("../config/snowflakes.json");
 const { MessageActionRow, MessageSelectMenu } = require("discord.js");
+const rolesClient = require("../utils/Utils.RolesLogin.js");
+const rolesClientPrimaryGuild = rolesClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
 
 
 
@@ -61,10 +63,11 @@ Module.addInteractionCommand({
       let color;
       if (interaction.values[0].toLowerCase().indexOf("random") > -1) color = await interaction.guild.roles.cache.get(`${memberColors[Math.floor(Math.random() * memberColors.length)]}`);
       else color = await interaction.guild.roles.cache.get(`${interaction.values[0]}`);
-      console.log(color.id)
-      await u.addRoles(interaction.member, memberColors, true)
+      console.log(color.id);
+      let member = await (await rolesClientPrimaryGuild).members.fetch(interaction.member);
+      await member.roles.remove(memberColors);
+      await member.roles.add(color)
       await interaction.editReply({ content: "You have successfully selected a role", ephemeral: true })
-      await u.addRoles(interaction.member, color.id);
     }
   })
 
