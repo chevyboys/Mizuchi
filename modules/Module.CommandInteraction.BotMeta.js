@@ -8,6 +8,13 @@ const snowflakes = require('../config/snowflakes.json');
 const Discord = require("discord.js")
 let previousDiscordIncident;
 
+function isURL(str) {
+  const urlMatch = /<?(https?:\/\/\S+)>?/;
+  const match = urlMatch.exec(str);
+  if (str.indexOf("youtube") > -1 || str.indexOf("twitch") > -1) return match ? match[1] || match[0] : null;
+  else return null;
+}
+
 async function setBotStatus({ clientuser, type, status, url }) {
   clientuser.setActivity({ type: type.toUpperCase(), url: url, name: status.trim() });
 
@@ -38,6 +45,7 @@ async function sendDiscordStatus(interaction, embed, verbose = false) {
             break;
           case "major_outage":
             emoji = "🟠";
+            break;
           default:
             emoji = "🔴";
             break;
@@ -221,12 +229,6 @@ Module
       console.log(JSON.stringify(interaction.options), 0, 2);
       let url = null
       if (url && interaction?.options?.get("type")?.value.toLowerCase().indexOf("stream") > -1) {
-        function isURL(str) {
-          const urlMatch = /<?(https?:\/\/\S+)>?/;
-          const match = urlMatch.exec(str);
-          if (str.indexOf("youtube") > -1 || str.indexOf("twitch") > -1) return match ? match[1] || match[0] : null;
-          else return null;
-        }
         url = interaction?.options?.get("url")?.value; //isURL(interaction?.options?.get("url")?.value);
         if (!url) return interaction.reply({ content: "That URL is not valid, streaming requires a valid youtube or twitch url", ephemeral: true })
       }
