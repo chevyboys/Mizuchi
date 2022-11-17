@@ -50,6 +50,39 @@ async function popart(msg, initialTransform) {
   } catch (error) { u.errorHandler(error, msg); }
 }
 
+async function composite(msg, suffix, compositeType) {
+  try {
+    let target;
+    let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+    let match = urlexp.exec(suffix)
+    let attachment;
+    if (msg.attachments.size > 0) {
+      attachment = msg.attachments.first().url;
+    } else return msg.reply("You need to attach an image")
+    if (match) {
+      target = match[1];
+    } else {
+      target = (await u.getMention(msg, false) || msg.author).displayAvatarURL({ size: 512, format: "png" });
+    }
+
+    try {
+      let av = await Jimp.read(target);
+      let attachmentImage = await Jimp.read(attachment);
+      av.resize(512, 512)
+      attachmentImage.resize(512, 512)
+      av.composite(attachmentImage, 0, 0, {
+        mode: compositeType || Jimp.BLEND_MULTIPLY
+
+      })
+      await msg.channel.send({ files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
+    } catch (error) {
+      msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
+    }
+  } catch (e) { u.errorHandler(e, msg); }
+
+}
+
+
 const Module = new Augur.Module()
   .addCommand({
     name: "andywarhol",
@@ -310,6 +343,24 @@ const Module = new Augur.Module()
         if (canvas) await msg.channel.send({ files: [await canvas.getBufferAsync(Jimp.MIME_JPEG)] });
       } catch (e) { u.errorHandler(e, msg); }
 
+    }
+  })
+  .addCommand({
+    name: "multiply",
+    description: "Multiply an avatar by an attached image",
+    aliases: ["grayscale", "bw"],
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_MULTIPLY)
+    }
+  })
+  .addCommand({
+    name: "hardlight",
+    description: "Multiply an avatar by an attached image",
+    aliases: ["grayscale", "bw"],
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_HARDLIGHT)
     }
   });
 
