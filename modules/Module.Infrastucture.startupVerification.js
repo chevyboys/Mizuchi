@@ -50,7 +50,7 @@ function fieldMismatches(obj1, obj2) {
 }
 
 
-Module.setInit(async (reload) => {
+Module.setInit(async () => {
   try {
     const requiredHidden = [
       "../config/config",
@@ -79,6 +79,14 @@ Module.setInit(async (reload) => {
       }
     }
     //make files if they don't exist
+    const dataDir = './data';
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir);
+    }
+    const faqDir = './faq';
+    if (!fs.existsSync(faqDir)) {
+      fs.mkdirSync(faqDir);
+    }
     const helpersDir = './data/helpers';
     if (!fs.existsSync(helpersDir)) {
       fs.mkdirSync(helpersDir);
