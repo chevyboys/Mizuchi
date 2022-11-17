@@ -348,7 +348,6 @@ const Module = new Augur.Module()
   .addCommand({
     name: "multiply",
     description: "Multiply an avatar by an attached image",
-    aliases: ["grayscale", "bw"],
     category: "Silly",
     process: async (msg, suffix) => {
       await composite(msg, suffix, Jimp.BLEND_MULTIPLY)
@@ -356,11 +355,34 @@ const Module = new Augur.Module()
   })
   .addCommand({
     name: "hardlight",
-    description: "Multiply an avatar by an attached image",
-    aliases: ["grayscale", "bw"],
+    description: "composite via hardlight on an avatar by an attached image",
     category: "Silly",
     process: async (msg, suffix) => {
       await composite(msg, suffix, Jimp.BLEND_HARDLIGHT)
+    }
+  })
+  .addCommand({
+    name: "overlay",
+    description: "composite via overlay on an avatar by an attached image",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_OVERLAY)
+    }
+  })
+  .addCommand({
+    name: "combine",
+    description: "composite via puts the attached image over an avatar ",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_SOURCE_OVER)
+    }
+  })
+  .addCommand({
+    name: "add",
+    description: "composite via hardlight on an avatar by an attached image",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_ADD)
     }
   });
 
