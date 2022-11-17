@@ -2,6 +2,45 @@ const Module = new (require("augurbot")).Module;
 const roleUtilities = require("../utils/Utils.RoleInventory");
 const u = require("../utils/Utils.Generic");
 const snowflakes = require("../config/snowflakes.json");
+const { MessageActionRow, MessageSelectMenu } = require("discord.js");
+
+
+
+function roleMessageComponents(interaction, memberColors) {
+  let SelectMenuOptions = [];
+  //buildSelectMenu
+  for (const role of memberColors) {
+    let name = interaction.guild.roles.cache.get(role).name
+    SelectMenuOptions.push({
+      label: name,
+      description: `The ${name} role`,
+      value: role,
+    })
+  }
+  SelectMenuOptions.push({
+    label: "Random",
+    description: `A Random color`,
+    value: "Random",
+  })
+  let rows = []
+  const row = new MessageActionRow()
+    .addComponents(
+      new MessageSelectMenu()
+        .setCustomId('InventoryRoleSelect')
+        .setPlaceholder('Nothing    selected')
+        .addOptions(SelectMenuOptions),
+    );
+  rows.push(row);
+  return rows;
+}
+async function inventoryEmbed(interaction, memberColors) {
+  memberColors = memberColors || await roleUtilities.getMemberColorInventory(interaction.member);
+  let memberColorString = memberColors.map(c => `<@&${c}>` + (interaction.member.roles.cache.has(c) ? " ✅" : "")).join("\n");
+  let embed = u.embed()
+    .setTitle(interaction.member.displayName + "'s inventory")
+    .setDescription(`__**Equipable Colors:**__\n${memberColorString}`);
+  return embed;
+}
 
 
 Module.addInteractionCommand({
@@ -10,16 +49,24 @@ Module.addInteractionCommand({
   process: async (interaction) => {
     interaction.deferReply();
     let memberColors = await roleUtilities.getMemberColorInventory(interaction.member);
-    //let memberSecondary = await roleUtilities.getSecondaryInventory(interaction.member);
-    let memberColorString = memberColors.map(c => `<@&${c}>` + (interaction.member.roles.cache.has(c) ? " ✅" : "")).join("\n");
-    //let memberSecondaryString = memberSecondary.map(c => `<@&${c}>` + (interaction.member.roles.cache.has(c) ? " ✅" : "")).join("\n");
-    let embed = u.embed()
-      .setTitle(interaction.member.displayName + "'s inventory")
-      .setDescription(`__**Equipable Colors:**__\n${memberColorString}`);
-    interaction.editReply({ embeds: [embed] });
+    let embed = await inventoryEmbed(interaction, memberColors);
+    await interaction.editReply({ embeds: [embed] });
+    interaction.followUp({ content: "Select your role", components: roleMessageComponents(interaction, memberColors), ephemeral: true })
   }
 })
+  .addInteractionHandler({
+    customId: `InventoryRoleSelect`, process: async (interaction) => {
+      interaction.deferReply();
+      let memberColors = await roleUtilities.getMemberColorInventory(interaction.member);
+      let color;
+      if (interaction.values[0].toLowerCase().indexOf("random") > -1) color = memberColors[Math.floor(Math.random() * memberColors.length)]
+      else color = interaction.values[0];
+      await u.addRoles(interaction.member, memberColors, true);
+      await u.addRoles(interaction.member, color);
 
+      interaction.update({ content: "You have successfully selected a role", components: roleMessageComponents(interaction, memberColors), ephemeral: true })
+    }
+  })
 
 module.exports = Module;
 

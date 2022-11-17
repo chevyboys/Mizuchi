@@ -1,5 +1,4 @@
-const Augur = require("augurbot"),
-  u = require("./Utils.Generic"),
+const u = require("./Utils.Generic"),
   { MessageActionRow, MessageButton } = require("discord.js");
 const Discord = require("discord.js");
 const snowflakes = require('../config/snowflakes.json');
@@ -15,7 +14,7 @@ let activeRequests = [];
  * @param {function approvedCallback({mod,card,embed,activeRequest, requestingUser, target, interaction})} approvedCallback //What happens on approval
  * @param {function overrideCallback({mod, target, interaction})} overrideCallback this function should accept an object containing the mod doing the action, the interaction, and the target message. It is executed if the person has moderation privilages
  */
-modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam, approvedCallback, overrideCallback) => {
+let modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiParam, approvedCallback, overrideCallback) => {
   Module.reactionHandlers = Module.reactionHandlers || [];
   let modRequestFunctionName = modRequestFunctionNameParam;
   let modRequestFunctionEmoji = modRequestFunctionEmojiParam;

@@ -1,4 +1,3 @@
-const { AugurClient } = require("augurbot");
 const Discord = require("discord.js"),
   config = require("../config/config.json"),
   snowflakes = require("../config/snowflakes.json"),
