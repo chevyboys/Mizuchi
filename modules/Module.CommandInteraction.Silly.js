@@ -247,6 +247,114 @@ const Module = new Augur.Module()
       } catch (e) { u.errorHandler(e, msg); }
 
     }
+  }).addCommand({
+    name: "normalize",
+    description: "Normalizes an Avatar",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      try {
+        let target;
+        let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+        let match = urlexp.exec(suffix)
+        if (msg.attachments.size > 0) {
+          target = msg.attachments.first().url;
+        } else if (match) {
+          target = match[1];
+        } else {
+          target = (await u.getMention(msg, false) || msg.author).displayAvatarURL({ size: 512, format: "png" });
+        }
+
+        try {
+          let av = await Jimp.read(target);
+          av.normalize();
+          await msg.channel.send({ files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
+        } catch (error) {
+          msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
+        }
+      } catch (e) { u.errorHandler(e, msg); }
+
+    }
+  }).addCommand({
+    name: "blur",
+    description: "Blurs an Avatar",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      try {
+        let target;
+        let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+        let match = urlexp.exec(suffix)
+        if (msg.attachments.size > 0) {
+          target = msg.attachments.first().url;
+        } else if (match) {
+          target = match[1];
+        } else {
+          target = (await u.getMention(msg, false) || msg.author).displayAvatarURL({ size: 512, format: "png" });
+        }
+
+        try {
+          let av = await Jimp.read(target);
+          av.blur(20)
+          await msg.channel.send({ files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
+        } catch (error) {
+          msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
+        }
+      } catch (e) { u.errorHandler(e, msg); }
+
+    }
+  }).addCommand({
+    name: "pixelate",
+    description: "Pixelates an Avatar",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      try {
+        let target;
+        let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+        let match = urlexp.exec(suffix)
+        if (msg.attachments.size > 0) {
+          target = msg.attachments.first().url;
+        } else if (match) {
+          target = match[1];
+        } else {
+          target = (await u.getMention(msg, false) || msg.author).displayAvatarURL({ size: 512, format: "png" });
+        }
+
+        try {
+          let av = await Jimp.read(target);
+          av.pixelate(20)
+          await msg.channel.send({ files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
+        } catch (error) {
+          msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
+        }
+      } catch (e) { u.errorHandler(e, msg); }
+
+    }
+  }).addCommand({
+    name: "sepia",
+    description: "Sepias an Avatar",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      try {
+        let target;
+        let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+        let match = urlexp.exec(suffix)
+        if (msg.attachments.size > 0) {
+          target = msg.attachments.first().url;
+        } else if (match) {
+          target = match[1];
+        } else {
+          target = (await u.getMention(msg, false) || msg.author).displayAvatarURL({ size: 512, format: "png" });
+        }
+
+        try {
+          let av = await Jimp.read(target);
+          av.sepia()
+          await msg.channel.send({ files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
+        } catch (error) {
+          msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
+        }
+      } catch (e) { u.errorHandler(e, msg); }
+
+    }
   })
   .addCommand({
     name: "invert",
@@ -445,6 +553,41 @@ const Module = new Augur.Module()
         await msg.channel.send({ files: [await image.getBufferAsync(Jimp.MIME_PNG)] });
 
       } catch (e) { u.errorHandler(e, msg); }
+    }
+  }).addCommand({
+    name: "screen",
+    description: "composite via screen on an avatar by an attached image",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_SCREEN)
+    }
+  }).addCommand({
+    name: "darken",
+    description: "composite via darkening on an avatar by an attached image",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_DARKEN)
+    }
+  }).addCommand({
+    name: "lighten",
+    description: "composite via lighten on an avatar by an attached image",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_LIGHTEN)
+    }
+  }).addCommand({
+    name: "darken",
+    description: "composite via darkening on an avatar by an attached image",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_DARKEN)
+    }
+  }).addCommand({
+    name: "exclusion",
+    description: "composite via exclusion on an avatar by an attached image",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      await composite(msg, suffix, Jimp.BLEND_EXCLUSION)
     }
   });
 
