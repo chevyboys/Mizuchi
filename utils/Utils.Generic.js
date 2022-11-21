@@ -1,4 +1,3 @@
-const { AugurClient } = require("augurbot");
 const Discord = require("discord.js"),
   config = require("../config/config.json"),
   snowflakes = require("../config/snowflakes.json"),
@@ -71,6 +70,36 @@ function parseInteraction(inter) {
 }
 
 const utils = {
+  setRoles: async (member, roles) => {
+    const guild = await rolesClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
+    const rolesClientMember = await guild.members.fetch(member.id ? member.id : member);
+    try {
+      await rolesClientMember.roles.set(roles);
+    } catch (error) {
+      let stack = error.stack ? error.stack : error.toString()
+      if (stack.indexOf("DiscordAPIError: Missing Permissions") > -1) {
+        let embed = utils.embed({
+          color: config.color,
+          title: `I couldn't set a role for ${member.displayName} `,
+          author: {
+            name: member.displayName,
+            icon_url: member.displayAvatarURL(),
+          },
+          description: `I don't have permission to sey the ${roles.map(r => `<@&${r}>`).join} roles for <@${member.id}>. Please set that for them on my behalf.`,
+          timestamp: new Date().toISOString(),
+          footer: {
+            text: `Role set Permission Denied`,
+          },
+
+        }
+        )
+        guild.channels.cache.get(snowflakes.channels.modRequests).send({ content: `<@&${snowflakes.roles.Moderator}>`, embeds: [embed], allowedMentions: { roles: [snowflakes.roles.Moderator] } });
+      }
+      else utils.errorHandler(error);
+    }
+
+
+  },
   addRoles: async (member, roles, takeRoleInsteadOfGive = false) => {
     try {
 
@@ -258,6 +287,32 @@ const utils = {
     if (message.attachments?.size > 0)
       embed.setImage(message.attachments?.first()?.url);
     return embed;
+  },
+  getMention: async function (msg, getMember = true) {
+    try {
+      let { suffix } = utils.parse(msg);
+      if (msg.guild) {
+        let memberMentions = msg.mentions.members;
+        memberMentions.delete(msg.client.user.id);
+        if (memberMentions.size > 0) {
+          return (getMember ? memberMentions.first() : memberMentions.first().user);
+        } else if (suffix && /^(.*)#(\d{4})$/.test(suffix)) {
+          let member = msg.guild.members.cache.find(m => m.user.tag.toLowerCase() == suffix.toLowerCase());
+          return member;
+        } else if (suffix) {
+          let member = (await msg.guild.members.fetch({ query: suffix })).first();
+          if (member) return (getMember ? member : member.user);
+          else return undefined;
+        } else return (getMember ? msg.member : msg.author);
+      } else {
+        let userMentions = msg.mentions.users;
+        userMentions.delete(msg.client.user.id);
+        return userMentions.first() || msg.author;
+      }
+    } catch (error) {
+      utils.errorHandler(error, msg);
+      return null;
+    }
   },
   /**
    * This task is extremely complicated.

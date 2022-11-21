@@ -1,12 +1,17 @@
 /* This category is for commands useable by everyone that give information about the bot or specifically aid in the bots ability to be run on the server.
 */
-const fs = require('fs');
 const Augur = require("augurbot");
 const u = require("../utils/Utils.Generic");
 const axios = require("axios").default;
 const snowflakes = require('../config/snowflakes.json');
-const Discord = require("discord.js")
 let previousDiscordIncident;
+
+/*function isURL(str) {
+  const urlMatch = /<?(https?:\/\/\S+)>?/;
+  const match = urlMatch.exec(str);
+  if (str.indexOf("youtube") > -1 || str.indexOf("twitch") > -1) return match ? match[1] || match[0] : null;
+  else return null;
+}*/
 
 async function setBotStatus({ clientuser, type, status, url }) {
   clientuser.setActivity({ type: type.toUpperCase(), url: url, name: status.trim() });
@@ -38,6 +43,7 @@ async function sendDiscordStatus(interaction, embed, verbose = false) {
             break;
           case "major_outage":
             emoji = "🟠";
+            break;
           default:
             emoji = "🔴";
             break;
@@ -151,6 +157,7 @@ Module
           if ((category == "Bot Admin" && msg.client.config.AdminIds.includes(msg.author.id)) || category != "Bot Admin" && category != "General" && category != "Server Admin" || (category == "Server Admin" && msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"]))) {
             embed.addField(`${category}`, `᲼`);
           }
+          // eslint-disable-next-line no-unused-vars
           for (let [name, command] of commands.filter(c => c.category == category && (!c.hidden || msg.client.config.AdminIds.includes(msg.author.id))).sort((a, b) => a.name.localeCompare(b.name))) {
             embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
             if (i == 20) {
@@ -204,36 +211,11 @@ Module
     }
   })
   .addCommand({
-    name: "playing",
-    category: "Bot Admin",
-    hidden: true,
-    description: "Set playing status",
-    syntax: "[game]",
-    aliases: ["streaming", "watching", "listening"],
-    process: (msg, suffix) => {//msg.client.user.setActivity(suffix);
-      if (suffix) {
-        let { command } = u.parse(msg);
-        command = command.toUpperCase();
-        let url = false;
-        if (command == "STREAMING") {
-
-          url = isURL(suffix);
-          msg.client.user.setActivity({ type: command.toUpperCase(), url: url, name: suffix.replace(url, "").replace("  ", " ").trim() });
-        }
-        else msg.client.user.setActivity({ type: command.toUpperCase(), name: suffix })
-
-      }
-      else msg.client.user.setActivity("");
-      msg.react("👌");
-    },
-    permissions: (msg) => (Module.config.AdminIds.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin))
-  }).addCommand({
     name: "avatar",
     category: "Bot Admin",
     hidden: true,
-    description: "Set playing status",
-    syntax: "[game]",
-    aliases: ["streaming", "watching", "listening"],
+    description: "set's the bot's avatar to an image of the same name as the message suffix",
+    syntax: "[name]",
     process: (msg, suffix) => {
       msg.client.user.setAvatar(('./avatar/' + (suffix ? suffix.trim() : "base.png")))
       msg.react("👌");
@@ -246,12 +228,6 @@ Module
       console.log(JSON.stringify(interaction.options), 0, 2);
       let url = null
       if (url && interaction?.options?.get("type")?.value.toLowerCase().indexOf("stream") > -1) {
-        function isURL(str) {
-          const urlMatch = /<?(https?:\/\/\S+)>?/;
-          const match = urlMatch.exec(str);
-          if (str.indexOf("youtube") > -1 || str.indexOf("twitch") > -1) return match ? match[1] || match[0] : null;
-          else return null;
-        }
         url = interaction?.options?.get("url")?.value; //isURL(interaction?.options?.get("url")?.value);
         if (!url) return interaction.reply({ content: "That URL is not valid, streaming requires a valid youtube or twitch url", ephemeral: true })
       }

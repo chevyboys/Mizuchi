@@ -2,9 +2,6 @@
 
 const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic");
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
-const fs = require('fs');
 const snowflakes = require('../config/snowflakes.json');
 const db = require("../utils/Utils.Database");
 
@@ -42,7 +39,7 @@ const Module = new Augur.Module()
     hidden: true,
     permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member.roles.cache.has(snowflakes.roles.BotMaster),
     process: async (msg) => {
-      emoji = msg.guild.emojis.cache.map(e => e.toString() + "`" + e.toString() + "`");
+      let emoji = msg.guild.emojis.cache.map(e => e.toString() + "`" + e.toString() + "`");
       let arrayOfMessagesToSend = [];
       while (emoji.join("\n").length > 800) {
         let thisMessageToSend = [];
@@ -80,7 +77,7 @@ const Module = new Augur.Module()
 
       let cmd;
       if (suffix.toLowerCase().indexOf("pull") > -1) {
-        cmd = spawn("git", ["pull"], { cwd: process.cwd() });
+        cmd = spawn("git", ["pull", "origin", "main"], { cwd: process.cwd() });
       }
       else if (suffix.indexOf("stash") > -1) {
         cmd = spawn("git", ["stash"], { cwd: process.cwd() });
@@ -133,8 +130,11 @@ const Module = new Augur.Module()
     description: "This command loops through all members in the guild and attempts to add them to the database",
     parseParams: true,
     process: async (msg) => {
-      u.clean(msg, 0);
-      return msg.guild.members.cache.map(m => db.User.new(m.id));
+
+      msg.guild.members.cache.map(m => db.User.new(m.id));
+      msg.react("🎚");
+      u.clean(msg, 10000);
+
     },
     permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
   })

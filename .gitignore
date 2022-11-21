@@ -1,5 +1,4 @@
 node_modules
-storage/*
 tmp
 config/*
 !config/README.md

@@ -19,7 +19,6 @@ async function shhh(msg) {
 const emojis = new Discord.Collection([
   [snowflakes.roles.BotMaster, snowflakes.emoji.bot],    // BotMasters - botIcon
   ["197050381270777857", snowflakes.emoji.upDawn], // Kritta - updawn
-  ["928916214342901830", "🫂"], //lnlyCloud
 
 ]);
 

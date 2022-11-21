@@ -4,6 +4,7 @@
   "description": "Custom Discord bot for the Climber's Court",
   "main": "bot.js",
   "scripts": {
+    "start": "node bot.js",
     "test": "node bot.js",
     "launch": "node bot.js",
     "debug": "node bot.js"
@@ -23,6 +24,7 @@
     "cron": "^1.8.2",
     "discord-api-types": "^0.23.1",
     "discord.js": "^13.10.3",
+    "jimp": "^0.16.2",
     "moment": "^2.29.1",
     "mongoose": "^5.13.7",
     "mysql": "^2.18.1",
@@ -45,15 +47,13 @@
       "commonjs": true,
       "es2022": true,
       "node": true
-  },
-  "extends": "eslint:recommended",
-  "overrides": [
-  ],
-  "parserOptions": {
+    },
+    "extends": "eslint:recommended",
+    "overrides": [],
+    "parserOptions": {
       "ecmaVersion": 13
-  },
-  "rules": {
-  }
+    },
+    "rules": {}
   },
   "nodeVersion": "17.1.0"
 }
