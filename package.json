@@ -24,6 +24,7 @@
     "cron": "^1.8.2",
     "discord-api-types": "^0.23.1",
     "discord.js": "^13.10.3",
+    "jimp": "^0.16.2",
     "moment": "^2.29.1",
     "mongoose": "^5.13.7",
     "mysql": "^2.18.1",
@@ -66,5 +67,4 @@
     }
   }
   "nodeVersion": "17.1.0"
-
 }
