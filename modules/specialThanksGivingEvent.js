@@ -80,11 +80,11 @@ let manageCommand = async () => {
   if (!thanksgiving() && !debug) {
     if (command) {
       await unsetHolidayRole();
-      u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Thanksgiving event ended")] });
+      u.errorLog.send({ embeds: [u.embed().setColor("WHITE").setDescription("Thanksgiving event ended")] });
       return commands.delete(command)
     }
   } else if (!command) {
-    u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Thanksgiving event started")] });
+    u.errorLog.send({ embeds: [u.embed().setColor("WHITE").setDescription("Thanksgiving event started")] });
     const registeredCommand = await commands.create(
       new SlashCommandBuilder()
         .setName(commandName)
@@ -132,9 +132,8 @@ const kickoff = () => {
   endTime.setMonth(10)
   endTime.setDate(turkyDay + 1)
   endTime.setHours(0)
+
   const guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-  const commands = guild.commands;
-  const command = commands.cache.find(c => c.name == commandName)?.id;
 
   guild.channels.cache.get(snowflakes.channels.general).send({
     embeds: [
@@ -150,7 +149,7 @@ const kickoff = () => {
         "\n\nA challenge they have for the climbers to see" +
         "\nA challenge to bring kindness and glee" +
         `\nBe thankful in <#${snowflakes.channels.general}> for big things and small` +
-        `\nUse </thankyou:${command}> to give xp boosts to all` +
+        `\nUse </thankyou:0> to give xp boosts to all` +
 
         "\n\nAn hour of boosts to each person you can grant," +
         "\nThough stacking more than one? well sadly you can't" +
