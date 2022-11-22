@@ -95,6 +95,10 @@ Module.setInit(async () => {
     if (!fs.existsSync(welcomeDir)) {
       fs.mkdirSync(welcomeDir);
     }
+    const holidayDir = './data/holiday';
+    if (!fs.existsSync(holidayDir)) {
+      fs.mkdirSync(holidayDir);
+    }
     const welcomeOveride = './data/welcome/welcomeOveride.json'
     if (!fs.existsSync(welcomeOveride)) {
       let welcomeOverrideDefaultData = {
