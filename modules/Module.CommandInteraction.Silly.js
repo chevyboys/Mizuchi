@@ -576,13 +576,6 @@ const Module = new Augur.Module()
       await composite(msg, suffix, Jimp.BLEND_LIGHTEN)
     }
   }).addCommand({
-    name: "darken",
-    description: "composite via darkening on an avatar by an attached image",
-    category: "Silly",
-    process: async (msg, suffix) => {
-      await composite(msg, suffix, Jimp.BLEND_DARKEN)
-    }
-  }).addCommand({
     name: "exclusion",
     description: "composite via exclusion on an avatar by an attached image",
     category: "Silly",

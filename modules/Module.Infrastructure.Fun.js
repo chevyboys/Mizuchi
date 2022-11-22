@@ -5,14 +5,19 @@ const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic")
 
 async function shhh(msg) {
-  if (!snowflakes.channels.secret) return;
-  let content = msg.content.toLowerCase().replaceAll(" ", "").replaceAll("-", "").replaceAll("_", "")
-  let channelName = msg.guild.channels.cache.get(snowflakes.channels.secret).name.toLowerCase().replaceAll(" ", "").replaceAll("-", "").replaceAll("_", "")
-  if (content?.indexOf(snowflakes.channels.secret) > -1 || content?.indexOf(channelName) > -1) {
-    await msg.react("🤫");
-    await u.wait(5000)
-    await msg.reactions.resolve("🤫").users.remove(msg.client.user.id);
+  try {
+    if (!snowflakes.channels.secret) return;
+    let content = msg.content.toLowerCase().replaceAll(" ", "").replaceAll("-", "").replaceAll("_", "")
+    let channelName = msg.guild.channels.cache.get(snowflakes.channels.secret).name.toLowerCase().replaceAll(" ", "").replaceAll("-", "").replaceAll("_", "")
+    if (content?.indexOf(snowflakes.channels.secret) > -1 || content?.indexOf(channelName) > -1) {
+      await msg.react("🤫");
+      await u.wait(5000)
+      await msg.reactions.resolve("🤫").users.remove(msg.client.user.id);
+    }
+  } catch (error) {
+    u.noop();
   }
+
 }
 
 
