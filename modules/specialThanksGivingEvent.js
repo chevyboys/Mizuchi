@@ -50,7 +50,7 @@ let thankProcess = async (interaction, bypassWait) => {
     .setAuthor({ iconURL: member.displayAvatarURL(), name: "Happy Thanksgiving!" })
     .setDescription(`Happy Thanksgiving ${member}!\n${interaction.member.displayName} sent you a big thankyou, and The <@&${snowflakes.roles.Holiday}> role was given to you for the next hour.`)
     .addField("Reason:", "```" + reason + "```")
-  interaction.guild.channels.cache.get(snowflakes.channels.botSpam).send({ embeds: [modCardEmbed], allowedMentions: { parse: ["users"] }, })
+  interaction.guild.channels.cache.get(snowflakes.channels.botSpam).send({ content: `<@${member.id}>`, embeds: [modCardEmbed], allowedMentions: { parse: ["users"] }, })
   if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Moderator) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster)) {
     cooldowns.add(interaction.user.id);
     setTimeout(() => {
