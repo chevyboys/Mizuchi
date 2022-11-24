@@ -217,7 +217,7 @@ Module.setClockwork(() => {
     process: async function (msg) {
       try {
         await msg.react("📃");
-        blogHandler(true);
+        kickoff();
       } catch (e) { u.errorHandler(e, msg); }
     },
     permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
