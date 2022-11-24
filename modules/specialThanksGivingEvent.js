@@ -211,7 +211,7 @@ Module.setClockwork(() => {
   .setInit((data) => { if (data) cooldowns = data })
   .setUnload(() => { return cooldowns })
   .addCommand({
-    name: "forceThanksgiving",
+    name: "forcethanksgiving",
     description: "Forces the thanksgiving post in case of an error",
     hidden: true,
     process: async function (msg) {
