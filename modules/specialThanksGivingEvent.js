@@ -191,14 +191,14 @@ let endTurkey = async () => {
 Module.setClockwork(() => {
   try {
     return setInterval(() => {
-      if ((new Date().getHours() > 23 && thanksgivingTomorrow()) || debug) {
+      if ((new Date().getHours() > 22 && thanksgivingTomorrow()) || debug) {
         kickoff()
       }
       manageCommand();
     }, (debug ? 1 : 60) * 60 * 1000);
   } catch (e) { u.errorHandler(e, "thanksgiving clockwork error"); }
 }).addEvent("ready", async () => {
-  if ((new Date().getHours() > 23 && thanksgivingTomorrow()) || debug) {
+  if ((new Date().getHours() > 22 && thanksgivingTomorrow()) || debug) {
     kickoff()
   }
   await manageCommand();
@@ -209,5 +209,17 @@ Module.setClockwork(() => {
     } catch (e) { u.errorHandler(e, "endturkey clockwork error"); }
   })
   .setInit((data) => { if (data) cooldowns = data })
-  .setUnload(() => { return cooldowns });
+  .setUnload(() => { return cooldowns })
+  .addCommand({
+    name: "forceThanksgiving",
+    description: "Forces the thanksgiving post in case of an error",
+    hidden: true,
+    process: async function (msg) {
+      try {
+        await msg.react("📃");
+        blogHandler(true);
+      } catch (e) { u.errorHandler(e, msg); }
+    },
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
+  });
 module.exports = Module;
