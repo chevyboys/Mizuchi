@@ -32,11 +32,14 @@ class EventPacket {
 
 class DateEmitter extends EventEmitter {
   static #timeoutID;
-  static #eventQueue = new PriorityQueue((lhs, rhs) => { lhs.date < rhs.date });
+  static #timePeriod;
+  static #eventQueue = new PriorityQueue((lhs, rhs) => { return lhs.date < rhs.date; });
 
-  constructor(date = undefined, event = undefined, callback = undefined, once = false) {
+  // 2073600000 is 24 days which is right below the 32 bit int length which is the maxium timeout delay
+  constructor(date = undefined, event = undefined, callback = undefined, once = false, timePeriod = 2073600000) {
     super({ captureRejections: true });
-    if (date && event != undefined) {
+    DateEmitter.#timePeriod = timePeriod
+    if (date != undefined && event != undefined) {
       let packet = new EventPacket(date, event, callback, once);
       DateEmitter.#eventQueue.push(packet);
       if (packet == DateEmitter.#eventQueue.peek()) {
@@ -50,7 +53,8 @@ class DateEmitter extends EventEmitter {
   }
 
   push(date, event, callback, once = false) {
-    let packet = new EventPacket(date, event, once);
+    let packet = new EventPacket(date, event, callback, once);
+    console.log(packet.date);
     DateEmitter.#eventQueue.push(packet);
     if (packet == DateEmitter.#eventQueue.peek()) {
       this.queueEvent(true);
@@ -59,22 +63,24 @@ class DateEmitter extends EventEmitter {
     }
   }
 
-  queueEvent(update = false) {
+
+  async queueEvent(update = false) {
 
     const event = DateEmitter.#eventQueue.peek();
+    console.log(event.date);
     if (DateEmitter.#timeoutID == undefined) {
 
-      if (this.#isToday(event.date)) {
-        DateEmitter.#timeoutID = setTimeout(() => { this.#emitEvent() }, Date.now() - event.date);
+      if (this.#isTimePeriod(event.date)) {
+        DateEmitter.#timeoutID = setTimeout(() => { this.#emitEvent() }, event.date - Date.now());
       } else {
         const date = Date.now();
         const delay = Date.prototype.getUTCHours(date) * 60 * 60 * 1000 + Date.prototype.getUTCMinutes(date) * 60 * 1000 + Date.prototype.getUTCSeconds(date) * 1000 + Date.prototype.getUTCMilliseconds(date);
         DateEmitter.#timeoutID = setTimeout(() => { this.queueEvent() }, delay)
       }
     } else {
-      if (update && this.#isToday(event.date)) {
+      if (update && this.#isTimePeriod(event.date)) {
         clearTimeout(DateEmitter.#timeoutID);
-        DateEmitter.#timeoutID = setTimeout(() => { this.#emitEvent() }, Date.now() - event.date);
+        DateEmitter.#timeoutID = setTimeout(() => { this.#emitEvent() }, event.date - Date.now());
       }
     }
   }
@@ -87,11 +93,11 @@ class DateEmitter extends EventEmitter {
     console.log('rejection happened for', event, 'with', err, ...args);
   }
 
-  #isToday(date) {
-    return Date.now() - date <= 1000 * 60 * 60 * 24;
+  #isTimePeriod(date) {
+    return Date.now() - date <= DateEmitter.#timePeriod;
   }
 
-  #emitEvent() {
+  async #emitEvent() {
     const event = DateEmitter.#eventQueue.pop();
 
     this.emit(event.event, event.callback);
@@ -101,6 +107,29 @@ class DateEmitter extends EventEmitter {
     }
   }
 }
+
+/* todo:
+
+- some sort of front end to handle the DateEmitter stuff automatically 
+- handles repeating dates or events that only happen a certain amount of times
+
+
+*/
+
+// class Scheduler {
+//   static #emitter = new DateEmitter();
+//   static #jobs = [];
+//   constructor() { }
+//   static push(date, event, callback, amount = 1) {
+
+//     return this.#emitter.on(event);
+//   }
+
+// }
+
+// Scheduler._emitter.on("scheduler", (callback) => {
+
+// })
 
 
 module.exports = { DateEmitter };

@@ -1,6 +1,7 @@
 const Augur = require("augurbot"),
   Module = new Augur.Module(),
-  u = require("../utils/Utils.Generic");
+  u = require("../utils/Utils.Generic"),
+  fs = require('fs');
 /**
 * function fieldMismatches
 * @param {Object} obj1 First object for comparison
@@ -76,6 +77,34 @@ Module.setInit(async (reload) => {
           ]
         });
       }
+    }
+    //make files if they don't exist
+    const helpersDir = './data/helpers';
+    if (!fs.existsSync(helpersDir)) {
+      fs.mkdirSync(helpersDir);
+    }
+    const welcomeDir = './data/welcome';
+    if (!fs.existsSync(welcomeDir)) {
+      fs.mkdirSync(welcomeDir);
+    }
+    const welcomeOveride = './data/welcome/welcomeOveride.json'
+    if (!fs.existsSync(welcomeOveride)) {
+      let welcomeOverrideDefaultData = {
+        welcomeString: "",
+        type: "disabled",
+        embedTitle: "",
+        embedImgUrl: "",
+        validTypes: [
+          "prepend",
+          "embed",
+          "append",
+          "insert",
+          "override",
+          "disabled"
+        ]
+      }
+
+      fs.writeFileSync('./data/welcome/welcomeOveride.json', JSON.stringify(welcomeOverrideDefaultData, 0, 2));
     }
   } catch (e) {
     u.errorHandler(e, "Error in startup verification");

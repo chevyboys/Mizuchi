@@ -1,12 +1,12 @@
 const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic"),
-  config = require("../config/config.json")
-snowflakes = require('../config/snowflakes.json');
+  config = require("../config/config.json"),
+  snowflakes = require('../config/snowflakes.json');
 const fs = require('fs');
 const { Message, MessageButton, MessageActionRow, Modal, TextInputComponent } = require('discord.js');
 let askedRecently = new Set();
 
-const canAnswerQuestions = interaction => (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.WorldMaker))
+const canAnswerQuestions = interaction => (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.WorldMaker) || interaction.member.roles.cache.has(snowflakes.roles.BotMaster))
 
 function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, buttonTwoEmoji, data) {
   return [
@@ -58,11 +58,11 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, bu
 async function deleteQuestion(interaction, targetId) {
 
   // Load data
-  files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+  let files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
   let rawData = [];
   let asker;
-  for (i = 0; i < files.length; i++) {
-    data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+  for (let i = 0; i < files.length; i++) {
+    let data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
     if (data.fetch.message == targetId) asker = data.details.asker;
     rawData.push({
       file: files[i],
@@ -99,19 +99,23 @@ async function deleteQuestion(interaction, targetId) {
 
 
   // Delete vote messages
-  c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
-  for (i = 0; i < target.length; i++) {
+  let c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
+  for (let i = 0; i < target.length; i++) {
     fs.unlinkSync(`./data/${target[i].file}`);
     try {
-      m = await c.messages.fetch(target[i].fetch.message);
-
+      let m = await c.messages.fetch(target[i].fetch.message);
+      if (m) m.delete().catch(() => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
     } catch (error) {
       if (error.toString().indexOf("Unknown Message") > -1) {
         u.errorHandler("That question has been deleted")
       }
     }
+  }
 
-    if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
+
+}
+
+if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
   }
 
 }
@@ -119,11 +123,11 @@ async function deleteQuestion(interaction, targetId) {
 async function moveQuestion(interaction, targetId) {
 
   // Load data
-  files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+  let files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
   let rawData = [];
   let asker;
-  for (i = 0; i < files.length; i++) {
-    data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+  for (let i = 0; i < files.length; i++) {
+    let data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
     if (data.fetch.message == targetId) asker = data.details.asker;
     rawData.push({
       file: files[i],
@@ -169,12 +173,12 @@ async function moveQuestion(interaction, targetId) {
 
 
   // Delete vote messages
-  c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
-  for (i = 0; i < target.length; i++) {
+  let c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
+  for (let i = 0; i < target.length; i++) {
     fs.unlinkSync(`./data/${target[i].file}`);
     try {
-      m = await c.messages.fetch(target[i].fetch.message);
-
+      let m = await c.messages.fetch(target[i].fetch.message);
+      if (m) m.delete().catch(() => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
     } catch (error) {
       if (error.toString().indexOf("Unknown Message") > -1) {
         u.errorHandler("That question has been deleted")
@@ -182,7 +186,6 @@ async function moveQuestion(interaction, targetId) {
       else throw error;
     }
 
-    if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
   }
 
 }
@@ -191,8 +194,8 @@ async function checkForDuplicates() {
   let files = fs.readdirSync("./data/").filter(x => x.endsWith(".json"));
   let uniqueQuestions = [];
   let duplicates = [];
-  for (i = 0; i < files.length; i++) {
-    data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+  for (let i = 0; i < files.length; i++) {
+    let data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
     if (uniqueQuestions.includes(data.details.question)) {
       duplicates.push(files[i] + ":" + data.details.question);
     } else {
@@ -202,8 +205,8 @@ async function checkForDuplicates() {
   }
   for (let index = 0; index < duplicates.length; index++) {
     const element = duplicates[index];
-    for (i = 0; i < files.length; i++) {
-      data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+    for (let i = 0; i < files.length; i++) {
+      let data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
       if (!duplicates.includes(files[index] + ":" + data.details.question) && data.details.question == element) {
         duplicates.push(files[index] + ":" + data.details.question);
       }
@@ -215,11 +218,11 @@ async function checkForDuplicates() {
 
 async function editQuestion(interaction, targetId) {
   // Load data
-  files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+  let files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
   let rawData = [];
   let asker;
-  for (i = 0; i < files.length; i++) {
-    data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+  for (let i = 0; i < files.length; i++) {
+    let data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
     if (data.fetch.message == targetId) asker = data.details.asker;
     rawData.push({
       file: files[i],
@@ -310,7 +313,7 @@ async function ask(interaction, bypassWait) {
 
 
     // Reply
-    embed = u.embed()
+    let embed = u.embed()
       .setAuthor(interaction.user.tag, interaction.user.displayAvatarURL())
       .setDescription(interaction.options ? interaction.options.get("question").value : interaction.cleanContent)
       .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
@@ -401,25 +404,30 @@ async function processTransfer(interaction) {
   }
   let numberOfQuestions = interaction?.options?.get("questions")?.value || 5
   // Load data
-  files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
-  rawData = [];
+  let files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+  let rawData = [];
 
-  for (i = 0; i < files.length; i++) {
-    data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+  for (let i = 0; i < files.length; i++) {
+    let data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
     //ensure data has minimum required feilds.
     if (data && data.system && data.system.IDs && data.fetch && data.details && data.details.asker && data.details.question) {
-      rawData.push({
+      let pushData = {
         file: files[i],
         fetch: data.fetch,
-        asker: await interaction.guild.members.fetch(data.details.asker) || data.details.asker,
         question: data.details.question,
         votes: data.system.IDs.length
-      });
+      }
+      try {
+        pushData.asker = await interaction.guild.members.fetch(data.details.asker);
+      } catch (error) {
+        pushData.asker = data.details.asker
+      }
+      rawData.push(pushData);
     }
   }
 
   // Sort
-  sorted = rawData.sort((a, b) => (a.votes < b.votes) ? 1 : -1);
+  let sorted = rawData.sort((a, b) => (a.votes < b.votes) ? 1 : -1);
 
   // Check
   if (sorted.length == 0) {
@@ -428,24 +436,29 @@ async function processTransfer(interaction) {
   }
   interaction.reply({ ephemeral: true, content: "👌" });
   // Format
-  messages = [];
-  accepted = [];
-  for (i = 0; i < numberOfQuestions; i++) {
+  let accepted = [];
+  for (let i = 0; i < numberOfQuestions; i++) {
     if (sorted[i]) {
       accepted[i] = sorted[i];
+      let url = undefined;
+      try {
+        url = sorted[i].asker?.avatarURL();
+      } catch (error) {
+        url = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Question_mark_%28black%29.svg/800px-Question_mark_%28black%29.svg.png";
+      }
       interaction.guild.channels.cache.get(snowflakes.channels.transfer).send({
-        content: "<@" + (sorted[i].asker.id || sorted[i].asker) + ">",
+        content: "<@" + (sorted[i].asker?.id || sorted[i].asker) + ">",
         embeds: [
           u.embed()
             .setAuthor(
               {
-                name: sorted[i].asker.displayName || sorted[i].asker,
-                iconURL: sorted[i].asker.avatarURL() || undefined
+                name: sorted[i].asker?.displayName || sorted[i].asker,
+                iconURL: url,
               }
             )
             .setDescription(sorted[i].question)
             .setFooter({ text: "Votes: " + sorted[i].votes })
-            .setColor(sorted[i].asker.displayHexColor || "#03cafc")
+            .setColor(sorted[i].asker?.displayHexColor || "#03cafc")
         ],
         components: transferAnswerComponents(i),
         allowedMentions: {
@@ -458,8 +471,8 @@ async function processTransfer(interaction) {
 
 
   // Delete vote messages
-  c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
-  for (i = 0; i < accepted.length; i++) {
+  let c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(snowflakes.channels.ask);
+  for (let i = 0; i < accepted.length; i++) {
     fs.unlinkSync(`./data/${accepted[i].file}`);
     let m = false;
     try {
@@ -470,7 +483,7 @@ async function processTransfer(interaction) {
       }
     }
 
-    if (m) m.delete().catch(err => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
+    if (m) m.delete().catch(() => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
   }
 
 }
@@ -527,10 +540,10 @@ async function processStats(interaction) {
     if (page < 1) page = 1;
 
     // Load data
-    files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
-    rawData = [];
-    for (i = 0; i < files.length; i++) {
-      data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
+    let files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+    let rawData = [];
+    for (let i = 0; i < files.length; i++) {
+      let data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
       rawData.push({
         file: files[i],
         fetch: data.fetch,
@@ -540,7 +553,7 @@ async function processStats(interaction) {
     }
 
     // Sort
-    sorted = rawData.sort((a, b) => (a.votes < b.votes) ? 1 : -1);
+    let sorted = rawData.sort((a, b) => (a.votes < b.votes) ? 1 : -1);
     statEmbed.addField("Total questions", "`" + sorted.length + "`");
     // Check
     if (sorted.length == 0) {
@@ -549,7 +562,7 @@ async function processStats(interaction) {
       return
     }
     if (page > Math.ceil(sorted.length / numberOfQuestions)) page = Math.ceil(sorted.length / numberOfQuestions);
-    for (i = page * numberOfQuestions - numberOfQuestions; i < page * numberOfQuestions; i++) {
+    for (let i = page * numberOfQuestions - numberOfQuestions; i < page * numberOfQuestions; i++) {
       if (sorted[i]) {
         statEmbed.addField("Top Question " + (i + 1) + ":" + "( " + sorted[i].votes + " votes)", sorted[i].string.substring(0, 1000));
       }
@@ -597,8 +610,8 @@ const Module = new Augur.Module()
 
       // Already voted?
       if (data.system.IDs.includes(interaction.user.id)) {
-        msg = await interaction.channel.messages.fetch(interaction.message.id);
-        row = questionRowButtons("DANGER", "SECONDARY", "SECONDARY", "", data);
+        let msg = await interaction.channel.messages.fetch(interaction.message.id);
+        let row = questionRowButtons("DANGER", "SECONDARY", "SECONDARY", "", data);
         msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
 
       } else {
@@ -607,8 +620,8 @@ const Module = new Augur.Module()
       }
 
       // Update message with new count
-      msg = await interaction.channel.messages.fetch(interaction.message.id);
-      row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
+      let msg = await interaction.channel.messages.fetch(interaction.message.id);
+      let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
       msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
 
       // Respond
@@ -641,16 +654,14 @@ const Module = new Augur.Module()
       let targetId = interaction.message.id;
       let newText = interaction.components[0].components[0].value;
       // Load data
-      files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
+      let files = fs.readdirSync(`./data/`).filter(x => x.endsWith(`.json`));
       let target;
-      let asker;
       let data;
-      for (i = 0; i < files.length; i++) {
+      for (let i = 0; i < files.length; i++) {
         data = JSON.parse(fs.readFileSync(`./data/${files[i]}`));
         if (data.fetch.message == targetId) {
-          asker = data.details.asker;
           target = data;
-        };
+        }
       }
       if (target == undefined) {
         interaction.reply({ content: `There are no questions with that ID in my memory crystals`, ephemeral: true });
@@ -709,8 +720,8 @@ const Module = new Augur.Module()
       }
 
       // Update message with new count
-      msg = await interaction.channel.messages.fetch(interaction.message.id);
-      row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
+      let msg = await interaction.channel.messages.fetch(interaction.message.id);
+      let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
 
       let author = interaction.guild.members.cache.get(data.details.asker)
 
@@ -724,21 +735,21 @@ const Module = new Augur.Module()
     process: async (interaction) => {
       // Check & Load data
       if (!fs.existsSync(`./data/${interaction.message.id}.json`)) return;
-      data = JSON.parse(fs.readFileSync(`./data/${interaction.message.id}.json`));
+      let data = JSON.parse(fs.readFileSync(`./data/${interaction.message.id}.json`));
 
       // Already voted?
       if (data.system.IDs.includes(interaction.user.id)) {
         data.system.IDs = data.system.IDs.filter((id) => (id != interaction.user.id && id != null));
         fs.writeFileSync(`./data/${interaction.message.id}.json`, JSON.stringify(data, null, 4));
       } else {
-        msg = await interaction.channel.messages.fetch(interaction.message.id);
-        row = questionRowButtons("SECONDARY", "SECONDARY", "DANGER", "", data);
+        let msg = await interaction.channel.messages.fetch(interaction.message.id);
+        let row = questionRowButtons("SECONDARY", "SECONDARY", "DANGER", "", data);
         msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
       }
 
       // Update message with new count
-      msg = await interaction.channel.messages.fetch(interaction.message.id);
-      row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
+      let msg = await interaction.channel.messages.fetch(interaction.message.id);
+      let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data);
       msg.edit({ embeds: [msg.embeds[0].setDescription(data.details.question)], components: row });
 
       // Respond

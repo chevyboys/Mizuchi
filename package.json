@@ -5,6 +5,7 @@
   "main": "bot.js",
   "scripts": {
     "test": "ava",
+    "start": "node bot.js",
     "launch": "node bot.js",
     "debug": "node bot.js"
   },
@@ -43,7 +44,8 @@
   "eslintConfig": {
     "env": {
       "commonjs": true,
-      "es2022": true
+      "es2022": true,
+      "node": true
     },
     "extends": "eslint:recommended",
     "overrides": [],
@@ -52,7 +54,6 @@
     },
     "rules": {}
   },
-  "nodeVersion": "17.1.0",
   "ava": {
     "files": [
       "tests/**/*",
@@ -62,5 +63,6 @@
     "environmentVariables": {
       "MY_ENVIRONMENT_VARIABLE": "test"
     }
-  }
+  },
+  "nodeVersion": "17.1.0"
 }

@@ -3,6 +3,7 @@ const Discord = require("discord.js"),
   config = require("../config/config.json"),
   snowflakes = require("../config/snowflakes.json")
 
+// process.env['NODE_ENV'] = "test";
 const errorLog = process.env.NODE_ENV == "test" ? { send(input) { console.error(input) } } : new Discord.WebhookClient(config.Webhooks.error);
 
 

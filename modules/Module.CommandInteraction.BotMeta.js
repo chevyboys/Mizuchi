@@ -204,36 +204,11 @@ Module
     }
   })
   .addCommand({
-    name: "playing",
-    category: "Bot Admin",
-    hidden: true,
-    description: "Set playing status",
-    syntax: "[game]",
-    aliases: ["streaming", "watching", "listening"],
-    process: (msg, suffix) => {//msg.client.user.setActivity(suffix);
-      if (suffix) {
-        let { command } = u.parse(msg);
-        command = command.toUpperCase();
-        let url = false;
-        if (command == "STREAMING") {
-
-          url = isURL(suffix);
-          msg.client.user.setActivity({ type: command.toUpperCase(), url: url, name: suffix.replace(url, "").replace("  ", " ").trim() });
-        }
-        else msg.client.user.setActivity({ type: command.toUpperCase(), name: suffix })
-
-      }
-      else msg.client.user.setActivity("");
-      msg.react("👌");
-    },
-    permissions: (msg) => (Module.config.AdminIds.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin))
-  }).addCommand({
     name: "avatar",
     category: "Bot Admin",
     hidden: true,
-    description: "Set playing status",
-    syntax: "[game]",
-    aliases: ["streaming", "watching", "listening"],
+    description: "set's the bot's avatar to an image of the same name as the message suffix",
+    syntax: "[name]",
     process: (msg, suffix) => {
       msg.client.user.setAvatar(('./avatar/' + (suffix ? suffix.trim() : "base.png")))
       msg.react("👌");
