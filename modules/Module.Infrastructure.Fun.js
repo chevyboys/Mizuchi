@@ -19,28 +19,67 @@ async function shhh(msg) {
   }
 
 }
+/**
+ * this is either null or a date object
+ */
+let lastDone;
+/**
+ * determines if the bot should respond with good morning, good afternoon, or good night
+ * @param {Discord.Message} msg 
+ */
+function goodTime(msg) {
+  const cooldownSeconds = 90;
 
+  let content = msg?.content?.toLowerCase();
+  let spacelessContent = content.replaceAll(" ", "")
+  if (content.indexOf("g") > -1) {
+    let replyMessage;
+    if (content.indexOf(" gn") > -1 || content.startsWith("gn") || spacelessContent.indexOf("goodnight") > -1) {
+      replyMessage = "Good night";
+      if (spacelessContent.indexOf("gnclimbers") > -1 || spacelessContent.indexOf("goodnightclimbers") > -1 || spacelessContent.indexOf("gntavare") > -1 || spacelessContent.indexOf("goodnighttavare") > -1) {
+        replyMessage += " " + msg.member.displayName;
+      }
+      replyMessage += "!"
+    }
+    else if (content.startsWith("gm ") || spacelessContent.indexOf("goodmorning") > -1) {
+      replyMessage = "Good morning";
+      if (spacelessContent.indexOf("gmclimbers") > -1 || spacelessContent.indexOf("goodmorningclimbers") > -1 || spacelessContent.indexOf("gmtavare") > -1 || spacelessContent.indexOf("goodmorningtavare") > -1) {
+        replyMessage += " " + msg.member.displayName;
+      }
+      replyMessage += "!";
+    }
+    if (replyMessage) {
+      if (lastDone && lastDone.valueOf() > new Date().valueOf() - 1000 * cooldownSeconds && !replyMessage.indexOf(msg.member.displayName) > -1) {
+        return;
+      }
+      lastDone = new Date();
+      msg.channel.send(replyMessage);
+    }
+  }
+
+}
 
 const emojis = new Discord.Collection([
   [snowflakes.roles.BotMaster, snowflakes.emoji.bot],    // BotMasters - botIcon
   ["197050381270777857", snowflakes.emoji.upDawn], // Kritta - updawn
-
 ]);
 
 async function tavareSawThatPing(msg) {
-  if (!msg.author.bot && msg.guild && msg.guild.id == snowflakes.guilds.PrimaryServer) {
-    emojis.set(msg.client.user.id, "👋");
-    // privilagedPingPerson Pings
-    for (const [privilagedPingPerson, emoji] of emojis)
-      if (msg.mentions.members.has(privilagedPingPerson) || msg.mentions.roles.has(privilagedPingPerson) || msg.mentions.members.some(m => m.roles.cache.has(privilagedPingPerson))) msg.react(emoji).catch(u.noop);
 
+  emojis.set(msg.client.user.id, "👋");
+  // privilagedPingPerson Pings
+  for (const [privilagedPingPerson, emoji] of emojis)
+    if (msg.mentions.members.has(privilagedPingPerson) || msg.mentions.roles.has(privilagedPingPerson) || msg.mentions.members.some(m => m.roles.cache.has(privilagedPingPerson))) msg.react(emoji).catch(u.noop);
 
-  }
 }
 
 
 
 Module.addEvent("messageCreate", async (msg) => {
+  if (msg.author.bot || (!msg.guild || msg.guild.id != snowflakes.guilds.PrimaryServer)) {
+    return;
+  }
+  goodTime(msg);
   shhh(msg);
   tavareSawThatPing(msg);
 });
