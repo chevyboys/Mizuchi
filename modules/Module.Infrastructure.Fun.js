@@ -65,7 +65,7 @@ function goodTime(msg) {
 }
 
 function youreWelcome(msg) {
-  if (msg.content.toLowerCase().replaceAll(" ", "").indexOf("thankyoutavare") {
+  if (msg.content.toLowerCase().replaceAll(" ", "").indexOf("thankyoutavare")) {
     msg.reply("You're very welcome!")
   }
 }
