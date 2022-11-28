@@ -49,11 +49,16 @@ function goodTime(msg) {
       replyMessage += "!";
     }
     if (replyMessage) {
-      if (lastDone && lastDone.valueOf() > new Date().valueOf() - 1000 * cooldownSeconds && !replyMessage.indexOf(msg.member.displayName) > -1) {
-        return;
+      if (replyMessage.indexOf(msg.member.displayName) > -1) {
+        lastDone = new Date();
+        msg.channel.send(replyMessage);
       }
-      lastDone = new Date();
-      msg.channel.send(replyMessage);
+      else if (lastDone && lastDone.valueOf() > new Date().valueOf() - 1000 * cooldownSeconds) {
+        return;
+      } else {
+        lastDone = new Date();
+        msg.channel.send(replyMessage);
+      }
     }
   }
 
