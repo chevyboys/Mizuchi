@@ -90,6 +90,7 @@ Module.addEvent("messageCreate", async (msg) => {
   if (msg.author.bot || (!msg.guild || msg.guild.id != snowflakes.guilds.PrimaryServer)) {
     return;
   }
+  youreWelcome(msg)
   goodTime(msg);
   shhh(msg);
   tavareSawThatPing(msg);
