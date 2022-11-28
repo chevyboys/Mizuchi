@@ -64,6 +64,12 @@ function goodTime(msg) {
 
 }
 
+function youreWelcome(msg) {
+  if (msg.content.toLowerCase().replaceAll(" ", "").indexOf("thankyoutavare") {
+    msg.reply("You're very welcome!")
+  }
+}
+
 const emojis = new Discord.Collection([
   [snowflakes.roles.BotMaster, snowflakes.emoji.bot],    // BotMasters - botIcon
   ["197050381270777857", snowflakes.emoji.upDawn], // Kritta - updawn
