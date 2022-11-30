@@ -150,9 +150,6 @@ const Module = new Augur.Module()
   });
 
 
-const Registrar = require("../utils/Utils.CommandRegistrar");
-//Register commands
-
 Module.addInteractionCommand({
   name: "welcome",
   guildId: snowflakes.guilds.PrimaryServer,
@@ -200,7 +197,6 @@ Module.addInteractionCommand({
           break;
 
         default: throw new Error("How did you even get here, this shouldn't be possible.");
-          break;
       }
       fs.writeFileSync(`./data/welcome/welcomeOveride.json`, JSON.stringify(data, null, 4));
       let welcomeString = "You have successfully edited the welcome message. This is an example of the new welcome message."
@@ -225,6 +221,5 @@ Module.addInteractionCommand({
       lastPrompt: lastPrompt,
       lastDirections: lastDirections
     }
-  });;
-
+  });
 module.exports = Module;
