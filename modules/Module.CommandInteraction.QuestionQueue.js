@@ -264,7 +264,8 @@ async function editQuestion(interaction, targetId) {
 
 
 async function ask(interaction, bypassWait) {
-  const hoursBetweenQuestions = 72;
+  let numberOfQuestions = (fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1);
+  let hoursBetweenQuestions = numberOfQuestions < 30 ? 0 : (numberOfQuestions < 60 ? numberOfQuestions / 5 : (numberOfQuestions < 72 ? numberOfQuestions : 72));
 
   if (interaction instanceof Message) {
     // correct channel?
@@ -313,7 +314,7 @@ async function ask(interaction, bypassWait) {
     let embed = u.embed()
       .setAuthor(interaction.user.tag, interaction.user.displayAvatarURL())
       .setDescription(interaction.options ? interaction.options.get("question").value : interaction.cleanContent)
-      .setFooter(`Question ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)}`)
+      .setFooter(`There are ${(fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1)} Questions  in the Queue`)
       .setTimestamp()
       .setColor(interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
     let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", data)
