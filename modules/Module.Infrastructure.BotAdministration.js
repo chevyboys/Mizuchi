@@ -26,7 +26,7 @@ const Module = new Augur.Module()
     category: "Bot Admin",
     description: "Gets the current total ping time for the bot.",
     hidden: true,
-    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member?.roles.cache.some(r => [Module.config.roles.mod, Module.config.roles.management, Module.config.roles.team].includes(r.id)),
+    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member?.roles.cache.some(r => [snowflakes.roles.Moderator, snowflakes.roles.Admin, snowflakes.roles.CommunityGuide].includes(r.id)),
     process: async (msg) => {
       let sent = await msg.reply({ content: 'Pinging...', allowedMentions: { repliedUser: false } });
       sent.edit({ content: `Pong! Took ${sent.createdTimestamp - (msg.editedTimestamp ? msg.editedTimestamp : msg.createdTimestamp)}ms`, allowedMentions: { repliedUser: false } });
