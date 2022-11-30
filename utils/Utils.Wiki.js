@@ -4,7 +4,7 @@ module.exports = {
    * @param {string} pageName a pagename that exists on wydds.wiki
    * @returns 
    */
-  pagedescription: async (pageName) => {
+  pageDescription: async (pageName) => {
     // eslint-disable-next-line no-useless-escape
     const regex = /{{2}[^}]*}{2}|'{2,}|<ref\ name=[^>\/]*>[^<]*<\/ref.|\[\[(:*)Category:[^\]|]*\|*|\[{2,}|\]{2,}|<ref[^>]*>/gm
     const axios = require("axios").default;
