@@ -4,7 +4,8 @@ const Augur = require("augurbot"),
   snowflakes = require('../config/snowflakes.json');
 const fs = require('fs');
 const { Message, MessageButton, MessageActionRow, Modal, TextInputComponent } = require('discord.js');
-let askedRecently = new Set();
+const { Collection } = require("../utils/Utils.Generic");
+let askedRecently = new Collection();
 
 const canAnswerQuestions = interaction => (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.WorldMaker) || interaction.member.roles.cache.has(snowflakes.roles.BotMaster))
 
@@ -280,7 +281,7 @@ async function ask(interaction, bypassWait) {
     u.clean(interaction, 3);
   }
   if (askedRecently.has(interaction.user.id) && !bypassWait) {
-    interaction.reply({ content: "Wait a few hours before asking again. - <@" + interaction.user + ">\nYour question was: " + (interaction.options ? interaction.options.get("question").value : interaction.cleanContent), ephemeral: true });
+    interaction.reply({ content: "You can ask again <t:" + Math.floor(askedRecently.get(interaction.user.id) / 1000) + ":R> . - <@" + interaction.user + ">\nYour question was: " + (interaction.options ? interaction.options.get("question").value : interaction.cleanContent), ephemeral: true });
   } else {
     // Akn
     try {
@@ -342,8 +343,10 @@ async function ask(interaction, bypassWait) {
     fs.writeFileSync(`./data/${msg.id}.json`, JSON.stringify(data, null, 4));
 
     // Adds the user to the set so that they can't ask for a few hours
-    if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Moderator) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster)) {
-      askedRecently.add(interaction.user.id);
+    if (!bypassWait && !interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Moderator) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster)) {
+      let date = new Date();
+      date.setHours(date.getHours() + hoursBetweenQuestions)
+      askedRecently.set(interaction.user.id, date);
       setTimeout(() => {
         // Removes the user from the set after the set number of hours
         askedRecently.delete(interaction.user.id);
