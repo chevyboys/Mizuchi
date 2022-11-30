@@ -345,7 +345,7 @@ async function ask(interaction, bypassWait) {
     if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Moderator) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster)) {
       askedRecently.add(interaction.user.id);
       setTimeout(() => {
-        // Removes the user from the set after 3 hours
+        // Removes the user from the set after the set number of hours
         askedRecently.delete(interaction.user.id);
       }, hoursBetweenQuestions * 60 * 60 * 1000);
     }
