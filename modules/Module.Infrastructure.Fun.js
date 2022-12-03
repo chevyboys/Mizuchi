@@ -2,7 +2,10 @@ const Augur = require("augurbot"),
   snowflakes = require('../config/snowflakes.json'),
   Discord = require("discord.js"),
   Module = new Augur.Module(),
-  u = require("../utils/Utils.Generic")
+  u = require("../utils/Utils.Generic");
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
 
 async function shhh(msg) {
   try {
@@ -34,16 +37,16 @@ function goodTime(msg) {
   let spacelessContent = content.replaceAll(" ", "")
   if (content.indexOf("g") > -1) {
     let replyMessage;
-    if (content.indexOf(" gn") > -1 || content.startsWith("gn") || spacelessContent.indexOf("goodnight") > -1) {
-      replyMessage = "Good night";
-      if (spacelessContent.indexOf("gnclimbers") > -1 || spacelessContent.indexOf("goodnightclimbers") > -1 || spacelessContent.indexOf("gntavare") > -1 || spacelessContent.indexOf("goodnighttavare") > -1) {
+    if (content.indexOf(" gn") > -1 || content.startsWith("gn") || spacelessContent.indexOf("goodnight") > -1 || content == "night") {
+      replyMessage = "Radience wishes you a good night";
+      if (spacelessContent.indexOf("gnclimbers") > -1 || spacelessContent.indexOf("nightclimbers") > -1 || spacelessContent.indexOf("gntavare") > -1 || spacelessContent.indexOf("nighttavare") > -1) {
         replyMessage += " " + msg.member.displayName;
       }
       replyMessage += "!"
     }
-    else if (content.startsWith("gm ") || spacelessContent.indexOf("goodmorning") > -1) {
-      replyMessage = "Good morning";
-      if (spacelessContent.indexOf("gmclimbers") > -1 || spacelessContent.indexOf("goodmorningclimbers") > -1 || spacelessContent.indexOf("gmtavare") > -1 || spacelessContent.indexOf("goodmorningtavare") > -1) {
+    else if (content.startsWith("gm ") || spacelessContent.indexOf("goodmorning") > -1 || content == "morning") {
+      replyMessage = "Radience wishes you a good morning";
+      if (spacelessContent.indexOf("gmclimbers") > -1 || spacelessContent.indexOf("morningclimbers") > -1 || spacelessContent.indexOf("gmtavare") > -1 || spacelessContent.indexOf("morningtavare") > -1) {
         replyMessage += " " + msg.member.displayName;
       }
       replyMessage += "!";
@@ -53,7 +56,7 @@ function goodTime(msg) {
         lastDone = new Date();
         msg.channel.send(replyMessage);
       }
-      else if (lastDone && lastDone.valueOf() > new Date().valueOf() - 1000 * cooldownSeconds) {
+      else if (getRandomInt(10) > 9 && lastDone && lastDone.valueOf() > new Date().valueOf() - 1000 * cooldownSeconds) {
         return;
       } else {
         lastDone = new Date();
