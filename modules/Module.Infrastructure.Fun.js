@@ -56,7 +56,7 @@ function goodTime(msg) {
         lastDone = new Date();
         msg.channel.send(replyMessage);
       }
-      else if (getRandomInt(10) > 9 && lastDone && lastDone.valueOf() > new Date().valueOf() - 1000 * cooldownSeconds) {
+      else if (getRandomInt(10) < 9 || lastDone && lastDone.valueOf() > new Date().valueOf() - 1000 * cooldownSeconds) {
         return;
       } else {
         lastDone = new Date();
