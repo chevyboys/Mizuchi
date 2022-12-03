@@ -78,27 +78,28 @@ Module.setInit(async () => {
         });
       }
     }
+
     //make files if they don't exist
-    const dataDir = './data';
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir);
+    let directories = [
+      './data',
+      './faq',
+      './data/helpers',
+      './data/welcome',
+      './data/holiday',
+      './data/question',
+      './data/question/queue',
+      './data/question/storage',
+    ]
+
+
+    for (const dir of directories) {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+      }
     }
-    const faqDir = './faq';
-    if (!fs.existsSync(faqDir)) {
-      fs.mkdirSync(faqDir);
-    }
-    const helpersDir = './data/helpers';
-    if (!fs.existsSync(helpersDir)) {
-      fs.mkdirSync(helpersDir);
-    }
-    const welcomeDir = './data/welcome';
-    if (!fs.existsSync(welcomeDir)) {
-      fs.mkdirSync(welcomeDir);
-    }
-    const holidayDir = './data/holiday';
-    if (!fs.existsSync(holidayDir)) {
-      fs.mkdirSync(holidayDir);
-    }
+
+
+
     const welcomeOveride = './data/welcome/welcomeOveride.json'
     if (!fs.existsSync(welcomeOveride)) {
       let welcomeOverrideDefaultData = {
