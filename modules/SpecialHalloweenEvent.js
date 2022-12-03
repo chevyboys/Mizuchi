@@ -41,11 +41,11 @@ class Participant {
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
   let message = reaction.message;
   let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
-  if (false && (reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
+  if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
 
     const member = message.guild.members.cache.get(user.id);
     try {
-      const index = cache.findIndex(element => user == element.user);
+      /*const index = cache.findIndex(element => user == element.user);
       if (index != -1) {
         const userCount = cache[index];
         userCount.updateCount();
@@ -63,17 +63,17 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 
       } else {
         cache.push(new Participant(user));
-      }
+      }*/
 
       channel.send({
         content: `<@${user.id}> captured a Specter in <#${message.channel.id}>`,
         allowedMentions: { parse: ["users"] }
       });
       reaction.users.remove(message.client.user.id);
-    } catch (error) { u.errorHandler(error, "Holliday reaction error"); }
+    } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
   }
 }).addEvent("messageCreate", (msg) => {
-  const odds = 1000;
+  const odds = 5000;
   if (
     msg.author &&
     !msg.webhookId &&
