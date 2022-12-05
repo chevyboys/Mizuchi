@@ -145,6 +145,10 @@ const wikiFunctions = {
   pageEmbed: async (pageName, short) => {
     pageName = pageName.replaceAll(" ", "_");
     let wikiPageText = (await axios.get(wikiBasePage + pageName)).data.source;
+    if (wikiPageText.indexOf("#REDIRECT") > -1) {
+      let newPageName = wikiPageText.substr(wikiPageText.indexOf("#REDIRECT")).replace("#REDIRECT", " ").trim().replaceAll(" ", "_").replace("[[", "").replace("]]", "");
+      wikiPageText = (await axios.get(wikiBasePage + newPageName)).data.source;
+    }
     let image = getFirstImageFileNameAsURL(wikiPageText);
     let wikiSections = wikiPageText.split("\n== ")
     if (Array.isArray(wikiSections)) wikiSections.every((v) => v.replace(" ==\n\n", ""))
