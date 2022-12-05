@@ -11,17 +11,54 @@ function convertCSVToJSON(rawResult) {
   let data = [];
   for (let i = 0; i < rawRows.length; i++) {
     const row = rawRows[i];
-    const cells = row.split(",");
     let parsedRow = {};
+    let cellStartIndex = 0;
+    let cellEndIndex = 0;
+    let cellValue = "";
     for (let j = 0; j < columns.length; j++) {
       const column = columns[j].trim();
-      const cell = cells[j].trim();
-      parsedRow[column] = cell;
+
+      // find the next cell start and end index
+      let cellStartQuotationIndex = row.indexOf('"', cellEndIndex);
+      if (cellStartQuotationIndex === -1) {
+        // if there is no quoted cell, use the next comma as the cell end index
+        cellEndIndex = row.indexOf(",", cellEndIndex);
+        if (cellEndIndex === -1) {
+          // if there are no more commas, the rest of the string is the cell value
+          cellEndIndex = row.length;
+        }
+      } else {
+        // if there is a quoted cell, find the end quotation mark
+        cellEndIndex = row.indexOf('"', cellStartQuotationIndex + 1);
+        if (cellEndIndex === -1) {
+          // if there is no closing quotation mark, the rest of the string is the cell value
+          cellEndIndex = row.length;
+        } else {
+          // if there is a closing quotation mark, skip the next comma
+          cellEndIndex = row.indexOf(",", cellEndIndex + 1);
+          if (cellEndIndex === -1) {
+            // if there are no more commas, the rest of the string is the cell value
+            cellEndIndex = row.length;
+          }
+        }
+      }
+
+      // extract the cell value
+      cellValue = row.substring(cellStartIndex, cellEndIndex).trim();
+      if (cellValue.startsWith('"') && cellValue.endsWith('"')) {
+        // if the cell value is quoted, remove the quotation marks
+        cellValue = cellValue.substring(1, cellValue.length - 1);
+      }
+      parsedRow[column] = cellValue;
+
+      // update the start index for the next cell
+      cellStartIndex = cellEndIndex + 1;
     }
     data.push(parsedRow);
   }
   return data;
 }
+
 /**
  * 
  * @param {string} url the url of the google sheet csv publication. To get this, go to file -> share -> publish to web and select the page you want to export, and the CSV format
@@ -31,6 +68,5 @@ async function get(url) {
   let rawResult = (await axios.get(url)).data;
   return convertCSVToJSON(rawResult);
 }
-
 
 module.exports = get;

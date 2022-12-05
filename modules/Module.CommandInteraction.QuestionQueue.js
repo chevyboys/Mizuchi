@@ -266,7 +266,8 @@ async function editQuestion(interaction, targetId) {
 
 async function ask(interaction, bypassWait) {
   let numberOfQuestions = (fs.readdirSync(`./data/`).filter(t => t.endsWith(`.json`)).length + 1);
-  let hoursBetweenQuestions = numberOfQuestions < 30 ? 0 : (numberOfQuestions < 60 ? numberOfQuestions / 5 : (numberOfQuestions < 72 ? numberOfQuestions : 72));
+  let exponential = Math.pow(1.11, numberOfQuestions - 30)
+  let hoursBetweenQuestions = Math.floor((exponential < 72 ? exponential : 72))
 
   if (interaction instanceof Message) {
     // correct channel?
