@@ -142,7 +142,7 @@ const wikiFunctions = {
     return wikitextToPlainText(wikiPageText.substr(0, wikiPageText.indexOf("==")));
   },
 
-  pageEmbed: async (pageName) => {
+  pageEmbed: async (pageName, short) => {
     pageName = pageName.replaceAll(" ", "_");
     let wikiPageText = (await axios.get(wikiBasePage + pageName)).data.source;
     let image = getFirstImageFileNameAsURL(wikiPageText);
@@ -156,7 +156,7 @@ const wikiFunctions = {
       .setColor("#000252")
       .setURL(wikiBaseUrl + "info/" + pageName)
       .setDescription(description)
-    if (wikiSections.length > 0 && Array.isArray(wikiSections)) {
+    if (wikiSections.length > 0 && Array.isArray(wikiSections) && !short) {
       let fields = wikiSections.filter(s => s.length > 3).map(s => {
         let title = "__" + s.trim().substr(0, s.indexOf("\n")).replaceAll("=", "").trim() + ":__";
         let text = wikitextToPlainText(s.substr(s.indexOf("\n")).trim());
