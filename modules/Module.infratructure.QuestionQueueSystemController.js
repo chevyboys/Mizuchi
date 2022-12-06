@@ -560,7 +560,7 @@ const Module = new Augur.Module()
     process: async (interaction) => {
       // Check & Load data
       let question = getTargetQuestionChecks(interaction, interaction.message.id, () => true);
-
+      if (!question) return;
       // Already voted?
       if (question.voterIds.includes(interaction.user.id)) {
         let msg = await interaction.channel.messages.fetch(interaction.message.id);
