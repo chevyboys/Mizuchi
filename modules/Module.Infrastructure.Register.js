@@ -6,9 +6,12 @@ const { REST, DiscordAPIError } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { Client, MessageEmbed, Intents, MessageButton, MessageActionRow } = require('discord.js');
 const snowflakes = require('../config/snowflakes.json');
+const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
+
 
 const Module = new Augur.Module()
   .addEvent("ready", async () => {
+    let authors = await gs(snowflakes.sheets.authors);
     // Build slash commands
     let commands = [
       new SlashCommandBuilder()
@@ -33,22 +36,41 @@ const Module = new Augur.Module()
                 .setDescription('Your question!')
                 .setRequired(true)
             )
+            .addStringOption(option =>
+              option
+                .setName('answerer')
+                .setDescription('The person you want to answer your question')
+                .setRequired(true)
+                .addChoices(...(authors.concat([{ Name: "any" }]).map((a) => {
+                  return {
+                    name: a.Name,
+                    value: a.Name
+                  }
+                })
+                ))
+            )
         )
         .addSubcommand(subcommand =>
           subcommand
             .setName('transfer')
             .setDescription('Get the 5 most popular questions!')
-            .addIntegerOption(option =>
-              option
-                .setName('questions')
-                .setDescription('The number of questions to transfer')
-                .setRequired(false)
-            ),
         ).addSubcommand(subcommand =>
           subcommand
             .setName('stats')
             .setDescription('Get the question queue stats')
-            .addIntegerOption(option =>
+            .addStringOption(option =>
+              option
+                .setName('answerer')
+                .setDescription('The person you want to answer your question')
+                .setRequired(true)
+                .addChoices(...(authors.concat([{ Name: "any" }]).map((a) => {
+                  return {
+                    name: a.Name,
+                    value: a.Name
+                  }
+                })
+                ))
+            ).addIntegerOption(option =>
               option
                 .setName('page')
                 .setDescription('The page to select from, default 1')

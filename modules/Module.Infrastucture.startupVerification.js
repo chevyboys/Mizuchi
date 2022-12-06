@@ -86,9 +86,7 @@ Module.setInit(async () => {
       './data/helpers',
       './data/welcome',
       './data/holiday',
-      './data/question',
-      './data/question/queue',
-      './data/question/storage',
+      './data/question'
     ]
 
 
