@@ -1,8 +1,7 @@
 const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic"),
-  config = require("../config/config.json"),
   snowflakes = require('../config/snowflakes.json');
-const { Message, MessageButton, MessageActionRow, Modal, TextInputComponent, MessageSelectMenu } = require('discord.js');
+const { MessageButton, MessageActionRow, Modal, TextInputComponent, MessageSelectMenu } = require('discord.js');
 const { Collection } = require("../utils/Utils.Generic");
 const Questions = new (require("./QuestionQueue/Question"))
 const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
@@ -40,7 +39,7 @@ function checkForExistingAnswer(questionText) {
   return Questions.readOnlyCollection().find(q => q.questionText == questionText)
 }
 
-currentQueue = (author, includeWaitingToBeAnswered) => Questions.readOnlyCollection().filter((v, k) => v.status == Questions.Status.Queued && (includeWaitingToBeAnswered || !v.flags.includes(Questions.Flags.unansweredButTransfered)) && (author == "any" || !author ? true : (v.requestedAnswerers.includes(author) || v.requestedAnswerers.includes("any"))))
+let currentQueue = (author, includeWaitingToBeAnswered) => Questions.readOnlyCollection().filter((v) => v.status == Questions.Status.Queued && (includeWaitingToBeAnswered || !v.flags.includes(Questions.Flags.unansweredButTransfered)) && (author == "any" || !author ? true : (v.requestedAnswerers.includes(author) || v.requestedAnswerers.includes("any"))))
 /**
  * 
  * @param {Discord.Interaction} interaction 
@@ -208,7 +207,7 @@ async function moveToQuestionDiscussion(interaction, targetId) {
       .setStyle('SECONDARY')
       .setLabel('Return to Question Queue')
   )
-  await discardQuestion(interaction, targetId, dontReply = true);
+  await discardQuestion(interaction, targetId, true);
 
   if (askedRecently.has(target.askerId)) {
     askedRecently.delete(target.askerId);
@@ -704,7 +703,10 @@ const Module = new Augur.Module()
   .addInteractionHandler({
     customId: `newAnswererSelect`,
     process: async (interaction) => {
-      let question = getTargetQuestionChecks(interaction, interaction.message.id, null, true)
+      let question = getTargetQuestionChecks(interaction, interaction.message.id, (interaction, target) => {
+        return target.askerId == interaction.member.id;
+      }, true)
+      if (!question) return;
       let newRequestedAnswerers = interaction.values;
       //generate a fake interaction that has the proper pfp and name for the question queue embed to process
       let fakeInteraction = interaction;
