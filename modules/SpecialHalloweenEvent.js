@@ -3,6 +3,7 @@ const u = require("../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
 const moment = require("moment");
+let odds = 80;
 const holidays = [
   {
     name: 'Halloween',
@@ -74,7 +75,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
   }
 }).addEvent("messageCreate", (msg) => {
-  const odds = 100;
+
   if (
     msg.author &&
     !msg.webhookId &&
@@ -89,6 +90,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
       const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
       const modifierToConvertToBotTime = 7;
+      odds = odds > 20 ? odds - 10 : odds;
       if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
         guild.roles.cache.get(snowflakes.roles.Holiday).members.each((m) =>
           u.addRoles(m, snowflakes.roles.Holiday, true)
