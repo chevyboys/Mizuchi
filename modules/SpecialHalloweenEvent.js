@@ -67,7 +67,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       }
 
       channel.send({
-        content: `<@${user.id}> found a present in <#${message.channel.id}>`,
+        content: `<@${user.id}> found a snowflake in <#${message.channel.id}>`,
         allowedMentions: { parse: ["users"] }
       });
       reaction.users.remove(message.client.user.id);
