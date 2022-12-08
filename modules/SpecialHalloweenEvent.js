@@ -1,7 +1,8 @@
 const snowflakes = require("../config/snowflakes.json");
-u = require("../utils/Utils.Generic");
+const u = require("../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
+const moment = require("moment");
 const holidays = [
   {
     name: 'Halloween',
@@ -45,7 +46,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 
     const member = message.guild.members.cache.get(user.id);
     try {
-      /*const index = cache.findIndex(element => user == element.user);
+      const index = cache.findIndex(element => user == element.user);
       if (index != -1) {
         const userCount = cache[index];
         userCount.updateCount();
@@ -54,7 +55,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
           case 5:
             u.addRoles(member, snowflakes.roles.Holiday);
             channel.send({
-              content: `<@${user.id}> has caught a bunch of specters and is now a <@&${snowflakes.roles.Holiday}>`,
+              content: `<@${user.id}> has found a bunch of snowflakes and has become an <@&${snowflakes.roles.Holiday}> until the next reset (at cakeday announcement time)`,
               allowedMentions: { parse: ["users"] }
             });
             break;
@@ -63,17 +64,17 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 
       } else {
         cache.push(new Participant(user));
-      }*/
+      }
 
       channel.send({
-        content: `<@${user.id}> captured a Specter in <#${message.channel.id}>`,
+        content: `<@${user.id}> found a present in <#${message.channel.id}>`,
         allowedMentions: { parse: ["users"] }
       });
       reaction.users.remove(message.client.user.id);
     } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
   }
 }).addEvent("messageCreate", (msg) => {
-  const odds = 5000;
+  const odds = 1000;
   if (
     msg.author &&
     !msg.webhookId &&
@@ -82,6 +83,22 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   ) {
     msg.react(holidays[0].emoji)
   }
+}).setClockwork(() => {
+  try {
+    return setInterval(() => {
+      let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
+      const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
+      const modifierToConvertToBotTime = 7;
+      if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
+        guild.roles.cache.get(snowflakes.roles.Holiday).members.each((m) =>
+          u.addRoles(m, snowflakes.roles.Holiday, true)
+        )
+      }
+
+    }
+
+      , 60 * 60 * 1000);
+  } catch (e) { u.errorHandler(e, "cakeOrJoinDay Clockwork Error"); }
 })
 
 module.exports = Module;
