@@ -74,7 +74,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
   }
 }).addEvent("messageCreate", (msg) => {
-  const odds = 1000;
+  const odds = 100;
   if (
     msg.author &&
     !msg.webhookId &&
