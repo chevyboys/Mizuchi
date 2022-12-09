@@ -80,7 +80,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
-    Math.floor(Math.random() * odds) > odds - 2
+    (Math.floor(Math.random() * odds) > odds - 2 || (msg.author.bot && (msg.channel.id == snowflakes.channels.general) && msg.content.indexOf("snow") > -1))
   ) {
     msg.react(holidays[0].emoji)
   }
