@@ -3,7 +3,7 @@ const u = require("../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
 const moment = require("moment");
-let odds = 80;
+let odds = 60;
 const holidays = [
   {
     name: 'Halloween',
@@ -80,7 +80,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
-    (Math.floor(Math.random() * odds) > odds - 2 || (msg.author.bot && (msg.channel.id == snowflakes.channels.general) && msg.content.indexOf("snow") > -1))
+    (Math.floor(Math.random() * odds) > odds - 2)
   ) {
     msg.react(holidays[0].emoji)
   }
