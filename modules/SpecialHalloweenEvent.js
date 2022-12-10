@@ -1,4 +1,5 @@
 const snowflakes = require("../config/snowflakes.json");
+const config = require("../config/config.json");
 const u = require("../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
@@ -73,6 +74,10 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       });
       reaction.users.remove(message.client.user.id);
     } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
+  }
+  else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id)) {
+    reaction.remove()
+    await reaction.message.react(holidays[0].emoji);
   }
 }).addEvent("messageCreate", (msg) => {
 
