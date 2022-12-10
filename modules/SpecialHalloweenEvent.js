@@ -85,7 +85,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
-    (Math.floor(Math.random() * odds) > odds - 2)
+    (msg.member.roles.cache.has(snowflakes.roles.Holiday) ? (Math.floor(Math.random() * odds / 2) > odds / 2 - 2) : (Math.floor(Math.random() * odds) > odds - 2))
   ) {
     msg.react(holidays[0].emoji)
   }
