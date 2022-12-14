@@ -31,7 +31,7 @@ async function buildMessage(index) {
     const spoiler = /\|\|/;
 
     for (const [key, valueCommas] of Object.entries(characterInfo[index])) {
-      const value = valueCommas.replace("[comma]", ",");
+      const value = valueCommas.replaceAll("[comma]", ",");
       if (value && key != "Character Name" && !key.startsWith("_") && !key.startsWith("*")) {
         const backticks = !spoiler.test(value) ? "```" : "   ";
         const newLines = backticks == "```" ? "\n" : "\n\n";
@@ -106,7 +106,7 @@ async function extraInfo(interaction) {
     }
 
     interaction.message.edit({ components: interaction.message.components });
-    interaction.reply({ content: char[interaction.customId].replace("[comma]", ",") });
+    interaction.reply({ content: char[interaction.customId].replaceAll("[comma]", ",") });
   } catch (error) { u.errorHandler(error, "CharacterInfo extra info button interaction") }
 }
 
