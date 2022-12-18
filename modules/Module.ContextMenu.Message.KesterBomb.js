@@ -19,13 +19,6 @@ async function buildMessage(messageToBeBombed, color) {
     returnObj = await buildMessage(referencedMessage, color);
   }
   let files = messageToBeBombed.attachments ? Array.from(messageToBeBombed.attachments.values()).map(v => v.attachment) : null
-  let embed = u.embed().setAuthor({
-    name: "*original Message*",
-    url: messageToBeBombed.url,
-    iconURL: (await messageToBeBombed.member)?.avatarURL() || (await messageToBeBombed.author)?.avatarURL()
-  }).setDescription(
-    messageToBeBombed.content || "No message content"
-  ).setColor(color);
   const components = [new MessageActionRow()
     .addComponents(
       new MessageButton({
@@ -54,10 +47,9 @@ async function kesterBomb(inputObject) {
   let channelToBeBombed = guild.channels.cache.get(inputObject.target.channelId);
   let messageToBeBombed = await channelToBeBombed.messages.fetch(inputObject.target.id);
   let messagesToSend = await buildMessage(messageToBeBombed, color);
-  let lastMessage;
   for (let index = 0; index < messagesToSend.length; index++) {
     const messageToSend = messagesToSend[index];
-    lastMessage = await kesterBombHook.send(messageToSend);
+    await kesterBombHook.send(messageToSend);
   }
 
 
