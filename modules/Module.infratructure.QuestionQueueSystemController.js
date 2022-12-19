@@ -5,7 +5,7 @@ const { MessageButton, MessageActionRow, Modal, TextInputComponent, MessageSelec
 const { Collection } = require("../utils/Utils.Generic");
 const Questions = new (require("./QuestionQueue/Question"))
 const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
-const debug = true;
+const debug = false;
 
 
 let authors;
