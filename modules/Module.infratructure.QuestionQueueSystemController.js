@@ -5,23 +5,30 @@ const { MessageButton, MessageActionRow, Modal, TextInputComponent, MessageSelec
 const { Collection } = require("../utils/Utils.Generic");
 const Questions = new (require("./QuestionQueue/Question"))
 const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
-
+const debug = true;
 
 
 let authors;
+/**
+ * Sets the file authors variable to be the current authors. Should only be called on init
+ */
 function getAuthors() {
   gs(snowflakes.sheets.authors).then((r) => authors = r);
 }
 
-
+/**
+ * A collection of userIds (keys) with the value of a date object of when they can ask again
+ */
 let askedRecently = new Collection();
 
-//configureables
+//========== Configureables =============================
+//A list of people allowed to answer questions. Botmasters and admins are added in case of any issues.
 const canAnswerQuestions = (interaction) => interaction.member.roles.cache.hasAny(
   snowflakes.roles.Admin,
   snowflakes.roles.WorldMaker,
   snowflakes.roles.BotMaster
 );
+//A list of people who can move, delete, edit, or do other moderation actions to a message
 const canModerateQuestions = interaction => interaction.member.roles.cache.hasAny(
   snowflakes.roles.LARPer,
   snowflakes.roles.BotMaster,
@@ -33,19 +40,42 @@ const canModerateQuestions = interaction => interaction.member.roles.cache.hasAn
   "MANAGE_MESSAGES",
   "MODERATE_MEMBERS"
 ])
-//helper functions
 
+//=========== helper functions ====================
+/**
+ * Checks to see if an answer to this exact question already exists, and if so, it returns the question with that exact text
+ * @param {string} questionText 
+ * @returns 
+ */
 function checkForExistingAnswer(questionText) {
   return Questions.readOnlyCollection().find(q => q.questionText == questionText)
 }
 
-let currentQueue = (author, includeWaitingToBeAnswered) => Questions.readOnlyCollection().filter((v) => v.status == Questions.Status.Queued && (includeWaitingToBeAnswered || !v.flags.includes(Questions.Flags.unansweredButTransfered)) && (author == "any" || !author ? true : (v.requestedAnswerers.includes(author) || v.requestedAnswerers.includes("any"))))
+/**
+ * Gets all questions currently in the queue
+ * @param {string} author the name of the author exactly as presented in the Authors google sheet. If missing, or "any", it will get all questions in queues
+ * @param {boolean} includeWaitingToBeAnswered set to true to include questions that have been moved to the answering channel, but have not yet been answered.
+ * @returns {Collection} a collction of all questions in the Queue. Note that this is READ ONLY. Edits will not be updated in the message or files.
+ */
+let currentQueue = (author, includeWaitingToBeAnswered) =>
+  Questions.readOnlyCollection().filter(
+    (v) => v.status == Questions.Status.Queued && (
+      includeWaitingToBeAnswered
+      || !v.flags.includes(Questions.Flags.unansweredButTransfered)
+    ) && (
+        author == "any"
+          || !author ?
+          true :
+          (v.requestedAnswerers.includes(author) || v.requestedAnswerers.includes("any"))
+      )
+  )
 /**
  * 
  * @param {Discord.Interaction} interaction 
  * @param {Question.messageId} targetId 
  * @param {fn} permissionsOverride a function that receives the interaction and target, and overrides the permissions.
- * @returns 
+ * @param {boolean} checkNonQueued weather or not to check all question files. By default checks only question files
+ * @returns {Question|null}
  */
 function getTargetQuestionChecks(interaction, targetId, permissionsOverride, checkNonQueued) {
   if (Array.isArray(targetId)) targetId = targetId[0]
@@ -76,6 +106,10 @@ function getTargetQuestionChecks(interaction, targetId, permissionsOverride, che
   return target;
 }
 
+/**
+ * Creates the message select menu for selecting a new Answerer
+ * @returns {MessageActionRow} 
+ */
 function newAnswererSelectComponent() {
   let SelectMenuOptions = [];
   //buildSelectMenu
@@ -100,11 +134,11 @@ function newAnswererSelectComponent() {
 }
 /**
  * 
- * @param {*} buttonOneStyle 
- * @param {*} buttonTwoStyle 
- * @param {*} buttonThreeStyle 
- * @param {string} buttonTwoEmoji 
- * @param {Question} Question recieves a message id for a question, or the question
+ * @param {ButtonStyle} buttonOneStyle The style of the upvote button (used for quickly flashing red if someone has already upvoted)
+ * @param {ButtonStyle} buttonTwoStyle The style of the vote check button. Mostly unused for now
+ * @param {ButtonStyle} buttonThreeStyle The style of the unvote button, used for quickly flashing red if someone hasn't upvoted
+ * @param {string} buttonTwoEmoji an emoji to add to the second button (usually unused)
+ * @param {Question|string} Question recieves a message id for a question, or the question object to properly update the message
  * @returns 
  */
 function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, buttonTwoEmoji, Question) {
@@ -154,13 +188,18 @@ function questionRowButtons(buttonOneStyle, buttonTwoStyle, buttonThreeStyle, bu
   ]
 }
 
-
+/**
+ * Deletes a message in a specific channel.
+ * @param {Snowflake} messageId 
+ * @param {TextChannel|Snowflake} channel 
+ * @returns {undefined}
+ */
 async function deleteMessage(messageId, channel) {
   let chan = channel.id ? channel.id : channel;
   let c = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.fetch(chan);
   try {
     let m = await c.messages.fetch(messageId?.messageId || messageId);
-    if (m) m.delete().catch(() => u.errorHandler(`ERR: Insufficient permissions to delete messages.`));
+    if (m) m.delete().catch(() => u.errorHandler(`ERR: Insufficient permissions to delete messages. channel: ${c.id} message: ${messageId}`));
   } catch (error) {
     if (error.toString().indexOf("Unknown Message") > -1) {
       u.errorHandler("That question does not exist")
@@ -172,7 +211,7 @@ async function deleteMessage(messageId, channel) {
 //================= question utility functions ===========================
 
 /**
- * Sets a question to "discarded, and deletes the message that it was in"
+ * Sets a question to "discarded", and deletes the message that it was in
  * @param {*} interaction the interaction requesting the deletion
  * @param {*} targetId the message id of the question to delete
  * @param {*} dontReply if the reply will be handled by another function, set this to true 
@@ -196,10 +235,16 @@ async function discardQuestion(interaction, targetId, dontReply) {
   await deleteMessage(target, interaction.channel.id);
 }
 
+/**
+ * Moves a question to the question discussion channel.
+ * @param {Interaction} interaction the button interaction that triggered this
+ * @param {Snowflake} targetId the message to be moved
+ * @returns {Snowflake} the new message id
+ */
 async function moveToQuestionDiscussion(interaction, targetId) {
-  let target = getTargetQuestionChecks(interaction, targetId)
-  if (!target) return;
-  interaction.reply({ content: `I have moved ${target.questionText} to <#${snowflakes.channels.questionDiscussion}>`, ephemeral: true });
+  let targetQuestion = getTargetQuestionChecks(interaction, targetId)
+  if (!targetQuestion) return;
+  interaction.reply({ content: `I have moved ${targetQuestion.questionText} to <#${snowflakes.channels.questionDiscussion}>`, ephemeral: true });
   let newResponseChannel = interaction.guild.channels.cache.get(snowflakes.channels.questionDiscussion)
   let newEmbed = interaction.message.embeds[0]
   let components = new MessageActionRow().addComponents(
@@ -210,18 +255,18 @@ async function moveToQuestionDiscussion(interaction, targetId) {
   )
   await discardQuestion(interaction, targetId, true);
 
-  if (askedRecently.has(target.askerId)) {
-    askedRecently.delete(target.askerId);
+  if (askedRecently.has(targetQuestion.askerId)) {
+    askedRecently.delete(targetQuestion.askerId);
   }
-  let newMessageID = await newResponseChannel.send({ content: `<@${target.askerId}>, ${interaction.member.displayName} flagged your question as either already answered, or answerable by the community.They should provide you with more information as a response to this message.`, embeds: [newEmbed], allowedMentions: { parse: ["users"] }, components: [components] })
-  target.update({ messageId: newMessageID.id || newMessageID });
+  let newMessageID = await newResponseChannel.send({ content: `<@${targetQuestion.askerId}>, ${interaction.member.displayName} flagged your question as either already answered, or answerable by the community.They should provide you with more information as a response to this message.`, embeds: [newEmbed], allowedMentions: { parse: ["users"] }, components: [components] })
+  targetQuestion.update({ messageId: newMessageID.id || newMessageID });
   return newMessageID;
 }
 
 /**
- * 
- * @param {Discord.interaction} interaction 
- * @param {Question.messageId} targetId 
+ * Restores a question to question queue, from either question discussion or from the answers channel
+ * @param {Discord.interaction} interaction the button interaction that triggered this
+ * @param {Question.messageId} targetId the message id of the question to be restored
  * @param {boolean} resetVotes weather or not the votes should be reset
  * @returns {Question.messageId} a new question message id
  */
@@ -254,7 +299,12 @@ async function restoreToQueue(interaction, targetId, resetVotes) {
   return newMessageID;
 }
 
-
+/**
+ * Creates the modal for a user to edit a question in the queue
+ * @param {*} interaction the button interaction that triggered this
+ * @param {*} targetId the id of the message that is being targeted
+ * @returns the show modal interaction response
+ */
 async function editQuestion(interaction, targetId) {
   let target = getTargetQuestionChecks(interaction, targetId, (interaction, target) => {
     return target.askerId == interaction.member.id;
@@ -278,6 +328,17 @@ async function editQuestion(interaction, targetId) {
   return await interaction.showModal(modal);
 }
 
+/**
+ * Generates the embed for the question queue
+ * @param {Interaction} interaction slash command interaction for creating the question.
+ * @param {[Collection]} interaction.options should have a response to a .get("answerer") with a .value. If not present, the bot will attempt to find an existing question with the same id
+ * @param {GuildMember} interaction.member the member of the person who asked the question
+ * @param {string} interaction.member.displayName the name of the asker
+ * @param {fn} interaction.member.displayAvatarURL() a function returning the url of the member's avatar
+ * @param {Guild} interaction.guild the guild the interaction was invoked in
+ * @param {string} questionTextOverride text to replace the description of the embed with. Must be specified if there isn't an "options" member of the interaction
+ * @returns {MessageEmbed} the embed for the question queue
+ */
 function questionQueueEmbed(interaction, questionTextOverride) {
   let authorName = interaction.options?.get("answerer")?.value ? interaction.options?.get("answerer")?.value : interaction.values ? interaction.values[0] : Questions.readOnlyCollection().get(interaction.message?.id)?.requestedAnswerers[0];
   let authorData = authors.find(a => a.Name.trim() == authorName);
@@ -292,10 +353,17 @@ function questionQueueEmbed(interaction, questionTextOverride) {
   return embed;
 }
 
+/**
+ * handles the /question ask command
+ * @param {SlashCommandInteraction} interaction 
+ * @param {boolean} bypassWait if cooldown rules should be respected with this interaction
+ * @returns 
+ */
 async function ask(interaction, bypassWait) {
   let numberOfQuestions = currentQueue(interaction.options.get("answerer").value).size + 1;
   let hoursBetweenQuestions = numberOfQuestions < 30 ? 0 : (numberOfQuestions < 60 ? numberOfQuestions / 5 : (numberOfQuestions < 72 ? numberOfQuestions : 72));
 
+  //Handle cooldown checking and rejections based on cooldowns
   if (askedRecently.has(interaction.user.id) && !bypassWait) {
     interaction.reply({ content: "You can ask again <t:" + Math.floor(askedRecently.get(interaction.user.id) / 1000) + ":R> . - <@" + interaction.user + ">\nYour question was: " + (interaction.options ? interaction.options.get("question").value : interaction.cleanContent), ephemeral: true });
   } else {
@@ -313,6 +381,7 @@ async function ask(interaction, bypassWait) {
       timestamp: Date.now(),
       answerText: ""
     }
+    //Handle that exact question having been asked before
     let askedBefore = checkForExistingAnswer(questionData.questionText);
     if (askedBefore) {
       let askerName = (await interaction.guild.members.fetch(askedBefore.askerId))?.displayName
@@ -331,20 +400,21 @@ async function ask(interaction, bypassWait) {
         })
       }
     }
+    //Respond to the interaction
     try {
       u.clean(await interaction.reply({ content: 'The Question Has been registered', ephemeral: true }));
     } catch (error) {
       u.noop();
     }
 
-    // Reply
+    // Send the quesion queue embed
 
     let row = questionRowButtons("SECONDARY", "SECONDARY", "SECONDARY", "", questionData)
     let msg = await interaction.guild.channels.cache.get(snowflakes.channels.ask).send({ embeds: [questionQueueEmbed(interaction)], components: row });
-
-    questionData.messageId = msg.id;
-
     console.log(`${interaction.user.tag} asked:\n\t${questionData.questionText}\n\nID:${questionData.messageId}\n\n\n`)
+
+    //finish building the question object
+    questionData.messageId = msg.id;
     new Questions.Question(questionData, true);
 
     // Adds the user to the set so that they can't ask for a few hours
@@ -360,10 +430,12 @@ async function ask(interaction, bypassWait) {
   }
 }
 
-
+/**
+ * Builds the components of responses to /question transfer
+ * @param {string} identifier a unique identifier to append to button ids so the right message and question get targeted
+ * @returns 
+ */
 function transferAnswerComponents(identifier) {
-
-
   return [new MessageActionRow().addComponents(
     new MessageButton()
       .setCustomId('qqa' + identifier)//qqa stands for question queue answer
@@ -378,11 +450,15 @@ function transferAnswerComponents(identifier) {
       .setStyle('SECONDARY')
       .setLabel('Answer Later'),
   ),
-  newAnswererSelectComponent()
+  newAnswererSelectComponent() //allow for transfering to other worldmakers
   ]
 }
 
-
+/**
+ * Handles the answerer returning a question to the queue
+ * @param {*} interaction 
+ * @returns 
+ */
 async function processRecycleButton(interaction) {
   if (!canAnswerQuestions(interaction) && !canModerateQuestions(interaction))
     return interaction.reply({ content: "I'm sorry, you can't do that", ephemeral: true })
@@ -392,11 +468,26 @@ async function processRecycleButton(interaction) {
 
 }
 
+/**
+ * handles the /transfer command, and moves questions from the queue to the appropriate channel
+ * @param {Interaction} interaction 
+ * @param {boolean} forceRequestedAnswerer 
+ * @returns 
+ */
 async function processTransfer(interaction, forceRequestedAnswerer) {
 
   let numberOfQuestions = 5
   let author = authors.find((a) => a.discordId == interaction.member.id || a.Name == forceRequestedAnswerer)
-  if (!author) interaction.reply({ content: "I'm sorry, but only Authors can do that", ephemeral: true })
+  if (!author) {
+    if (!debug)
+      return interaction.reply({ content: "I'm sorry, but only Authors can do that", ephemeral: true })
+    else //things to do when debugging
+    {
+      author = authors.find((a) => a.Name == "Andrew Rowe")
+      author.id = interaction.member.id
+      author.answerChannelId = snowflakes.channels.transfer
+    }
+  }
   // Sort
   let sorted = currentQueue(author?.Name).sort((a, b) => (a.voterIds.length < b.voterIds.length) ? 1 : -1);
 
@@ -406,8 +497,9 @@ async function processTransfer(interaction, forceRequestedAnswerer) {
     return;
   }
   interaction.reply({ content: `Transfering questions.`, ephemeral: true });
-  // Format
+
   for (let i = 0; i < numberOfQuestions && i < sorted.size; i++) {
+    // Prepare variables for the message
     if (sorted.at(i)) {
       let url = undefined;
       let asker;
@@ -421,6 +513,9 @@ async function processTransfer(interaction, forceRequestedAnswerer) {
       } catch (error) {
         url = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Question_mark_%28black%29.svg/800px-Question_mark_%28black%29.svg.png";
       }
+
+
+      // --- send the message to the answer channel ----
       let message = await (interaction.guild.channels.cache.get(author?.answerChannelId)).send({
         content: "<@" + (asker.id || asker) + ">",
         embeds: [
@@ -440,16 +535,42 @@ async function processTransfer(interaction, forceRequestedAnswerer) {
           parse: ['users']
         }
       })
+
+
+
+      //add the Unanswered but Transfered flag to the question flags
       let flags = sorted.at(i).flags.concat([Questions.Flags.unansweredButTransfered]);
       if (sorted.at(i).messageId == message.id) {
         throw new Error("Improper message id");
       }
+
+      //delete the old message
       await deleteMessage(sorted.at(i), snowflakes.channels.ask);
+
+      //update the question file and question object
       sorted.at(i).update({ messageId: message.id, flags: flags })
     }
   }
 }
 
+
+
+//========== Transfered but unanswered Button handlers ==================
+
+
+function worldmakerReplyEmbed(interaction) {
+  return u.embed().setAuthor({
+    name: interaction.member.displayName,
+    iconURL: interaction.member.avatarURL() || interaction.member.user.avatarURL()
+  }).setColor(interaction.member.displayHexColor)
+}
+
+//Functions to handle the Answering of the Questions with the answer modal
+/**
+ * Creates a modal for the answerer to use
+ * @param {*} interaction 
+ * @returns The Modal
+ */
 async function processQQAButtonModalMaker(interaction) {
   const modal = new Modal()
     .setCustomId("answerQuestionModal")
@@ -466,13 +587,10 @@ async function processQQAButtonModalMaker(interaction) {
   return modal.addComponents(firstActionRow);
 }
 
-function worldmakerReplyEmbed(interaction) {
-  return u.embed().setAuthor({
-    name: interaction.member.displayName,
-    iconURL: interaction.member.avatarURL() || interaction.member.user.avatarURL()
-  }).setColor(interaction.member.displayHexColor)
-}
-
+/**
+ * processes the interaction summoning the modal
+ * @param {*} interaction 
+ */
 async function processqqaButton(interaction) {
   if (canAnswerQuestions(interaction)) {
     await interaction.showModal(await processQQAButtonModalMaker(interaction));
@@ -480,6 +598,10 @@ async function processqqaButton(interaction) {
   else interaction.reply({ content: "I'm sorry, but you don't have access to that.", ephemeral: true })
 }
 
+/**
+ * Handles the RAFO button being pressed
+ * @param {Discord.Interaction} interaction 
+ */
 async function processRAFOButton(interaction) {
   if (canAnswerQuestions(interaction)) {
     const answer = "You're going to have to read and find out on that one I'm afraid."
@@ -500,6 +622,11 @@ async function processRAFOButton(interaction) {
   else interaction.reply({ content: "I'm sorry, but you don't have access to that.", ephemeral: true })
 }
 
+/**
+ * Processes the /question stats command
+ * @param {*} interaction 
+ * @returns 
+ */
 async function processStats(interaction) {
   {
 
@@ -532,6 +659,45 @@ async function processStats(interaction) {
   }
 }
 
+// ============================= Answered Questions editing =======================
+function answeredQuestionsComponentsBuilder() {
+  return [new MessageActionRow().addComponents(
+    new MessageButton()
+      .setCustomId('qqansweredquestionedit')//qqa stands for question queue answer
+      .setStyle('SECONDARY')
+      .setLabel('Edit Answer')
+      .setEmoji('🖊'),
+  )
+  ]
+}
+
+async function qqAnsweredQuestionEdit(interaction) {
+  if (canAnswerQuestions(interaction)) {
+    const modal = new Modal()
+      .setCustomId("editAnswerModal")
+      .setTitle("Edit Question");
+
+    const newQuestionInput = new TextInputComponent()
+      .setCustomId('editAnswerModalInput')
+      .setLabel("New Answer Text")
+      .setMaxLength(4000)
+      .setPlaceholder(interaction.message.embeds[0].description.slice(0, 99))
+      // Paragraph means multiple lines of text.
+      .setStyle("PARAGRAPH");
+
+    const firstActionRow = new MessageActionRow().addComponents(newQuestionInput);
+    modal.addComponents(firstActionRow);
+    return await interaction.showModal(modal);
+
+  }
+  else interaction.reply({ content: "I'm sorry, but you don't have access to that.", ephemeral: true })
+
+}
+/*
+========================================================================================================
+========================================== Handle Augur stuff ==========================================
+========================================================================================================
+*/
 const Module = new Augur.Module()
   .addInteractionCommand({
     name: "question",
@@ -631,6 +797,29 @@ const Module = new Augur.Module()
     }
 
   }).addInteractionHandler({
+    customId: "editAnswerModal",
+    process: async (interaction) => {
+      let targetId = interaction.message.id;
+      let newText = interaction.components[0].components[0].value;
+      // Load data
+      let question = Questions.readOnlyCollection().get(targetId);
+      if (question == undefined) {
+        interaction.reply({ content: `There are no questions with that ID in my memory crystals`, ephemeral: true });
+        return;
+      }
+
+      //-----------------------
+      question.update({ answerText: newText });
+      let msg = await interaction.channel.messages.fetch(interaction.message.id);
+
+      msg.edit({ embeds: [msg.embeds[0], msg.embeds[1].setDescription(question.answerText)] });
+
+      // Respond
+      interaction.deferUpdate();
+
+    }
+
+  }).addInteractionHandler({
     customId: "answerQuestionModal",
     process: async (interaction) => {
       if (canAnswerQuestions(interaction)) {
@@ -638,7 +827,7 @@ const Module = new Augur.Module()
         let embeds = interaction.message.embeds;
         embeds[0].setColor(authors.find(a => a.discordId == interaction.member.id)?.hexColor || interaction.member.displayHexColor)
         embeds.push(worldmakerReplyEmbed(interaction).setDescription(answer))
-        interaction.update({ embeds: embeds, components: [] })
+        interaction.update({ embeds: embeds, components: answeredQuestionsComponentsBuilder() })
         let question = Questions.readOnlyCollection().get(interaction.message.id);
         let flags = question.flags.filter(f => f != Questions.Flags.unansweredButTransfered)
         question.update({
@@ -703,6 +892,7 @@ const Module = new Augur.Module()
   .addInteractionHandler({ customId: `qqa4`, process: processqqaButton })
   .addInteractionHandler({ customId: `RAFO`, process: processRAFOButton })
   .addInteractionHandler({ customId: `qqaRecycle`, process: processRecycleButton })
+  .addInteractionHandler({ customId: `qqansweredquestionedit`, process: qqAnsweredQuestionEdit })
   .addInteractionHandler({
     customId: `newAnswererSelect`,
     process: async (interaction) => {
