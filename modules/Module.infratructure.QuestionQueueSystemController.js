@@ -57,6 +57,7 @@ function getTargetQuestionChecks(interaction, targetId, permissionsOverride, che
       interaction.reply({ content: `There are no questions with that ID in my memory crystals`, ephemeral: true });
       return null
     } else {
+      u.errorHandler("Mismatched message id auto-resolved. Be careful!\ntargeted id = " + targetId)
       console.log("Mismatched message id auto-resolved. Be careful!")
       target.update({ messageId: interaction.message.id })
     }
@@ -255,7 +256,9 @@ async function restoreToQueue(interaction, targetId, resetVotes) {
 
 
 async function editQuestion(interaction, targetId) {
-  let target = getTargetQuestionChecks(interaction, targetId)
+  let target = getTargetQuestionChecks(interaction, targetId, (interaction, target) => {
+    return target.askerId == interaction.member.id;
+  })
   if (!target) return;
 
   const modal = new Modal()
