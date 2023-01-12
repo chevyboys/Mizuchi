@@ -27,12 +27,12 @@ async function shhh(msg) {
  */
 let lastDone;
 /**
- * determines if the bot should respond with good morning, good afternoon, or good night
+ * determines if the bot should respond with good morning, good afternoon, or good night, then does so
  * @param {Discord.Message} msg 
  */
 function goodTime(msg) {
   const cooldownSeconds = 90;
-
+  if (msg.channel != snowflakes.channels.general) return;
   let content = msg?.content?.toLowerCase();
   let spacelessContent = content.replaceAll(" ", "")
   if (content.indexOf("g") > -1) {

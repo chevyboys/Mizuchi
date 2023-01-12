@@ -1,13 +1,12 @@
 
 
-const snowflakes = require("../../config/snowflakes.json");
 const fs = require('fs');
 const { Collection } = require("../../utils/Utils.Generic");
 const questionFolder = "././data/question/";
 
 
 function getAllQuestionFiles() {
-  return files = fs.readdirSync(questionFolder).filter(x => x.endsWith(".json")).map(q => questionFolder + q);
+  return fs.readdirSync(questionFolder).filter(x => x.endsWith(".json")).map(q => questionFolder + q);
 }
 
 /**
@@ -29,9 +28,8 @@ function validateQuestion(QuestionResolvable, objectToTestAgainst) {
     throw new Error("askerid cannot equal my messageid!")
   else if (QuestionResolvable.flags?.some(f => !QuestionFlag[f])) {
     throw new Error("flag " + QuestionResolvable.flags.find(f => !QuestionFlag[f]) + " is not a valid question flag")
-  } else if (QuestionResolvable.status && !QuestionStatus[QuestionResolvable.status])
-    throw new Error("invalid question status");
-  else if (QuestionResolvable.askerId && (!QuestionResolvable.askerId instanceof String && !typeof QuestionResolvable.askerId === 'string'))
+  }
+  else if (QuestionResolvable.askerId && (!(QuestionResolvable.askerId instanceof String) && !typeof QuestionResolvable.askerId === 'string'))
     throw new Error("Askerid must be a string")
 }
 
