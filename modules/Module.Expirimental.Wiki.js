@@ -7,9 +7,10 @@ const Command = {
   name: "wiki",
   guildId: snowflakes.guilds.PrimaryServer,
   process: async (interaction) => {
-    let page = interaction?.options?.get("reason")?.value
+    let page = interaction?.options?.get("page")?.value
+    let shorten = (!interaction?.options?.get("advanced")?.value);
     if (page.toLowerCase() != 'unknown page') {
-      interaction.reply({ embeds: [wiki.pageEmbed(page)] });
+      interaction.reply({ embeds: [await wiki.pageEmbed(page, shorten)] });
     }
     else interaction.reply({ content: "I couldn't find that page" });
   }
@@ -25,13 +26,15 @@ Module.addEvent("interactionCreate", async (interaction) => {
   if (!interaction.isAutocomplete() || interaction.commandName != Command.name) return;
   const focusedValue = interaction.options.getFocused();
   const choices = await wiki.search(focusedValue);
-  const filtered = choices.filter(choice => isValidChoice(choice, focusedValue));
-  if (choices.length < 1) {
+  if (!choices.length || choices.length < 1) {
     await interaction.respond([{ name: 'unknown page', value: 'unknown page' }])
   }
-  else await interaction.respond(
-    filtered.map(choice => ({ name: choice, value: choice })),
-  );
+  else {
+    const filtered = choices.filter(choice => isValidChoice(choice, focusedValue));
+    await interaction.respond(
+      filtered.map(choice => ({ name: choice, value: choice })),
+    );
+  }
 
 }).addInteractionCommand(Command)
 module.exports = Module;

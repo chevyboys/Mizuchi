@@ -26,7 +26,14 @@ const Module = new Augur.Module()
         .addStringOption(option =>
           option.setName('page')
             .setDescription('Phrase to search for')
-            .setAutocomplete(true)),
+            .setAutocomplete(true)
+            .setRequired(true)
+        )
+        .addBooleanOption(option =>
+          option.setName('advanced')
+            .setDescription('Sends a longer page description')
+            .setRequired(false)
+        ),
       new SlashCommandBuilder()
         .setName('question')
         .setDescription('Interact with our Questions Queue')

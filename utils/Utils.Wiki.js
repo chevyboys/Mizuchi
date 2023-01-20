@@ -115,6 +115,7 @@ async function getAllPageNames(baseUrl) {
  * @returns {string} The title of the first search result, or an empty string if no results are found.
  */
 async function searchMediaWiki(baseUrl, search) {
+  if (!search) return "";
   let queryUrl = baseUrl + "/w/api.php?action=query&format=json&formatversion=2&list=search&srlimit=1&srprop=title&srsearch=" + encodeURIComponent(search);
   let queryResult = await axios.get(queryUrl);
   let searchResults = queryResult.data.query.search;
