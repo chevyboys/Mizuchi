@@ -2,9 +2,6 @@ const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic");
 const fs = require('fs');
 const { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandStringOption } = require('@discordjs/builders');
-const { REST, DiscordAPIError } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
-const { Client, MessageEmbed, Intents, MessageButton, MessageActionRow } = require('discord.js');
 const snowflakes = require('../config/snowflakes.json');
 const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
 
@@ -23,6 +20,13 @@ const Module = new Augur.Module()
             .setDescription('The character you are looking for')
             .setRequired(true)
         ),
+      new SlashCommandBuilder()
+        .setName('wiki')
+        .setDescription('pull description from the wiki')
+        .addStringOption(option =>
+          option.setName('page')
+            .setDescription('Phrase to search for')
+            .setAutocomplete(true)),
       new SlashCommandBuilder()
         .setName('question')
         .setDescription('Interact with our Questions Queue')

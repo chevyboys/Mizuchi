@@ -119,7 +119,7 @@ async function searchMediaWiki(baseUrl, search) {
   let queryResult = await axios.get(queryUrl);
   let searchResults = queryResult.data.query.search;
   if (searchResults.length > 0) {
-    return searchResults[0].title;
+    return searchResults.slice(0, 20).map(wikiArticle => wikiArticle.title);
   }
   return "";
 }
