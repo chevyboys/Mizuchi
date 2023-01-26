@@ -18,3 +18,16 @@ config/snowflakes.json
 package-lock.json
 Judgement
 avatar/*
+Old
+node_modules
+tmp
+src/config/*
+!src/config/README.md
+!src/config/*-example.*
+*-.js
+*-.json
+*-.ts
+# For Visual Studio's temp directory
+package-lock.json
+dist/config/config.json
+dist/config/config.js

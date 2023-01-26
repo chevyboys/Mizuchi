@@ -1,0 +1,26 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "update",
+      "command": "npm", // Could be any other shell command
+      "args": [
+        "update"
+      ],
+      "type": "shell"
+    },
+    {
+      "label": "compile",
+      "command": "tsc", // Could be any other shell command
+      "args": [],
+      "type": "shell"
+    },
+    {
+      "label": "Build",
+      "dependsOn": [
+        "update",
+        "compile"
+      ]
+    }
+  ]
+}

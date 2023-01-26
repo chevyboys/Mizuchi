@@ -9,7 +9,7 @@ and example of data we store:
 We don't: 
 - Sell your data to 3rd parties
 - Give your data to 3rd parties
-- Give any access to your data to non-server members
+- Give any access to your data to third parties
 - Allow any non-staff members bulk access to data
 
 ### Privacy Policy
