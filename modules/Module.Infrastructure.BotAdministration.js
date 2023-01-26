@@ -115,6 +115,7 @@ const Module = new Augur.Module()
       u.clean(msg);
       const fs = require("fs");
       let files = fs.readdirSync('./modules/').filter(file => file.endsWith(".js"));
+
       for (const file of files) {
         try {
           msg.client.moduleHandler.reload('./modules/' + file);
@@ -142,7 +143,7 @@ const Module = new Augur.Module()
   .addEvent("ready", () => {
     //When the bot is fully online, fetch all the discord members, since it will only autofetch for small servers and we want them all.
     Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.fetch();
-
+    u.setClient(Module.client);
   }).addEvent("guildMemberUpdate", async (oldMember, newMember) => {
     if (newMember.guild.id == snowflakes.guilds.PrimaryServer) {
       if (newMember.roles.cache.size > oldMember.roles.cache.size) {

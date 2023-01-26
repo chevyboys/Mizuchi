@@ -7,7 +7,8 @@ const TurndownService = require('turndown')
 const Discord = require("discord.js");
 
 
-const blogWebHook = new Discord.WebhookClient(config.Webhooks.blogPosts);
+const webhookUtil = require("../utils/Webhook").webhook;
+
 const parser = new Parser();
 const turndownService = new TurndownService();
 const blogLink = "https://andrewkrowe.wordpress.com/feed/";
@@ -32,7 +33,7 @@ async function blogHandler(force) {
     .setDescription(turndownService.turndown(entry.content))
     .setColor('#c8dee5')
     .setThumbnail(thumbnailUrl.split('?', 1)[0]);
-  return blogWebHook.send({
+  return await webhookUtil((Module.client.guilds.cache.find(g => g.channels.cache.has(snowflakes.channels.blogAnnouncements))).channels.cache.get(snowflakes.channels.blogAnnouncements), "blogHook", "./avatar/base.png", {
     content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.BlogUpdates}>`,
     embeds: [embed]
   });

@@ -3,9 +3,9 @@ const Augur = require("augurbot"),
   config = require("../config/config.json"),
   snowflakes = require("../config/snowflakes.json");
 const { MessageButton, MessageActionRow, WebhookClient } = require('discord.js');
-
+const webhookUtil = require("../utils/Webhook").webhook;
 const Module = new Augur.Module()
-const kesterBombHook = new WebhookClient(config.Webhooks.kesterBombs);
+//const kesterBombHook = new WebhookClient(config.Webhooks.kesterBombs);
 
 
 async function buildMessage(messageToBeBombed, color) {
@@ -49,7 +49,8 @@ async function kesterBomb(inputObject) {
   let messagesToSend = await buildMessage(messageToBeBombed, color);
   for (let index = 0; index < messagesToSend.length; index++) {
     const messageToSend = messagesToSend[index];
-    await kesterBombHook.send(messageToSend);
+    //await kesterBombHook.send(messageToSend);
+    await webhookUtil(guild.channels.cache.get(snowflakes.channels.kesterBomb), "kesterBombhook", "./avatar/base.png", messageToSend)
   }
 
 

@@ -68,8 +68,14 @@ function parseInteraction(inter) {
     return { command, data };
   }
 }
-
+let _client = null;
 const utils = {
+  setClient: (client) => {
+    _client = client;
+  },
+  getClient: () => {
+    return _client;
+  },
   setRoles: async (member, roles) => {
     const guild = await rolesClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
     const rolesClientMember = await guild.members.fetch(member.id ? member.id : member);
