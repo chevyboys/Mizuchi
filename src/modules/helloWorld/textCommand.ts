@@ -1,8 +1,9 @@
 import { MessageCommandComponent } from "chironbot";
-import { Message } from "discord.js";
+import { Events, Message } from "discord.js";
 
 export let HelloWorldTextCommand = new MessageCommandComponent({
     name: "hello",
+    trigger: Events.MessageCreate,
     description: "replies with 'world'",
     category: "main",
     enabled: true,
@@ -15,6 +16,7 @@ export let HelloWorldTextCommand = new MessageCommandComponent({
 
 export let HelloWorldEchoCommand = new MessageCommandComponent({
     name: "echo",
+    trigger: Events.MessageCreate,
     description: "replies with 'world'",
     category: "main",
     enabled: true,

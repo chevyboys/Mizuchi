@@ -2,9 +2,6 @@ import { ChironConfig, ChironClient } from "chironbot";
 import { Partials, GatewayIntentBits } from "discord.js";
 import { configOptions } from "./config/config";
 import * as mysql from "mysql";
-import { Client } from "ssh2";
-const sshClient = new Client();
-sshClient.connect(configOptions.database.ssh);
 const con = mysql.createConnection(configOptions.database.mysql);
 con.connect(function (err) {
     if (err && !(err.toString().indexOf("Cannot enqueue Handshake after already enqueuing a Handshake") > -1))

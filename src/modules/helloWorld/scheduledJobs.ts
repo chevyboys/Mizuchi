@@ -1,6 +1,6 @@
 import { ChironClient, ScheduleComponent } from "chironbot";
 import { ChannelType, PermissionFlagsBits, TextChannel } from "discord.js";
-import * as Schedule from "node-schedule";
+
 
 
 
