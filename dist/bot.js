@@ -1,13 +1,6 @@
 import { ChironConfig, ChironClient } from "chironbot";
 import { Partials, GatewayIntentBits } from "discord.js";
 import { configOptions } from "./config/config";
-import * as mysql from "mysql";
-const con = mysql.createConnection(configOptions.database.mysql);
-con.connect(function (err) {
-    if (err && !(err.toString().indexOf("Cannot enqueue Handshake after already enqueuing a Handshake") > -1))
-        throw err;
-    console.log("Connected to DataBase!");
-});
 const config = new ChironConfig(configOptions);
 export let clientOptions = {
     config: config,
@@ -22,6 +15,7 @@ export let clientOptions = {
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
     ],
+    //database: DataBaseActions
 };
 const client = new ChironClient(clientOptions);
 await client.login(config.token);
