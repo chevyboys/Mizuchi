@@ -1,6 +1,8 @@
 import { ChironConfig, ChironClient } from "chironbot";
 import { Partials, GatewayIntentBits } from "discord.js";
 import { configOptions } from "./config/config";
+import { initialize as DbInit } from "./utils/Database/DatabaseGeneral";
+import * as DataBaseActions from "./utils/Utils.Database";
 const config = new ChironConfig(configOptions);
 export let clientOptions = {
     config: config,
@@ -15,8 +17,9 @@ export let clientOptions = {
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
     ],
-    //database: DataBaseActions
+    database: DataBaseActions
 };
 const client = new ChironClient(clientOptions);
 await client.login(config.token);
 client.modules.register();
+DbInit(client);

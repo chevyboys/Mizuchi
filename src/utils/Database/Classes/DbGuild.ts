@@ -153,7 +153,7 @@ export class DbGuild implements IDbGuild {
     public static async get(optionId: Snowflake): Promise<DbGuild | undefined> {
         if (!assertIsSnowflake(optionId)) throw new Error(optionId + " is not a valid guildId");
         let guildObject = await new Promise((fulfill, reject) => {
-            con.query("SELECT * FROM `Guild` WHERE Guild.id = '" + con.escape(optionId) + "';", function (error, result) {
+            con.query("SELECT * FROM `Guild` WHERE Guild.id = " + con.escape(optionId) + ";", function (error, result) {
                 if (!result || result == undefined) {
                     reject("No guild with that id was found")
                 } else {
@@ -426,7 +426,7 @@ class DbGuildRole implements IDbGuildRole {
     static async getAll(guildId: Snowflake) {
         if (!assertIsSnowflake(guildId)) throw new Error(guildId + " is not a valid guild snowflake")
         let guildRoles = await new Promise((fulfill, reject) => {
-            con.query("SELECT `GuildRoleTypeRelationship`.`discordRoleId`, `GuildRoleTypeRelationship`.`sensitiveData`, `RoleDuty`.`friendlyName` FROM `GuildRoleTypeRelationship` LEFT JOIN `RoleDuty` ON `GuildRoleTypeRelationship`.`discordRoleDutyId` = `RoleDuty`.`id` WHERE GuildRoleTypeRelationship.discordGuildId = '" + con.escape(guildId) + "';", function (error, result) {
+            con.query("SELECT `GuildRoleTypeRelationship`.`discordRoleId`, `GuildRoleTypeRelationship`.`sensitiveData`, `RoleDuty`.`friendlyName` FROM `GuildRoleTypeRelationship` LEFT JOIN `RoleDuty` ON `GuildRoleTypeRelationship`.`discordRoleDutyId` = `RoleDuty`.`id` WHERE GuildRoleTypeRelationship.discordGuildId = " + con.escape(guildId) + ";", function (error, result) {
                 if (!result || result == undefined) {
                     reject("No roles for a guild with that id were found")
                 } else {
@@ -486,7 +486,7 @@ class DbGuildFaq implements IDbGuildFaq {
     public static async getAll(guildId: Snowflake) {
         if (!assertIsSnowflake(guildId)) throw new Error(guildId + " is not a valid guild snowflake")
         let guildFaq = await new Promise((fulfill, reject) => {
-            con.query("SELECT`FAQCategory`.`messageId`, `FAQCategory`.`name`, `FAQCategory`.`expiration`, `FAQQuestion`.`question`, `FAQQuestion`.`answer` FROM`FAQCategory` LEFT JOIN`FAQQuestion` ON`FAQQuestion`.`FAQCategoryId` = `FAQCategory`.`id` WHERE FAQCategory.guildId = '" + con.escape(guildId) + "';", function (error, result) {
+            con.query("SELECT`FAQCategory`.`messageId`, `FAQCategory`.`name`, `FAQCategory`.`expiration`, `FAQQuestion`.`question`, `FAQQuestion`.`answer` FROM`FAQCategory` LEFT JOIN`FAQQuestion` ON`FAQQuestion`.`FAQCategoryId` = `FAQCategory`.`id` WHERE FAQCategory.guildId = " + con.escape(guildId) + ";", function (error, result) {
                 if (!result || result == undefined) {
                     reject("No FAQ for a guild with that id were found")
                 } else {
@@ -549,7 +549,7 @@ class DbLink implements IDbLink {
     static async getAll(guildId: Snowflake) {
         if (!assertIsSnowflake(guildId)) throw new Error(guildId + " is not a valid guild snowflake")
         let guildLinkRows = await new Promise((fulfill, reject) => {
-            con.query("SELECT `GuildLinks`.`link`, `GuildLinks`.`label`, `GuildLinks`.`isMeme` FROM `GuildLinks` where GuildLinks.discordGuildid = '" + con.escape(guildId) + "';", function (error, result) {
+            con.query("SELECT `GuildLinks`.`link`, `GuildLinks`.`label`, `GuildLinks`.`isMeme` FROM `GuildLinks` where GuildLinks.discordGuildid = " + con.escape(guildId) + ";", function (error, result) {
                 if (!result || result == undefined) {
                     reject("No links for a guild with that id were found")
                 } else {
@@ -618,7 +618,7 @@ class DbGuildAuthor implements IDbGuildAuthor {
     public static async getAll(optionGuildId: Snowflake) {
         if (!assertIsSnowflake(optionGuildId)) throw new Error(optionGuildId + " is not a valid guild snowflake")
         let guildAuthorRows = await new Promise((fulfill, reject) => {
-            con.query("SELECT `Author`.`id`, `Author`.`userId`, `Author`.`authorName`, AuthorGuildRelationship.answerChannelId, `Author`.`authorHexColor`, `Author`.`blogApiUrl`, `AuthorGuildRelationship`.`blogChannelId`, `Author`.`imageUrl`, `AuthorGuildRelationship`.`blogEnabled`, `AuthorLinks`.`label`, `AuthorLinks`.`link` FROM `Author` LEFT JOIN `AuthorGuildRelationship` ON `AuthorGuildRelationship`.`authorId` = `Author`.`id` LEFT JOIN `AuthorLinks` ON `AuthorLinks`.`authorId` = `Author`.`id` where AuthorGuildRelationship.guildid = '" + con.escape(optionGuildId) + "';", function (error, result) {
+            con.query("SELECT `Author`.`id`, `Author`.`userId`, `Author`.`authorName`, AuthorGuildRelationship.answerChannelId, `Author`.`authorHexColor`, `Author`.`blogApiUrl`, `AuthorGuildRelationship`.`blogChannelId`, `Author`.`imageUrl`, `AuthorGuildRelationship`.`blogEnabled`, `AuthorLinks`.`label`, `AuthorLinks`.`link` FROM `Author` LEFT JOIN `AuthorGuildRelationship` ON `AuthorGuildRelationship`.`authorId` = `Author`.`id` LEFT JOIN `AuthorLinks` ON `AuthorLinks`.`authorId` = `Author`.`id` where AuthorGuildRelationship.guildid = " + con.escape(optionGuildId) + ";", function (error, result) {
                 if (!result || result == undefined) {
                     reject("No authors for a guild with that id were found")
                 } else {
@@ -688,7 +688,7 @@ class DbGuildEmoji implements IDbGuildEmoji {
     public static async getAll(optionGuildId: Snowflake) {
         if (!assertIsSnowflake(optionGuildId)) throw new Error(optionGuildId + " is not a valid guild snowflake")
         let guildEmojiRows = await new Promise((fulfill, reject) => {
-            con.query("SELECT `GuildEmoji`.`emoji`, `EmojiDuty`.`duty`, `EmojiDuty`.`defaultEmoji` FROM`GuildEmoji` RIGHT JOIN`EmojiDuty` ON`GuildEmoji`.`emojiDutyId` = `EmojiDuty`.`id` WHERE GuildEmoji.discordGuildid = '" + con.escape(optionGuildId) + "';", function (error, result) {
+            con.query("SELECT `GuildEmoji`.`emoji`, `EmojiDuty`.`duty`, `EmojiDuty`.`defaultEmoji` FROM`GuildEmoji` RIGHT JOIN`EmojiDuty` ON`GuildEmoji`.`emojiDutyId` = `EmojiDuty`.`id` WHERE GuildEmoji.discordGuildid = " + con.escape(optionGuildId) + ";", function (error, result) {
                 if (!result || result == undefined) {
                     reject("No emoji for a guild with that id were found")
                 } else {

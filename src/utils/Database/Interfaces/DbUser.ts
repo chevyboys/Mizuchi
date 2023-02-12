@@ -11,4 +11,5 @@ export interface IDbUserGuild {
     cakeday: string,
     totalXp: number,
     currentXp: number
+    roles: Array<Snowflake>
 }

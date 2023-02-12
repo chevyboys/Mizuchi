@@ -33,3 +33,7 @@ export function assertIsCakeDay(string: string) {
     throw (string + ":" + JSON.stringify(string) + " is not a valid CakeDay")
 }
 
+export function initialize(client: IChironClient) {
+    hasBeenInitialized = true;
+    clientPrimaryInstance = client;
+}

@@ -30,3 +30,7 @@ export function assertIsCakeDay(string) {
     }
     throw (string + ":" + JSON.stringify(string) + " is not a valid CakeDay");
 }
+export function initialize(client) {
+    hasBeenInitialized = true;
+    clientPrimaryInstance = client;
+}
