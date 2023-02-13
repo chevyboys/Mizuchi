@@ -595,7 +595,7 @@ interface DbGuildAuthorRow {
     link?: string, //link
 }
 
-class DbGuildAuthor implements IDbGuildAuthor {
+export class DbGuildAuthor implements IDbGuildAuthor {
     id: Snowflake;
     name: string;
     color?: string | undefined;
@@ -613,6 +613,11 @@ class DbGuildAuthor implements IDbGuildAuthor {
         this.imageUrl = options.imageUrl;
         this.links = options.links;
         this.guildId = options.guildId;
+    }
+
+    public static async get(userId: Snowflake, guildId: Snowflake) {
+        let authors = await DbGuildAuthor.getAll(guildId)
+        return authors.find(r => r.id == userId)
     }
 
     public static async getAll(optionGuildId: Snowflake) {

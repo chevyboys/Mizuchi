@@ -417,7 +417,7 @@ class DbLink {
         return guildLinkRows.map(r => new DbLink(r));
     }
 }
-class DbGuildAuthor {
+export class DbGuildAuthor {
     id;
     name;
     color;
@@ -435,6 +435,10 @@ class DbGuildAuthor {
         this.imageUrl = options.imageUrl;
         this.links = options.links;
         this.guildId = options.guildId;
+    }
+    static async get(userId, guildId) {
+        let authors = await DbGuildAuthor.getAll(guildId);
+        return authors.find(r => r.id == userId);
     }
     static async getAll(optionGuildId) {
         if (!assertIsSnowflake(optionGuildId))

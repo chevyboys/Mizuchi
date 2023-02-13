@@ -7,7 +7,7 @@ import { HelloWorldSlashCommand, HelloWorldSecondSlashCommand } from "./helloWor
 import { HelloWorldEchoCommand, HelloWorldTextCommand } from "./helloWorld/textCommand";
 import { HelloWorldUnregisterSlashCommand, loaded, Reload, unloaded } from "./helloWorld/loadUnload";
 import { Events } from "discord.js";
-import { Guild, User } from "../utils/Utils.Database";
+import * as Database from "../utils/Utils.Database";
 export const Module = new ChironModule({
     name: "hello world",
     components: [
@@ -35,10 +35,12 @@ Module.components.push(new MessageCommandComponent({
     permissions: (msg) => true,
     process: async (msg, suffix) => {
         if (msg.guild?.id) {
-            let guild = await Guild.get(msg.guild?.id);
-            let user = await User.get(msg.author.id);
+            let guild = await Database.Guild.get(msg.guild?.id);
+            let user = await Database.User.get(msg.author.id);
+            let question = await Database.Question.get("1054318740289888296");
+            console.log(question);
             console.log(guild);
-            console.table(user);
+            console.log(user);
         }
         msg.reply("echoing" + suffix);
         return "";

@@ -1,4 +1,4 @@
-import { Snowflake } from "discord.js";
+import { Collection, Snowflake } from "discord.js";
 import { IDbGuildAuthor } from "./DbAuthor";
 import { IDbClass } from "./DbGeneral";
 
@@ -9,9 +9,9 @@ export interface IDbQuestion extends IDbClass {
     status: QuestionStatus,
     questionText: string,
     answerText: string,
-    author: IDbGuildAuthor,
+    author: Snowflake,
     timestamp: Date,
-    users: IDbQuestionUser,
+    users: Collection<Snowflake, IDbQuestionUser>,
     flags: QuestionFlag[]
 }
 
@@ -28,7 +28,7 @@ export enum QuestionFlag {
 
 export interface IDbQuestionUser {
     id: Snowflake,
-    relationship: QuestionUserRelationship
+    relationships: Array<QuestionUserRelationship>
 }
 
 export enum QuestionUserRelationship {
