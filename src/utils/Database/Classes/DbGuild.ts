@@ -690,6 +690,7 @@ class DbGuildEmoji implements IDbGuildEmoji {
         this.emoji = options.emoji;
     }
 
+
     public static async getAll(optionGuildId: Snowflake) {
         if (!assertIsSnowflake(optionGuildId)) throw new Error(optionGuildId + " is not a valid guild snowflake")
         let guildEmojiRows = await new Promise((fulfill, reject) => {
