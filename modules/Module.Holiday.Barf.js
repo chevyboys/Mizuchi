@@ -4,7 +4,7 @@ const Module = new Augur.Module;
 const RoleClient = require("../utils/Utils.RolesLogin");
 let roleGuild = RoleClient.guilds.cache.get(snowflakes.guilds.PrimaryServer);
 let eventRunning = false;
-let shouldUpdateColor = true;
+let shouldUpdateColor = false;
 
 const u = require("../utils/Utils.Generic")
 
