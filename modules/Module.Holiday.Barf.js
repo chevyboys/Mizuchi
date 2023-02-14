@@ -50,7 +50,7 @@ Module.addEvent("messageCreate", async (msg) => {
     } eventRunning = true;
     msg.react("👌");
     await holiday.setName("Kester Day");
-    await holiday.setColor("#C4CBFF")
+    await holiday.setColor(colors[Math.floor(Math.random() * colors.length)]);
     try {
       await holiday.setIcon("./avatar/red-heart.png")
     } catch (error) {
