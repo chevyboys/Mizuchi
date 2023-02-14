@@ -48,6 +48,7 @@ Module.addEvent("messageCreate", async (msg) => {
       else (await selys).send("Go forth, and steal dungeon floors.");
       await general.send("It's a very special day of the year. A time for celebrating and cherishing the love and freindships around us. Radiance is happy to announce, our Kester Day Celebrations have begun! Enjoy your holiday bonus XP.")
     } eventRunning = true;
+    msg.react("👌");
     await holiday.setName("Kester Day");
     await holiday.setColor("#C4CBFF")
     try {
