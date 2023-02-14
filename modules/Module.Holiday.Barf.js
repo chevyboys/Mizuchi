@@ -4,19 +4,21 @@ const Module = new Augur.Module;
 const RoleClient = require("../utils/Utils.RolesLogin");
 let roleGuild = RoleClient.guilds.cache.get(snowflakes.guilds.PrimaryServer);
 let eventRunning = false;
+let shouldUpdateColor = true;
 
 const u = require("../utils/Utils.Generic")
 
-const colors = ["#C00000", "#FF3334", "#FF0000", "#FF6F77", "#FFBBC1", "#FFDEC1", "#FFDEE3", "#FF8896", "#FC245C", "#FC8CB4", "#820123", "#960228"]
+const colors = ["#C00000", "#FF3334", "#FF0000", "#FF6F77", "#FFBBC1", "#e4adff", "#FFDEE3", "#FF8896", "#FC245C", "#FC8CB4", "#820123", "#960228"]
 async function updateColor() {
-  if (!eventRunning) return;
+  if (!eventRunning || !shouldUpdateColor) return;
   const holiday = await roleGuild.roles.fetch(snowflakes.roles.Holiday);
   try {
     let item = colors[Math.floor(Math.random() * colors.length)];
     await holiday.setColor(item)
   }
-  catch {
-    console.log("Could not reset color of holiday role")
+  catch (error) {
+    shouldUpdateColor = false;
+    throw error
   }
 }
 
@@ -35,16 +37,17 @@ Module.addEvent("messageCreate", async (msg) => {
     const general = msg.guild.channels.cache.get(snowflakes.channels.general);
     const webhooks = await general.fetchWebhooks()
     let selys = webhooks.find(w => w.name.toLowerCase().indexOf("selys") > -1);
-    if (!selys) {
-      selys = await general.createWebhook('Selys', {
-        avatar: './avatar/selysWebhook.png',
-        reason: 'Holiday Event'
-      })
-        .then(sel => sel.send("Go forth, and steal dungeon floors.")).catch(err => { throw err });
-    }
-    else (await selys).send("Go forth, and steal dungeon floors.");
-    await general.send("It's a very special day of the year. A time for celebrating and cherishing the love and freindships around us. Radiance is happy to announce, our Kester Day Celebrations have begun! Enjoy your holiday bonus XP.")
-    eventRunning = true;
+    if (!msg.content.indexOf("silent")) {
+      if (!selys) {
+        selys = await general.createWebhook('Selys', {
+          avatar: './avatar/selysWebhook.png',
+          reason: 'Holiday Event'
+        })
+          .then(sel => sel.send("Go forth, and steal dungeon floors.")).catch(err => { throw err });
+      }
+      else (await selys).send("Go forth, and steal dungeon floors.");
+      await general.send("It's a very special day of the year. A time for celebrating and cherishing the love and freindships around us. Radiance is happy to announce, our Kester Day Celebrations have begun! Enjoy your holiday bonus XP.")
+    } eventRunning = true;
     await holiday.setName("Kester Day");
     await holiday.setColor("#C4CBFF")
     try {
@@ -77,7 +80,7 @@ Module.addEvent("messageCreate", async (msg) => {
   }
 }).setClockwork(() => {
   try {
-    return setInterval(updateColor, 10 * 60 * 1000);
+    return setInterval(updateColor, 30 * 60 * 1000);
   } catch (e) { u.errorHandler(e, "update holiday role color error"); }
 })
 
