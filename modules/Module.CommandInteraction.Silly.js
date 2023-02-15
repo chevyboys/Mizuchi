@@ -2,6 +2,7 @@
 const Augur = require("augurbot"),
   u = require('../utils/Utils.Generic'),
   Jimp = require("jimp");
+const { MessageAttachment } = require("discord.js");
 
 const supportedFormats = ["png", "jpg", "jpeg", "bmp", "tiff", "gif"];
 
@@ -215,6 +216,29 @@ const Module = new Augur.Module()
         canvas.blit(avatar, 120, 0);
 
         await msg.channel.send({ files: [await canvas.getBufferAsync(Jimp.MIME_PNG)] });
+
+      } catch (e) { u.errorHandler(e, msg); }
+    }
+  })
+  .addCommand({
+    name: "valentines",
+    description: "Show it off.",
+    category: "Silly",
+    process: async (msg, suffix) => {
+      const x = 788;
+      const y = 529;
+      try {
+        const card = "https://cdn.discordapp.com/attachments/1059565264527704286/1062892298708463706/SPOILER_image.png";
+        const target = suffix || "everyone"
+
+        const canvas = await Jimp.read(card);
+        const font = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE)
+        canvas.print(font, x, y, target);
+        let file = new MessageAttachment(await canvas.getBufferAsync(Jimp.MIME_PNG), "Mara.png").setSpoiler(true)
+
+
+
+        await msg.channel.send({ content: "AA4 spoilers", files: [file] });
 
       } catch (e) { u.errorHandler(e, msg); }
     }

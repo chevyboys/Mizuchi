@@ -35,13 +35,7 @@
     "selenium-webdriver": "^4.1.1",
     "turndown": "^7.1.1"
   },
-  "devDependencies": {
-    "eslint": "^8.26.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.24.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.0"
-  },
+  "devDependencies": {},
   "eslintConfig": {
     "env": {
       "commonjs": true,
