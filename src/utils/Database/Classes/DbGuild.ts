@@ -48,6 +48,31 @@ interface GuildRoleTypeRelationshipQuery {
     friendlyName?: string
 }
 
+
+interface GuildAddOptions {
+    id: Snowflake,
+    //name -> extract from guild object
+    wikiLink?: string,
+    welcomes: GuildWelcomeAddOptions,
+    channels?: GuildChannelAddOptions
+    roles?: Collection<Snowflake, {
+        Duties?: Array<DbGuildRoleDuty>
+        SensativeData?: boolean
+    }>;
+    faqs?: Collection<string, IDbGuildFaq>;
+    links: DbLink[];
+    authors: Collection<number, DbGuildAuthor>;
+    emoji?: Collection<string, DbGuildEmoji>;
+}
+
+interface GuildWelcomeAddOptions{
+
+}
+
+interface GuildChannelAddOptions {
+
+}
+
 //Eventually, all of these Setters should also update the database
 export class DbGuild implements IDbGuild {
     private _id!: Snowflake;
@@ -148,6 +173,14 @@ export class DbGuild implements IDbGuild {
 
     }
 
+    public static async add(optionId: Snowflake) {
+        if (!assertIsSnowflake(optionId)) throw new Error(optionId + " is not a valid guildId");
+        const client = clientPrimaryInstance;
+        const guild = await client.guilds.fetch(optionId);
+        if(!guild) throw new Error(optionId + " is not a guildId of a guild I am in");
+        
+        
+    }
 
 
     public static async get(optionId: Snowflake): Promise<DbGuild | undefined> {
@@ -185,12 +218,7 @@ export class DbGuild implements IDbGuild {
 
     };
 
-    public static set(options: IDbGuildOptions) {
-        //ToDo
-    };
-    private static add(options: IDbGuildOptions) {
-        //ToDo
-    }
+
     public static setAll() {
         let client = clientPrimaryInstance;
     };
