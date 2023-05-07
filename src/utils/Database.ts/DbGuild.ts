@@ -21,7 +21,7 @@ class DbGuild {
     constructor(_guild: Guild | PGuild ) {
         this.id = _guild.id;
         this.name = _guild.name;
-
+        this.welcome = new DbGuildWelcome(_guild);
     }
     
     static get(id:Snowflake){
@@ -35,7 +35,13 @@ class DbGuildWelcome{
     title: string | null = null;
     image: string | null = null;
     expiration: Date | null = null;
-    constructor(_guild: Guild | PGuild ){
-        
+    constructor(_guild: PGuild | Guild | null ){
+        if( (<PGuild>_guild).welcomeString != undefined){
+            this.string = (<PGuild>_guild).welcomeString || null;
+            this.type = (<PGuild>_guild).welcomeType || "disabled";
+            this.title = (<PGuild>_guild).welcomeTitle || null;
+            this.image = (<PGuild>_guild).welcomeImage || null;
+            this.expiration = (<PGuild>_guild).welcomeExpiration || null;
+        } 
     }
 }
