@@ -1,0 +1,251 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Author {
+  id                      BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  userId                  String                    @db.VarChar(30)
+  authorName              String                    @db.VarChar(60)
+  authorHexColor          String                    @db.VarChar(7)
+  blogApiUrl              String?                   @db.Text
+  blogChannelId           String?                   @db.VarChar(30)
+  imageUrl                String                    @db.Text
+  User                    User                      @relation(fields: [userId], references: [id], onDelete: NoAction, map: "FK_AuthorUserId")
+  AuthorGuildRelationship AuthorGuildRelationship[]
+  AuthorLinks             AuthorLinks[]
+  Question                Question[]
+
+  @@index([userId], map: "FK_AuthorUserId")
+}
+
+model AuthorGuildRelationship {
+  id              BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  guildid         String  @db.VarChar(30)
+  authorId        BigInt  @db.UnsignedBigInt
+  answerChannelId String? @db.VarChar(30)
+  blogChannelId   String? @db.VarChar(30)
+  blogEnabled     Boolean @default(false)
+  Author          Author  @relation(fields: [authorId], references: [id], onUpdate: Restrict, map: "FK_AuthorGuildRelationship_AuthorId")
+  Guild           Guild   @relation(fields: [guildid], references: [id], onUpdate: Restrict, map: "FK_AuthorGuildRelationship_guildId")
+
+  @@index([authorId], map: "FK_AuthorGuildRelationship_AuthorId")
+  @@index([guildid], map: "FK_AuthorGuildRelationship_guildId")
+}
+
+model AuthorLinks {
+  id       BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  authorId BigInt @db.UnsignedBigInt
+  label    String @db.VarChar(80)
+  link     String @db.Text
+  Author   Author @relation(fields: [authorId], references: [id], onDelete: Cascade, map: "FK_AuthorLinks_Author")
+
+  @@index([authorId], map: "FK_AuthorLinks_Author")
+}
+
+model EmojiDuty {
+  id           Int          @id @default(autoincrement()) @db.UnsignedSmallInt
+  duty         String       @db.VarChar(60)
+  defaultEmoji String       @db.Char(1)
+  GuildEmoji   GuildEmoji[]
+}
+
+model FAQCategory {
+  id          BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  guildId     String        @db.VarChar(30)
+  messageId   String        @db.VarChar(30)
+  name        String        @db.VarChar(60)
+  expiration  DateTime?     @db.Timestamp(0)
+  Guild       Guild         @relation(fields: [guildId], references: [id], onUpdate: Restrict, map: "FK_FAQCategory_GuildId")
+  FAQQuestion FAQQuestion[]
+
+  @@index([guildId], map: "FK_FAQCategory_GuildId")
+}
+
+model FAQQuestion {
+  id            BigInt      @id @default(autoincrement()) @db.UnsignedBigInt
+  FAQCategoryId BigInt      @db.UnsignedBigInt
+  question      String      @db.VarChar(80)
+  answer        String      @db.Text
+  FAQCategory   FAQCategory @relation(fields: [FAQCategoryId], references: [id], onDelete: Cascade, map: "FK_FAQQUESTION_QuestionCategory")
+
+  @@index([FAQCategoryId], map: "FK_FAQQUESTION_QuestionCategory")
+}
+
+model Guild {
+  id                        String                      @id @db.VarChar(30)
+  name                      String?                     @db.VarChar(32)
+  wikiLink                  String?                     @db.Text
+  welcomeString             String?                     @db.Text
+  welcomeType               Guild_welcomeType           @default(disabled)
+  welcomeTitle              String?                     @db.VarChar(500)
+  welcomeImage              String?                     @db.Text
+  welcomeExpiration         DateTime?                   @db.Timestamp(0)
+  questionQueueChannel      String?                     @db.VarChar(30)
+  publicCommandsChannel     String?                     @db.VarChar(30)
+  questionDiscussionChannel String?                     @db.VarChar(30)
+  adminCommandsChannel      String?                     @db.VarChar(30)
+  faqChannel                String?                     @db.VarChar(30)
+  generalChannel            String?                     @db.VarChar(30)
+  introductionsChannel      String?                     @db.VarChar(30)
+  modRequestsChannel        String?                     @db.VarChar(30)
+  rolesChannel              String?                     @db.VarChar(30)
+  rulesChannel              String?                     @db.VarChar(30)
+  secretChannel             String?                     @db.VarChar(30)
+  spoilerPolicyChannel      String?                     @db.VarChar(30)
+  AuthorGuildRelationship   AuthorGuildRelationship[]
+  FAQCategory               FAQCategory[]
+  GuildEmoji                GuildEmoji[]
+  GuildLinks                GuildLinks[]
+  GuildRoleTypeRelationship GuildRoleTypeRelationship[]
+  UserGuildRelationship     UserGuildRelationship[]
+}
+
+model GuildEmoji {
+  id             BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  emojiDutyId    Int?       @db.UnsignedSmallInt
+  discordGuildid String     @db.VarChar(30)
+  emoji          String     @db.VarChar(100)
+  EmojiDuty      EmojiDuty? @relation(fields: [emojiDutyId], references: [id], map: "FK_DiscordGuildEmoji_EmojiDutyId")
+  Guild          Guild      @relation(fields: [discordGuildid], references: [id], onDelete: NoAction, map: "FK_DiscordGuildEmoji_GuildId")
+
+  @@index([emojiDutyId], map: "FK_DiscordGuildEmoji_EmojiDutyId")
+  @@index([discordGuildid], map: "FK_DiscordGuildEmoji_GuildId")
+}
+
+model GuildLinks {
+  id             BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  discordGuildid String  @db.VarChar(30)
+  link           String  @db.VarChar(1000)
+  label          String  @db.VarChar(80)
+  isMeme         Boolean @default(false)
+  Guild          Guild   @relation(fields: [discordGuildid], references: [id], onDelete: Cascade, map: "FK_GuildLinks_GuildId")
+
+  @@index([discordGuildid], map: "FK_GuildLinks_GuildId")
+}
+
+model GuildRoleTypeRelationship {
+  id                        BigInt                      @id @default(autoincrement()) @db.UnsignedBigInt
+  discordGuildId            String                      @db.VarChar(30)
+  discordRoleId             String                      @db.VarChar(30)
+  discordRoleDutyId         Int?                        @db.UnsignedSmallInt
+  sensitiveData             Boolean?
+  RoleDuty                  RoleDuty?                   @relation(fields: [discordRoleDutyId], references: [id], map: "FK_GuildRoleTypeRelationship_DutyId")
+  Guild                     Guild                       @relation(fields: [discordGuildId], references: [id], onDelete: NoAction, map: "FK_GuildRoleTypeRelationship_GuildId")
+  UserGuildRoleRelationship UserGuildRoleRelationship[]
+
+  @@index([discordRoleDutyId], map: "FK_GuildRoleTypeRelationship_DutyId")
+  @@index([discordGuildId], map: "FK_GuildRoleTypeRelationship_GuildId")
+}
+
+model Question {
+  id                       BigInt                     @id @default(autoincrement()) @db.UnsignedBigInt
+  messageId                String?                    @db.VarChar(30)
+  status                   Question_status            @default(Queued)
+  questionText             String                     @db.Text
+  answerText               String?                    @db.Text
+  answererAuthorId         BigInt?                    @db.UnsignedBigInt
+  timestamp                DateTime                   @default(now()) @db.Timestamp(0)
+  Author                   Author?                    @relation(fields: [answererAuthorId], references: [id], map: "FK_Question_Answerer")
+  QuestionFlagRelationship QuestionFlagRelationship[]
+  QuestionUserRelationship QuestionUserRelationship[]
+
+  @@index([answererAuthorId], map: "FK_Question_Answerer")
+}
+
+model QuestionFlag {
+  id                       Int                        @id @default(autoincrement()) @db.UnsignedTinyInt
+  name                     String                     @db.VarChar(30)
+  QuestionFlagRelationship QuestionFlagRelationship[]
+}
+
+model QuestionFlagRelationship {
+  id             BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  questionId     BigInt       @db.UnsignedBigInt
+  questionFlagId Int          @db.UnsignedTinyInt
+  QuestionFlag   QuestionFlag @relation(fields: [questionFlagId], references: [id], onDelete: Cascade, map: "FK_QuestionFlagRelationship_FlagId")
+  Question       Question     @relation(fields: [questionId], references: [id], onDelete: Cascade, map: "FK_QuestionFlagRelationship_QuestionId")
+
+  @@index([questionFlagId], map: "FK_QuestionFlagRelationship_FlagId")
+  @@index([questionId], map: "FK_QuestionFlagRelationship_QuestionId")
+}
+
+model QuestionUserRelationship {
+  id                             BigInt                       @id @default(autoincrement()) @db.UnsignedBigInt
+  questionId                     BigInt                       @db.UnsignedBigInt
+  discordUserId                  String                       @db.VarChar(30)
+  questionUserRelationshipTypeId Int                          @db.UnsignedTinyInt
+  Question                       Question                     @relation(fields: [questionId], references: [id], onDelete: Cascade, map: "FK_UserQuestionRelationshipQuestion")
+  QuestionUserRelationshipType   QuestionUserRelationshipType @relation(fields: [questionUserRelationshipTypeId], references: [id], onDelete: Cascade, map: "FK_UserQuestionRelationshipQuestionType")
+  User                           User                         @relation(fields: [discordUserId], references: [id], onDelete: Cascade, map: "FK_UserQuestionRelationshipUser")
+
+  @@index([questionId], map: "FK_UserQuestionRelationshipQuestion")
+  @@index([questionUserRelationshipTypeId], map: "FK_UserQuestionRelationshipQuestionType")
+  @@index([discordUserId], map: "FK_UserQuestionRelationshipUser")
+}
+
+model QuestionUserRelationshipType {
+  id                       Int                        @id @default(autoincrement()) @db.UnsignedTinyInt
+  name                     String                     @db.VarChar(60)
+  QuestionUserRelationship QuestionUserRelationship[]
+}
+
+model RoleDuty {
+  id                        Int                         @id @default(autoincrement()) @db.UnsignedSmallInt
+  friendlyName              String                      @db.VarChar(50)
+  GuildRoleTypeRelationship GuildRoleTypeRelationship[]
+}
+
+model User {
+  id                        String                      @id @db.VarChar(30)
+  Author                    Author[]
+  QuestionUserRelationship  QuestionUserRelationship[]
+  UserGuildRelationship     UserGuildRelationship[]
+  UserGuildRoleRelationship UserGuildRoleRelationship[]
+}
+
+model UserGuildRelationship {
+  id                   BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  discordUserId        String    @db.VarChar(30)
+  discordGuildId       String    @db.VarChar(30)
+  helperExpirationDate DateTime? @db.Timestamp(0)
+  cakeday              String    @db.VarChar(10)
+  currentXp            BigInt    @db.UnsignedBigInt
+  totalXp              BigInt    @db.UnsignedBigInt
+  Guild                Guild     @relation(fields: [discordGuildId], references: [id], map: "fk_discordGuildId")
+  User                 User      @relation(fields: [discordUserId], references: [id], map: "fk_discordUserId")
+
+  @@index([discordGuildId], map: "fk_discordGuildId")
+  @@index([discordUserId, discordGuildId], map: "guildId userId")
+}
+
+model UserGuildRoleRelationship {
+  id                        BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  discordUserId             String                    @db.VarChar(30)
+  guildRoleRelationshipId   BigInt                    @db.UnsignedBigInt
+  GuildRoleTypeRelationship GuildRoleTypeRelationship @relation(fields: [guildRoleRelationshipId], references: [id], onDelete: Cascade, map: "FK_UserGuildRoleRelationship_GuildRoleRelationshipId")
+  User                      User                      @relation(fields: [discordUserId], references: [id], onDelete: NoAction, map: "FK_UserGuildRoleRelationship_UserId")
+
+  @@index([guildRoleRelationshipId], map: "FK_UserGuildRoleRelationship_GuildRoleRelationshipId")
+  @@index([discordUserId], map: "FK_UserGuildRoleRelationship_UserId")
+}
+
+enum Question_status {
+  Discarded
+  Answered
+  Queued
+  EMPTY_ENUM_VALUE @map("")
+}
+
+enum Guild_welcomeType {
+  prepend
+  embed
+  append
+  insert
+  override
+  disabled
+}

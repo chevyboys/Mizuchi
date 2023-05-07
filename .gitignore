@@ -31,3 +31,4 @@ src/config/*
 package-lock.json
 dist/config/config.json
 dist/config/config.js
+.env

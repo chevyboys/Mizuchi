@@ -7,7 +7,8 @@ import { HelloWorldSlashCommand, HelloWorldSecondSlashCommand } from "./helloWor
 import { HelloWorldEchoCommand, HelloWorldTextCommand } from "./helloWorld/textCommand";
 import { HelloWorldUnregisterSlashCommand, loaded, Reload, unloaded } from "./helloWorld/loadUnload";
 import { Events, Message } from "discord.js";
-import * as Database from "../utils/Utils.Database";
+import * as db from "../utils/Utils.Database";
+let Database = db.Database;
 
 export const Module = new ChironModule({
     name: "hello world",
@@ -39,10 +40,16 @@ Module.components.push(
         permissions: (msg) => true,
         process: async (msg: Message, suffix: string) => {
             if (msg.guild?.id) {
-                let guild = await Database.Guild.get(msg.guild?.id);
-                let user = await Database.User.get(msg.author.id);
-                let question = await Database.Question.get("1054318740289888296");
-                console.log(question);
+                let guild = await Database.guild.findFirstOrThrow({
+                    where: {
+                      id: msg.guild.id,
+                    },
+                  });
+                let user = await Database.user.findFirstOrThrow({
+                    where: {
+                      id: msg.author.id,
+                    },
+                  });
                 console.log(guild)
                 console.log(user);
             }
