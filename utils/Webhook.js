@@ -10,7 +10,7 @@ module.exports = {
    */
   webhook: async (channel, name, avatar, message) => {
     const webhooks = await channel.fetchWebhooks()
-    let webhook = webhooks.find(w => w.name.toLowerCase().indexOf(name) > -1);
+    let webhook = webhooks.find(w => w.name.toLowerCase().indexOf(name.toLowerCase()) > -1);
     if (!webhook) {
       return await channel.createWebhook(name, {
         avatar: avatar,
