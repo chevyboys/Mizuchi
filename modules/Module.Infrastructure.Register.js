@@ -120,7 +120,7 @@ const Module = new Augur.Module()
         ),
       new SlashCommandBuilder()
         .setName("roll")
-        .setDescription("roles a dice of any reasonable size")
+        .setDescription("rolls a dice of any reasonable size")
         .addStringOption(option =>
           option
             .setName("dice")
@@ -129,7 +129,7 @@ const Module = new Augur.Module()
         ),
       new SlashCommandBuilder()
         .setName("gmroll")
-        .setDescription("roles a dice of any reasonable size")
+        .setDescription("rolls a dice of any reasonable size")
         .addStringOption(option =>
           option
             .setName("dice")
