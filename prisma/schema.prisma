@@ -148,13 +148,14 @@ model Question {
   status                   Question_status            @default(Queued)
   questionText             String                     @db.Text
   answerText               String?                    @db.Text
-  answererAuthorId         BigInt?                    @db.UnsignedBigInt
+  answererAuthorRelationshipId         BigInt?        @db.UnsignedBigInt
   timestamp                DateTime                   @default(now()) @db.Timestamp(0)
-  Author                   Author?                    @relation(fields: [answererAuthorId], references: [id], map: "FK_Question_Answerer")
+  AuthorGuildRelationship  AuthorGuildRelationship?   @relation(fields: [answererAuthorRelationshipId], references: [id], map: "FK_Question_Answerer")
+  
   QuestionFlagRelationship QuestionFlagRelationship[]
   QuestionUserRelationship QuestionUserRelationship[]
 
-  @@index([answererAuthorId], map: "FK_Question_Answerer")
+  @@index([answererAuthorRelationshipId], map: "FK_Question_Answerer")
 }
 
 model QuestionFlag {

@@ -11,6 +11,7 @@
     "moduleResolution": "node",                       /* Specify how TypeScript looks up a file from a given module specifier. */
     "resolveJsonModule": true,                        /* Enable importing .json files. */
 
+    "noErrorTruncation": true,                       /* Disable truncating types in error messages. */
     /* Emit */
     "outDir": "./dist",                                   /* Specify an output folder for all emitted files. */
     "importsNotUsedAsValues": "remove",               /* Specify emit/checking behavior for imports that are only used for types. */
