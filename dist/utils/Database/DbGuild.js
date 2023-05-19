@@ -14,69 +14,77 @@ export class DbGuild {
     authors;
     features;
     constructor(_guild) {
-        this.id = _guild.id;
-        this.name = _guild.name;
-        this.welcome = new DbGuildWelcome(_guild);
-        this.channels = new DbGuildChannels(_guild);
-        this.faqs = _guild.FAQCategory;
-        this.emoji = _guild.GuildEmoji;
-        this.links = _guild.GuildLinks;
-        this.roles = _guild.GuildRoleTypeRelationship;
-        this.users = _guild.UserGuildRelationship;
-        this.features = _guild.GuildFeatureRelationship;
-        this.authors = [];
-        let thisGuildAuthors = _guild.AuthorGuildRelationship;
-        for (let i = 0; i < thisGuildAuthors.length; i++) {
-            this.authors.push(new DbGuildAuthor(thisGuildAuthors[i]));
+        if (_guild instanceof DbGuild) {
+            this.id = _guild.id;
+            this.name = _guild.name;
+            this.welcome = _guild.welcome;
+            this.channels = _guild.channels;
+            this.faqs = _guild.faqs;
+            this.emoji = _guild.emoji;
+            this.links = _guild.links;
+            this.roles = _guild.roles;
+            this.users = _guild.users;
+            this.authors = _guild.authors;
+            this.features = _guild.features;
+        }
+        else {
+            this.id = _guild.id;
+            this.name = _guild.name;
+            this.welcome = new DbGuildWelcome(_guild);
+            this.channels = new DbGuildChannels(_guild);
+            this.faqs = _guild.FAQCategory;
+            this.emoji = _guild.GuildEmoji;
+            this.links = _guild.GuildLinks;
+            this.roles = _guild.GuildRoleTypeRelationship;
+            this.users = _guild.UserGuildRelationship;
+            this.features = _guild.GuildFeatureRelationship;
+            this.authors = [];
+            let thisGuildAuthors = _guild.AuthorGuildRelationship;
+            if (thisGuildAuthors)
+                for (let i = 0; i < thisGuildAuthors.length; i++) {
+                    if (thisGuildAuthors[i])
+                        this.authors.push(new DbGuildAuthor(thisGuildAuthors[i]));
+                }
         }
     }
     static get(id) {
-        return new Promise((resolve, reject) => {
-            let record = prisma.guild.findUnique({
-                where: {
-                    id: id,
+        return prisma.guild.findUnique({
+            where: {
+                id: id,
+            },
+            include: {
+                FAQCategory: {
+                    include: {
+                        FAQQuestion: true,
+                    }
                 },
-                include: {
-                    FAQCategory: {
-                        include: {
-                            FAQQuestion: true,
-                        }
-                    },
-                    GuildEmoji: {
-                        include: {
-                            EmojiDuty: true,
-                        }
-                    },
-                    GuildLinks: true,
-                    GuildRoleTypeRelationship: {
-                        include: {
-                            RoleDuty: true,
-                        }
-                    },
-                    UserGuildRelationship: {
-                        include: {
-                            User: true,
-                        }
-                    },
-                    AuthorGuildRelationship: {
-                        include: {
-                            Author: {
-                                include: {
-                                    AuthorLinks: true,
-                                }
+                GuildEmoji: {
+                    include: {
+                        EmojiDuty: true,
+                    }
+                },
+                GuildLinks: true,
+                GuildRoleTypeRelationship: {
+                    include: {
+                        RoleDuty: true,
+                    }
+                },
+                UserGuildRelationship: {
+                    include: {
+                        User: true,
+                    }
+                },
+                AuthorGuildRelationship: {
+                    include: {
+                        Author: {
+                            include: {
+                                AuthorLinks: true,
                             }
-                        },
+                        }
                     },
-                    GuildFeatureRelationship: true,
-                }
-            });
-            if (record == null)
-                reject("No record found");
-            else
-                resolve(new DbGuild(record));
-        })
-            .then((record) => {
-            return record;
+                },
+                GuildFeatureRelationship: true,
+            }
         });
     }
     ;
@@ -93,34 +101,28 @@ export class DbGuild {
         if (guildExisting)
             return guildExisting;
         else
-            return new Promise((resolve, reject) => {
-                let record = prisma.guild.create({
-                    data: {
-                        id: guild.id,
-                        name: guild.name,
-                        faqChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "faq" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        generalChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "general" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        introductionsChannel: guild.channels.cache.filter(channel => (channel.name.toLowerCase() == "introductions" || channel.name.toLowerCase() == "welcome") && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        modRequestsChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "mod-requests" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        rolesChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "roles" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        rulesChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "rules" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        secretChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "secret" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        spoilerPolicyChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "spoiler-policy" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        questionQueueChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "question-queue" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        publicCommandsChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "public-commands" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        questionDiscussionChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "question-discussion" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        adminCommandsChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "admin-commands" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
-                        welcomeString: null,
-                        welcomeType: "disabled",
-                        welcomeTitle: null,
-                        welcomeImage: null,
-                        welcomeExpiration: null,
-                    }
-                });
-                if (record == null)
-                    reject("No record found");
-                else
-                    resolve(new DbGuild(record));
+            return prisma.guild.create({
+                data: {
+                    id: guild.id,
+                    name: guild.name,
+                    faqChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "faq" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    generalChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "general" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    introductionsChannel: guild.channels.cache.filter(channel => (channel.name.toLowerCase() == "introductions" || channel.name.toLowerCase() == "welcome") && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    modRequestsChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "mod-requests" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    rolesChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "roles" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    rulesChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "rules" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    secretChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "secret" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    spoilerPolicyChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "spoiler-policy" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    questionQueueChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "question-queue" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    publicCommandsChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "public-commands" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    questionDiscussionChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "question-discussion" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    adminCommandsChannel: guild.channels.cache.filter(channel => channel.name.toLowerCase() == "admin-commands" && channel.type == Discord.ChannelType.GuildText).first()?.id || null,
+                    welcomeString: null,
+                    welcomeType: "disabled",
+                    welcomeTitle: null,
+                    welcomeImage: null,
+                    welcomeExpiration: null,
+                }
             });
     }
     static delete(id) {
@@ -139,7 +141,7 @@ export class DbGuild {
             },
         });
     }
-    setChannels(channels) {
+    async setChannels(channels) {
         let channelsToSet = {};
         for (const key in this.channels) {
             if (Object.prototype.hasOwnProperty.call(this.channels, key) && typeof this.channels[key] !== "function") {
@@ -150,7 +152,7 @@ export class DbGuild {
                 }
             }
         }
-        prisma.guild.update({
+        return await prisma.guild.update({
             where: {
                 id: this.id,
             },
@@ -221,18 +223,18 @@ export class DbGuildChannels {
     secret = null;
     spoilerPolicy = null;
     constructor(_guild) {
-        this.questionQueue = _guild.questionQueueChannel || null;
-        this.publicCommands = _guild.publicCommandsChannel || null;
-        this.questionDiscussion = _guild.questionDiscussionChannel || null;
-        this.adminCommands = _guild.adminCommandsChannel || null;
-        this.faq = _guild.faqChannel || null;
-        this.general = _guild.generalChannel || null;
-        this.introductions = _guild.introductionsChannel || null;
-        this.modRequests = _guild.modRequestsChannel || null;
-        this.roles = _guild.rolesChannel || null;
-        this.rules = _guild.rulesChannel || null;
-        this.secret = _guild.secretChannel || null;
-        this.spoilerPolicy = _guild.spoilerPolicyChannel || null;
+        this.questionQueue = _guild?.questionQueueChannel || null;
+        this.publicCommands = _guild?.publicCommandsChannel || null;
+        this.questionDiscussion = _guild?.questionDiscussionChannel || null;
+        this.adminCommands = _guild?.adminCommandsChannel || null;
+        this.faq = _guild?.faqChannel || null;
+        this.general = _guild?.generalChannel || null;
+        this.introductions = _guild?.introductionsChannel || null;
+        this.modRequests = _guild?.modRequestsChannel || null;
+        this.roles = _guild?.rolesChannel || null;
+        this.rules = _guild?.rulesChannel || null;
+        this.secret = _guild?.secretChannel || null;
+        this.spoilerPolicy = _guild?.spoilerPolicyChannel || null;
     }
     toString() {
         let string = "";
