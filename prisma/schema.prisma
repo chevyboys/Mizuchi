@@ -18,20 +18,20 @@ model Author {
   User                    User                      @relation(fields: [userId], references: [id], onDelete: NoAction, map: "FK_AuthorUserId")
   AuthorGuildRelationship AuthorGuildRelationship[]
   AuthorLinks             AuthorLinks[]
-  Question                Question[]
 
   @@index([userId], map: "FK_AuthorUserId")
 }
 
 model AuthorGuildRelationship {
-  id              BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
-  guildid         String  @db.VarChar(30)
-  authorId        BigInt  @db.UnsignedBigInt
-  answerChannelId String? @db.VarChar(30)
-  blogChannelId   String? @db.VarChar(30)
-  blogEnabled     Boolean @default(false)
-  Author          Author  @relation(fields: [authorId], references: [id], onUpdate: Restrict, map: "FK_AuthorGuildRelationship_AuthorId")
-  Guild           Guild   @relation(fields: [guildid], references: [id], onUpdate: Restrict, map: "FK_AuthorGuildRelationship_guildId")
+  id              BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  guildid         String     @db.VarChar(30)
+  authorId        BigInt     @db.UnsignedBigInt
+  answerChannelId String?    @db.VarChar(30)
+  blogChannelId   String?    @db.VarChar(30)
+  blogEnabled     Boolean    @default(false)
+  Author          Author     @relation(fields: [authorId], references: [id], onUpdate: Restrict, map: "FK_AuthorGuildRelationship_AuthorId")
+  Guild           Guild      @relation(fields: [guildid], references: [id], onUpdate: Restrict, map: "FK_AuthorGuildRelationship_guildId")
+  Questions       Question[]
 
   @@index([authorId], map: "FK_AuthorGuildRelationship_AuthorId")
   @@index([guildid], map: "FK_AuthorGuildRelationship_guildId")
@@ -103,6 +103,7 @@ model Guild {
   GuildLinks                GuildLinks[]
   GuildRoleTypeRelationship GuildRoleTypeRelationship[]
   UserGuildRelationship     UserGuildRelationship[]
+  GuildFeatureRelationship  GuildFeatureRelationship[]
 }
 
 model GuildEmoji {
@@ -143,19 +144,17 @@ model GuildRoleTypeRelationship {
 }
 
 model Question {
-  id                       BigInt                     @id @default(autoincrement()) @db.UnsignedBigInt
-  messageId                String?                    @db.VarChar(30)
-  status                   Question_status            @default(Queued)
-  questionText             String                     @db.Text
-  answerText               String?                    @db.Text
-  answererAuthorRelationshipId         BigInt?        @db.UnsignedBigInt
-  timestamp                DateTime                   @default(now()) @db.Timestamp(0)
-  AuthorGuildRelationship  AuthorGuildRelationship?   @relation(fields: [answererAuthorRelationshipId], references: [id], map: "FK_Question_Answerer")
-  
+  id                    BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
+  messageId             String?                 @db.VarChar(30)
+  status                Question_status         @default(Queued)
+  questionText          String                  @db.Text
+  answerText            String?                 @db.Text
+  answererGuildAuthorId BigInt                  @db.UnsignedBigInt
+  answererGuildAuthor   AuthorGuildRelationship @relation(fields: [answererGuildAuthorId], references: [id])
+  timestamp             DateTime                @default(now()) @db.Timestamp(0)
+
   QuestionFlagRelationship QuestionFlagRelationship[]
   QuestionUserRelationship QuestionUserRelationship[]
-
-  @@index([answererAuthorRelationshipId], map: "FK_Question_Answerer")
 }
 
 model QuestionFlag {
@@ -233,6 +232,23 @@ model UserGuildRoleRelationship {
 
   @@index([guildRoleRelationshipId], map: "FK_UserGuildRoleRelationship_GuildRoleRelationshipId")
   @@index([discordUserId], map: "FK_UserGuildRoleRelationship_UserId")
+}
+
+model Feature {
+  id                       BigInt                     @id @default(autoincrement()) @db.UnsignedBigInt
+  friendlyName             String                     @db.VarChar(90)
+  GuildFeatureRelationship GuildFeatureRelationship[]
+}
+
+model GuildFeatureRelationship {
+  id             BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  featureId      BigInt  @db.UnsignedBigInt
+  discordGuildId String  @db.VarChar(30)
+  Guild          Guild   @relation(fields: [discordGuildId], references: [id], map: "fk_discordGuildId1")
+  Feature        Feature @relation(fields: [featureId], references: [id], map: "fk_FeatureId")
+
+  @@index([discordGuildId], map: "fk_discordGuildId")
+  @@index([featureId, discordGuildId], map: "guildId featureId")
 }
 
 enum Question_status {
