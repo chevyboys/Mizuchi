@@ -36,7 +36,7 @@ let subcommandChannelsProccess = async (interaction) => {
     guild = new DbGuild(newGuild ? newGuild : guild);
     let embed = new EmbedBuilder()
         .setTitle("Channel Setup")
-        .setDescription("The channels have been set to the following:\n" + JSON.stringify(guild.channels, null, 2))
+        .setDescription("The channels have been set to the following:\n" + guild.channels.toString())
         .setColor([255, 3, 5])
         .setTimestamp();
     interaction.isRepliable() ? interaction.reply({
