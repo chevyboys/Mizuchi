@@ -1,6 +1,6 @@
 {
   "name": "project-mizuchi",
-  "version": "3.0.0 - Alpha 0.0.1",
+  "version": "3.0.0A0.1",
   "description": "Custom Discord bot for the Climber's Court",
   "main": "src/Bot.ts",
   "scripts": {
