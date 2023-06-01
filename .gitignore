@@ -18,3 +18,7 @@ config/snowflakes.json
 package-lock.json
 Judgement
 avatar/*
+dist/config/config.js
+.gitignore
+src/config/config.ts
+prisma/.env
