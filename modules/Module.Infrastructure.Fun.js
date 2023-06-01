@@ -7,6 +7,7 @@ const RoleClient = require("../utils/Utils.RolesLogin");
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
+const levenshtein = require('js-levenshtein');
 
 async function shhh(msg) {
   try {
@@ -81,10 +82,26 @@ async function pride(msg) {
   let content = msg?.content?.toLowerCase();
   let spacelessContent = content.replaceAll(" ", "");
   if (mon != 5) return
-if (!roleGuild) {
+  if (!roleGuild) {
     roleGuild = await RoleClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
   }
-  if (spacelessContent.indexOf("happypride") > -1 || spacelessContent.indexOf("pridetavare") > -1 || (msg.mentions.members.has(msg.client.user.id) && spacelessContent.indexOf("pride"))) {
+  let enabled = false;
+  if (spacelessContent.indexOf("happypride") > -1 || spacelessContent.indexOf("pridetavare") > -1 || (msg.mentions.members.has(msg.client.user.id) && spacelessContent.indexOf("pride"))) enabled = true;
+  else {
+    let split = content.split(" ");
+    for (let i = 1; i < split.length; i++) {
+      try {
+        let word = split[i - 1] + split[i];
+        if (levenshtein(word, "happypride") < 2 || levenshtein(word, "pridetavare") < 2 || (msg.mentions.members.has(msg.client.user.id) && levenshtein(word, "pride") < 2)) {
+          enabled = true;
+          break;
+        }
+      } catch (error) {
+        u.noop();
+      }
+    }
+  }
+  if (enabled) {
     let addons = [
       "🏳‍🌈",
       "It's dangerous to go alone, take this 🏳‍🌈",

@@ -50,5 +50,8 @@
     },
     "rules": {}
   },
-  "nodeVersion": "17.1.0"
+  "nodeVersion": "17.1.0",
+  "devDependencies": {
+    "@types/js-levenshtein": "^1.1.1"
+  }
 }
