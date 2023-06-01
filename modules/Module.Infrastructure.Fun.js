@@ -134,14 +134,26 @@ async function pride(msg) {
     let midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 24, 0, 0);
     let milisecondsUntilMidnight = (midnight.valueOf() - now.valueOf());
 
-    setTimeout(() => {
+    //set role to random hexcolor
+    let color = Math.floor(Math.random() * 16777215).toString(16);
+    try {
+      roleGuild.roles.fetch(snowflakes.roles.Holiday).then(role => {
+        role.setColor(color);
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
+
+    setTimeout(async () => {
       let index = prideRepliedUsers.indexOf(msg.author.id);
       if (index > -1) {
         prideRepliedUsers.splice(index, 1);
-        member.roles.remove(snowflakes.roles.Holiday);
+        await member.roles.remove(snowflakes.roles.Holiday);
       }
     }
       , milisecondsUntilMidnight);
+    return;
   }
 
 }
