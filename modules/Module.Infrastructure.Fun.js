@@ -3,6 +3,7 @@ const Augur = require("augurbot"),
   Discord = require("discord.js"),
   Module = new Augur.Module(),
   u = require("../utils/Utils.Generic");
+const RoleClient = require("../utils/Utils.RolesLogin");
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
