@@ -67,11 +67,71 @@ function goodTime(msg) {
 
 }
 
+let prideRepliedUsers = [];
+/**determines if the bot should respond with Happy pride, then does so 
+ * @param {Discord.Message} msg
+*/
+function pride(msg) {
+  if (msg.author.bot || prideRepliedUsers.includes(msg.author.id)) return;
+  if (msg.channel != snowflakes.channels.general) return;
+  let mon = new Date().getMonth();
+  if (mon != 5) return
+  let content = msg?.content?.toLowerCase();
+  let spacelessContent = content.replaceAll(" ", "");
+  if (mon != 5) return
+
+  if (spacelessContent.indexOf("happypride") > -1 || spacelessContent.indexOf("pridetavare") > -1 || (msg.mentions.members.has(msg.client.user.id) && spacelessContent.indexOf("pride"))) {
+    let addons = [
+      "🏳‍🌈",
+      "It's dangerous to go alone, take this 🏳‍🌈",
+      "🏳‍🌈🏳‍🌈🏳‍🌈",
+      "🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈",
+      "Take this 🏳‍🌈 and slay with pride!",
+      "Grab this 🏳‍🌈 and let your true colors shine!",
+      "Here's a 🏳‍🌈 for your courageous journey!",
+      "Take this 🏳‍🌈 and slay with pride!",
+      "Wield this 🏳‍🌈 and conquer hate with love!",
+      "Grab this 🏳‍🌈 and let your true colors shine!",
+      "Have a 🏳‍🌈!",
+      "Here's a 🏳‍🌈 for wherever your exploration of yourself takes you!",
+      "You are fabulous! ",
+      "You deserve love and acceptance.",
+      "Radiance appreciates your presence here.",
+      "Go drink some water, you deserve it.",
+      "Radiance reminds you that you are valid, and we care about you.",
+      "Remember to take care of yourself this month.",
+      "You are excellent, and we are glad you are here.",
+      "Thanks for being here.",
+      "Radiance is proud of you.",
+      "In this vast world, embrace this 🏳‍🌈 and let it be a reminder of the strength that lies within you.",
+      "Sometimes, the greatest battles are fought within ourselves. Carry this 🏳‍🌈 and let it be a symbol of your inner harmony.",
+      "My dear friend, take this 🏳‍🌈 and let it be a light in the darkness, reminding you of the power of love and unity.",
+      "Life is a series of challenges, but with this 🏳‍🌈, may you find the courage to face them with grace and authenticity.",
+      "Sometimes, the greatest wisdom comes from embracing our true selves. Carry this 🏳‍🌈 and let it guide you towards your own truth.",
+      "Like a gentle breeze, let this 🏳‍🌈 remind you to spread kindness, compassion, and acceptance wherever you go.",
+      "In the tapestry of life, every color is important. Embrace this 🏳‍🌈 and celebrate the vibrant diversity that makes us who we are.",
+      "My young friend, take this 🏳‍🌈 and let it remind you that you are loved, cherished, and worthy of acceptance."
+    ]
+    msg.reply({ content: `Happy Pride ${msg.member.displayName}! ${u.rand(addons)}`, allowedMentions: { repliedUser: false } });
+    prideRepliedUsers.push(msg.author.id);
+    //create callback to remove user from array after 8 hours
+    setTimeout(() => {
+      let index = prideRepliedUsers.indexOf(msg.author.id);
+      if (index > -1) {
+        prideRepliedUsers.splice(index, 1);
+      }
+    }
+      , 1000 * 60 * 60 * 8);
+  }
+
+}
+
 function youreWelcome(msg) {
   if (msg.content.toLowerCase().replaceAll(" ", "").indexOf("thankyoutavare") > -1) {
     msg.reply("You're very welcome!")
   }
 }
+
 
 const emojis = new Discord.Collection([
   //[snowflakes.roles.BotMaster, snowflakes.emoji.bot],    // BotMasters - botIcon
@@ -98,5 +158,6 @@ Module.addEvent("messageCreate", async (msg) => {
   goodTime(msg);
   shhh(msg);
   tavareSawThatPing(msg);
+  pride(msg);
 });
 module.exports = Module;
