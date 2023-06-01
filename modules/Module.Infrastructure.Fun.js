@@ -67,11 +67,12 @@ function goodTime(msg) {
 
 }
 
+let roleGuild;
 let prideRepliedUsers = [];
 /**determines if the bot should respond with Happy pride, then does so 
  * @param {Discord.Message} msg
 */
-function pride(msg) {
+async function pride(msg) {
   if (msg.author.bot || prideRepliedUsers.includes(msg.author.id)) return;
   if (msg.channel != snowflakes.channels.general) return;
   let mon = new Date().getMonth();
@@ -114,14 +115,33 @@ function pride(msg) {
     ]
     msg.reply({ content: `Happy Pride ${msg.member.displayName}! ${u.rand(addons)}`, allowedMentions: { repliedUser: false } });
     prideRepliedUsers.push(msg.author.id);
+
+    let member = await roleGuild.members.fetch(msg.member.id);
+    if (!roleGuild) {
+      roleGuild = await RoleClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
+    }
+    try {
+      member.roles.add(snowflakes.roles.Holiday);
+      console.log("Added holiday role to " + msg.member.displayName)
+    } catch (error) {
+      const modRequests = msg.guild.channels.cache.get(snowflakes.channels.modRequests);
+      modRequests.send("I couldn't add the <@&" + snowflakes.roles.Holiday + " role to " + msg.member.displayName)
+      throw error;
+    }
     //create callback to remove user from array after 8 hours
+    //calculate seconds until midnight
+    let now = new Date();
+    let midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 24, 0, 0);
+    let milisecondsUntilMidnight = (midnight.valueOf() - now.valueOf());
+
     setTimeout(() => {
       let index = prideRepliedUsers.indexOf(msg.author.id);
       if (index > -1) {
         prideRepliedUsers.splice(index, 1);
+        member.roles.remove(snowflakes.roles.Holiday);
       }
     }
-      , 1000 * 60 * 60 * 8);
+      , milisecondsUntilMidnight);
   }
 
 }
