@@ -80,7 +80,9 @@ async function pride(msg) {
   let content = msg?.content?.toLowerCase();
   let spacelessContent = content.replaceAll(" ", "");
   if (mon != 5) return
-
+if (!roleGuild) {
+    roleGuild = await RoleClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
+  }
   if (spacelessContent.indexOf("happypride") > -1 || spacelessContent.indexOf("pridetavare") > -1 || (msg.mentions.members.has(msg.client.user.id) && spacelessContent.indexOf("pride"))) {
     let addons = [
       "🏳‍🌈",
