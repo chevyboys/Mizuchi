@@ -25,6 +25,7 @@
     "discord-api-types": "^0.23.1",
     "discord.js": "^13.10.3",
     "jimp": "^0.22.8",
+    "js-levenshtein": "^1.1.6",
     "moment": "^2.29.1",
     "mongoose": "^5.13.7",
     "mysql": "^2.18.1",
@@ -36,7 +37,6 @@
     "selenium-webdriver": "^4.1.1",
     "turndown": "^7.1.1"
   },
-  "devDependencies": {},
   "eslintConfig": {
     "env": {
       "commonjs": true,
