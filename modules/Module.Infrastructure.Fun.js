@@ -7,7 +7,7 @@ const RoleClient = require("../utils/Utils.RolesLogin");
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
-const levenshtein = require('js-levenshtein');
+const {distance, closest} = require('fastest-levenshtein');
 
 async function shhh(msg) {
   try {
@@ -92,7 +92,7 @@ async function pride(msg) {
     for (let i = 1; i < split.length; i++) {
       try {
         let word = split[i - 1] + split[i];
-        if (levenshtein(word, "happypride") < 2 || levenshtein(word, "pridetavare") < 2 || (msg.mentions.members.has(msg.client.user.id) && levenshtein(word, "pride") < 2)) {
+        if (distance(word, "happypride") < 2 || distance(word, "pridetavare") < 2 || (msg.mentions.members.has(msg.client.user.id) && distance(word, "pride") < 2)) {
           enabled = true;
           break;
         }
