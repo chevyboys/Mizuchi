@@ -429,6 +429,51 @@ const utils = {
     return pages.slice(0, finalNumberOfPages)
   },
   /**
+   *  splits a string into chunks of 1900 characters, splitting on the last newline or space if possible
+   * @param {string} message The string to split
+   * @returns {string[]} An array of strings, each of which is less than 1900 characters
+   **/
+  splitMessage: (message) => {
+    const chunks = [];
+    let currentChunk = '';
+
+    while (message.length > 0) {
+      if (message.length <= 1900) {
+        chunks.push(message);
+        break;
+      }
+
+      let chunk = message.substr(0, 1900);
+
+      // Check if there is a newline within the chunk
+      const newlineIndex = chunk.lastIndexOf('\n');
+
+      if (newlineIndex >= 1800 && newlineIndex < 1900) {
+        // Split on the last newline within the chunk
+        chunk = chunk.substr(0, newlineIndex + 1);
+        chunks.push(currentChunk + chunk);
+        message = message.substr(newlineIndex + 1);
+        currentChunk = '';
+      } else {
+        // Split on the last space within the chunk
+        const lastSpaceIndex = chunk.lastIndexOf(' ');
+        if (lastSpaceIndex !== -1) {
+          chunk = chunk.substr(0, lastSpaceIndex + 1);
+          chunks.push(currentChunk + chunk);
+          message = message.substr(lastSpaceIndex + 1);
+          currentChunk = '';
+        } else {
+          // No space found, split at 1900 characters
+          chunks.push(currentChunk + chunk);
+          message = message.substr(1900);
+          currentChunk = '';
+        }
+      }
+    }
+
+    return chunks;
+  },
+  /**
    * Returns a promise that will fulfill after the given amount of time.
    * If awaited, will block for the given amount of time.
    * @param {number} t The time to wait, in milliseconds.
