@@ -1,0 +1,62 @@
+{
+  "name": "pride",
+  "description": "pride event commands",
+  "options": [
+    {
+      "type": 1,
+      "name": "border",
+      "description": "Generates a version of your pfp with a border on it (Credit: Rels & Ryo)",
+      "options": [
+        {
+          "type": 3,
+          "name": "flag",
+          "description": "the pride flag you want to add",
+          "required": true,
+          "autocomplete": true
+        }
+      ]
+    },
+    {
+      "type": 1,
+      "name": "emoji",
+      "description": "create a custom pride emoji image (Credit: Rels & Ryo)",
+      "options": [
+        {
+          "type": 3,
+          "name": "emoji",
+          "description": "the emoji you wish to use",
+          "required": true,
+          "autocomplete": true
+        },
+        {
+          "type": 3,
+          "name": "flag",
+          "description": "the flag the emoji should use",
+          "required": true,
+          "autocomplete": true
+        }
+      ]
+    },
+    {
+      "type": 1,
+      "name": "rune",
+      "description": "create a pride rune image (Credit: Rels & Lan)",
+      "options": [
+        {
+          "type": 3,
+          "name": "rune",
+          "description": "the rune set to use",
+          "required": true,
+          "autocomplete": true
+        },
+        {
+          "type": 3,
+          "name": "flag",
+          "description": "the flag to use",
+          "required": true,
+          "autocomplete": true
+        }
+      ]
+    }
+  ]
+}
