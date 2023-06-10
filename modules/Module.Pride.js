@@ -7,62 +7,6 @@ const supportedFormats = ["png", "jpg", "jpeg", "bmp", "tiff", "gif"];
 const snowflakes = require('../config/snowflakes.json');
 const { closest } = require("fastest-levenshtein");
 
-async function bilateralSmoothing(image) {
-  const width = image.getWidth();
-  const height = image.getHeight();
-  const halfDiameter = 3; // Set the desired half diameter value for smoothing
-
-  // Create a temporary image for storing smoothed pixels
-  const buffer = new Jimp(width, height);
-
-  function calculateWeight(distance, intensityDifference, intensitySigma, spatialSigma) {
-    const spatialWeight = Math.exp(-(distance * distance) / (2 * spatialSigma * spatialSigma));
-    const intensityWeight = Math.exp(-(intensityDifference * intensityDifference) / (2 * intensitySigma * intensitySigma));
-    return spatialWeight * intensityWeight;
-  }
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let rAccumulator = 0;
-      let gAccumulator = 0;
-      let bAccumulator = 0;
-      let weightAccumulator = 0;
-
-      for (let dy = -halfDiameter; dy <= halfDiameter; dy++) {
-        const yPos = y + dy;
-        if (yPos < 0 || yPos >= height) continue;
-
-        for (let dx = -halfDiameter; dx <= halfDiameter; dx++) {
-          const xPos = x + dx;
-          if (xPos < 0 || xPos >= width) continue;
-
-          const intensityDifference = Math.sqrt(
-            Math.pow(image.getPixelColor(xPos, yPos) & 0xff - image.getPixelColor(x, y) & 0xff, 2) +
-            Math.pow((image.getPixelColor(xPos, yPos) >> 8) & 0xff - (image.getPixelColor(x, y) >> 8) & 0xff, 2) +
-            Math.pow((image.getPixelColor(xPos, yPos) >> 16) & 0xff - (image.getPixelColor(x, y) >> 16) & 0xff, 2)
-          );
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          const weight = calculateWeight(distance, intensityDifference, 50, 25); // Set the desired sigma values for intensity and spatial smoothing
-
-          rAccumulator += (image.getPixelColor(xPos, yPos) & 0xff) * weight;
-          gAccumulator += ((image.getPixelColor(xPos, yPos) >> 8) & 0xff) * weight;
-          bAccumulator += ((image.getPixelColor(xPos, yPos) >> 16) & 0xff) * weight;
-          weightAccumulator += weight;
-        }
-      }
-
-      const pixelColor = Jimp.rgbaToInt(
-        Math.round(rAccumulator / weightAccumulator),
-        Math.round(gAccumulator / weightAccumulator),
-        Math.round(bAccumulator / weightAccumulator),
-        image.getPixelColor(x, y) & 0xff
-      );
-      buffer.setPixelColor(pixelColor, x, y);
-    }
-  }
-
-  return buffer;
-}
 
 function createMaskFromTransparentImage(image) {
 
@@ -175,14 +119,14 @@ const sword = async (interaction) => {
   const flag1 = (await Jimp.read(getFlagFromOption(interaction)));
   flag1.rotate(90);
   flag1.resize(600, 300);
-  flag1.color([{ apply: 'saturate', params: [20 + 0.5 * interaction.options.get("intensity").value || 40] }]);
+  flag1.color([{ apply: 'saturate', params: [20 + 0.5 * interaction.options.get("intensity")?.value || 40] }]);
   flag1.color([{ apply: 'darken', params: [20] }]);
   flag1;
   const flag2 = flag1.clone().flip(true, false);
-  const saekes1 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getEmoji())}/Base1.png`);
-  const saekes2 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getEmoji())}/Base2.png`);
-  const saekes3 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getEmoji())}/Base3.png`);
-  const saekes4 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getEmoji())}/Base4.png`);
+  const saekes1 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getSword())}/Base1.png`);
+  const saekes2 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getSword())}/Base2.png`);
+  const saekes3 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getSword())}/Base3.png`);
+  const saekes4 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getSword())}/Base4.png`);
 
   const saekes1Mask = createMaskFromTransparentImage(saekes1);
   const saekes2Mask = createMaskFromTransparentImage(saekes2);
@@ -211,7 +155,7 @@ const sword = async (interaction) => {
   flagCanvas.composite(flag1, 0, 0);
   flagCanvas.composite(flag2, 600, 0);
   flagCanvas.blur(40);
-  flagCanvas.opacity((interaction.options.get("intensity").value + 50) / 100 || 0.7);
+  flagCanvas.opacity((interaction.options.get("intensity")?.value + 50) / 100 || 0.7);
 
   //create the canvas and composite the images onto it
   const canvas = new Jimp(1200, 300, 0x00000000);
