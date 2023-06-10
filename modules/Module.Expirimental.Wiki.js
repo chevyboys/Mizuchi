@@ -43,7 +43,26 @@ Module.addEvent("interactionCreate", async (interaction) => {
     } else {
       const distanceA = distance(a, focusedValue);
       const distanceB = distance(b, focusedValue);
-      return distanceA - distanceB; // Sort based on distance for other cases
+      let finalDistanceA;
+      let finalDistanceB;
+      if (focusedValue.length < a.length) {
+        const distanceAAtLength = distance(a.slice(0, focusedValue.length).toLowerCase(), focusedValue.toLowerCase());
+        finalDistanceA = distanceA > distanceAAtLength ? distanceAAtLength : distanceA;
+      } else {
+        finalDistanceA = distanceA;
+      }
+
+
+      if (focusedValue.length < b.length) {
+        const distanceBAtLength = distance(b.slice(0, focusedValue.length).toLowerCase(), focusedValue.toLowerCase());
+        finalDistanceB = distanceB > distanceBAtLength ? distanceBAtLength : distanceB;
+      } else {
+        finalDistanceB = distanceB;
+      }
+
+      if (a == "Sera Cadence" || b == "Sera Cadence")
+        console.log(a, b, finalDistanceA, finalDistanceB)
+      return finalDistanceA - finalDistanceB; // Sort based on distance for other cases
     }
   });
   //find the last page before the page where distance is greater than 3
@@ -52,7 +71,11 @@ Module.addEvent("interactionCreate", async (interaction) => {
 
   let numberOfPages = pages.length > 5 ? 5 : pages.length;
 
-  let tooFarAwayIndex = pages.slice(0, numberOfPages).findIndex(page => page.toLowerCase().indexOf(focusedValue.toLowerCase()) == -1 && distance(page, focusedValue) > levenshteinTolerance);
+  let tooFarAwayIndex = pages.slice(0, numberOfPages).findIndex(
+    page =>
+      page.toLowerCase().indexOf(focusedValue.toLowerCase()) == -1
+      && distance(page.toLowerCase(), focusedValue.toLowerCase()) > levenshteinTolerance
+      && distance(page.slice(0, focusedValue.length).toLowerCase(), focusedValue.toLowerCase()) > levenshteinTolerance);
   let finalNumberOfPages = tooFarAwayIndex > -1 ? tooFarAwayIndex : numberOfPages;
 
 
