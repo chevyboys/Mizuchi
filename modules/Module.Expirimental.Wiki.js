@@ -10,10 +10,15 @@ const Command = {
   process: async (interaction) => {
     let page = interaction?.options?.get("page")?.value
     let shorten = (!interaction?.options?.get("advanced")?.value);
-    if (page.toLowerCase() != 'unknown page') {
-      interaction.reply({ embeds: [await wiki.pageEmbed(page, shorten)] });
+    try {
+      if (page.toLowerCase() != 'unknown page') {
+        interaction.reply({ embeds: [await wiki.pageEmbed(page, shorten)] });
+      }
+      else interaction.reply({ content: "I couldn't find that page" });
+    } catch (error) {
+      console.log(error);
+      interaction.reply({ content: "I couldn't find that page" });
     }
-    else interaction.reply({ content: "I couldn't find that page" });
   }
 }
 
