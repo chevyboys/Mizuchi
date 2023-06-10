@@ -21,6 +21,25 @@
         "update",
         "compile"
       ]
+    },
+    {
+      "label": "prisma pull",
+      "command": "npx prisma db pull", // Could be any other shell command
+      "args": [],
+      "type": "shell"
+    },
+    {
+      "label": "prisma generate",
+      "command": "npx prisma generate", // Could be any other shell command
+      "args": [],
+      "type": "shell"
+    },
+    {
+      "label": "db typings pull",
+      "dependsOn": [
+        "prisma pull",
+        "prisma generate"
+      ]
     }
   ]
 }
