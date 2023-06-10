@@ -23,15 +23,44 @@ function isValidChoice(choice, searchString) {
   return (choice.toLowerCase().indexOf(searchString.toLowerCase()) > -1);
 }
 
+const levenshteinTolerance = 3;
 Module.addEvent("interactionCreate", async (interaction) => {
   if (!interaction.isAutocomplete() || interaction.commandName != Command.name) return;
   if (!interaction.name == Command.name) return;
   const focusedValue = interaction.options.getFocused();
 
-  let pages = wiki.allPages.sort((a, b) => levenshtein.get(a, focusedValue) - levenshtein.get(b, focusedValue));
+  let pages = await wiki.allPages.sort((a, b) => {
+
+    let aIncludes = a.toLowerCase().indexOf(focusedValue.toLowerCase()) > -1;
+    let bIncludes = b.toLowerCase().indexOf(focusedValue.toLowerCase()) > -1;
+
+    if (aIncludes && !bIncludes) {
+      return -1; // 'a' contains focusedValue, prioritize it over 'b'
+    } else if (!aIncludes && bIncludes) {
+      return 1; // 'b' contains focusedValue, prioritize it over 'a'
+    } else if (aIncludes && bIncludes) {
+      return a.toLowerCase().indexOf(focusedValue.toLowerCase()) - b.toLowerCase().indexOf(focusedValue.toLowerCase())
+    } else {
+      const distanceA = distance(a, focusedValue);
+      const distanceB = distance(b, focusedValue);
+      return distanceA - distanceB; // Sort based on distance for other cases
+    }
+  });
+  //find the last page before the page where distance is greater than 3
+
+
+
   let numberOfPages = pages.length > 5 ? 5 : pages.length;
+
+  let tooFarAwayIndex = pages.slice(0, numberOfPages).findIndex(page => page.toLowerCase().indexOf(focusedValue.toLowerCase()) == -1 && distance(page, focusedValue) > levenshteinTolerance);
+  let finalNumberOfPages = tooFarAwayIndex > -1 ? tooFarAwayIndex : numberOfPages;
+
+
+
+
+
   await interaction.respond(
-    pages.slice(0, numberOfPages).map(page => ({ name: page, value: page })),
+    pages.slice(0, finalNumberOfPages).map(page => ({ name: page, value: page })),
   );
 
 }).addInteractionCommand(Command)
