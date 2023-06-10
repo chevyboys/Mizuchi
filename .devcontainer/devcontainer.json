@@ -1,0 +1,9 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+        },
+"ghcr.io/devcontainers-contrib/features/mysql-homebrew:1": {}
+  }
+}

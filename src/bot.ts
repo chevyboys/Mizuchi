@@ -1,7 +1,21 @@
 import { ChironConfig, ChironClient } from "chironbot";
 import { IChironClientOptions } from "chironbot/dist/Headers/Client";
 import { Partials, GatewayIntentBits } from "discord.js";
-import { configOptions } from "./config/config";
+let configOptions;
+import('./config/config')
+  .then((module) => {
+    configOptions = module.configOptions;
+  })
+  .catch((error) => {
+    configOptions = {
+    adminIds: [process.env.DISCORD_USER_SNOWFLAKE],
+    database: {},
+    repo: new URL("https://github.com/chevyboys/Mizuchi/"),
+    token: process.env.TEST_BOT ,
+    adminServer: process.env.DISCORD_ADMIN_GUILD_SNOWFLAKE,
+    DEBUG: true
+}; 
+  });
 
 const config = new ChironConfig(configOptions)
 export let clientOptions = {
