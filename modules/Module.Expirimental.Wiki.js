@@ -2,6 +2,7 @@ const wiki = require("../utils/Utils.Wiki.js");
 const Augur = require("augurbot");
 const Module = new Augur.Module();
 const snowflakes = require('../config/snowflakes.json');
+const { distance, closest } = require('fastest-levenshtein');
 
 const Command = {
   name: "wiki",
@@ -24,17 +25,14 @@ function isValidChoice(choice, searchString) {
 
 Module.addEvent("interactionCreate", async (interaction) => {
   if (!interaction.isAutocomplete() || interaction.commandName != Command.name) return;
+  if (!interaction.name == Command.name) return;
   const focusedValue = interaction.options.getFocused();
-  const choices = await wiki.search(focusedValue);
-  if (!choices.length || choices.length < 1) {
-    await interaction.respond([{ name: 'unknown page', value: 'unknown page' }])
-  }
-  else {
-    const filtered = choices.filter(choice => isValidChoice(choice, focusedValue));
-    await interaction.respond(
-      filtered.map(choice => ({ name: choice, value: choice })),
-    );
-  }
+
+  let pages = wiki.allPages.sort((a, b) => levenshtein.get(a, focusedValue) - levenshtein.get(b, focusedValue));
+  let numberOfPages = pages.length > 5 ? 5 : pages.length;
+  await interaction.respond(
+    pages.slice(0, numberOfPages).map(page => ({ name: page, value: page })),
+  );
 
 }).addInteractionCommand(Command)
 module.exports = Module;
