@@ -225,8 +225,13 @@ Module.addEvent("interactionCreate", async (interaction) => {
       break;
     case "sword":
       let sword = u.smartSearchSort(getSword(), focusedOption.value, 2, 10);
-      await interaction.respond(sword.map(sword => ({ name: sword, value: sword })));
-      break;
+      try {
+        await interaction.respond(sword.map(sword => ({ name: sword, value: sword })));
+        break;
+      } catch (error) {
+        break;
+      }
+
     default:
       break;
   }
