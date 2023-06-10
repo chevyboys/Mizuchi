@@ -3,6 +3,7 @@ const Discord = require("discord.js"),
   snowflakes = require("../config/snowflakes.json"),
 
   errorLog = new Discord.WebhookClient(config.Webhooks.error);
+const { distance, closest } = require('fastest-levenshtein');
 const rolesClient = require("./Utils.RolesLogin");
 /**
  * @typedef {Object} ParsedInteraction
@@ -367,6 +368,65 @@ const utils = {
    */
   rand: function (selections) {
     return selections[Math.floor(Math.random() * selections.length)];
+  },
+  /**
+   * 
+   * @param {string[]} array //The array to search through
+   * @param {string} searchTerm //The term to search for
+   * @param {number} [tolerance] //The maximum levenshtein distance to allow
+   * @param {number} [size] //The maximum number of results to return
+   * @returns {string[]}
+   * 
+   */
+  smartSearchSort: function (array, searchTerm, tolerance, size = 5) {
+    const levenshteinTolerance = tolerance || 2;
+    let pages = array.sort((a, b) => {
+
+      let aIncludes = a.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+      let bIncludes = b.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+
+      if (aIncludes && !bIncludes) {
+        return -1; // 'a' contains searchTerm, prioritize it over 'b'
+      } else if (!aIncludes && bIncludes) {
+        return 1; // 'b' contains searchTerm, prioritize it over 'a'
+      } else if (aIncludes && bIncludes) {
+        return a.toLowerCase().indexOf(searchTerm.toLowerCase()) - b.toLowerCase().indexOf(searchTerm.toLowerCase())
+      } else {
+        const distanceA = distance(a, searchTerm);
+        const distanceB = distance(b, searchTerm);
+        let finalDistanceA;
+        let finalDistanceB;
+        if (searchTerm.length < a.length) {
+          const distanceAAtLength = distance(a.slice(0, searchTerm.length).toLowerCase(), searchTerm.toLowerCase());
+          finalDistanceA = distanceA > distanceAAtLength ? distanceAAtLength : distanceA;
+        } else {
+          finalDistanceA = distanceA;
+        }
+
+
+        if (searchTerm.length < b.length) {
+          const distanceBAtLength = distance(b.slice(0, searchTerm.length).toLowerCase(), searchTerm.toLowerCase());
+          finalDistanceB = distanceB > distanceBAtLength ? distanceBAtLength : distanceB;
+        } else {
+          finalDistanceB = distanceB;
+        }
+
+        return finalDistanceA - finalDistanceB; // Sort based on distance for other cases
+      }
+    });
+
+
+    //find the last page before the page where distance is greater than 3
+
+    let numberOfPages = pages.length > size ? size : pages.length;
+
+    let tooFarAwayIndex = pages.slice(0, numberOfPages).findIndex(
+      page =>
+        page.toLowerCase().indexOf(searchTerm.toLowerCase()) == -1
+        && distance(page.toLowerCase(), searchTerm.toLowerCase()) > levenshteinTolerance
+        && distance(page.slice(0, searchTerm.length).toLowerCase(), searchTerm.toLowerCase()) > levenshteinTolerance);
+    let finalNumberOfPages = tooFarAwayIndex > -1 ? tooFarAwayIndex : numberOfPages;
+    return pages.slice(0, finalNumberOfPages)
   },
   /**
    * Returns a promise that will fulfill after the given amount of time.
