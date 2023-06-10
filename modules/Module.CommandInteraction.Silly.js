@@ -93,7 +93,7 @@ const Module = new Augur.Module()
     process: async (msg) => {
       try {
         const canvas = await popart(msg, [{ apply: "spin", params: [60] }]);
-        if (canvas) await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await canvas.getBufferAsync(Jimp.MIME_JPEG)] });
+        if (canvas) await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await canvas.getBufferAsync(Jimp.MIME_JPEG)] });
       } catch (e) { u.errorHandler(e, msg); }
 
     }
@@ -113,7 +113,7 @@ const Module = new Augur.Module()
           .setAuthor(name)
           .setDescription(u.escapeText(name) + "'s Avatar")
           .setImage(msg.member.displayAvatarURL({ size: 512, dynamic: true }));
-        msg.channel.send({ content: `<@msg.author.id> created:`, embeds: [embed] });
+        msg.channel.send({ content: `<@${msg.author.id}> created:`, embeds: [embed] });
       } catch (error) { u.errorHandler(error, msg); }
     },
   })
@@ -142,7 +142,7 @@ const Module = new Augur.Module()
             { apply: "hue", params: [235] }         // { apply: "hue", params: [227] }
           ]);
 
-          await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
+          await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
         } catch (error) {
           msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
         }
@@ -181,7 +181,7 @@ const Module = new Augur.Module()
           image.color([
             { apply: "hue", params: [color] }
           ]);
-          await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await image.getBufferAsync(Jimp.MIME_PNG)] });
+          await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await image.getBufferAsync(Jimp.MIME_PNG)] });
         } catch (error) {
           msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
         }
@@ -215,7 +215,7 @@ const Module = new Augur.Module()
 
         canvas.blit(avatar, 120, 0);
 
-        await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await canvas.getBufferAsync(Jimp.MIME_PNG)] });
+        await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await canvas.getBufferAsync(Jimp.MIME_PNG)] });
 
       } catch (e) { u.errorHandler(e, msg); }
     }
@@ -241,7 +241,7 @@ const Module = new Augur.Module()
         try {
           let av = await Jimp.read(target);
           av.color([{ apply: "desaturate", params: [100] }]);
-          await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
+          await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
         } catch (error) {
           msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
         }
@@ -268,7 +268,7 @@ const Module = new Augur.Module()
         try {
           let av = await Jimp.read(target);
           av.normalize();
-          await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
+          await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
         } catch (error) {
           msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
         }
@@ -295,7 +295,7 @@ const Module = new Augur.Module()
         try {
           let av = await Jimp.read(target);
           av.blur(20)
-          await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
+          await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
         } catch (error) {
           msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
         }
@@ -322,7 +322,7 @@ const Module = new Augur.Module()
         try {
           let av = await Jimp.read(target);
           av.pixelate(20)
-          await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
+          await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
         } catch (error) {
           msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
         }
@@ -349,7 +349,7 @@ const Module = new Augur.Module()
         try {
           let av = await Jimp.read(target);
           av.sepia()
-          await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
+          await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await av.getBufferAsync(Jimp.MIME_PNG)] });
         } catch (error) {
           msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
         }
@@ -383,7 +383,7 @@ const Module = new Augur.Module()
               img.setPixelColor(Jimp.rgbaToInt(255 - r, 255 - g, 255 - b, a), x, y);
             }
           }
-          await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await img.getBufferAsync(Jimp.MIME_PNG)] });
+          await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await img.getBufferAsync(Jimp.MIME_PNG)] });
         } catch (error) {
           msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
         }
@@ -417,7 +417,7 @@ const Module = new Augur.Module()
 
         canvas.blit(avatar, 120, 0);
 
-        await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await canvas.getBufferAsync(Jimp.MIME_PNG)] });
+        await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await canvas.getBufferAsync(Jimp.MIME_PNG)] });
 
       } catch (e) { u.errorHandler(e, msg); }
     }
@@ -435,7 +435,7 @@ const Module = new Augur.Module()
         target.resize(350, 350);
         target.mask(mask);
         image.blit(target, 1050, 75);
-        await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await image.getBufferAsync(Jimp.MIME_PNG)] });
+        await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await image.getBufferAsync(Jimp.MIME_PNG)] });
 
       } catch (e) { u.errorHandler(e, msg); }
     }
@@ -450,7 +450,7 @@ const Module = new Augur.Module()
           { apply: "desaturate", params: [100] },
           { apply: "saturate", params: [50] }
         ]);
-        if (canvas) await msg.channel.send({ content: `<@msg.author.id> created:`, files: [await canvas.getBufferAsync(Jimp.MIME_JPEG)] });
+        if (canvas) await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await canvas.getBufferAsync(Jimp.MIME_JPEG)] });
       } catch (e) { u.errorHandler(e, msg); }
 
     }
