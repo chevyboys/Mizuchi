@@ -60,8 +60,6 @@ Module.addEvent("interactionCreate", async (interaction) => {
         finalDistanceB = distanceB;
       }
 
-      if (a == "Sera Cadence" || b == "Sera Cadence")
-        console.log(a, b, finalDistanceA, finalDistanceB)
       return finalDistanceA - finalDistanceB; // Sort based on distance for other cases
     }
   });
@@ -80,8 +78,7 @@ Module.addEvent("interactionCreate", async (interaction) => {
 
 
 
-
-
+  if (pages.length == 0) return interaction.respond([{ name: "Unknown Page", value: "unknown page" }]);
   await interaction.respond(
     pages.slice(0, finalNumberOfPages).map(page => ({ name: page, value: page })),
   );
