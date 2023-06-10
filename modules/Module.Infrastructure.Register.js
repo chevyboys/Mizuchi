@@ -216,6 +216,8 @@ const Module = new Augur.Module()
     let commandCache = guild.commands.cache;
     for (const file of registryFiles) {
       if (file.indexOf(".js") > -1) {
+        //if it isn't june, don't register the pride.json file
+        if (file == "pride.json" && new Date().getMonth() != 5) continue;
         let fileToRegister = file;
         const commandData = require(`../registry/${fileToRegister}`);
         commands.push(commandData);
