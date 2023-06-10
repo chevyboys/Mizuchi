@@ -23,7 +23,7 @@ function isValidChoice(choice, searchString) {
   return (choice.toLowerCase().indexOf(searchString.toLowerCase()) > -1);
 }
 
-const levenshteinTolerance = 3;
+const levenshteinTolerance = 2;
 Module.addEvent("interactionCreate", async (interaction) => {
   if (!interaction.isAutocomplete() || interaction.commandName != Command.name) return;
   if (!interaction.name == Command.name) return;
