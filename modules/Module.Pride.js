@@ -127,7 +127,9 @@ Module.addEvent("interactionCreate", async (interaction) => {
       break;
   }
 
-}).addInteractionCommand(Command)
+})
+if (new Date().getMonth() == 5)
+  Module.addInteractionCommand(Command);
 module.exports = Module;
 
 
