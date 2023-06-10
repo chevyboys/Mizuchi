@@ -14,10 +14,10 @@ const Command = {
       if (page.toLowerCase() != 'unknown page') {
         interaction.reply({ embeds: [await wiki.pageEmbed(page, shorten)] });
       }
-      else interaction.reply({ content: "I couldn't find that page" });
+      else interaction.reply({ content: "I couldn't find that page", ephemeral: true });
     } catch (error) {
       console.log(error);
-      interaction.reply({ content: "I couldn't find that page" });
+      interaction.reply({ content: "I couldn't find that page", ephemeral: true });
     }
   }
 }
