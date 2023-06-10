@@ -97,15 +97,19 @@ function getFirstImageFileNameAsURL(wikitext) {
  * @param {string} baseUrl The base URL of the MediaWiki API, including the protocol and hostname.
  * @returns {string[]} An array of page names.
  */
-async function getAllPageNames(baseUrl) {
-  let queryUrl = baseUrl + "/w/api.php?action=query&format=json&formatversion=2&list=allpages&aplimit=max";
-  let queryResult = await axios.get(queryUrl);
-  let pages = queryResult.data.query.allpages;
-  let pageNames = [];
-  for (let i = 0; i < pages.length; i++) {
-    pageNames.push(pages[i].title);
-  }
-  return pageNames;
+function getAllPageNames(baseUrl) {
+  return new Promise((resolve, reject) => {
+    let queryUrl = baseUrl + "/w/api.php?action=query&format=json&formatversion=2&list=allpages&aplimit=max";
+    axios.get(queryUrl)
+      .then(response => {
+        let pages = response.data.query.allpages;
+        let pageNames = pages.map(page => page.title);
+        resolve(pageNames);
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
 }
 
 /**
@@ -125,11 +129,17 @@ async function searchMediaWiki(baseUrl, search) {
   return "";
 }
 
-const constAllPages = getAllPageNames(wikiBaseUrl);
+getAllPageNames(wikiBaseUrl)
+  .then(pageNames => {
+    wikiFunctions.allPages = pageNames;
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
 
 const wikiFunctions = {
 
-  allPages: constAllPages,
+  allPages: "",
   /**
    * 
    * @param {string} pageName a pagename that exists on wydds.wiki
