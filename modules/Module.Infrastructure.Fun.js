@@ -186,7 +186,7 @@ function youreWelcome(msg) {
 
 
 const emojis = new Discord.Collection([
-  [snowflakes.roles.BotMaster, snowflakes.emoji.bot],    // BotMasters - botIcon
+  //[snowflakes.roles.BotMaster, snowflakes.emoji.bot],    // BotMasters - botIcon
   //["197050381270777857", snowflakes.emoji.upDawn], // Kritta - updawn
 
 ]);
@@ -199,7 +199,7 @@ async function tavareSawThatPing(msg) {
     if (msg.mentions.members.has(privilagedPingPerson) || msg.mentions.roles.has(privilagedPingPerson) || msg.mentions.members.some(m => m.roles.cache.has(privilagedPingPerson))) {
       await msg.react(emoji).catch(u.noop);
       await u.wait(1000)
-      await msg.reactions.resolve(emoji).users.remove(msg.client.user.id);
+      await msg.reactions.cache.get(emoji).users.remove(msg.client.user.id).catch(u.noop);
     }
   }
 
