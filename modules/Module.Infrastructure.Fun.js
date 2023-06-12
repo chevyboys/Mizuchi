@@ -7,7 +7,7 @@ const RoleClient = require("../utils/Utils.RolesLogin");
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
-const {distance, closest} = require('fastest-levenshtein');
+const { distance, closest } = require('fastest-levenshtein');
 
 async function shhh(msg) {
   try {
@@ -186,7 +186,7 @@ function youreWelcome(msg) {
 
 
 const emojis = new Discord.Collection([
-  //[snowflakes.roles.BotMaster, snowflakes.emoji.bot],    // BotMasters - botIcon
+  [snowflakes.roles.BotMaster, snowflakes.emoji.bot],    // BotMasters - botIcon
   //["197050381270777857", snowflakes.emoji.upDawn], // Kritta - updawn
 
 ]);
@@ -195,12 +195,33 @@ async function tavareSawThatPing(msg) {
 
   emojis.set(msg.client.user.id, "👋");
   // privilagedPingPerson Pings
-  for (const [privilagedPingPerson, emoji] of emojis)
-    if (msg.mentions.members.has(privilagedPingPerson) || msg.mentions.roles.has(privilagedPingPerson) || msg.mentions.members.some(m => m.roles.cache.has(privilagedPingPerson))) msg.react(emoji).catch(u.noop);
+  for (const [privilagedPingPerson, emoji] of emojis) {
+    if (msg.mentions.members.has(privilagedPingPerson) || msg.mentions.roles.has(privilagedPingPerson) || msg.mentions.members.some(m => m.roles.cache.has(privilagedPingPerson))) {
+      await msg.react(emoji).catch(u.noop);
+      await u.wait(5000)
+      await msg.reactions.resolve(emoji).users.remove(msg.client.user.id);
+    }
+  }
+
 
 }
 
+removePrideRole = async () => {
+  //return if it's not between midnight and 1am
+  let now = new Date();
+  if (now.getHours() != 0) {
+    return;
+  }
 
+  const roleGuild = RoleClient.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+  const role = await roleGuild.roles.fetch(snowflakes.roles.Holiday);
+  const members = await role.members.fetch();
+  members.forEach(async member => {
+    await member.roles.remove(role);
+  }
+  );
+
+}
 
 Module.addEvent("messageCreate", async (msg) => {
   if (msg.author.bot || (!msg.guild || msg.guild.id != snowflakes.guilds.PrimaryServer)) {
@@ -211,5 +232,15 @@ Module.addEvent("messageCreate", async (msg) => {
   shhh(msg);
   tavareSawThatPing(msg);
   pride(msg);
-});
+})
+
+//if it's june
+if (new Date().getMonth() == 5) {
+  Module.setClockwork(() => {
+    try {
+      return setInterval(removePrideRole, 60 * 60 * 1000);
+    } catch (e) { u.errorHandler(e, "cakeOrJoinDay Clockwork Error"); }
+
+  })
+}
 module.exports = Module;
