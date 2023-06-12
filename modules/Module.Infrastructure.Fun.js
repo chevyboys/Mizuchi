@@ -198,7 +198,7 @@ async function tavareSawThatPing(msg) {
   for (const [privilagedPingPerson, emoji] of emojis) {
     if (msg.mentions.members.has(privilagedPingPerson) || msg.mentions.roles.has(privilagedPingPerson) || msg.mentions.members.some(m => m.roles.cache.has(privilagedPingPerson))) {
       await msg.react(emoji).catch(u.noop);
-      await u.wait(5000)
+      await u.wait(1000)
       await msg.reactions.resolve(emoji).users.remove(msg.client.user.id);
     }
   }
