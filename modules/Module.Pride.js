@@ -6,6 +6,7 @@ const Jimp = require("jimp");
 const supportedFormats = ["png", "jpg", "jpeg", "bmp", "tiff", "gif"];
 const snowflakes = require('../config/snowflakes.json');
 const { closest } = require("fastest-levenshtein");
+const RoleClient = require("../utils/Utils.RolesLogin");
 
 
 function createMaskFromTransparentImage(image) {
@@ -180,6 +181,14 @@ const sword = async (interaction) => {
   return;
 }
 
+
+const remove = async (interaction) => {
+  const roleGuild = RoleClient.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+  const member = await roleGuild.members.fetch(interaction.member.id);
+  await member.roles.remove(snowflakes.roles.Holiday);
+  return await interaction.editReply({ content: `I have removed the role from you`, ephemeral: true });
+}
+
 const Command = {
   name: "pride",
   guildId: snowflakes.guilds.PrimaryServer,
@@ -198,6 +207,8 @@ const Command = {
         return await rune(interaction, subCommandOptions);
       case "sword":
         return await sword(interaction, subCommandOptions);
+      case "remove":
+        return await remove(interaction);
       default:
         break;
     }

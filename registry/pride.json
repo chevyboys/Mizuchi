@@ -86,6 +86,12 @@
           "max_value": 50
         }
       ]
+    },
+    {
+      "type": 1,
+      "name": "remove",
+      "description": "remove the pride role from yourself",
+      "options": []
     }
   ]
 }
