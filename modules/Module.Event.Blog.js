@@ -33,9 +33,13 @@ async function blogHandler(force) {
     .setDescription(turndownService.turndown(entry.content))
     .setColor('#c8dee5')
     .setThumbnail(thumbnailUrl.split('?', 1)[0]);
-  return await webhookUtil((Module.client.guilds.cache.find(g => g.channels.cache.has(snowflakes.channels.blogAnnouncements))).channels.cache.get(snowflakes.channels.blogAnnouncements), "Blog Update", "./avatar/base.png", {
+  
+return await webhookUtil((Module.client.guilds.cache.find(g => g.channels.cache.has(snowflakes.channels.blogAnnouncements))).channels.cache.get(snowflakes.channels.blogAnnouncements), "Blog Update", "./avatar/base.png", {
     content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.BlogUpdates}>`,
+    "allowed_mentions": {
+    "parse": ["everyone, roles"],
     embeds: [embed]
+ 
   });
 }
 
