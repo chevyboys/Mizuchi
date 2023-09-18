@@ -225,21 +225,25 @@ function getRandomDominion(type, interaction) {
     ]
   }
   let returnedValue = "";
+  let title = "";
   switch (type) {
     case "dominion": //get a random dominion
       //get a random dominion from dominions.all
       returnedValue = DOMINIONS.all[Math.floor(Math.random() * DOMINIONS.all.length)];
+      title = "Random Dominion";
       break;
     case "prime": //get a random dominion from dominions.prime
       returnedValue = DOMINIONS.prime[Math.floor(Math.random() * DOMINIONS.prime.length)];
+      title = "Random Prime Dominion";
       break;
     case "deep": //get a random dominion from dominions.deep
       returnedValue = DOMINIONS.deep[Math.floor(Math.random() * DOMINIONS.deep.length)];
+      title = "Random Deep Dominion";
       break;
   }
   //replace the first letter with a capital letter
   returnedValue = returnedValue.replace(returnedValue[0], returnedValue[0].toUpperCase());
-  let embed = u.embed().setDescription("The Dominion of " + returnedValue).setTitle("Random Dominion")
+  let embed = u.embed().setDescription("The Dominion of " + returnedValue).setTitle(title || "Random Dominion")
   return interaction.reply({ embeds: [embed] });
 }
 
