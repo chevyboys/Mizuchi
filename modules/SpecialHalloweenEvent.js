@@ -37,16 +37,22 @@ class Participant {
   get user() {
     return this.#_user;
   }
+
 }
 
-
-
-
+let haunted = [];
+let hauntedChannel = null;
 
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
   let message = reaction.message;
   let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
   if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
+    //if the person is haunted, simply remove their reaction and do nothing else
+    if (haunted.includes(user.id)) {
+      reaction.users.remove(user.id);
+      return;
+    }
+
 
     const member = message.guild.members.cache.get(user.id);
     try {
@@ -57,11 +63,23 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         // incase this is changed later instead of if statments
         switch (userCount.count) {
           case 5:
+            //if the user already has the role, don't do anything
+            if (member.roles.cache.has(snowflakes.roles.Holiday)) break;
             u.addRoles(member, snowflakes.roles.Holiday);
             channel.send({
               content: `<@${user.id}> has captured enough spirits and has become a <@&${snowflakes.roles.Holiday}> until the next reset (at cakeday announcement time)`,
               allowedMentions: { parse: ["users"] }
             });
+            break;
+          case 10: channel.send({
+            content: `<@${user.id}> has captured too many spirits and is now haunted and they won't be able to capture any more spirits for 5 minutes!`,
+            allowedMentions: { parse: ["users"] }
+          });
+            //add user to haunted list, and remove after 5 minutes
+            haunted.push(user.id);
+            setTimeout(() => {
+              haunted.splice(haunted.indexOf(user.id), 1);
+            }, 1000 * 60 * 5);
             break;
 
         }
@@ -87,23 +105,41 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
-    (msg.member.roles.cache.has(snowflakes.roles.Holiday) ? (Math.floor(Math.random() * odds / 2) > odds / 2 - 2) : (Math.floor(Math.random() * odds) > odds - 2))
+    ((Math.floor(Math.random() * odds) > odds - 2))
   ) {
+    msg.react(holidays[0].emoji)
+  } else if (
+    //if a user is haunted, they have a 90 percent chance of spawning a spirit
+    haunted.includes(msg.author.id) &&
+    //random number between 0 and 100
+    Math.floor(Math.random() * 100) > 90
+  ) {
+    msg.react(holidays[0].emoji)
+  } else if (hauntedChannel) {
     msg.react(holidays[0].emoji)
   }
   else {
-    if (config.AdminIds.includes(msg.author.id) && msg.content.indexOf("🔮") > -1 && !started) {
-      started = true;
+    if (config.AdminIds.includes(msg.author.id) && msg.content.indexOf("🔮") > -1) {
       msg.delete();
-      let holidayRole = await msg.guild.roles.fetch(snowflakes.roles.Holiday)
-      holidayRole.setName("Ghost Hunter")
-      holidayRole.setColor(holidays[0].color)
-      msg.channel.send({
-        embeds: [
-          u.embed().setColor(holidays[0].color).setTitle("Special Event").setDescription(holidays[0].description)
-        ]
-      })
-
+      if (started) {
+        msg.channel.send("*A surge of spirits is rising in this channel*");
+        hauntedChannel = msg.channel.id;
+        //in ten minutes the channel will be cleared
+        setTimeout(() => {
+          hauntedChannel = null;
+          msg.channel.send("*The surge of spirits has passed*");
+        }, 1000 * 60 * 10);
+      } else {
+        started = true;
+        let holidayRole = await msg.guild.roles.fetch(snowflakes.roles.Holiday)
+        holidayRole.setName("Ghost Hunter")
+        holidayRole.setColor(holidays[0].color)
+        msg.channel.send({
+          embeds: [
+            u.embed().setColor(holidays[0].color).setTitle("Special Event").setDescription(holidays[0].description)
+          ]
+        })
+      }
     }
   }
 }).setClockwork(() => {
