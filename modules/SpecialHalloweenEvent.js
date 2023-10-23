@@ -98,7 +98,6 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       let holidayRole = await msg.guild.roles.fetch(snowflakes.roles.Holiday)
       holidayRole.setName("Ghost Hunter")
       holidayRole.setColor(holidays[0].color)
-      holidayRole.setIcon(holidays[0].emoji)
       msg.channel.send({
         embeds: [
           u.embed().setColor(holidays[0].color).setTitle("Special Event").setDescription(holidays[0].description)
