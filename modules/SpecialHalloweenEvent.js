@@ -60,6 +60,11 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       if (index != -1) {
         const userCount = cache[index];
         userCount.updateCount();
+        channel.send({
+          content: `<@${user.id}> found a spirit in <#${message.channel.id}>`,
+          allowedMentions: { parse: ["users"] }
+        });
+        reaction.users.remove(message.client.user.id);
         // incase this is changed later instead of if statments
         switch (userCount.count) {
           case 5:
@@ -71,8 +76,12 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
               allowedMentions: { parse: ["users"] }
             });
             break;
+          case 20: channel.send({ embeds: [u.embed().setColor(holidays[0].color).setTitle("Special Event").setDescription(`<@${user.id}> has captured an incredible number of spirits!`)] });
+            break;
+          case 25:
+          case 15:
           case 10: channel.send({
-            content: `<@${user.id}> has captured too many spirits and is now haunted and they won't be able to capture any more spirits for 5 minutes!`,
+            content: `<@${user.id}> has captured too many spirits! They are now haunted and they won't be able to capture any more spirits for the next few minutes!`,
             allowedMentions: { parse: ["users"] }
           });
             //add user to haunted list, and remove after 5 minutes
@@ -88,11 +97,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         cache.push(new Participant(user));
       }
 
-      channel.send({
-        content: `<@${user.id}> found a spirit in <#${message.channel.id}>`,
-        allowedMentions: { parse: ["users"] }
-      });
-      reaction.users.remove(message.client.user.id);
+
     } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
   }
   else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id)) {
