@@ -115,7 +115,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     Math.floor(Math.random() * 100) > 90
   ) {
     msg.react(holidays[0].emoji)
-  } else if (hauntedChannel) {
+  } else if (msg.channel.id == hauntedChannel) {
     msg.react(holidays[0].emoji)
   }
   else {
