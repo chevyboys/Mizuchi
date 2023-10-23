@@ -81,7 +81,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     reaction.remove()
     await reaction.message.react(holidays[0].emoji);
   }
-}).addEvent("messageCreate", (msg) => {
+}).addEvent("messageCreate", async (msg) => {
 
   if (
     msg.author &&
@@ -95,7 +95,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     if (config.AdminIds.includes(msg.author.id) && msg.content.indexOf("🔮") && !started) {
       started = true;
       msg.delete();
-      let holidayRole = msg.guild.roles.get(snowflakes.roles.Holiday)
+      let holidayRole = await msg.guild.roles.fetch(snowflakes.roles.Holiday)
       holidayRole.setName("Ghost Hunter")
       holidayRole.setColor(holidays[0].color)
       holidayRole.setIcon(holidays[0].emoji)
