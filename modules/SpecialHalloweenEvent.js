@@ -92,7 +92,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.react(holidays[0].emoji)
   }
   else {
-    if (config.AdminIds.includes(msg.author.id) && msg.content.indexOf("🔮") && !started) {
+    if (config.AdminIds.includes(msg.author.id) && msg.content.indexOf("🔮") > -1 && !started) {
       started = true;
       msg.delete();
       let holidayRole = await msg.guild.roles.fetch(snowflakes.roles.Holiday)
