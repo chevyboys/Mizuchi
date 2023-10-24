@@ -116,7 +116,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id)) {
     reaction.remove()
     await reaction.message.react(holidays[0].emoji);
-  } else if (reaction.emoji.toString().toLowerCase().indexOf("⚫") > -1 && !consumed.includes(user.id) && msg.guild.roles.cache.get("1166179561332027522").members.has(user.id)) {
+  } else if (reaction.emoji.toString().toLowerCase().indexOf("⚫") > -1 && !consumed.includes(user.id) && reaction.message.guild.roles.cache.get("1166179561332027522").members.has(user.id)) {
     reaction.remove()
     reaction.message.react(holidays[0].emoji);
     consumed.push(user.id);
