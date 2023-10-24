@@ -42,13 +42,14 @@ class Participant {
 
 let haunted = [];
 let hauntedChannel = null;
+let consumed = [];
 
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
   let message = reaction.message;
   let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
   if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
     //if the person is haunted, simply remove their reaction and do nothing else
-    if (haunted.includes(user.id)) {
+    if (haunted.includes(user.id) || msg.guild.roles.cache.get("1166179561332027522").members.has(user.id)) {
       reaction.users.remove(user.id);
       return;
     }
@@ -90,7 +91,15 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
               haunted.splice(haunted.indexOf(user.id), 1);
             }, 1000 * 60 * 5);
             break;
+          case 30: channel.send({ embeds: [u.embed().setColor(holidays[0].color).setTitle("Special Event").setDescription(`<@${user.id}> captured too many spirits and has been consumed!`)] });
+            try {
+              user.send("You have been consumed by the spirits! You will not be able to capture any more spirits until the next reset (at cakeday announcement time). You have gained the dark powers of the consumed. Once per hour you may react with a ⚫ to summon a ghost on a message of your choice");
 
+            } catch (error) {
+              u.errorLog(error, "Holiday DM error");
+            }
+
+            u.addRoles(member, "1166179561332027522");
         }
 
       } else {
@@ -103,6 +112,13 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id)) {
     reaction.remove()
     await reaction.message.react(holidays[0].emoji);
+  } else if (reaction.emoji.toString.toLowerCase().indexOf("⚫") > -1 && !consumed.includes(user.id) && msg.guild.roles.cache.get("1166179561332027522").members.has(user.id)) {
+    reaction.remove()
+    reaction.message.react(holidays[0].emoji);
+    consumed.push(user.id);
+    setTimeout(() => {
+      consumed.splice(consumed.indexOf(user.id), 1);
+    }, 1000 * 30 * 60);
   }
 }).addEvent("messageCreate", async (msg) => {
 
@@ -157,6 +173,9 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
         guild.roles.cache.get(snowflakes.roles.Holiday).members.each((m) =>
           u.addRoles(m, snowflakes.roles.Holiday, true)
+        )
+        guild.roles.cache.get("1166179561332027522").members.each((m) =>
+          u.addRoles(m, "1166179561332027522", true)
         )
       }
 
