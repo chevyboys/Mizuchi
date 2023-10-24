@@ -39,7 +39,7 @@ class Participant {
   }
 
 }
-
+let recentReactions = [];
 let haunted = [];
 let hauntedChannel = null;
 let consumed = [];
@@ -48,8 +48,8 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   let message = reaction.message;
   let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
   if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
-    //if the person is haunted, simply remove their reaction and do nothing else
-    if (haunted.includes(user.id) || reaction.msg.guild.roles.cache.get("1166179561332027522").members.has(user.id)) {
+    //if the person is haunted, simply remove their reaction and do nothing else. Also skip them if they have gotten one in the last ten seconds
+    if (haunted.includes(user.id) || reaction.message.guild.roles.cache.get("1166179561332027522").members.has(user.id) || recentReactions.includes(user.id)) {
       reaction.users.remove(user.id);
       return;
     }
@@ -103,6 +103,10 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         }
 
       } else {
+        recentReactions.push(user.id);
+        setTimeout(() => {
+          recentReactions.splice(recentReactions.indexOf(user.id), 1);
+        }, 1000 * 10);
         cache.push(new Participant(user));
       }
 
