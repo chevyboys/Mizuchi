@@ -49,7 +49,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
   if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
     //if the person is haunted, simply remove their reaction and do nothing else
-    if (haunted.includes(user.id) || msg.guild.roles.cache.get("1166179561332027522").members.has(user.id)) {
+    if (haunted.includes(user.id) || reaction.msg.guild.roles.cache.get("1166179561332027522").members.has(user.id)) {
       reaction.users.remove(user.id);
       return;
     }
@@ -112,7 +112,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id)) {
     reaction.remove()
     await reaction.message.react(holidays[0].emoji);
-  } else if (reaction.emoji.toString.toLowerCase().indexOf("⚫") > -1 && !consumed.includes(user.id) && msg.guild.roles.cache.get("1166179561332027522").members.has(user.id)) {
+  } else if (reaction.emoji.toString().toLowerCase().indexOf("⚫") > -1 && !consumed.includes(user.id) && msg.guild.roles.cache.get("1166179561332027522").members.has(user.id)) {
     reaction.remove()
     reaction.message.react(holidays[0].emoji);
     consumed.push(user.id);
