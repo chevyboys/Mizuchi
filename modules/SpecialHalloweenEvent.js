@@ -68,7 +68,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         reaction.users.remove(message.client.user.id);
         // incase this is changed later instead of if statments
         switch (userCount.count) {
-          case 5:
+          case 10:
             //if the user already has the role, don't do anything
             if (member.roles.cache.has(snowflakes.roles.Holiday)) break;
             u.addRoles(member, snowflakes.roles.Holiday);
@@ -80,8 +80,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
           case 20: channel.send({ embeds: [u.embed().setColor(holidays[0].color).setTitle("Special Event").setDescription(`<@${user.id}> has captured an incredible number of spirits!`)] });
             break;
           case 25:
-          case 15:
-          case 10: channel.send({
+          case 15: channel.send({
             content: `<@${user.id}> has captured too many spirits! They are now haunted and they won't be able to capture any more spirits for the next few minutes!`,
             allowedMentions: { parse: ["users"] }
           });
@@ -93,7 +92,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
             break;
           case 30: channel.send({ embeds: [u.embed().setColor(holidays[0].color).setTitle("Special Event").setDescription(`<@${user.id}> captured too many spirits and has been consumed!`)] });
             try {
-              user.send("You have been consumed by the spirits! You will not be able to capture any more spirits until the next reset (at cakeday announcement time). You have gained the dark powers of the consumed. Once per hour you may react with a ⚫ to summon a ghost on a message of your choice");
+              user.send("You have been consumed by the spirits! You will not be able to capture any more spirits until the next reset (at cakeday announcement time). You have gained the dark powers of the consumed. Once per ten minutes you may react with a ⚫ to summon a ghost on a message of your choice");
 
             } catch (error) {
               u.errorLog(error, "Holiday DM error");
@@ -122,7 +121,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     consumed.push(user.id);
     setTimeout(() => {
       consumed.splice(consumed.indexOf(user.id), 1);
-    }, 1000 * 30 * 60);
+    }, 1000 * 5 * 60);
   }
 }).addEvent("messageCreate", async (msg) => {
 
@@ -140,7 +139,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     Math.floor(Math.random() * 100) > 90
   ) {
     msg.react(holidays[0].emoji)
-  } else if (msg.channel.id == hauntedChannel) {
+  } else if (haunted channel == "*" || msg.channel.id == hauntedChannel) {
     msg.react(holidays[0].emoji)
   }
   else {
@@ -149,6 +148,27 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       if (started) {
         msg.channel.send("*A surge of spirits is rising in this channel*");
         hauntedChannel = msg.channel.id;
+        //in ten minutes the channel will be cleared
+        setTimeout(() => {
+          hauntedChannel = null;
+          msg.channel.send("*The surge of spirits has passed*");
+        }, 1000 * 60 * 10);
+      } else {
+        started = true;
+        let holidayRole = await msg.guild.roles.fetch(snowflakes.roles.Holiday)
+        holidayRole.setName("Ghost Hunter")
+        holidayRole.setColor(holidays[0].color)
+        msg.channel.send({
+          embeds: [
+            u.embed().setColor(holidays[0].color).setTitle("Special Event").setDescription(holidays[0].description)
+          ]
+        })
+      }
+    } else if (config.AdminIds.includes(msg.author.id) && msg.content.indexOf("💫") > -1) {
+      msg.delete();
+      if (started) {
+        msg.channel.send("*A massive surge of spirits is rising everywhere*");
+        hauntedChannel = "*";
         //in ten minutes the channel will be cleared
         setTimeout(() => {
           hauntedChannel = null;
