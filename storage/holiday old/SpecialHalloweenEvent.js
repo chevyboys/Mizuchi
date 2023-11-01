@@ -1,6 +1,6 @@
-const snowflakes = require("../config/snowflakes.json");
-const config = require("../config/config.json");
-const u = require("../utils/Utils.Generic");
+const snowflakes = require("../../config/snowflakes.json");
+const config = require("../../config/config.json");
+const u = require("../../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
 const moment = require("moment");
