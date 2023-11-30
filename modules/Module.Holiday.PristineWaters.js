@@ -218,41 +218,48 @@ Module.addEvent("messageReactionAdd",
         return;
       }
     }
-  }).addEvent("messageCreate", async (msg) => {
-    if (!active) return;
-    if (msg.channel.type == "dm") return;
-    if (flurries.includes(msg.channel.id)) {
-      msg.react(getRandomEmoji());
-    }
-    if (
-      msg.author &&
-      !msg.webhookId &&
-      !msg.author.bot &&
-      (msg.member.roles.cache.has(snowflakes.roles.Holiday[1]) ? (Math.random() * 100 < odds) : (Math.random() * 100 < odds + 5))
-    ) {
-      msg.react(getRandomEmoji());
-    }
-  }).setClockwork(() => {
-    if (!active) return;
-    try {
-      return setInterval(async () => {
-        let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
-        const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
-        const modifierToConvertToBotTime = 7;
-        if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
-          let roles = guild.roles.cache.get(snowflakes.roles.Holiday);
-          await event.cleanRoleMembers(roles[0]);
-          await event.cleanRoleMembers(roles[1]);
-          participants.cache.forEach(element => {
-            element.dailyReset();
-          });
-        }
-        participants.write();
+  }).addEvent("messageCreate",
+    /**
+     * 
+     * @param {Message} msg 
+     * @returns 
+     */
+    async (msg) => {
+      if (!active) return;
+      if (msg.channel.type == "dm") return;
+      if (flurries.includes(msg.channel.id)) {
+        msg.react(getRandomEmoji());
       }
+      if (
+        msg.author &&
+        !msg.webhookId &&
+        !msg.author.bot &&
+        msg.type == "DEFAULT" &&
+        (msg.member.roles.cache.has(snowflakes.roles.Holiday[1]) ? (Math.random() * 100 < odds) : (Math.random() * 100 < odds + 5))
+      ) {
+        msg.react(getRandomEmoji());
+      }
+    }).setClockwork(() => {
+      if (!active) return;
+      try {
+        return setInterval(async () => {
+          let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
+          const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
+          const modifierToConvertToBotTime = 7;
+          if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
+            let roles = guild.roles.cache.get(snowflakes.roles.Holiday);
+            await event.cleanRoleMembers(roles[0]);
+            await event.cleanRoleMembers(roles[1]);
+            participants.cache.forEach(element => {
+              element.dailyReset();
+            });
+          }
+          participants.write();
+        }
 
-        , 60 * 60 * 1000);
-    } catch (e) { u.errorHandler(e, "event Clockwork Error"); }
-  })
+          , 60 * 60 * 1000);
+      } catch (e) { u.errorHandler(e, "event Clockwork Error"); }
+    })
 
 async function begin(msg) {
   await event.setHolidayBotIcon(msg.client);
@@ -280,7 +287,7 @@ async function begin(msg) {
 Module.addCommand({ //TODO: REMOVE THIS
   name: "begin",
   guild: snowflakes.guilds.PrimaryServer,
-  permissions: (msg) => true,
+  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
   process: async (msg) => {
     await begin(msg);
     await msg.react("✔");
