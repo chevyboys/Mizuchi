@@ -324,6 +324,7 @@ Module.addCommand({ //TODO: REMOVE THIS
     || msg.member.roles.cache.has(snowflakes.roles.Moderator)
     || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
   process: async (msg) => {
+    if (!active) return msg.channel.send("The event is not active");
     let roles = guild.roles.cache.get(snowflakes.roles.Holiday);
     await event.cleanRoleMembers(roles[0]);
     await event.cleanRoleMembers(roles[1]);
@@ -341,6 +342,15 @@ Module.addCommand({ //TODO: REMOVE THIS
    * @param {CommandInteraction} interaction 
    */
   process: async (interaction) => {
+    if (!active) return interaction.reply({
+      embeds: [u.embed(
+        {
+          description: `The event is not active`,
+          color: event.colors[event.colors.length - 1].color,
+        }
+      )],
+      ephemeral: true
+    });
     switch (interaction.options.getSubcommand()) {
       case "inventory":
         let index = participants.cache.findIndex(element => interaction.user.id == element.user);
@@ -460,11 +470,10 @@ if (!active) {
      * @returns 
      */
     async (msg) => {
+      if (msg.author.bot || active || msg.channel.type == "dm" || (msg.author.id != eventHerald && !msg.member.roles.cache.has(snowflakes.roles.BotMaster)) || (msg.channel.id != eventHeraldChannel && msg.channel.id != testServerEventHeraldChannel)) return;
       let eventHerald = "887021464438603776";
       let eventHeraldChannel = "898352409053659187";
       let testServerEventHeraldChannel = "891846270963036200";
-
-      if (msg.author.bot || active || msg.channel.type == "dm" || (msg.author.id != eventHerald && !msg.member.roles.cache.has(snowflakes.roles.BotMaster)) || (msg.channel.id != eventHeraldChannel && msg.channel.id != testServerEventHeraldChannel)) return;
       await begin(msg);
 
     });
