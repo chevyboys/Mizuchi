@@ -1,376 +1,121 @@
 //Initalization, imports, etc
-const { Guild, Role, Message, MessageReaction, User, GuildMember } = require('discord.js');
+const { MessageReaction, User, CommandInteraction, Message, } = require('discord.js');
 const snowflakes = require('../config/snowflakes.json')
 const Module = new (require("augurbot")).Module;
 const fs = require('fs');
-const webhookSend = require('../utils/Webhook.js');
 const config = require('../config/config.json');
 const u = require('../utils/Utils.Generic');
+const event = require("./PristineWaters/utils");
+const odds = event.odds;
+const Participant = require("./PristineWaters/Participant");
+const NPCSend = require("./PristineWaters/NPC");
 
+///things that can be manually set
+const firstDayOfHanukkah = "12/07"; //MM/DD
 
-let odds = 3;
-const eventAvatar = "./avatar/winter.png";
-const firstDayOfHanukkah = "12/07";
-
-const eventEmoji = [
-  "💧",
-  "❄"
-]
-
-const eventColors = [
-  {
-    name: "Bingus Blurple",
-    color: "#c4ccff"
-  },
-  {
-    name: "Blue",
-    color: "#8CD2FF"
-  },
-  {
-    color: "#DBA3FF",
-    name: "Lavender",
-  },
-  {
-    color: "#FFD28C",
-    name: "Gold"
-  },
-  {
-    color: "#A10000",
-    name: "Deep Red"
-  },
-  {
-    name: "Green",
-    color: "#009D4C"
-  },
-]
-
-
-function NPCSend(channel, embedOptions, additionalMessageOptions) {
-  embedOptions.color = eventColors[0].color;
-  additionalMessageOptions.embeds = [embedOptions];
-  return webhookSend.webhook(channel, "Archduke Soju Ryotsu", eventRoles[0].icon, additionalMessageOptions);
+//active should be set based on a file in the same directory as pristine waters called active.json. if it doesn't exist, it should be created with the value of false
+//if active.json exists
+let active;
+if (!fs.existsSync('./data/holiday/active.json')) {
+  fs.writeFileSync('./data/holiday/active.json', JSON.stringify({ active: false }));
+  active = false;
+} else {
+  active = require('../data/holiday/active.json').active;
 }
 
-const eventRoles = [{
-  name: "Seeker of Pristine Water",
-  color: eventColors.find(c => c.name == "Bingus Blurple").color,
-  hoist: true,
-  icon: "./avatar/blueStar.png"
-},
-{
-  name: "Celebrant",
-  color: eventColors.find(c => c.name == "Gold").color,
-  hoist: true,
-  icon: "./avatar/blueStar.png" //TODO: CHANGE THIS
+//if active.json is true, set active to true
+
+
+
+function setActive(bool) {
+  active = bool;
+  fs.writeFileSync('./data/holiday/active.json', JSON.stringify({ active: bool }));
 }
-];
 
 
-const eventColorRoles = [];
-class Participant {
-  #_user;
-  #_count = 1;
-  #_MultiDayCount = 0;
-  #_currency = 0;
-  #_MultiDayGifted = 0;
-  #_MultiDayReceived = 0;
-  #_gifted = 0;
-  #_received = 0;
-  #_status = "ACTIVE" // ACTIVE, BANNED, SUSPENDED, INACTIVE
-  #_lastSuspension = 0;
 
-  constructor({ user, count = 1, MultiDayCount = 0, currency = 0, gifted = 0, received = 0, multiDayGifted = 0, multiDayReceived = 0 }) {
-    try {
-      this.#_user = user.id ? user.id : user;
-    } catch (error) {
-      if (error.message.indexOf("Cannot read properties of undefined") > -1) {
-        return;
-      } else throw error;
+let flurries = [];
+function flurry(channel) {
+  NPCSend(channel, u.embed({
+    description: "Let the feasting begin!"
+  }));
+  flurries.push(channel.id);
+  setTimeout(() => {
+    flurries.splice(flurries.indexOf(channel.id), 1);
+  }, 10 * 60 * 1000);
+}
+
+
+class Participants {
+  cache = [];
+  #_savePath = './data/holiday/cache.json';
+  constructor() {
+    if (fs.existsSync(this.#_savePath)) {
+      this.cache = require("." + this.#_savePath).map(element => new Participant(element));
+    } else {
+      this.cache = [];
+      this.write();
     }
-    this.#_MultiDayCount = MultiDayCount;
-    this.#_count = count;
-    this.#_currency = currency;
-    this.#_gifted = gifted;
-    this.#_received = received;
-    this.#_MultiDayGifted = multiDayGifted;
-    this.#_MultiDayReceived = multiDayReceived;
   }
+  write() {
+    fs.writeFileSync(this.#_savePath, JSON.stringify(this.cache.map(element => element.getWriteable()), 0, 4));
+  }
+  async gift(giver, reciever, client) {
+    let egg = [
+      "You require more minerals",
+      "You require more vespene gas",
+      "You Must Construct Additional Pylons!",
+    ]
 
-  async updateCount() {
-    this.#_count++;
-    //if the count is ten higher than last suspension, have a 10% chance of suspending the user, increasing by 1% for every count above the last suspension. unsuspend the user after 5 minutes
-    if (this.#_count > this.#_lastSuspension + 10) {
-      if (Math.random() * 100 < (this.#_count - this.#_lastSuspension) / 10) {
-        this.#_status = "SUSPENDED";
-        this.#_lastSuspension = this.#_count;
-        setTimeout(() => {
-          this.#_status = "ACTIVE";
-        }, 5 * 60 * 1000);
+    if (client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(reciever).bot) return "While we appreciate the consideration from one so illustrious, the server elementals have no need for this.";
+    let giverIndex = this.cache.findIndex(element => giver == element.user);
+    let recieverIndex = this.cache.findIndex(element => reciever == element.user);
+    if (giverIndex == -1) {
+      this.cache.push(new Participant({ user: giver, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0, }));
+      giverIndex = this.cache.length - 1;
+      this.write();
+      switch (Math.floor(Math.random() * 100)) {
+        case 0:
+          return egg[0];
+        case 1:
+          return egg[1];
+        case 2:
+          return egg[2];
+        default:
+          return "Find a sweet to give someone first";
       }
     }
-    await this.#_rewards();
-    return this.#_status;
-  }
-
-  async updateReceived() {
-    this.#_received++;
-    await this.#_rewards();
-  }
-
-  updateGifted() {
-    this.#_gifted++;
-    //await rewards();
-  }
-
-  async #_rewards() {
-    let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-    let member = guild.members.cache.get(this.user);
-    let channel = guild.channels.cache.get(snowflakes.channels.botSpam);
-    switch (this.adjustedCount) {
-      case 5:
-        if (!eventRoles[0].role) await generateRoles(guild);
-        if (member.roles.cache.has(eventRoles[0].role.id)) return;
-        member.roles.add(eventRoles[0].role);
-        NPCSend(channel, u.embed(
-          {
-            description: `I'm proud to say that <@${this.user}>, a <@&${eventRoles[0].role.id}>, has enough pristine water to begin their journey. They have gained access to the /event command. \nContinue gathering water to grow in strength and unlock more secrets.`,
-          }
-        ),
-          {
-            content: `<@${this.user}>`,
-            allowedMentions: { users: [this.user] }
-          }
-        );
-        break;
-
+    if (recieverIndex == -1) {
+      this.cache.push(new Participant({ user: reciever, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0 }));
+      recieverIndex = this.cache.length - 1;
+    }
+    if (giverIndex == recieverIndex) return "You can't gift to yourself!";
+    if (this.cache[giverIndex].adjustedCount > 0) {
+      this.cache[giverIndex].updateGifted(client);
+      await this.cache[recieverIndex].updateReceived(client);
+      this.write();
+      return "Your gift has been sent!";
+    } else {
+      this.write();
+      switch (Math.floor(Math.random() * 100)) {
+        case 0:
+          return egg[0];
+        case 1:
+          return egg[1];
+        case 2:
+          return egg[2];
+        default:
+          return "Find a sweet to give someone first";
+      }
     }
   }
-
-  get count() {
-    return this.#_count;
-  }
-
-  get user() {
-    return this.#_user;
-  }
-
-  get MultiDayCount() {
-    return this.#_MultiDayCount;
-  }
-
-  get adjustedCount() {
-    return this.#_count + this.received - this.gifted;
-  }
-
-  get gifted() {
-    return this.#_gifted;
-  }
-
-  get received() {
-    return this.#_received;
-  }
-
-  get currency() {
-    return this.#_currency;
-  }
-
-  get MultiDayGifted() {
-    return this.#_MultiDayGifted;
-  }
-
-  get MultiDayReceived() {
-    return this.#_MultiDayReceived;
-  }
-
-  get status() {
-    return this.#_status;
-  }
-
-  dailyReset() {
-    this.#_MultiDayCount += this.#_count;
-    this.#_count = 0;
-    this.#_MultiDayGifted += this.#_gifted;
-    this.#_MultiDayReceived += this.#_received;
-    this.#_gifted = 0;
-    this.#_received = 0;
-  }
-
-  getWriteable() {
-    return {
-      user: this.#_user,
-      count: this.#_count,
-      MultiDayCount: this.#_MultiDayCount,
-      currency: this.#_currency,
-      gifted: this.#_gifted,
-      received: this.#_received,
-      multiDayGifted: this.#_MultiDayGifted,
-      multiDayReceived: this.#_MultiDayReceived
-    };
-  }
-
 }
 
-const cacheFilePath = './data/holiday/cache.json';
-
-let cache = [];
-function cacheWrite() {
-  fs.writeFileSync(cacheFilePath, JSON.stringify(cache.map(element => element.getWriteable()), 0, 4));
-
-}
-if (fs.existsSync(cacheFilePath)) {
-  cache = require("." + cacheFilePath).map(element => new Participant(element));
-} else {
-  cacheWrite();
-}
-
-/**
- * 
- * @param {Snowflake} giver 
- * @param {Snowflake} reciever 
- * @returns {boolean} true if the transaction is permitted, false if there is insufficient funds
- */
-async function participantGift(giver, reciever) {
-  let giverIndex = cache.findIndex(element => giver == element.user);
-  let recieverIndex = cache.findIndex(element => reciever == element.user);
-  if (giverIndex == -1) {
-    cache.push(new Participant({ user: giver, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0 }));
-    giverIndex = cache.length - 1;
-    cacheWrite();
-    return false;
-  }
-  if (recieverIndex == -1) {
-    cache.push(new Participant({ user: reciever, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0 }));
-    recieverIndex = cache.length - 1;
-  }
-  if (giverIndex == recieverIndex) return true;
-  if (cache[giverIndex].adjustedCount > 0) {
-    cache[giverIndex].updateGifted();
-    await cache[recieverIndex].updateReceived();
-    cacheWrite();
-    return true;
-  } else {
-    cacheWrite();
-    return false;
-  }
-}
-
-
-
+const participants = new Participants();
 
 //get random emoji from eventEmoji
 function getRandomEmoji() {
-  return eventEmoji[Math.floor(Math.random() * eventEmoji.length)];
-}
-
-//Event opening
-//create the needed roles, if roles of their name don't exist.
-//generate color roles
-//for each event color, create a role with that color titled "pristine waters <color name> if that role doesn't exist" This should be done in the generateRoles async function
-
-/**
- * 
- * @param {Guild} guild 
- */
-async function generateRoles(guild) {
-  let promises = [];
-  console.log("Generating roles");
-  for (const color of eventColors) {
-    let role = guild.roles.cache.find(r => r.name.toLowerCase() == `pristine ${color.name.toLowerCase()}`);
-
-    if (!role) {
-      role = await guild.roles.create({
-        name: `Pristine ${color.name}`,
-        color: color.color,
-        reason: "Pristine Waters Event",
-        position: guild.roles.cache.get(snowflakes.roles.Holiday[0]).position - 1
-      });
-      console.log("Created " + role.name + " role");
-    } else {
-      console.log("Found " + role.name + " role");
-    }
-    eventColorRoles.push(role);
-  }
-
-  //update the bonus xp roles we already have
-  //sort snowflakes.roles.Holiday by position
-  let holidayRoles = snowflakes.roles.Holiday.sort((a, b) => guild.roles.cache.get(a).position - guild.roles.cache.get(b).position);
-  for (const role of holidayRoles) {
-    if (guild.premiumTier != "TIER_2" && guild.premiumTier != "TIER_3") {
-      eventRoles[holidayRoles.indexOf(role)].icon = undefined;
-    }
-    promises.push(guild.roles.edit(role, eventRoles[holidayRoles.indexOf(role)]).then(discordRole => {
-      eventRoles[snowflakes.roles.Holiday.indexOf(role)].role = discordRole;
-      console.log("Updated " + discordRole.name + " role");
-    }
-    ));
-
-  }
-  return await Promise.all(promises);
-}
-/**
- * 
- * @param {Guild} guild 
- * @returns 
- */
-async function cleanRoles(guild) {
-  let promises = [];
-  console.log("Cleaning roles");
-
-  for (const color of eventColors) {
-    const role = guild.roles.cache.find(r => r.name.toLowerCase() == `pristine ${color.name.toLowerCase()}`);
-    if (role) {
-      promises.push(role.delete());
-      console.log("Deleted " + role.name + " role");
-    }
-  }
-  promises.push(guild.members.fetch().then(m => {
-    let promisesRoles = [];
-    for (const role of snowflakes.roles.Holiday) {
-      promisesRoles.push(guild.roles.fetch(role).then(
-        /**
-        * @param {Role} r
-        */
-        r =>
-          r.edit({
-            name: "Holiday Role " + snowflakes.roles.Holiday.indexOf(role) + 1,
-            color: "#000000",
-            hoist: false,
-            icon: null
-          }).then(discordRole => {
-            console.log("Updated " + discordRole.name + " role");
-            return cleanRoleMembers(discordRole);
-          }
-          )
-      )
-      );
-    }
-    return Promise.all(promisesRoles);
-  }
-  ));
-
-  return await Promise.all(promises);
-}
-
-function cleanRoleMembers(role) {
-  let removalPromises = [];
-  role.members.forEach(m => {
-    removalPromises.push(m.roles.remove(role));
-  }
-  )
-
-  return Promise.all(removalPromises);
-}
-
-/**
- * 
- * @param {Message} msg 
- */
-function setHolidayBotIcon() {
-  return Module.client.user.setAvatar(eventAvatar || ('./avatar/' + ("base.png")))
-}
-
-function cleanHolidayBotIcon() {
-  return Module.client.user.setAvatar(('./avatar/' + ("base.png")))
+  return event.emoji[Math.floor(Math.random() * event.emoji.length)];
 }
 
 
@@ -382,48 +127,50 @@ Module.addEvent("messageReactionAdd",
    * @param {User} user 
    */
   async (reaction, user) => {
+    if (!active) return;
     let message = reaction.message;
     let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
-    if (eventEmoji.indexOf(reaction.emoji.toString().toLowerCase()) > -1 && !user.bot && reaction.users.cache.has(message.client.user.id)) {
-      /**
-       * @param {GuildMember} member
-       */
-      const member = message.guild.members.cache.get(user.id);
+    let member = await message.guild.members.fetch(user.id);
+    if (event.emoji.indexOf(reaction.emoji.toString().toLowerCase()) > -1 && !user.bot && reaction.users.cache.has(message.client.user.id)) {
       let status;
       try {
-        const index = cache.findIndex(element => user == element.user);
-        if (cache[index].status != "ACTIVE") {
-          reaction.users.remove(cache[index].user);
+        let index = participants.cache.findIndex(element => user == element.user);
+        if (!participants.cache[index]) {
+          participants.cache.push(new Participant({ user: user, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0 }));
+          index = participants.cache.length - 1;
+        }
+
+        if (participants.cache[index].status != "ACTIVE") {
+          reaction.users.remove(participants.cache[index].user);
           return;
         }
         if (index != -1) {
-          const userCount = cache[index];
-          status = await userCount.updateCount();
+          const userCount = participants.cache[index];
+          status = await userCount.updateCount(message.client);
 
         } else {
-          cache.push(new Participant({ user: user }));
+          participants.cache.push(new Participant({ user: user }));
         }
         NPCSend(channel,
           u.embed(
             {
-              description: `I see <@${user.id}> found pristine water in <#${message.channel.id}> `,
+              description: `I see <@${user.id}> found a treat in <#${message.channel.id}> `,
               footer: {
-                text: `Found today: ${cache[index].adjustedCount} | total: ${cache[index].MultiDayCount + cache[index].count}\nGifted today: ${cache[index].gifted} | total: ${cache[index].MultiDayGifted + cache[index].gifted}\nReceived today: ${cache[index].received} | total: ${cache[index].MultiDayReceived + cache[index].received}`
+                text: `Found today: ${participants.cache[index].adjustedCount} | total: ${participants.cache[index].MultiDayCount + participants.cache[index].count}\nGifted today: ${participants.cache[index].gifted} | total: ${participants.cache[index].MultiDayGifted + participants.cache[index].gifted}\nReceived today: ${participants.cache[index].received} | total: ${participants.cache[index].MultiDayReceived + participants.cache[index].received}`
               }
             }
           ),
           {
             content: `<@${user.id}>`,
-            allowedMentions: { users: [user.id] }
           }
         );
         if (status == "SUSPENDED") {
           NPCSend(channel,
             u.embed(
               {
-                description: `<@${user.id}> is carrying to much and needs to rest for a few minutes.`,
+                description: `<@${user.id}> is pleasantly full, and shouldn't partake of more sweets for a few minutes, which leaves only one thing to do! begin leaving some for their compatriots! Instead of finding sweets, react with the 🎁 emoji up to once every sixty seconds to leave something delicious for others to find for the next five minutes!`,
                 footer: {
-                  text: `Found today: ${cache[index].adjustedCount} | total: ${cache[index].MultiDayCount + cache[index].count}\nGifted today: ${cache[index].gifted} | total: ${cache[index].MultiDayGifted + cache[index].gifted}\nReceived today: ${cache[index].received} | total: ${cache[index].MultiDayReceived + cache[index].received}`
+                  text: `Found today: ${participants.cache[index].adjustedCount} | total: ${participants.cache[index].MultiDayCount + participants.cache[index].count}\nGifted today: ${participants.cache[index].gifted} | total: ${participants.cache[index].MultiDayGifted + participants.cache[index].gifted}\nReceived today: ${participants.cache[index].received} | total: ${participants.cache[index].MultiDayReceived + participants.cache[index].received}`
                 }
               }
             ),
@@ -434,17 +181,49 @@ Module.addEvent("messageReactionAdd",
           );
         }
         // Write cache to a JSON file
-        cacheWrite();
+        participants.write();
 
 
-        reaction.users.remove(message.client.user.id);
+        reaction.remove();
       } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
     }
-    else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id)) {
+    else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id) || member.roles.cache.hasAny([snowflakes.roles.Admin, snowflakes.roles.Helper, snowflakes.roles.Moderator, snowflakes.roles.CommunityGuide, snowflakes.roles.BotMaster, snowflakes.roles.WorldMaker])) {
       reaction.remove()
       await reaction.message.react(getRandomEmoji());
+    } else if (reaction.emoji.toString().toLowerCase().indexOf("🎁") > -1) {
+      let index = participants.cache.findIndex(element => user == element.user);
+      if (index == -1 || (participants.cache[index].status != "SUSPENDED" && participants.cache[index].status != "INACTIVE")) {
+        reaction.users.remove(participants.cache[index].user);
+        return;
+      } else if (participants.cache[index].canUseAbility(1) == false) {
+        reaction.users.remove(participants.cache[index].user);
+        return;
+      }
+      participants.cache[index].updateAbilityUse();
+      reaction.users.remove(participants.cache[index].user)
+      return await reaction.message.react(getRandomEmoji());
+    } else if (reaction.emoji.toString().toLowerCase().indexOf("✨") > -1) {
+      //if the users status is not inactive, remove the reaction, and return
+      let index = participants.cache.findIndex(element => user == element.user);
+      if (index == -1 || participants.cache[index].status != "INACTIVE") {
+        reaction.users.remove(participants.cache[index].user);
+        return;
+      } else if (participants.cache[index].canUseAbility(30) == true) {
+        participants.cache[index].updateAbilityUse();
+        flurry(message.channel);
+        reaction.users.remove(participants.cache[index].user);
+        return;
+      } else {
+        reaction.remove();
+        return;
+      }
     }
   }).addEvent("messageCreate", async (msg) => {
+    if (!active) return;
+    if (msg.channel.type == "dm") return;
+    if (flurries.includes(msg.channel.id)) {
+      msg.react(getRandomEmoji());
+    }
     if (
       msg.author &&
       !msg.webhookId &&
@@ -454,6 +233,7 @@ Module.addEvent("messageReactionAdd",
       msg.react(getRandomEmoji());
     }
   }).setClockwork(() => {
+    if (!active) return;
     try {
       return setInterval(async () => {
         let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
@@ -461,133 +241,300 @@ Module.addEvent("messageReactionAdd",
         const modifierToConvertToBotTime = 7;
         if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
           let roles = guild.roles.cache.get(snowflakes.roles.Holiday);
-          await cleanRoleMembers(roles[0]);
-          await cleanRoleMembers(roles[1]);
-          cache.forEach(element => {
+          await event.cleanRoleMembers(roles[0]);
+          await event.cleanRoleMembers(roles[1]);
+          participants.cache.forEach(element => {
             element.dailyReset();
           });
         }
-        cacheWrite();
+        participants.write();
       }
 
         , 60 * 60 * 1000);
     } catch (e) { u.errorHandler(e, "event Clockwork Error"); }
   })
 
+async function begin(msg) {
+  await event.setHolidayBotIcon(msg.client);
+  await event.generateRoles(msg.guild);
+  setActive(true);
+  NPCSend(msg.channel, u.embed({
+    description: `In celebration of The Festival of Pristine Waters I have opened my coffers to fund feasts, procure presents and prizes, generate games and much more. By the blessing of Katashi and in cooperation with the priests in the Grand Cathedral, I am proud to invite our people to seek out the delights of the festival.
+
+    Look for the sweets that have been hidden throughout this wonderful place to enjoy. Listen and watch closely for the secrets that have been hidden in the winds. And most importantly, share the joy of the season with your fellow citizens.
+
+    With great diligence, badges and adornments of favor may be earned, Granting the bearer even greater access to my coffers and even access to excerpts from the House Ryotsu library and access to private record rooms within the Kokina Toshokan.
+
+    I look forward to seeing you all at the festival, and wish you all the best of luck in your endeavors. If you need help, summon Radiance with the incant /festive help.
+
+    Let the festival of Pristine Waters begin! `,
+  },
+  ),
+    {
+      content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.MetaUpdates}>, <@&${snowflakes.roles.Updates.HolidayUpdates}>`,
+      allowedMentions: { roles: [snowflakes.roles.Updates.AllUpdates, snowflakes.roles.Updates.MetaUpdates, snowflakes.roles.Updates.HolidayUpdates] }
+    });
+}
 
 
-
-Module.addCommand({//TODO: REMOVE THIS
-  name: "prep",
-  guild: snowflakes.guilds.PrimaryServer,
-  permissions: (msg) => true,
-  process: async (msg) => {
-    await generateRoles(msg.guild);
-    await msg.channel.send("Roles generated");
-  }
-}).addCommand({ //TODO: REMOVE THIS
+Module.addCommand({ //TODO: REMOVE THIS
   name: "begin",
   guild: snowflakes.guilds.PrimaryServer,
   permissions: (msg) => true,
   process: async (msg) => {
-    await setHolidayBotIcon(msg);
+    await begin(msg);
     await msg.react("✔");
   }
 }).addCommand({ //TODO: REMOVE THIS
   name: "clean",
   guild: snowflakes.guilds.PrimaryServer,
-  permissions: (msg) => true,
+  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
   process: async (msg) => {
-    await cleanRoles(msg.guild);
-    await cleanHolidayBotIcon(msg);
+    await event.cleanRoles(msg.guild);
+    await event.cleanHolidayBotIcon(msg.client);
+    //delete the active.json file and the cache.json file
+    fs.unlinkSync('./data/holiday/active.json');
+    fs.unlinkSync('./data/holiday/cache.json');
     await msg.channel.send("Roles cleaned");
   }
-}).addCommand({ //TODO: REMOVE THIS
-  name: "gift",
+}).addCommand({
+  name: "flurry",
   guild: snowflakes.guilds.PrimaryServer,
-  permissions: () => true,
+  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.Admin)
+    || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
+    || msg.member.roles.cache.has(snowflakes.roles.WorldMaker)
+    || msg.member.roles.cache.has(snowflakes.roles.Moderator)
+    || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
   process: async (msg) => {
-    let user = msg.mentions.users.first();
-    if ((await participantGift(msg.author.id, user)) !== false) {
-      msg.channel.send("Transaction successful");
-    }
-    else {
-      msg.channel.send("You require more funds");
-    }
-
+    flurry(msg.channel);
   }
-})
-
-
-  //NPC introduction
-
-
-  //Send messages from characters
-
-
-  //allow people to gain event currency
-
-
-  //reward people for event currency
-  //role inventory commands
-
-  //allow people to grant gifts
-
-  //allow people to create storms
-
-
-
-  //admin commands
-  //allow people to get stats on how many people have done each thing
-  //allow admins to add an emoji
-
-
-
-  //Hannukah
-  .setClockwork(() => {
-    try {
-      return setInterval(() => {
-        //if today is the first day of hannukah, change the bot's avatar to Hanukkah1.png avatar
-        //if today is the second day of hannukah, change the bot's avatar to Hanukkah2.png avatar
-        //if today is the third day of hannukah, change the bot's avatar to Hanukkah3.png avatar
-        //if today is the fourth day of hannukah, change the bot's avatar to Hanukkah4.png avatar
-        //if today is the fifth day of hannukah, change the bot's avatar to Hanukkah5.png avatar
-        //if today is the sixth day of hannukah, change the bot's avatar to Hanukkah6.png avatar
-        //if today is the seventh day of hannukah, change the bot's avatar to Hanukkah7.png avatar
-        //if today is the eighth day of hannukah, change the bot's avatar to Hanukkah8.png avatar
-
-        if (moment().format("MM/DD") == firstDayOfHanukkah) {
-          Module.client.user.setAvatar(('./avatar/' + ("Hanukkah1.png")))
+}).addCommand({
+  name: "dailyreset",
+  guild: snowflakes.guilds.PrimaryServer,
+  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.Admin)
+    || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
+    || msg.member.roles.cache.has(snowflakes.roles.WorldMaker)
+    || msg.member.roles.cache.has(snowflakes.roles.Moderator)
+    || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
+  process: async (msg) => {
+    let roles = guild.roles.cache.get(snowflakes.roles.Holiday);
+    await event.cleanRoleMembers(roles[0]);
+    await event.cleanRoleMembers(roles[1]);
+    participants.cache.forEach(element => {
+      element.dailyReset();
+    });
+    participants.write();
+    msg.channel.send("Daily reset complete");
+  }
+}).addInteractionCommand({
+  name: "festival",
+  guildId: snowflakes.guilds.PrimaryServer,
+  /**
+   * 
+   * @param {CommandInteraction} interaction 
+   */
+  process: async (interaction) => {
+    switch (interaction.options.getSubcommand()) {
+      case "inventory":
+        let index = participants.cache.findIndex(element => interaction.user.id == element.user);
+        if (index == -1) {
+          participants.cache.push(new Participant({ user: interaction.user.id, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0 }));
         }
-        else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(1, "day").format("MM/DD")) {
-          Module.client.user.setAvatar(('./avatar/' + ("Hanukkah2.png")))
-        }
-        else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(2, "day").format("MM/DD")) {
-          Module.client.user.setAvatar(('./avatar/' + ("Hanukkah3.png")))
-        }
-        else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(3, "day").format("MM/DD")) {
-          Module.client.user.setAvatar(('./avatar/' + ("Hanukkah4.png")))
-        }
-        else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(4, "day").format("MM/DD")) {
-          Module.client.user.setAvatar(('./avatar/' + ("Hanukkah5.png")))
-        }
-        else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(5, "day").format("MM/DD")) {
-          Module.client.user.setAvatar(('./avatar/' + ("Hanukkah6.png")))
-        }
-        else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(6, "day").format("MM/DD")) {
-          Module.client.user.setAvatar(('./avatar/' + ("Hanukkah7.png")))
-        }
-        else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(7, "day").format("MM/DD")) {
-          Module.client.user.setAvatar(('./avatar/' + ("Hanukkah8.png")))
-        } else
-          //if the month is december, set the bot's avatar to winter.png
-          if (moment().format("MM") == "12") {
-            Module.client.user.setAvatar(eventAvatar || ('./avatar/' + ("winter.png")))
+        let participantObj = participants.cache[index];
+        let colors = await participantObj.getunlockedColorRoles(interaction.client);
+        let colorOptions = colors.map(element => {
+          return {
+            label: element.name,
+            value: element.id,
+            description: element.description,
+            emoji: element.emoji
           }
+        })
+        colorOptions.push({
+          label: "None",
+          value: "none",
+          description: "Remove all event roles",
+          emoji: "❌"
+        });
+        interaction.reply({
+          embeds: [u.embed(
+            {
+              description: `You have found ${participantObj.MultiDayCount + participantObj.count} sweets over the course of the event, ${participantObj.MultiDayGifted + participantObj.gifted} of which you have gifted to others, and ${participantObj.MultiDayReceived + participantObj.received} of which you have received from others.\n\nYou have access to the following roles:`
+                + colors.map(element => `\n<@&${element.id}>`).join("\n"),
+              color: event.colors[event.colors.length - 1].color,
+            }
+          )],
+          ephemeral: true,
+          components: [
+            //the menu to select roles from
+            {
+              type: 1,
+              components: [
+                {
+                  type: 3,
+                  custom_id: "PristineRoleSelector",
+                  options: colorOptions,
+                }
+              ]
+            }
+          ]
+        })
+        break;
 
-      }, 3 * 60 * 60 * 1000);
-    } catch (e) { u.errorHandler(e, "Hannukah PFP update error"); }
-  })
+
+      case "gift":
+        let user = interaction.options.getUser("recipient");
+        await participants.gift(interaction.user.id, user.id, interaction.client).then((result) => {
+          interaction.reply(result);
+        }
+        );
+
+        break;
+
+      case "help":
+        interaction.reply({
+          embeds: [u.embed(
+            {
+              description: `In order to participate in this event, you will need to find various reactions left by the bots throughout the server. Each will be of a delicious treat. Each one you get progresses you towards rewards, both daily, and longer term rewards. Rewards will include specail roles to give your name an extra flare, bonus XP, access to private event channels, and a set of **never before seen *canon* letters** from characters provided by one of our wonderful worldmakers, released over the coarse of the event.\n\nThis event will go on for several weeks. \n\nHappy Festival of Pristine waters!\n -Ghost `,
+              color: event.colors[event.colors.length - 1].color,
+            }
+          )],
+          ephemeral: true
+        })
+        break;
+    }
+  }
+}).addInteractionHandler({
+  customId: "PristineRoleSelector",
+  /**
+   * 
+   * @param {CommandInteraction} interaction 
+   */
+  process: async (interaction) => {
+    let index = participants.cache.findIndex(element => interaction.user.id == element.user);
+    if (index == -1) {
+      participants.cache.push(new Participant({ user: interaction.user.id, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0 }));
+    }
+    let participantObj = participants.cache[index];
+    let colors = await participantObj.getunlockedColorRoles(interaction.client);
+    let role = colors.find(element => element.id == interaction.values[0]);
+    if (interaction.values[0] == "none") {
+      interaction.member.roles.remove(colors.map(element => element.id));
+      return interaction.reply({
+        content: `All event colors have been removed.`,
+        ephemeral: true
+      })
+    }
+    else if (role) {
+      //remove all color roles from the user
+      return interaction.member.roles.remove(colors.map(element => element.id).filter(e => e != role)).then(() => {
+        return interaction.member.roles.add(role);
+      }).then(() => {
+        return interaction.reply({
+          content: `You have been given the <@&${role.id}> role.`,
+          ephemeral: true
+        })
+      });
+
+    } else {
+      interaction.reply({
+        content: "You do not have access to that role.",
+        ephemeral: true
+      });
+    }
+  }
+});
+
+if (!active) {
+  Module.addEvent("messageCreate",
+    /**
+     * 
+     * @param {Message} msg 
+     * @returns 
+     */
+    async (msg) => {
+      let eventHerald = "887021464438603776";
+      let eventHeraldChannel = "898352409053659187";
+      let testServerEventHeraldChannel = "891846270963036200";
+
+      if (msg.author.bot || active || msg.channel.type == "dm" || (msg.author.id != eventHerald && !msg.member.roles.cache.has(snowflakes.roles.BotMaster)) || (msg.channel.id != eventHeraldChannel && msg.channel.id != testServerEventHeraldChannel)) return;
+      await begin(msg);
+
+    });
+}
+
+//the JSON registration with discord for the event interaction commands should look like this:
+// {
+//   "name": "Festival",
+//   "description": "Pristine Waters Event",
+//   "options": [
+//     {
+//       "name": "inventory",
+//       "description": "View and manage your event roles",
+//       "type": 1
+//     },
+//     {
+//       "name": "gift",
+//       "description": "Gift a sweet to another user",
+//       "type": 1,
+//       "options": [
+//         {
+//           "name": "recipient",
+//           "description": "The user to gift to",
+//           "type": 6,
+//           "required": true
+//         }
+//       ]
+//     }
+//   ]
+// }
+
+
+//Hannukah
+Module.setClockwork(() => {
+  try {
+    return setInterval(() => {
+      //if today is the first day of hannukah, change the bot's avatar to Hanukkah1.png avatar
+      //if today is the second day of hannukah, change the bot's avatar to Hanukkah2.png avatar
+      //if today is the third day of hannukah, change the bot's avatar to Hanukkah3.png avatar
+      //if today is the fourth day of hannukah, change the bot's avatar to Hanukkah4.png avatar
+      //if today is the fifth day of hannukah, change the bot's avatar to Hanukkah5.png avatar
+      //if today is the sixth day of hannukah, change the bot's avatar to Hanukkah6.png avatar
+      //if today is the seventh day of hannukah, change the bot's avatar to Hanukkah7.png avatar
+      //if today is the eighth day of hannukah, change the bot's avatar to Hanukkah8.png avatar
+
+      if (moment().format("MM/DD") == firstDayOfHanukkah) {
+        Module.client.user.setAvatar(('./avatar/' + ("Hanukkah1.png")))
+      }
+      else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(1, "day").format("MM/DD")) {
+        Module.client.user.setAvatar(('./avatar/' + ("Hanukkah2.png")))
+      }
+      else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(2, "day").format("MM/DD")) {
+        Module.client.user.setAvatar(('./avatar/' + ("Hanukkah3.png")))
+      }
+      else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(3, "day").format("MM/DD")) {
+        Module.client.user.setAvatar(('./avatar/' + ("Hanukkah4.png")))
+      }
+      else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(4, "day").format("MM/DD")) {
+        Module.client.user.setAvatar(('./avatar/' + ("Hanukkah5.png")))
+      }
+      else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(5, "day").format("MM/DD")) {
+        Module.client.user.setAvatar(('./avatar/' + ("Hanukkah6.png")))
+      }
+      else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(6, "day").format("MM/DD")) {
+        Module.client.user.setAvatar(('./avatar/' + ("Hanukkah7.png")))
+      }
+      else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(7, "day").format("MM/DD")) {
+        Module.client.user.setAvatar(('./avatar/' + ("Hanukkah8.png")))
+      } else
+        //if the month is december, set the bot's avatar to winter.png
+        if (moment().format("MM") == "12") {
+          Module.client.user.setAvatar(event.avatar || ('./avatar/' + ("winter.png")))
+        }
+
+    }, 3 * 60 * 60 * 1000);
+  } catch (e) { u.errorHandler(e, "Hannukah PFP update error"); }
+})
 
 
 module.exports = Module;

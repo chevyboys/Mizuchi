@@ -1,0 +1,29 @@
+{
+  "name": "festival",
+  "description": "Pristine Waters Event",
+  "options": [
+    {
+      "name": "inventory",
+      "description": "View and manage your event roles",
+      "type": 1
+    },
+    {
+      "name": "gift",
+      "description": "Gift a single sweet to another user",
+      "type": 1,
+      "options": [
+        {
+          "name": "recipient",
+          "description": "The user to gift to",
+          "type": 6,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "help",
+      "description": "Get help with the event",
+      "type": 1
+    }
+  ]
+}
