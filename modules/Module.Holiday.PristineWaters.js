@@ -481,7 +481,7 @@ if (!active) {
 
 //the JSON registration with discord for the event interaction commands should look like this:
 // {
-//   "name": "Festival",
+//   "name": "festival",
 //   "description": "Pristine Waters Event",
 //   "options": [
 //     {
@@ -501,6 +501,11 @@ if (!active) {
 //           "required": true
 //         }
 //       ]
+//     },
+//     {
+//       "name": "help",
+//       "description": "Get help with the event",
+//       "type": 1
 //     }
 //   ]
 // }
