@@ -9,6 +9,7 @@ const event = require("./PristineWaters/utils");
 const odds = event.odds;
 const Participant = require("./PristineWaters/Participant");
 const NPCSend = require("./PristineWaters/NPC");
+const moment = require("moment");
 
 ///things that can be manually set
 const firstDayOfHanukkah = "12/07"; //MM/DD
