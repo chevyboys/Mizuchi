@@ -473,10 +473,10 @@ if (!active) {
      * @returns 
      */
     async (msg) => {
-      if (msg.author.bot || active || msg.channel.type == "dm" || (msg.author.id != eventHerald && !msg.member.roles.cache.has(snowflakes.roles.BotMaster)) || (msg.channel.id != eventHeraldChannel && msg.channel.id != testServerEventHeraldChannel)) return;
       let eventHerald = "887021464438603776";
       let eventHeraldChannel = "898352409053659187";
       let testServerEventHeraldChannel = "891846270963036200";
+      if (msg.author.bot || active || msg.channel.type == "dm" || (msg.author.id != eventHerald && !msg.member.roles.cache.has(snowflakes.roles.BotMaster)) || (msg.channel.id != eventHeraldChannel && msg.channel.id != testServerEventHeraldChannel)) return;
       await begin(msg);
 
     });
