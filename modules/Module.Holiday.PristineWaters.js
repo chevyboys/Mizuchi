@@ -327,7 +327,7 @@ Module.addCommand({ //TODO: REMOVE THIS
     || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
   process: async (msg) => {
     if (!active) return msg.channel.send("The event is not active");
-    let roles = guild.roles.cache.get(snowflakes.roles.Holiday);
+    let roles = msg.guild.roles.cache.get(snowflakes.roles.Holiday);
     await event.cleanRoleMembers(roles[0]);
     await event.cleanRoleMembers(roles[1]);
     participants.cache.forEach(element => {
