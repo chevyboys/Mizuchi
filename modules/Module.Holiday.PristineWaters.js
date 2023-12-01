@@ -1,4 +1,4 @@
-//Initalization, imports, etc
+h//Initalization, imports, etc
 const { MessageReaction, User, CommandInteraction, Message, } = require('discord.js');
 const snowflakes = require('../config/snowflakes.json')
 const Module = new (require("augurbot")).Module;
@@ -251,7 +251,7 @@ Module.addEvent("messageReactionAdd",
 
             participants.cache.forEach(element => {
               element.dailyReset();
-                msg.guild.members.cache.get(element.user).roles.remove(snowflakes.roles.Holiday);
+                (awa8t msg.guild.members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
             });
           }
           participants.write();
