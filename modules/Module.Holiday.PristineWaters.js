@@ -141,7 +141,7 @@ Module.addEvent("messageReactionAdd",
           index = participants.cache.length - 1;
         }
 
-        if (participants.cache[index].status != "ACTIVE") {
+        if (participants.cache[index].status != "ACTIVE" || participants.cache[index].adjustedCount > 50) {
           reaction.users.remove(participants.cache[index].user);
           return;
         }
