@@ -52,7 +52,7 @@ const roles = [
   {
     name: "Celebrant",
     hoist: true,
-    icon: "./avatar/blueStar.png" //TODO: CHANGE THIS
+    icon: "./avatar/PristineWaters.png" //TODO: CHANGE THIS
   }
 ]
 
