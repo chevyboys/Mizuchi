@@ -248,11 +248,10 @@ Module.addEvent("messageReactionAdd",
           const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
           const modifierToConvertToBotTime = 7;
           if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
-            let roles = guild.roles.cache.get(snowflakes.roles.Holiday);
-            await event.cleanRoleMembers(roles[0]);
-            await event.cleanRoleMembers(roles[1]);
+
             participants.cache.forEach(element => {
               element.dailyReset();
+                msg.guild.members.cache.get(element.user).roles.remove(snowflakes.roles.Holiday);
             });
           }
           participants.write();
@@ -327,11 +326,9 @@ Module.addCommand({ //TODO: REMOVE THIS
     || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
   process: async (msg) => {
     if (!active) return msg.channel.send("The event is not active");
-    let roles = msg.guild.roles.cache.get(snowflakes.roles.Holiday);
-    await event.cleanRoleMembers(roles[0]);
-    await event.cleanRoleMembers(roles[1]);
     participants.cache.forEach(element => {
       element.dailyReset();
+      msg.guild.members.cache.get(element.user).roles.remove(snowflakes.roles.Holiday);
     });
     participants.write();
     msg.channel.send("Daily reset complete");
