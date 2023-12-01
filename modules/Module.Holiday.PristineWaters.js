@@ -315,6 +315,7 @@ Module.addCommand({ //TODO: REMOVE THIS
     || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
   process: async (msg) => {
     flurry(msg.channel);
+    u.clean(msg);
   }
 }).addCommand({
   name: "dailyreset",
