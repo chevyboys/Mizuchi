@@ -1,4 +1,4 @@
-h//Initalization, imports, etc
+//Initalization, imports, etc
 const { MessageReaction, User, CommandInteraction, Message, } = require('discord.js');
 const snowflakes = require('../config/snowflakes.json')
 const Module = new (require("augurbot")).Module;
