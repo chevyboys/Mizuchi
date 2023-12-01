@@ -251,7 +251,7 @@ Module.addEvent("messageReactionAdd",
 
             participants.cache.forEach(element => {
               element.dailyReset();
-                (awa8t msg.guild.members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
+                (await msg.guild.members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
             });
           }
           participants.write();
