@@ -172,6 +172,10 @@ class Participant {
 
 
     }
+    if (this.adjustedCount > 50) {
+      this.#_status = "INACTIVE";
+      this.lastAbilityUse = Date.now() - 1000 * 60 * 60 * 24;
+    }
     switch (this.adjustedCount) {
       case 5:
         if (!event.roles[0].role) await event.generateRoles(guild);
