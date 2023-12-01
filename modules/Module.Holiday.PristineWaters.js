@@ -269,7 +269,7 @@ async function begin(msg) {
   NPCSend(msg.channel, u.embed({
     description: `In celebration of The Festival of Pristine Waters I have opened my coffers to fund feasts, procure presents and prizes, generate games and much more. By the blessing of Katashi and in cooperation with the priests in the Grand Cathedral, I am proud to invite our people to seek out the delights of the festival.
 
-    Look for the sweets that have been hidden throughout this wonderful place to enjoy. Listen and watch closely for the secrets that have been hidden in the winds. And most importantly, share the joy of the season with your fellow citizens.
+    Look for the sweets that have been hidden throughout this event to enjoy. Listen and watch closely for the secrets that have been hidden in the winds. And most importantly, share the joy of the season with your fellow citizens.
 
     With great diligence, badges and adornments of favor may be earned, Granting the bearer even greater access to my coffers and even access to excerpts from the House Ryotsu library and access to private record rooms within the Kokina Toshokan.
 
@@ -413,7 +413,8 @@ Module.addCommand({ //TODO: REMOVE THIS
         interaction.reply({
           embeds: [u.embed(
             {
-              description: `In order to participate in this event, you will need to find various reactions left by the bots throughout the server. Each will be of a delicious treat. Each one you get progresses you towards rewards, both daily, and longer term rewards. Rewards will include specail roles to give your name an extra flare, bonus XP, access to private event channels, and a set of **never before seen *canon* letters** from characters provided by one of our wonderful worldmakers, released over the coarse of the event.\n\nThis event will go on for several weeks. \n\nHappy Festival of Pristine waters!\n -Ghost `,
+              description: `In order to participate in this event, you will need to find various reactions left by the bots throughout the server. Each will be of a delicious treat. Each one you get progresses you towards rewards, both daily, and longer term rewards. Rewards will include specail roles to give your name an extra flare, bonus XP, access to private event channels, and a set of **never before seen *canon* letters** from characters provided by one of our wonderful worldmakers, released over the coarse of the event.\n\nThis event will go on for several weeks. \n\nHappy Festival of Pristine waters!\n -Ghost `
+                + "\n\n **__Credits__** \nThis event was created by Ghost, with help from the following amazing people:\nKayleigh Nicol\nKritta\nKester/Jace\nKumokun\nDuke Tersael\nRels\n\n **__Special Thanks__**:\nPandora K Ballard, Andrew Rowe,",
               color: event.colors[event.colors.length - 1].color,
             }
           )],
