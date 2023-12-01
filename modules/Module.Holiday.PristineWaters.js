@@ -251,7 +251,7 @@ Module.addEvent("messageReactionAdd",
 
             participants.cache.forEach(element => {
               element.dailyReset();
-                (await msg.guild.members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
+                (await guild.members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
             });
           }
           participants.write();
@@ -328,7 +328,7 @@ Module.addCommand({ //TODO: REMOVE THIS
     if (!active) return msg.channel.send("The event is not active");
     participants.cache.forEach(element => {
       element.dailyReset();
-      msg.guild.members.cache.get(element.user).roles.remove(snowflakes.roles.Holiday);
+      (await msg.guild.members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
     });
     participants.write();
     msg.channel.send("Daily reset complete");
