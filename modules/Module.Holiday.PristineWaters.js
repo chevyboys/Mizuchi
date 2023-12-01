@@ -249,9 +249,9 @@ Module.addEvent("messageReactionAdd",
           const modifierToConvertToBotTime = 7;
           if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
 
-            participants.cache.forEach(element => {
+            participants.cache.forEach(async (element) => {
               element.dailyReset();
-                (await guild.members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
+                (await  (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
             });
           }
           participants.write();
