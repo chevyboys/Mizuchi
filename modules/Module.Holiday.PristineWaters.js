@@ -157,7 +157,7 @@ Module.addEvent("messageReactionAdd",
             {
               description: `I see <@${user.id}> found a treat in <#${message.channel.id}> `,
               footer: {
-                text: `Found today: ${participants.cache[index].adjustedCount} | total: ${participants.cache[index].MultiDayCount + participants.cache[index].count}\nGifted today: ${participants.cache[index].gifted} | total: ${participants.cache[index].MultiDayGifted + participants.cache[index].gifted}\nReceived today: ${participants.cache[index].received} | total: ${participants.cache[index].MultiDayReceived + participants.cache[index].received}`
+                text: `Found today: ${participants.cache[index].adjustedCount} | total: ${participants.cache[index].MultiDayCount + participants.cache[index].count}\nGifted today: ${participants.cache[index].gifted} | total: ${participants.cache[index].MultiDayGifted + participants.cache[index].gifted}\nReceived today: ${participants.cache[index].received} | total: ${participants.cache[index].MultiDayReceived + participants.cache[index].received}\n`
               }
             }
           ),
@@ -169,9 +169,9 @@ Module.addEvent("messageReactionAdd",
           NPCSend(channel,
             u.embed(
               {
-                description: `<@${user.id}> is pleasantly full, and shouldn't partake of more sweets for a few minutes, which leaves only one thing to do! begin leaving some for their compatriots! Instead of finding sweets, react with the 🎁 emoji up to once every sixty seconds to leave something delicious for others to find for the next five minutes!`,
+                description: `<@${user.id}> is pleasantly full, and shouldn't partake of more sweets for a few minutes, which leaves only one thing to do! Begin leaving some for their compatriots! Instead of finding sweets, react with the 🎁 emoji up to once every sixty seconds to leave something delicious for others to find for the next five minutes!`,
                 footer: {
-                  text: `Found today: ${participants.cache[index].adjustedCount} | total: ${participants.cache[index].MultiDayCount + participants.cache[index].count}\nGifted today: ${participants.cache[index].gifted} | total: ${participants.cache[index].MultiDayGifted + participants.cache[index].gifted}\nReceived today: ${participants.cache[index].received} | total: ${participants.cache[index].MultiDayReceived + participants.cache[index].received}`
+                  text: `Found today: ${participants.cache[index].adjustedCount} | total: ${participants.cache[index].MultiDayCount + participants.cache[index].count}\nGifted today: ${participants.cache[index].gifted} | total: ${participants.cache[index].MultiDayGifted + participants.cache[index].gifted}\nReceived today: ${participants.cache[index].received} | total: ${participants.cache[index].MultiDayReceived + participants.cache[index].received}\n`
                 }
               }
             ),
