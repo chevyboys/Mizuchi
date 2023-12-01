@@ -414,7 +414,7 @@ Module.addCommand({ //TODO: REMOVE THIS
           embeds: [u.embed(
             {
               description: `In order to participate in this event, you will need to find various reactions left by the bots throughout the server. Each will be of a delicious treat. Each one you get progresses you towards rewards, both daily, and longer term rewards. Rewards will include specail roles to give your name an extra flare, bonus XP, access to private event channels, and a set of **never before seen *canon* letters** from characters provided by one of our wonderful worldmakers, released over the coarse of the event.\n\nThis event will go on for several weeks. \n\nHappy Festival of Pristine waters!\n -Ghost `
-                + "\n\n **__Credits__** \nThis event was created by Ghost, with help from the following amazing people:\nKayleigh Nicol\nKritta\nKester/Jace\nKumokun\nDuke Tersael\nRels\n\n **__Special Thanks__**:\nPandora K Ballard, Andrew Rowe,",
+                + "\n\n **__Credits__** \nThis event was created by Ghost, with help from the following amazing people:\nKayleigh Nicol\nKritta\nKester/Jace\nKumokun\nDuke Tersael\nRels\n\n **__Special Thanks__**:\nPandora K Ballard,\nAndrew Rowe,",
               color: event.colors[event.colors.length - 1].color,
             }
           )],
