@@ -24,6 +24,11 @@
       "name": "help",
       "description": "Get help with the event",
       "type": 1
+    },
+    {
+      "name": "leaderboard",
+      "description": "View the leaderboard",
+      "type": 1
     }
   ]
 }

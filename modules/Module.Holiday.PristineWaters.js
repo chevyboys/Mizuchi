@@ -119,7 +119,27 @@ function getRandomEmoji() {
   return event.emoji[Math.floor(Math.random() * event.emoji.length)];
 }
 
+async function begin(msg) {
+  await event.setHolidayBotIcon(msg.client);
+  await event.generateRoles(msg.guild);
+  setActive(true);
+  NPCSend(msg.channel, u.embed({
+    description: `In celebration of The Festival of Pristine Waters I have opened my coffers to fund feasts, procure presents and prizes, generate games and much more. By the blessing of Katashi and in cooperation with the priests in the Grand Cathedral, I am proud to invite our people to seek out the delights of the festival.
 
+    Look for the sweets that have been hidden throughout this event to enjoy. Listen and watch closely for the secrets that have been hidden in the winds. And most importantly, share the joy of the season with your fellow citizens.
+
+    With great diligence, badges and adornments of favor may be earned, Granting the bearer even greater access to my coffers and even access to excerpts from the House Ryotsu library and access to private record rooms within the Kokina Toshokan.
+
+    I look forward to seeing you all at the festival, and wish you all the best of luck in your endeavors. If you need help, summon Radiance with the incant /festive help.
+
+    Let the festival of Pristine Waters begin! `,
+  },
+  ),
+    {
+      content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.MetaUpdates}>, <@&${snowflakes.roles.Updates.HolidayUpdates}>`,
+      allowedMentions: { roles: [snowflakes.roles.Updates.AllUpdates, snowflakes.roles.Updates.MetaUpdates, snowflakes.roles.Updates.HolidayUpdates] }
+    });
+}
 
 Module.addEvent("messageReactionAdd",
   /**
@@ -262,27 +282,7 @@ Module.addEvent("messageReactionAdd",
       } catch (e) { u.errorHandler(e, "event Clockwork Error"); }
     })
 
-async function begin(msg) {
-  await event.setHolidayBotIcon(msg.client);
-  await event.generateRoles(msg.guild);
-  setActive(true);
-  NPCSend(msg.channel, u.embed({
-    description: `In celebration of The Festival of Pristine Waters I have opened my coffers to fund feasts, procure presents and prizes, generate games and much more. By the blessing of Katashi and in cooperation with the priests in the Grand Cathedral, I am proud to invite our people to seek out the delights of the festival.
 
-    Look for the sweets that have been hidden throughout this event to enjoy. Listen and watch closely for the secrets that have been hidden in the winds. And most importantly, share the joy of the season with your fellow citizens.
-
-    With great diligence, badges and adornments of favor may be earned, Granting the bearer even greater access to my coffers and even access to excerpts from the House Ryotsu library and access to private record rooms within the Kokina Toshokan.
-
-    I look forward to seeing you all at the festival, and wish you all the best of luck in your endeavors. If you need help, summon Radiance with the incant /festive help.
-
-    Let the festival of Pristine Waters begin! `,
-  },
-  ),
-    {
-      content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.MetaUpdates}>, <@&${snowflakes.roles.Updates.HolidayUpdates}>`,
-      allowedMentions: { roles: [snowflakes.roles.Updates.AllUpdates, snowflakes.roles.Updates.MetaUpdates, snowflakes.roles.Updates.HolidayUpdates] }
-    });
-}
 
 
 Module.addCommand({ //TODO: REMOVE THIS
@@ -419,6 +419,39 @@ Module.addCommand({ //TODO: REMOVE THIS
               color: event.colors[event.colors.length - 1].color,
             }
           )],
+          ephemeral: true
+        })
+        break;
+      case "leaderboard":
+        //get the first 25 participants, sorted by the number of sweets they have found
+        let leaderboard = participants.cache.sort((a, b) => b.MultiDayCount + b.count - a.MultiDayCount - a.count).slice(0, 10);
+        let leaderboardFoundToday = participants.cache.sort((a, b) => b.count - a.count).slice(0, 10);
+        let leaderboardGiftedToday = participants.cache.sort((a, b) => b.gifted - a.gifted).slice(0, 10);
+        let leaderboardEmbed = u.embed({
+          title: "Leaderboard",
+          description: leaderboard.map((element, index) => {
+            return `${index + 1}. <@${element.user}>: ${element.MultiDayCount + element.count} sweet${(element.MultiDayCount + element.count > 1) ? "s" : ""} found over the course of the event`
+          }).join("\n"),
+          fields: [
+            {
+              name: "Most sweets found today",
+              value: leaderboardFoundToday.map((element, index) => {
+                return `${index + 1}. <@${element.user}>: ${element.count}`
+              }).join("\n"),
+              inline: true
+            },
+            {
+              name: "Most sweets gifted today",
+              value: leaderboardGiftedToday.map((element, index) => {
+                return `${index + 1}. <@${element.user}>: ${element.gifted}`
+              }).join("\n"),
+              inline: true
+            }
+          ],
+          color: event.colors[event.colors.length - 1].color,
+        })
+        interaction.reply({
+          embeds: [leaderboardEmbed],
           ephemeral: true
         })
         break;
