@@ -104,7 +104,7 @@ let event = {
     "🍷",
     "☕"
   ],
-  odds: 3,
+  odds: 8,
   /**
  * 
  * @param {Guild} guild 
