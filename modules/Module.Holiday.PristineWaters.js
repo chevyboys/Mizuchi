@@ -64,8 +64,11 @@ class Participants {
   async gift(giver, reciever, client) {
     let egg = [
       "You require more minerals",
-      "You require more vespene gas",
       "You Must Construct Additional Pylons!",
+      "Spawn more Overlords!",
+      "We Require More Vespene Gas!",
+      "Not Enough Minerals!",
+      "Insufficient Vespene Gas!",
     ]
 
     if (client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(reciever).bot) return "While we appreciate the consideration from one so illustrious, the server elementals have no need for this.";
@@ -75,16 +78,10 @@ class Participants {
       this.cache.push(new Participant({ user: giver, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0, }));
       giverIndex = this.cache.length - 1;
       this.write();
-      switch (Math.floor(Math.random() * 100)) {
-        case 0:
-          return egg[0];
-        case 1:
-          return egg[1];
-        case 2:
-          return egg[2];
-        default:
-          return "Find a sweet to give someone first";
-      }
+      //roll a dice between 1 and 1000, if the result is less than the length of the egg array, return the egg message corresponding to the index of the roll
+      if (Math.floor(Math.random() * 1000) < egg.length) return egg[Math.floor(Math.random() * egg.length)];
+      else return "Find a sweet to give someone first";
+
     }
     if (recieverIndex == -1) {
       this.cache.push(new Participant({ user: reciever, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0 }));
@@ -271,7 +268,7 @@ Module.addEvent("messageReactionAdd",
 
             participants.cache.forEach(async (element) => {
               element.dailyReset();
-                (await  (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
+              (await (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
             });
           }
           participants.write();
