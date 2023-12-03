@@ -443,13 +443,13 @@ Module.addCommand({ //TODO: REMOVE THIS
         break;
       case "leaderboard":
         //get the first 25 participants, sorted by the number of sweets they have found
-        let leaderboard = participants.cache.sort((a, b) => b.MultiDayCount + b.count - a.MultiDayCount - a.count).slice(0, 10);
+        let leaderboard = participants.cache.sort((a, b) => b.multidayAdjustedCount + b.adjustedCount - a.multidayAdjustedCount - a.adjustedCount).slice(0, 10);
         let leaderboardFoundToday = participants.cache.sort((a, b) => b.count - a.count).slice(0, 10);
         let leaderboardGiftedToday = participants.cache.sort((a, b) => b.gifted - a.gifted).slice(0, 10);
         let leaderboardEmbed = u.embed({
           title: "Leaderboard",
           description: leaderboard.map((element, index) => {
-            return `${index + 1}. <@${element.user}>: ${element.MultiDayCount + element.count} sweet${(element.MultiDayCount + element.count > 1) ? "s" : ""} found over the course of the event`
+            return `${index + 1}. <@${element.user}>: ${element.MultiDayCount + element.count} sweet${(element.MultiDayCount + element.count > 1) ? "s" : ""} collected over the course of the event`
           }).join("\n"),
           fields: [
             {
