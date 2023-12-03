@@ -192,7 +192,8 @@ class Participant {
           }
         );
         break;
-      case 50: if (!event.roles[1].role) await event.generateRoles(guild);
+      case 50: if (!event.roles[1].role) {
+        await event.generateRoles(guild);
         member.roles.add(event.roles[1].role);
         this.#_status = "INACTIVE";
         this.lastAbilityUse = Date.now() - 1000 * 60 * 60 * 24;
@@ -214,7 +215,10 @@ class Participant {
           )],
           content: `<@${this.user}>`,
         });
+        //send a message in event.channel
+        client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.cache.get(event.channel).send("Welcome to the hidden event channel <@" + this.user + ">!");
         break;
+      }
     }
   }
 
