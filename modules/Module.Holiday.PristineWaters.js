@@ -449,7 +449,7 @@ Module.addCommand({ //TODO: REMOVE THIS
         let leaderboardEmbed = u.embed({
           title: "Leaderboard",
           description: leaderboard.map((element, index) => {
-            return `${index + 1}. <@${element.user}>: ${element.MultiDayCount + element.count} sweet${(element.MultiDayCount + element.count > 1) ? "s" : ""} collected over the course of the event`
+            return `${index + 1}. <@${element.user}>: ${element.MultiDayAdjustedCount + element.adjustedCount} sweet${(element.MultiDayAdjustedCount + element.adjustedCount > 1) ? "s" : ""} collected over the course of the event`
           }).join("\n"),
           fields: [
             {
