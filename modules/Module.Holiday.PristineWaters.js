@@ -465,8 +465,22 @@ Module.addCommand({ //TODO: REMOVE THIS
                 return `${index + 1}. <@${element.user}>: ${element.gifted}`
               }).join("\n"),
               inline: true
+            },
+            {
+              name: "Most unique colors unlocked",
+              value: leaderboard.map((element, index) => {
+                //get the unlocked color roles for each participant, ensure no duplicates are counted, and return the number of unique colors unlocked
+                return `${index + 1}. <@${element.user}>: ${element.getunlockedColorRoles(interaction.client).length}`
+              }).join("\n"),
             }
           ],
+          footer: {
+            text: "You currently have " + (participants.cache.findIndex(element => interaction.user.id == element.user) == -1 ?
+              0 : participants.cache[participants.cache.findIndex(element => interaction.user.id == element.user)].adjustedCount) + " sweets today"
+              + "\nYou have found " + (participants.cache.findIndex(element => interaction.user.id == element.user) == -1 ?
+                0 : participants.cache[participants.cache.findIndex(element => interaction.user.id == element.user)].multidayAdjustedCount + participants.cache[participants.cache.findIndex(element => interaction.user.id == element.user)].adjustedCount)
+              + " sweets over the course of the event"
+          },
           color: event.colors[event.colors.length - 1].color,
         })
         interaction.reply({
