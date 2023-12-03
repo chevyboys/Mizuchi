@@ -78,6 +78,7 @@ const avatar = "./avatar/winter.png";
  */
 
 let event = {
+  channel: "1179840845470503004",
   avatar: avatar,
   colors: colors,
   roles: roles,
