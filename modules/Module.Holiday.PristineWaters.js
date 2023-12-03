@@ -46,6 +46,16 @@ function flurry(channel) {
   }, 10 * 60 * 1000);
 }
 
+function extendedFlurry(channel, minutes) {
+  NPCSend(channel, u.embed({
+    description: "I invite you all to join me in a grand feast, to last long into the night!"
+  }));
+  flurries.push(channel.id);
+  setTimeout(() => {
+    flurries.splice(flurries.indexOf(channel.id), 1);
+  }, minutes * 60 * 1000);
+}
+
 
 class Participants {
   cache = [];
@@ -247,6 +257,21 @@ Module.addEvent("messageReactionAdd",
       if (msg.channel.type == "dm") return;
       if (flurries.includes(msg.channel.id)) {
         msg.react(getRandomEmoji());
+      } else {
+        //if there have been two messages in the channel in the last 10 minutes, double the odds of a flurry
+        if (msg.channel.messages.cache.filter(element => element.createdTimestamp > Date.now() - 10 * 60 * 1000).size > 2 && Math.floor(Math.random() * 100) < 2) {
+          //if the channel name is general, have a chance for an extended flurry
+          if (msg.channel.name.toLowerCase() == "general" && Math.floor(Math.random() * 100) < 10) {
+            extendedFlurry(msg.channel, 180);
+          }
+          else flurry(msg.channel);
+        }
+
+        //one percent chance to trigger a flurry in the channel
+        else if (Math.floor(Math.random() * 100) == 0 && msg.channel.permissionsFor(msg.guild.members.me).has("MANAGE_MESSAGES")) {
+          flurry(msg.channel);
+        }
+
       }
       if (
         msg.author &&
