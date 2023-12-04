@@ -28,7 +28,6 @@ const colors = [
     name: "Mint",
     color: "#b9ffea"
   },
-
   {
     name: "frost",
     color: "#b9ebff"
@@ -36,6 +35,10 @@ const colors = [
   {
     name: "Deep Purple",
     color: "#310c38"
+  },
+  {
+    name: "Tavare Winter Blue",
+    color: "#66a3d8"
   },
   {
     name: "Goddess Blue",
