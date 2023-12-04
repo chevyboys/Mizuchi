@@ -38,6 +38,10 @@ const colors = [
     color: "#310c38"
   },
   {
+    name: "Goddess Blue",
+    color: "#9CA9FF"
+  },
+  {
     name: "Bingus Blurple",
     color: "#c4ccff"
   },
