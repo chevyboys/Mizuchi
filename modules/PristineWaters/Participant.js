@@ -196,6 +196,7 @@ class Participant {
       case 51: if (member.roles.cache.has(event.roles[1].role.id)) { break }
       case 50: if (!event.roles[1].role) {
         await event.generateRoles(guild);
+      }
         await member.roles.add(event.roles[1].role);
         this.#_status = "INACTIVE";
         this.lastAbilityUse = Date.now() - 1000 * 60 * 60 * 24;
@@ -223,7 +224,6 @@ class Participant {
         } catch (error) {
         }
         break;
-      }
     }
   }
 
