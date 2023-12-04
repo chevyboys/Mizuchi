@@ -744,6 +744,8 @@ Module.setClockwork(() => {
         //if the month is december, set the bot's avatar to winter.png
         if (moment().format("MM") == "12") {
           Module.client.user.setAvatar(event.avatar || ('./avatar/' + ("winter.png")))
+        } else if (moment().format("MM/DD") == "01/02") {
+          Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.cache.get(snowflakes.channels.modRequests).send("Please have a bot master update the hanukkah start date in the code (modules/Module.Holiday.PristineWaters.js)");
         }
 
     }, 3 * 60 * 60 * 1000);
