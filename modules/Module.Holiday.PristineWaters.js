@@ -338,7 +338,7 @@ Module.addCommand({ //TODO: REMOVE THIS
   process: async (msg) => {
     if (msg.content.includes("extended")) extendedFlurry(msg.channel, 10);
     else flurry(msg.channel);
-    u.clean(msg);
+    u.clean(msg, 0);
   }
 }).addCommand({
   name: "dailyreset",
