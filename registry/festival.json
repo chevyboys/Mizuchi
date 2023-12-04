@@ -29,6 +29,11 @@
       "name": "leaderboard",
       "description": "View the leaderboard",
       "type": 1
+    },
+    {
+      "name": "avatar",
+      "description": "Build a custom event avatar",
+      "type": 1
     }
   ]
 }

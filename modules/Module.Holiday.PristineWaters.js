@@ -1,5 +1,5 @@
 //Initalization, imports, etc
-const { MessageReaction, User, CommandInteraction, Message, } = require('discord.js');
+const { MessageReaction, User, CommandInteraction, Message, MessageSelectMenu, MessageActionRow, } = require('discord.js');
 const snowflakes = require('../config/snowflakes.json')
 const Module = new (require("augurbot")).Module;
 const fs = require('fs');
@@ -10,6 +10,7 @@ const odds = event.odds;
 const Participant = require("./PristineWaters/Participant");
 const NPCSend = require("./PristineWaters/NPC");
 const moment = require("moment");
+const manipulateImage = require('./PristineWaters/imageManipulation');
 
 ///things that can be manually set
 const firstDayOfHanukkah = "12/07"; //MM/DD
@@ -268,7 +269,7 @@ Module.addEvent("messageReactionAdd",
         }
 
         //one percent chance to trigger a flurry in the channel
-        else if (Math.floor(Math.random() * 100) == 0 && msg.channel.permissionsFor(msg.guild.members.me).has("MANAGE_MESSAGES")) {
+        else if (Math.floor(Math.random() * 100) == 0 && msg.channel.permissionsFor(msg.guild?.members.me)?.has("MANAGE_MESSAGES")) {
           flurry(msg.channel);
         }
 
@@ -355,7 +356,74 @@ Module.addCommand({ //TODO: REMOVE THIS
     participants.write();
     msg.channel.send("Daily reset complete");
   }
-}).addInteractionCommand({
+});
+
+
+//Things for the command interaction
+let folderNames = fs.readdirSync("./storage/pristine/");
+let folderOptions = folderNames.map(element => {
+  return {
+    label: element,
+    value: element,
+    description: element,
+    emoji: "🖼️"
+  }
+});
+const folderRow = new MessageActionRow().addComponents(
+  new MessageSelectMenu(
+    {
+      customId: "PristineAvatarOverlayFolderSelector",
+      options: folderOptions,
+      placeholder: "Select an overlay",
+    }
+  )
+
+);
+
+async function handlePristineAvatarOverlaySelectionMenus(interaction) {
+  //interaction.deferUpdate();
+  let folderMenu = interaction.message.components[0];
+  let colorMenu = interaction.message.components[1];
+  let folder = folderMenu.components[0].placeholder;
+  let colorRoleName = interaction.message.components[1].components[0].placeholder;
+  if (interaction.customId == "PristineAvatarOverlayFolderSelector") {
+    folderMenu.components[0].placeholder = interaction.values[0];
+    folder = interaction.values[0];
+  }
+  else if (interaction.customId == "PristineAvatarOverlayColorSelector") {
+    colorRoleName = interaction.guild.roles.cache.get(interaction.values[0]).name;
+    colorMenu.components[0].placeholder = colorRoleName;
+  }
+  if (!(interaction.message.components[0].components[0].placeholder == "Select an overlay") && !(interaction.message.components[1].components[0].placeholder == "Select a color")) {
+    //get the hex color from the event cache for the user's selected color
+    let color = participants.cache.find(element => interaction.user.id == element.user).unlockedColors.find(element => "Pristine " + element.name == colorRoleName)?.color;
+    return manipulateImage({
+      folderName: folder,
+      member: interaction.member,
+      hexColor: color
+    }).then((image) => {
+      return interaction.update({
+        embeds: interaction.message.embeds,
+        components: [folderMenu, colorMenu],
+        files: [{
+          attachment: image,
+          name: "avatar.gif"
+
+        }
+        ]
+      })
+    })
+  }
+  else return interaction.update({
+    embeds: interaction.message.embeds,
+    components: [folderMenu, colorMenu]
+  })
+
+
+}
+
+
+Module.addInteractionCommand({
   name: "festival",
   guildId: snowflakes.guilds.PrimaryServer,
   /**
@@ -441,6 +509,7 @@ Module.addCommand({ //TODO: REMOVE THIS
           ephemeral: true
         })
         break;
+
       case "leaderboard":
         //get the first 25 participants, sorted by the number of sweets they have found
         let leaderboard = participants.cache.sort((a, b) => b.multidayAdjustedCount + b.adjustedCount - a.multidayAdjustedCount - a.adjustedCount).slice(0, 10);
@@ -488,6 +557,58 @@ Module.addCommand({ //TODO: REMOVE THIS
           ephemeral: true
         })
         break;
+
+      case "avatar":
+        //the avatar sub command should send a message with two menus, one to select a folder name from ./storage/pristine/ and one to select a color from the event color roles in the user's inventory
+
+        //get all the folders in ./storage/pristine/
+
+        //get all the color roles in the user's inventory
+        //get the participant object for the user
+        let participant = participants.cache.find(element => interaction.user.id == element.user);
+        //get the unlocked color roles for the user
+        let unlockedColorRoles = await participant.getunlockedColorRoles(interaction.client);
+        //get the color options for the menu
+        let userColorOptions = unlockedColorRoles.map(element => {
+          return {
+            label: element.name,
+            value: element.id,
+            description: element.description,
+            emoji: element.emoji
+          }
+        });
+        if (userColorOptions.length == 0) return interaction.reply({
+          embeds: [u.embed({
+            description: "You do not have any event colors unlocked",
+            color: event.colors[event.colors.length - 1].color,
+          })],
+          ephemeral: true
+        });
+        //get the folder options for the menu
+
+        //create the message
+        interaction.reply({
+          embeds: [u.embed({
+            description: "Create an event avatar overlay",
+            color: event.colors[event.colors.length - 1].color,
+          })],
+          ephemeral: true,
+          components: [
+            //the menu to select the folder from
+            folderRow,
+            //the menu to select the color from
+            new MessageActionRow().addComponents(
+              new MessageSelectMenu(
+                {
+                  customId: "PristineAvatarOverlayColorSelector",
+                  options: userColorOptions,
+                  placeholder: "Select a color",
+                }
+              )
+            )
+          ]
+        })
+
     }
   }
 }).addInteractionHandler({
@@ -529,24 +650,27 @@ Module.addCommand({ //TODO: REMOVE THIS
       });
     }
   }
+}).addInteractionHandler({
+  customId: "PristineAvatarOverlayFolderSelector",
+  /**
+   * 
+   * @param {CommandInteraction} interaction 
+   */
+  process: async (interaction) => {
+    //get the currently selected options in the two menus from the interaction
+    return await handlePristineAvatarOverlaySelectionMenus(interaction);
+
+  }
+}).addInteractionHandler({
+  customId: "PristineAvatarOverlayColorSelector",
+  /**
+   * 
+   * @param {CommandInteraction} interaction 
+   */
+  process: async (interaction) => {
+    return await handlePristineAvatarOverlaySelectionMenus(interaction);
+  }
 });
-
-if (!active) {
-  Module.addEvent("messageCreate",
-    /**
-     * 
-     * @param {Message} msg 
-     * @returns 
-     */
-    async (msg) => {
-      let eventHerald = "887021464438603776";
-      let eventHeraldChannel = "898352409053659187";
-      let testServerEventHeraldChannel = "891846270963036200";
-      if (msg.author.bot || active || msg.channel.type == "dm" || (msg.author.id != eventHerald && !msg.member.roles.cache.has(snowflakes.roles.BotMaster)) || (msg.channel.id != eventHeraldChannel && msg.channel.id != testServerEventHeraldChannel)) return;
-      await begin(msg);
-
-    });
-}
 
 //the JSON registration with discord for the event interaction commands should look like this:
 // {

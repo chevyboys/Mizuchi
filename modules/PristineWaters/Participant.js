@@ -216,7 +216,10 @@ class Participant {
           content: `<@${this.user}>`,
         });
         //send a message in event.channel
-        client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.cache.get(event.channel).send("Welcome to the hidden event channel <@" + this.user + ">!");
+        try {
+          client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.cache.get(event.channel).send("Welcome to the hidden event channel <@" + this.user + ">!");
+        } catch (error) {
+        }
         break;
       }
     }
