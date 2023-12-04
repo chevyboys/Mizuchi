@@ -128,9 +128,6 @@ class Participant {
    * @returns {Promise<void>}
    */
   async #_rewards(client) {
-
-
-
     let guild = client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
     let member = guild.members.cache.get(this.user);
     let channel = guild.channels.cache.get(snowflakes.channels.botSpam);
@@ -192,12 +189,16 @@ class Participant {
           }
         );
         break;
+      case 54:
+      case 53:
+      case 52:
+      case 51: if (member.roles.cache.has(event.roles[1].role.id)) { break }
       case 50: if (!event.roles[1].role) {
         await event.generateRoles(guild);
-        member.roles.add(event.roles[1].role);
+        await member.roles.add(event.roles[1].role);
         this.#_status = "INACTIVE";
         this.lastAbilityUse = Date.now() - 1000 * 60 * 60 * 24;
-        NPCSend(channel, u.embed(
+        await NPCSend(channel, u.embed(
           {
             description: `With many delectable delicacies found and recovered, <@${this.user}> has run out of sweets for the day and can return home, sit back and enjoy the company of friendly faces, new and old. Come back tomorrow for another day of celebrations!`,
           }
