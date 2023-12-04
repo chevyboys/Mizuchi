@@ -336,7 +336,7 @@ Module.addCommand({ //TODO: REMOVE THIS
     || msg.member.roles.cache.has(snowflakes.roles.Moderator)
     || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
   process: async (msg) => {
-    if (msg.content.includes("extended")) extendedFlurry(msg.channel, 10);
+    if (msg.content.includes("extended")) extendedFlurry(msg.channel, 180);
     else flurry(msg.channel);
     u.clean(msg, 0);
   }
