@@ -169,9 +169,10 @@ class Participant {
 
 
     }
-    if (this.adjustedCount > 50) {
+    if (this.adjustedCount > 50 && !this.#_status === "INACTIVE") {
       this.#_status = "INACTIVE";
       this.lastAbilityUse = Date.now() - 1000 * 60 * 60 * 24;
+      throw new Error("Participant <@" + this.#_user + "> has reached the maximum count for the event without recieving the inactive status");
     }
     switch (this.adjustedCount) {
       case 5:
