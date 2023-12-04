@@ -221,7 +221,7 @@ Module.addEvent("messageReactionAdd",
       await reaction.message.react(getRandomEmoji());
     } else if (reaction.emoji.toString().toLowerCase().indexOf("🎁") > -1) {
       let index = participants.cache.findIndex(element => user == element.user);
-      if (index == -1 || (participants.cache[index].status != "SUSPENDED" && participants.cache[index].status != "INACTIVE")) {
+      if (index == -1 || (participants.cache[index].status != "SUSPENDED" && participants.cache[index].status != "INACTIVE") || reaction.message.channel.id == event.channel) {
         reaction.users.remove(participants.cache[index].user);
         return;
       } else if (participants.cache[index].canUseAbility(1) == false) {
