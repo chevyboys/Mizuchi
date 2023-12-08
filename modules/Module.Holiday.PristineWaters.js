@@ -260,7 +260,8 @@ Module.addEvent("messageReactionAdd",
         msg.react(getRandomEmoji());
       } else {
         //if there have been two messages in the channel in the last 10 minutes, double the odds of a flurry
-        if (msg.channel.messages.cache.filter(element => element.createdTimestamp > Date.now() - 10 * 60 * 1000).size > 2 && Math.floor(Math.random() * 100) < 1) {
+        let me = await msg.guild.members.fetch(msg.client.user.id);
+        if (msg.channel.messages.cache.filter(element => element.createdTimestamp > Date.now() - 10 * 60 * 1000 && !element.author.bot && element.channel.permissionsFor(me).has("MANAGE_MESSAGES")).size > 2 && Math.floor(Math.random() * 100) < 1) {
           //if the channel name is general, have a chance for an extended flurry
           if (msg.channel.name.toLowerCase() == "general" && Math.floor(Math.random() * 100) < 10) {
             extendedFlurry(msg.channel, 180);
