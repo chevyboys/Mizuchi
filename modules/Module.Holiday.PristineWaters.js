@@ -295,7 +295,7 @@ Module.addEvent("messageReactionAdd",
 
             participants.cache.forEach(async (element) => {
               element.dailyReset();
-              (await (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
+              await (await (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
             });
           }
           participants.write();
@@ -357,6 +357,7 @@ Module.addCommand({ //TODO: REMOVE THIS
     });
     participants.write();
     msg.channel.send("Daily reset complete");
+    msg.guild.channels.cache.get(snowflakes.channels.general).send("Go forth and find new sweets!");
   }
 });
 
