@@ -411,7 +411,8 @@ async function handlePristineAvatarOverlaySelectionMenus(interaction) {
         components: [folderMenu, colorMenu],
         files: [{
           attachment: image,
-          name: "avatar.gif"
+          //if the user has an animated avatar, set the file name to avatar.gif, otherwise set it to avatar.png
+          name: interaction.member.user.avatar.startsWith("a_") ? "avatar.gif" : "avatar.png"
 
         }
         ]
