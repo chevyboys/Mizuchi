@@ -56,7 +56,7 @@ async function manipulateImage({ folderName, member, hexColor }) {
   console.log(animated)
   //layeredImage.clone().gif().toFile(`./storage/pristine/${folderName.trim()}/test.gif`);
   //return the image as either a png or a gif
-  return await (animated ? layeredImage.gif().toBuffer() : layeredImage.gif().toBuffer());
+  return await (animated ? layeredImage.gif().toBuffer() : layeredImage.png().toBuffer());
 }
 
 
