@@ -37,8 +37,8 @@ function setActive(bool) {
 
 
 let flurries = [];
-function flurry(channel) {
-  NPCSend(channel, u.embed({
+function flurry(channel, hidden = false) {
+  if (!hidden) NPCSend(channel, u.embed({
     description: "Let the feasting begin!"
   }));
   flurries.push(channel.id);
@@ -47,8 +47,8 @@ function flurry(channel) {
   }, 10 * 60 * 1000);
 }
 
-function extendedFlurry(channel, minutes) {
-  NPCSend(channel, u.embed({
+function extendedFlurry(channel, minutes, hidden = false) {
+  if (!hidden) NPCSend(channel, u.embed({
     description: "I invite you all to join me in a grand feast, to last long into the night!"
   }));
   flurries.push(channel.id);
