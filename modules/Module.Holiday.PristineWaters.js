@@ -284,7 +284,7 @@ Module.addEvent("messageReactionAdd",
       ) {
         msg.react(getRandomEmoji());
       }
-    }).setClockwork(() => {
+    })/*.setClockwork(() => {
       if (!active) return;
       try {
         return setInterval(async () => {
@@ -303,7 +303,7 @@ Module.addEvent("messageReactionAdd",
 
           , 60 * 60 * 1000);
       } catch (e) { u.errorHandler(e, "event Clockwork Error"); }
-    })
+    })*/
 
 
 
