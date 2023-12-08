@@ -255,25 +255,26 @@ Module.addEvent("messageReactionAdd",
      */
     async (msg) => {
       if (!active) return;
-      if (msg.channel.type == "dm") return;
+      if (msg.channel.type == "DM") return;
       if (flurries.includes(msg.channel.id)) {
         msg.react(getRandomEmoji());
       } else {
-        //if there have been two messages in the channel in the last 10 minutes, double the odds of a flurry
-        let me = await msg.guild.members.fetch(msg.client.user.id);
-        if (msg.channel.messages.cache.filter(element => element.createdTimestamp > Date.now() - 10 * 60 * 1000 && !element.author.bot).size > 2 && Math.floor(Math.random() * 100) < 1 && msg.channel.permissionsFor(me)?.has("MANAGE_MESSAGES") && !msg.author.bot && event.channel != msg.channel.id) {
+        /*if the channel has:
+         - More than two messages in the last 10 minutes from non bots
+         - passes a 1% chance to trigger
+         - The triggering message author is not a bot
+         - The triggering message is not in the event channel
+         - The triggering message is not in a DM
+         - The triggering message is not in a channel where the everyone role cannot send messages
+         Then have a flurry in the channel
+        */
+        if (msg.channel.messages.cache.filter(element => element.createdTimestamp > Date.now() - 10 * 60 * 1000 && !element.author.bot).size > 2 && Math.floor(Math.random() * 100) < 1 && !msg.author.bot && event.channel != msg.channel.id && msg.channel.type != "DM" && msg.guild.roles.everyone.permissionsIn(msg.channel).has("SEND_MESSAGES")) {
           //if the channel name is general, have a chance for an extended flurry
           if (msg.channel.name.toLowerCase() == "general" && Math.floor(Math.random() * 100) < 10) {
             extendedFlurry(msg.channel, 180);
           }
           else flurry(msg.channel);
         }
-
-        //one percent chance to trigger a flurry in the channel
-        else if (Math.floor(Math.random() * 100) == 0 && msg.channel.permissionsFor(msg.guild?.members.me)?.has("MANAGE_MESSAGES")) {
-          flurry(msg.channel);
-        }
-
       }
       if (
         msg.author &&
