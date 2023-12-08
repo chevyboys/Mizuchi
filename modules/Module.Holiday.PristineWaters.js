@@ -338,8 +338,8 @@ Module.addCommand({ //TODO: REMOVE THIS
     || msg.member.roles.cache.has(snowflakes.roles.Moderator)
     || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
   process: async (msg) => {
-    if (msg.content.includes("extended")) extendedFlurry(msg.channel, 180);
-    else flurry(msg.channel);
+    if (msg.content.includes("extended")) extendedFlurry(msg.channel, 180, msg.content.includes("hidden"));
+    else flurry(msg.channel, msg.content.includes("hidden"));
     u.clean(msg, 0);
   }
 }).addCommand({
