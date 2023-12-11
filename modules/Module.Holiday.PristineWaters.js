@@ -155,8 +155,8 @@ function removeReaction(reaction) {
   } catch (error) {
     if ((error.stack ? error.stack : error.toString()).toLowerCase().includes("unknown message")) return;
     else if ((error.stack ? error.stack : error.toString()).toLowerCase().includes("missing permissions")) {
-      reaction.users.remove(reaction.message.client.user.id);
       u.errorHandler(error, "Holiday reaction error: Missing manage messages permissions in " + reaction.message.guild.name + " in channel **" + reaction.message.channel.name + "**");
+      return reaction.users.remove(reaction.message.client.user.id);
     }
     else u.errorHandler(error, "Holiday reaction error in " + reaction.message.guild.name + " in channel **" + reaction.message.channel.name + "**");
   }
