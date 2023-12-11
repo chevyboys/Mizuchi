@@ -149,6 +149,19 @@ async function begin(msg) {
     });
 }
 
+function removeReaction(reaction) {
+  try {
+    return reaction.remove();
+  } catch (error) {
+    if (error.includes("Unknown Message")) return;
+    else if (error.includes("Missing Permissions")) {
+      reaction.users.remove(reaction.message.client.user.id);
+      u.errorHandler(error, "Holiday reaction error: Missing manage messages permissions in " + reaction.message.guild.name + " in channel **" + reaction.message.channel.name + "**");
+    }
+    else u.errorHandler(error, "Holiday reaction error");
+  }
+}
+
 Module.addEvent("messageReactionAdd",
   /**
    * 
@@ -213,7 +226,7 @@ Module.addEvent("messageReactionAdd",
         participants.write();
 
 
-        reaction.remove();
+        await removeReaction(reaction)
       } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
     }
     else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id) || member.roles.cache.hasAny([snowflakes.roles.Admin, snowflakes.roles.Helper, snowflakes.roles.Moderator, snowflakes.roles.CommunityGuide, snowflakes.roles.BotMaster, snowflakes.roles.WorldMaker])) {
@@ -243,7 +256,7 @@ Module.addEvent("messageReactionAdd",
         reaction.users.remove(participants.cache[index].user);
         return;
       } else {
-        reaction.remove();
+        removeReaction(reaction)
         return;
       }
     }
