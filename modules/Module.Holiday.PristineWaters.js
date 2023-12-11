@@ -150,8 +150,9 @@ async function begin(msg) {
 }
 
 function removeReaction(reaction) {
+  let returnable = null;
   try {
-    return reaction.remove();
+    returnable = reaction.remove();
   } catch (error) {
     if ((error.stack ? error.stack : error.toString()).toLowerCase().includes("unknown message")) return;
     else if ((error.stack ? error.stack : error.toString()).toLowerCase().includes("missing permissions")) {
@@ -159,6 +160,8 @@ function removeReaction(reaction) {
       return reaction.users.remove(reaction.message.client.user.id);
     }
     else u.errorHandler(error, "Holiday reaction error in " + reaction.message.guild.name + " in channel **" + reaction.message.channel.name + "**");
+  } finally {
+    return returnable;
   }
 }
 
