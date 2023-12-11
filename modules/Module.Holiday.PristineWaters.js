@@ -176,7 +176,7 @@ Module.addEvent("messageReactionAdd",
     let message = reaction.message;
     let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
     let member = await message.guild.members.fetch(user.id);
-    if (event.emoji.indexOf(reaction.emoji.toString().toLowerCase()) > -1 && !user.bot && reaction.users.cache.has(message.client.user.id)) {
+    if (event.emoji.indexOf(reaction.emoji.toString().toLowerCase()) > -1 && !user.bot && reaction.users.cache.has(message.client.user.id) && message.channel.permissionsFor(message.client.user).has("MANAGE_MESSAGES")) {
       let status;
       try {
         let index = participants.cache.findIndex(element => user == element.user);
