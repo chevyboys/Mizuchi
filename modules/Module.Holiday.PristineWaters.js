@@ -537,6 +537,7 @@ Module.addInteractionCommand({
         let leaderboardFoundToday = participants.cache.sort((a, b) => b.count - a.count).slice(0, 10);
         let leaderboardGiftedToday = participants.cache.sort((a, b) => b.gifted - a.gifted).slice(0, 10);
         let leaderboardGiftedTotal = participants.cache.sort((a, b) => b.MultiDayGifted + b.gifted - a.MultiDayGifted - a.gifted).slice(0, 10);
+        let totalPeopleWhoHaveFoundOrGivenSweets = participants.cache.filter(element => element.multidayAdjustedCount + element.adjustedCount + element.MultiDayGifted + element.gifted > 0).length;
         let leaderboardEmbed = u.embed({
           title: "Leaderboard",
           description: leaderboard.map((element, index) => {
@@ -579,7 +580,7 @@ Module.addInteractionCommand({
               0 : participants.cache[participants.cache.findIndex(element => interaction.user.id == element.user)].adjustedCount) + " sweets today"
               + "\nYou have found " + (participants.cache.findIndex(element => interaction.user.id == element.user) == -1 ?
                 0 : participants.cache[participants.cache.findIndex(element => interaction.user.id == element.user)].multidayAdjustedCount + participants.cache[participants.cache.findIndex(element => interaction.user.id == element.user)].adjustedCount)
-              + " sweets over the course of the event"
+              + " sweets over the course of the event.\n" + totalPeopleWhoHaveFoundOrGivenSweets + " people come to the festival so far this year."
 
           },
           color: event.colors[event.colors.length - 1].color,
