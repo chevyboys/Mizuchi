@@ -555,6 +555,7 @@ Module.addInteractionCommand({
                 //get the unlocked color roles for each participant, ensure no duplicates are counted, and return the number of unique colors unlocked
                 return `${index + 1}. <@${element.user}>: ${element.getunlockedColorRoles(interaction.client).length}/${event.colors.length}`
               }).join("\n"),
+              inline: true
             },
             {
               name: "Most sweets gifted today",
