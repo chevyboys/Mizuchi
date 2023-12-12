@@ -538,7 +538,7 @@ Module.addInteractionCommand({
         let leaderboardGiftedToday = participants.cache.sort((a, b) => b.gifted - a.gifted).slice(0, 10);
         let leaderboardGiftedTotal = participants.cache.sort((a, b) => b.MultiDayGifted + b.gifted - a.MultiDayGifted - a.gifted).slice(0, 10);
         let totalPeopleWhoHaveFoundOrGivenSweets = participants.cache.filter(element => element.multidayAdjustedCount + element.adjustedCount + element.MultiDayGifted + element.gifted > 0).length;
-        let totalSweetsFound = participants.cache.reduce((accumulator, currentValue) => accumulator + currentValue.count + currentValue.MultidayCount, 0);
+        let totalSweetsFound = participants.cache.reduce((accumulator, currentValue) => accumulator + currentValue.count + currentValue.MultiDayCount, 0);
         let totalGiftsGiven = participants.cache.reduce((accumulator, currentValue) => accumulator + currentValue.MultiDayGifted + currentValue.gifted, 0);
         let leaderboardEmbed = u.embed({
           title: "Leaderboard",
