@@ -550,6 +550,13 @@ Module.addInteractionCommand({
               inline: true
             },
             {
+              name: "Most unique colors unlocked",
+              value: leaderboard.map((element, index) => {
+                //get the unlocked color roles for each participant, ensure no duplicates are counted, and return the number of unique colors unlocked
+                return `${index + 1}. <@${element.user}>: ${element.getunlockedColorRoles(interaction.client).length}/${event.colors.length}`
+              }).join("\n"),
+            },
+            {
               name: "Most sweets gifted today",
               value: leaderboardGiftedToday.map((element, index) => {
                 return `${index + 1}. <@${element.user}>: ${element.gifted}`
@@ -557,12 +564,13 @@ Module.addInteractionCommand({
               inline: true
             },
             {
-              name: "Most unique colors unlocked",
+              name: "Most sweets gifted total",
               value: leaderboard.map((element, index) => {
-                //get the unlocked color roles for each participant, ensure no duplicates are counted, and return the number of unique colors unlocked
-                return `${index + 1}. <@${element.user}>: ${element.getunlockedColorRoles(interaction.client).length}`
+                return `${index + 1}. <@${element.user}>: ${element.MultiDayGifted + element.gifted}`
               }).join("\n"),
-            }
+              inline: true
+            },
+
           ],
           footer: {
             text: "You currently have " + (participants.cache.findIndex(element => interaction.user.id == element.user) == -1 ?
@@ -570,6 +578,7 @@ Module.addInteractionCommand({
               + "\nYou have found " + (participants.cache.findIndex(element => interaction.user.id == element.user) == -1 ?
                 0 : participants.cache[participants.cache.findIndex(element => interaction.user.id == element.user)].multidayAdjustedCount + participants.cache[participants.cache.findIndex(element => interaction.user.id == element.user)].adjustedCount)
               + " sweets over the course of the event"
+
           },
           color: event.colors[event.colors.length - 1].color,
         })
