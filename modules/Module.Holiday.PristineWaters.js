@@ -563,7 +563,7 @@ Module.addInteractionCommand({
               value: leaderboardGiftedToday.map((element, index) => {
                 return `${index + 1}. <@${element.user}>: ${element.gifted}`
               }).join("\n"),
-              inline: true
+              inline: false
             },
             {
               name: "Most sweets gifted total",
