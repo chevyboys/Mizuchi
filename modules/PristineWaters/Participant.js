@@ -132,12 +132,13 @@ class Participant {
     let member = guild.members.cache.get(this.user);
     let channel = guild.channels.cache.get(snowflakes.channels.botSpam);
     if (this.multidayAdjustedCount % 50 === 0 && !(this.multidayAdjustedCount < 1)) {
-      let colorRole = guild.roles.cache.find(r => r.name == "Pristine " + event.colors[this.multidayAdjustedCount / 50 - 1].name);
+      let eventColor = event.colors.filter(c => c.award_threshold == undefined)[this.multidayAdjustedCount / 50 - 1] || event.colors.find(c => c.award_threshold == this.multidayAdjustedCount);
+      let colorRole = guild.roles.cache.find(r => r.name == "Pristine " + eventColor.name);
       if (!colorRole) {
         await event.generateRoles(guild).then(() => {
-          colorRole = guild.roles.cache.find(r => r.name == "Pristine " + event.colors[this.multidayAdjustedCount / 50 - 1].name);
-          if (!event.colors[this.multidayAdjustedCount / 50 - 1]) return;
-          this.#_unlockedColors.push(event.colors[this.multidayAdjustedCount / 50 - 1]);
+          colorRole = guild.roles.cache.find(r => r.name == "Pristine " + eventColor.name);
+          if (!eventColor) return;
+          this.#_unlockedColors.push(eventColor);
 
           NPCSend(channel, u.embed(
             {
@@ -152,8 +153,9 @@ class Participant {
           member.roles.add(colorRole);
         });
       } else {
-        if (!event.colors[this.multidayAdjustedCount / 50 - 1]) return;
-        this.#_unlockedColors.push(event.colors[this.multidayAdjustedCount / 50 - 1]);
+
+        if (!eventColor) return;
+        this.#_unlockedColors.push(eventColor);
         NPCSend(channel, u.embed(
           {
             description: `<@${this.user}>, has unlocked the <@&${colorRole.id}> role. Use /Festival inventory to manage your roles.`,

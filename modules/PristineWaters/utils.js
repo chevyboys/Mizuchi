@@ -48,6 +48,11 @@ const colors = [
     name: "Bingus Blurple",
     color: "#c4ccff"
   },
+  {
+    name: "Bot Master Amythest",
+    color: "#e0c2ff",
+    award_threshold: 1000
+  }
 ]
 
 const roles = [
