@@ -536,6 +536,7 @@ Module.addInteractionCommand({
         let leaderboard = participants.cache.sort((a, b) => b.multidayAdjustedCount + b.adjustedCount - a.multidayAdjustedCount - a.adjustedCount).slice(0, 10);
         let leaderboardFoundToday = participants.cache.sort((a, b) => b.count - a.count).slice(0, 10);
         let leaderboardGiftedToday = participants.cache.sort((a, b) => b.gifted - a.gifted).slice(0, 10);
+        let leaderboardGiftedTotal = participants.cache.sort((a, b) => b.MultiDayGifted + b.gifted - a.MultiDayGifted - a.gifted).slice(0, 10);
         let leaderboardEmbed = u.embed({
           title: "Leaderboard",
           description: leaderboard.map((element, index) => {
@@ -566,7 +567,7 @@ Module.addInteractionCommand({
             },
             {
               name: "Most sweets gifted total",
-              value: leaderboard.map((element, index) => {
+              value: leaderboardGiftedTotal.map((element, index) => {
                 return `${index + 1}. <@${element.user}>: ${element.MultiDayGifted + element.gifted}`
               }).join("\n"),
               inline: true
