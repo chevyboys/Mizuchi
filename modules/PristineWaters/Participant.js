@@ -9,10 +9,6 @@ const NPCSend = require("./NPC");
 const suspensionOddsMultiplier = 2;
 
 
-function rewardColors() {
-
-}
-
 
 /**
  * Represents a participant in the Pristine Waters module.
