@@ -57,7 +57,6 @@ class Participant {
   #_status = "ACTIVE" // ACTIVE, BANNED, SUSPENDED, INACTIVE
   #_lastSuspension = 0;
   #_lastAbilityUse = Date.now() - 1000 * 60 * 60 * 24;
-  #_unlockedColors = [];
 
   constructor({ user, count = 1, MultiDayCount = 0, currency = 0, gifted = 0, received = 0, multiDayGifted = 0, multiDayReceived = 0, unlockedColors = [], status = "ACTIVE", lastSuspension = 0, lastAbilityUse = Date.now() - 1000 * 60 * 60 * 24 }) {
     try {
@@ -74,16 +73,9 @@ class Participant {
     this.#_received = received;
     this.#_MultiDayGifted = multiDayGifted;
     this.#_MultiDayReceived = multiDayReceived;
-    this.#_unlockedColors = unlockedColors;
     this.#_status = (status == "SUSPENDED") ? "ACTIVE" : status;
     this.#_lastSuspension = lastSuspension;
     this.#_lastAbilityUse = lastAbilityUse;
-  }
-
-  async unlockColor(color) {
-    if (this.#_unlockedColors.includes(color)) return;
-    if (!event.colors.find(c => c.name === color || c.name === color.name)) return;
-    this.#_unlockedColors.push(color);
   }
 
   updateAbilityUse() {
@@ -131,15 +123,15 @@ class Participant {
     let guild = client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
     let member = guild.members.cache.get(this.user);
     let channel = guild.channels.cache.get(snowflakes.channels.botSpam);
-    if (this.multidayAdjustedCount % 50 === 0 && !(this.multidayAdjustedCount < 1)) {
-      let eventColor = event.colors.filter(c => c.award_threshold == undefined)[this.multidayAdjustedCount / 50 - 1] || event.colors.find(c => c.award_threshold == this.multidayAdjustedCount);
-      let colorRole = guild.roles.cache.find(r => r.name == "Pristine " + eventColor.name);
+
+    //if the user has just hit an award threshold, give them the role
+    let justUnlocked = event.colors.find(c => c.award_threshold == this.multidayAdjustedCount);
+    if (justUnlocked) {
+      let colorRole = guild.roles.cache.find(r => r.name.toLowerCase() == ("Pristine " + justUnlocked.name).toLowerCase());
       if (!colorRole) {
         await event.generateRoles(guild).then(() => {
-          colorRole = guild.roles.cache.find(r => r.name == "Pristine " + eventColor.name);
-          if (!eventColor) return;
-          this.#_unlockedColors.push(eventColor);
-
+          colorRole = guild.roles.cache.find(r => r.name.toLowerCase() == ("Pristine " + justUnlocked.name).toLowerCase());
+          if (!colorRole) throw new Error("Could not find role " + "Pristine " + justUnlocked.name.toLowerCase());
           NPCSend(channel, u.embed(
             {
               description: `<@${this.user}>, has unlocked the <@&${colorRole.id}> role. Use /Festival inventory to manage your roles.`,
@@ -150,12 +142,11 @@ class Participant {
               allowedMentions: { users: [this.user] }
             }
           );
-          member.roles.add(colorRole);
+          return colorRole;
+        }).then(colorRole => {
+          return member.roles.add(colorRole);
         });
       } else {
-
-        if (!eventColor) return;
-        this.#_unlockedColors.push(eventColor);
         NPCSend(channel, u.embed(
           {
             description: `<@${this.user}>, has unlocked the <@&${colorRole.id}> role. Use /Festival inventory to manage your roles.`,
@@ -166,11 +157,11 @@ class Participant {
             allowedMentions: { users: [this.user] }
           }
         );
-        member.roles.add(colorRole);
+        return await member.roles.add(colorRole);
       }
-
-
     }
+
+
     if (this.adjustedCount > 50 && !this.#_status === "INACTIVE") {
       this.#_status = "INACTIVE";
       this.lastAbilityUse = Date.now() - 1000 * 60 * 60 * 24;
@@ -274,17 +265,17 @@ class Participant {
   }
 
   get unlockedColors() {
-    return this.#_unlockedColors;
+    return event.colors.filter(c => this.multidayAdjustedCount + this.adjustedCount >= c.award_threshold);
   }
 
   getunlockedColorRoles(client) {
-    if (!this.#_unlockedColors) return;
+    if (this.unlockedColors.length < 1) return;
     if (event.roles.length < event.colors.length) {
       return event.generateRoles(client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).then(() => {
-        return event.roles.filter(r => r.name.toLowerCase().indexOf("pristine") > -1 && this.#_unlockedColors.find(c => c.name.toLowerCase() === r.name.toLowerCase().replace("pristine ", "")));
+        return event.roles.filter(r => r.name.toLowerCase().indexOf("pristine") > -1 && this.unlockedColors.find(c => c.name.toLowerCase() === r.name.toLowerCase().replace("pristine ", "")));
       });
     }
-    return event.roles.filter(r => r.name.toLowerCase().indexOf("pristine") > -1 && this.#_unlockedColors.find(c => c.name.toLowerCase() === r.name.toLowerCase().replace("pristine ", "")));
+    return event.roles.filter(r => r.name.toLowerCase().indexOf("pristine") > -1 && this.unlockedColors.find(c => c.name.toLowerCase() === r.name.toLowerCase().replace("pristine ", "")));
   }
 
   dailyReset() {
@@ -312,7 +303,6 @@ class Participant {
       status: this.#_status,
       lastSuspension: this.#_lastSuspension,
       //lastAbilityUse: this.#_lastAbilityUse,
-      unlockedColors: this.#_unlockedColors
     };
   }
 

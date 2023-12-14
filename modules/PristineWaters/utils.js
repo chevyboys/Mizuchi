@@ -3,50 +3,61 @@ const snowflakes = require('../../config/snowflakes.json');
 const colors = [
   {
     name: "Raspberry",
-    color: "#961547"
+    color: "#961547",
+    award_threshold: 50
   },
 
   {
     name: "Orange",
-    color: "#e07f35"
+    color: "#e07f35",
+    award_threshold: 100
   },
 
   {
     name: "Gold",
-    color: "#fffe7b"
+    color: "#fffe7b",
+    award_threshold: 150
   },
 
   {
     name: "Green",
-    color: "#a7ff76"
+    color: "#a7ff76",
+    award_threshold: 200
   },
   {
     name: "Eucalyptus Green",
-    color: "#28eaa2"
+    color: "#28eaa2",
+    award_threshold: 250
   },
   {
     name: "Mint",
-    color: "#b9ffea"
+    color: "#b9ffea",
+    award_threshold: 300
   },
   {
     name: "frost",
-    color: "#b9ebff"
+    color: "#b9ebff",
+    award_threshold: 350
   },
   {
     name: "Deep Purple",
-    color: "#310c38"
+    color: "#310c38",
+    award_threshold: 400
   },
   {
     name: "Tavare Winter Blue",
-    color: "#66a3d8"
+    color: "#66a3d8",
+    award_threshold: 450
   },
   {
     name: "Goddess Blue",
-    color: "#9CA9FF"
+    color: "#9CA9FF",
+    award_threshold: 500
   },
   {
     name: "Bingus Blurple",
-    color: "#c4ccff"
+    color: "#c4ccff",
+    award_threshold: 550
   },
   {
     name: "Bot Master Amythest",
