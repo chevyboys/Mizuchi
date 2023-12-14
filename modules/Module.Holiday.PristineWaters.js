@@ -431,7 +431,7 @@ Module.addCommand({ //TODO: REMOVE THIS
       u.clean(msg, 0);
       //notify mods that a blizzard was started in the mod requests channel
       let embed = u.embed({
-        description: "A " + msg.content.includes("extended") ? "grand " : "" + "feast everywhere has been started by " + msg.member.displayName + " using the &blizzard command!\nIt will last for " +
+        description: "A " + (msg.content.includes("extended") ? "grand " : "") + "feast everywhere has been started by " + msg.member.displayName + " using the &blizzard command!\nIt will last for " +
           (msg.content.includes("extended") ? "three hours" : "ten minutes") + "." + (msg.content.includes("hidden") ? "\nThis feast was hidden." : ""),
         color: embedColor,
       });
