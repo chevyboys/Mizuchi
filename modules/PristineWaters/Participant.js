@@ -133,7 +133,7 @@ class Participant {
     let channel = guild.channels.cache.get(snowflakes.channels.botSpam);
     if (this.multidayAdjustedCount % 50 === 0 && !(this.multidayAdjustedCount < 1)) {
       let eventColor = event.colors.filter(c => c.award_threshold == undefined)[this.multidayAdjustedCount / 50 - 1] || event.colors.find(c => c.award_threshold == this.multidayAdjustedCount);
-      let colorRole = guild.roles.cache.find(r => r.name == "Pristine " + eventColor.name);
+      let colorRole = guild.roles.cache.find(r => r.name.toLowerCase() == ("Pristine " + eventColor?.name).toLowerCase());
       if (!colorRole) {
         await event.generateRoles(guild).then(() => {
           colorRole = guild.roles.cache.find(r => r.name == "Pristine " + eventColor.name);
