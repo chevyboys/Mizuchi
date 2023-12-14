@@ -185,7 +185,7 @@ Module.addEvent("messageReactionAdd",
           index = participants.cache.length - 1;
         }
 
-        if ((participants.cache[index].status != "ACTIVE" || participants.cache[index].adjustedCount > 50) && message.channel.id != event.channel) {
+        if ((participants.cache[index].status != "ACTIVE" || (participants.cache[index].adjustedCount > 50) && message.channel.id != event.channel)) {
           reaction.users.remove(participants.cache[index].user);
           return;
         }
@@ -243,10 +243,11 @@ Module.addEvent("messageReactionAdd",
       } else if (participants.cache[index].canUseAbility(1) == false) {
         reaction.users.remove(participants.cache[index].user);
         return;
+      } else {
+        participants.cache[index].updateAbilityUse();
+        reaction.users.remove(participants.cache[index].user)
+        return await reaction.message.react(getRandomEmoji());
       }
-      participants.cache[index].updateAbilityUse();
-      reaction.users.remove(participants.cache[index].user)
-      return await reaction.message.react(getRandomEmoji());
     } else if (reaction.emoji.toString().toLowerCase().indexOf("✨") > -1) {
       //if the users status is not inactive, remove the reaction, and return
       let index = participants.cache.findIndex(element => user == element.user);
