@@ -11,6 +11,7 @@ const Participant = require("./PristineWaters/Participant");
 const NPCSend = require("./PristineWaters/NPC");
 const moment = require("moment");
 const manipulateImage = require('./PristineWaters/imageManipulation');
+const embedColor = event.colors.find(c => c.name.toLowerCase().includes("blurple")).color || event.colors[event.colors.length - 1].color;
 
 ///things that can be manually set
 const firstDayOfHanukkah = "12/07"; //MM/DD
@@ -457,7 +458,7 @@ Module.addInteractionCommand({
       embeds: [u.embed(
         {
           description: `The event is not active`,
-          color: event.colors[event.colors.length - 1].color,
+          color: embedColor,
         }
       )],
       ephemeral: true
@@ -489,7 +490,7 @@ Module.addInteractionCommand({
             {
               description: `You have found ${participantObj.MultiDayCount + participantObj.count} sweets over the course of the event, ${participantObj.MultiDayGifted + participantObj.gifted} of which you have gifted to others, and ${participantObj.MultiDayReceived + participantObj.received} of which you have received from others.\n\nYou have access to the following roles:`
                 + colors.map(element => `\n<@&${element.id}>`).join("\n"),
-              color: event.colors[event.colors.length - 1].color,
+              color: embedColor,
             }
           )],
           ephemeral: true,
@@ -525,7 +526,7 @@ Module.addInteractionCommand({
             {
               description: `In order to participate in this event, you will need to find various reactions left by the bots throughout the server. Each will be of a delicious treat. Each one you get progresses you towards rewards, both daily, and longer term rewards. Rewards will include specail roles to give your name an extra flare, bonus XP, access to private event channels, and a set of **never before seen *canon* letters** from characters provided by one of our wonderful worldmakers, released over the coarse of the event.\n\nThis event will go on for several weeks. \n\nHappy Festival of Pristine waters!\n -Ghost `
                 + "\n\n **__Credits__** \nThis event was created by Ghost, with help from the following amazing people:\nKayleigh Nicol\nKritta\nKester/Jace\nKumokun\nDuke Tersael\nRels\nLan\n\n **__Special Thanks__**:\nPandora K Ballard,",
-              color: event.colors[event.colors.length - 1].color,
+              color: embedColor,
             }
           )],
           ephemeral: true
@@ -586,7 +587,7 @@ Module.addInteractionCommand({
               + " sweets over the course of the event.\n" + totalPeopleWhoHaveFoundOrGivenSweets + " people have found " + totalSweetsFound + " sweets so far this year."
 
           },
-          color: event.colors[event.colors.length - 1].color,
+          color: embedColor,
         })
         interaction.reply({
           embeds: [leaderboardEmbed],
@@ -616,7 +617,7 @@ Module.addInteractionCommand({
         if (userColorOptions.length == 0) return interaction.reply({
           embeds: [u.embed({
             description: "You do not have any event colors unlocked",
-            color: event.colors[event.colors.length - 1].color,
+            color: embedColor,
           })],
           ephemeral: true
         });
@@ -626,7 +627,7 @@ Module.addInteractionCommand({
         interaction.reply({
           embeds: [u.embed({
             description: "Create an event avatar overlay",
-            color: event.colors[event.colors.length - 1].color,
+            color: embedColor,
           })],
           ephemeral: true,
           components: [
