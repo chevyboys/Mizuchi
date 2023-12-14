@@ -182,7 +182,10 @@ class Participant {
       case 54:
       case 53:
       case 52:
-      case 51: if (member.roles.cache.has(event.roles[1].role.id)) { break }
+      case 51: if (!event.roles[1].role) {
+        await event.generateRoles(guild);
+      }
+        if (member.roles.cache.has(event.roles[1].role.id)) { break }
       case 50: if (!event.roles[1].role) {
         await event.generateRoles(guild);
       }
