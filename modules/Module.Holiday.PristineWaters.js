@@ -100,15 +100,20 @@ function blizzard(channel, extendedMinutes = 0, hidden = false) {
     }
     else {
       if (!hidden) {
-        eventChannel.send(u.embed({
-          description: "Let the feasting begin!",
-          color: embedColor,
-        }));
-      }
-      return flurry(eventChannel, true);
+        eventChannel.send({
+          embeds: [u.embed({
+            description: "Let the feasting begin!",
+            color: embedColor,
+          })],
+          content: "Event Special Announcement"
+        })
+      };
     }
-  });
+    return flurry(eventChannel, true);
+  }
+  )
 }
+
 
 class Participants {
   cache = [];
