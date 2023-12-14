@@ -852,13 +852,23 @@ Module.setClockwork(() => {
       }
       else if (moment().format("MM/DD") == moment(firstDayOfHanukkah).add(7, "day").format("MM/DD")) {
         Module.client.user.setAvatar(('./avatar/' + ("Hanukkah8.png")))
-      } else
-        //if the month is december, set the bot's avatar to winter.png
-        if (moment().format("MM") == "12") {
-          Module.client.user.setAvatar(event.avatar || ('./avatar/' + ("winter.png")))
-        } else if (moment().format("MM/DD") == "01/02") {
-          Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.cache.get(snowflakes.channels.modRequests).send("Please have a bot master update the hanukkah start date in the code (modules/Module.Holiday.PristineWaters.js)");
-        }
+      } else if (moment().format("MM/DD") == "12/24") {
+        //set the avatar to the blueStar.png avatar, set the status to watching silent night, and set the activity type to "WATCHING", link to
+        let blueStar = "./avatar/blueStar.png";
+        Module.client.user.setAvatar(blueStar);
+        Module.client.user.setActivity("Silent Night", { type: "WATCHING", url: "https://www.youtube.com/watch?v=PrLoWt2tfqg", });
+      } else if (moment().format("MM/DD") == "12/25") {
+        //set the avatar to the blueStar.png avatar, set the status to watching silent night, and set the activity type to "WATCHING", link to
+        let blueStar = "./avatar/blueStar.png";
+        Module.client.user.setAvatar(blueStar);
+        Module.client.user.setActivity("A Wonderful Christams Time", { type: "WATCHING", url: "https://www.youtube.com/watch?v=t_xq3Bj_tas", });
+      }
+      //if the month is december, set the bot's avatar to winter.png
+      else if (moment().format("MM") == "12") {
+        Module.client.user.setAvatar(event.avatar || ('./avatar/' + ("winter.png")))
+      } else if (moment().format("MM/DD") == "01/02") {
+        Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.cache.get(snowflakes.channels.modRequests).send("Please have a bot master update the hanukkah start date in the code (modules/Module.Holiday.PristineWaters.js)");
+      }
 
     }, 3 * 60 * 60 * 1000);
   } catch (e) { u.errorHandler(e, "Hannukah PFP update error"); }
