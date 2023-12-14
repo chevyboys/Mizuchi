@@ -63,6 +63,11 @@ const colors = [
     name: "Bot Master Amythest",
     color: "#e0c2ff",
     award_threshold: 1000
+  },
+  {
+    name: "Licorice",
+    color: "#141414",
+    award_threshold: 2000
   }
 ]
 
