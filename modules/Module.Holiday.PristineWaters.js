@@ -58,6 +58,57 @@ function extendedFlurry(channel, minutes, hidden = false) {
   }, minutes * 60 * 1000);
 }
 
+function blizzard(channel, extendedMinutes = 0, hidden = false) {
+  //triggers a flurry in every channel where all the following are true:
+  // - The channel is not the event channel (if it is the event channel trigger the eventChannelFulrry function)
+  // - The channel is not a DM
+  // - The channel is not a channel where the everyone role cannot send messages
+  // - The channel is not a channel where the bot cannot send messages
+  // - The channel is not a channel where the bot cannot add reactions
+  // - The channel is not a channel where the bot cannot manage messages
+  // - The channel is not a thread
+  // - The channel is not the bot spam channel
+
+  //get all the channels in the guild
+  return channel.guild.channels.fetch().then((channels) => {
+    //filter out all the channels that don't meet the above criteria
+    return channels = channels.filter(element => element.type == "GUILD_TEXT" &&
+      element.id != event.channel &&
+      element.type != "DM" &&
+      element.permissionsFor(channel.guild.roles.everyone).has("SEND_MESSAGES") &&
+      element.permissionsFor(channel.guild.roles.everyone).has("VIEW_CHANNEL") &&
+      element.permissionsFor(channel.guild.roles.everyone).has("ADD_REACTIONS") &&
+      //make sure the bot user can manage messages (not the everyone role)
+      element.permissionsFor(channel.guild.me).has("MANAGE_MESSAGES") &&
+      !element.isThread() &&
+      element.id != snowflakes.channels.botSpam
+    );
+  }).then((channels) => {
+    //for each channel, trigger a flurry
+    return Promise.all(channels.map(element => extendedMinutes ? extendedFlurry(element, extendedMinutes, hidden) : flurry(element, hidden)));
+  }).then(() => {
+    //send a message indicating the appropriate type of feast in the event channel as the bot, not the NPC; The NPC cannot send messages into the event channel because it is a thread
+    let eventChannel = channel.guild.channels.cache.get(event.channel);
+    if (extendedMinutes) {
+      if (!hidden) {
+        eventChannel.send(u.embed({
+          description: "I invite you all to join me in a grand feast, to last long into the night!",
+          color: embedColor,
+        }));
+      }
+      return extendedFlurry(eventChannel, extendedMinutes, true);
+    }
+    else {
+      if (!hidden) {
+        eventChannel.send(u.embed({
+          description: "Let the feasting begin!",
+          color: embedColor,
+        }));
+      }
+      return flurry(eventChannel, true);
+    }
+  });
+}
 
 class Participants {
   cache = [];
@@ -360,25 +411,49 @@ Module.addCommand({ //TODO: REMOVE THIS
     else flurry(msg.channel, msg.content.includes("hidden"));
     u.clean(msg, 0);
   }
-}).addCommand({
-  name: "dailyreset",
-  guild: snowflakes.guilds.PrimaryServer,
-  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.Admin)
-    || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
-    || msg.member.roles.cache.has(snowflakes.roles.WorldMaker)
-    || msg.member.roles.cache.has(snowflakes.roles.Moderator)
-    || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
-  process: async (msg) => {
-    if (!active) return msg.channel.send("The event is not active");
-    participants.cache.forEach(async (element) => {
-      element.dailyReset();
-      (await msg.guild.members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
-    });
-    participants.write();
-    msg.channel.send("Daily reset complete");
-    msg.guild.channels.cache.get(snowflakes.channels.general).send("Go forth and find new sweets!");
+}).addCommand(
+  {
+    name: "blizzard",
+    guild: snowflakes.guilds.PrimaryServer,
+    permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.Admin)
+      || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
+      || msg.member.roles.cache.has(snowflakes.roles.WorldMaker)
+      || msg.member.roles.cache.has(snowflakes.roles.Moderator)
+      || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
+    process: async (msg) => {
+      if (msg.content.includes("extended")) blizzard(msg.channel, 180, msg.content.includes("hidden"));
+      else blizzard(msg.channel, 0, msg.content.includes("hidden"));
+      u.clean(msg, 0);
+      //notify mods that a blizzard was started in the mod requests channel
+      let embed = u.embed({
+        description: "A " + msg.content.includes("extended") ? "grand " : "" + "feast everywhere has been started by " + msg.member.displayName + " using the &blizzard command!\nIt will last for " +
+          (msg.content.includes("extended") ? "three hours" : "ten minutes") + "." + (msg.content.includes("hidden") ? "\nThis feast was hidden." : ""),
+        color: embedColor,
+      });
+      msg.guild.channels.cache.get(snowflakes.channels.modRequests).send({ embeds: [embed] });
+    }
+
   }
-});
+)
+  .addCommand({
+    name: "dailyreset",
+    guild: snowflakes.guilds.PrimaryServer,
+    permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.Admin)
+      || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
+      || msg.member.roles.cache.has(snowflakes.roles.WorldMaker)
+      || msg.member.roles.cache.has(snowflakes.roles.Moderator)
+      || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
+    process: async (msg) => {
+      if (!active) return msg.channel.send("The event is not active");
+      participants.cache.forEach(async (element) => {
+        element.dailyReset();
+        (await msg.guild.members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
+      });
+      participants.write();
+      msg.channel.send("Daily reset complete");
+      msg.guild.channels.cache.get(snowflakes.channels.general).send("Go forth and find new sweets!");
+    }
+  });
 
 
 //Things for the command interaction
