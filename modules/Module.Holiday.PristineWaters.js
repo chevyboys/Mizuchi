@@ -242,7 +242,7 @@ Module.addEvent("messageReactionAdd",
           index = participants.cache.length - 1;
         }
 
-        if ((participants.cache[index].status != "ACTIVE" || (participants.cache[index].adjustedCount > 50) && message.channel.id != event.channel)) {
+        if ((participants.cache[index].status != "ACTIVE" || participants.cache[index].adjustedCount > 50) && message.channel.id != event.channel) {
           reaction.users.remove(participants.cache[index].user);
           return;
         }
