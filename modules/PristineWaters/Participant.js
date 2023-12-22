@@ -87,15 +87,16 @@ class Participant {
     this.#_count++;
 
     //if the count is ten higher than last suspension, have a 10% chance of suspending the user, increasing by 2% (or whatever the suspension odds multiplier is) for every count above the last suspension. unsuspend the user after 5 minutes
-    if (this.#_count > this.#_lastSuspension + 10 && this.#_status != "SUSPENDED" && this.#_status != "INACTIVE") {
+    /*if (this.#_count > this.#_lastSuspension + 10 && this.#_status != "SUSPENDED" && this.#_status != "INACTIVE") {
       if (Math.random() * 100 < (this.#_count * suspensionOddsMultiplier - this.#_lastSuspension)) {
+      let temp = this.#_status;
         this.#_status = "SUSPENDED";
         this.#_lastSuspension = this.#_count;
         setTimeout(() => {
-          this.#_status = "ACTIVE";
+          this.#_status = temp;
         }, 5 * 60 * 1000);
       }
-    }
+    }*/
     await this.#_rewards(client);
     return this.#_status;
   }

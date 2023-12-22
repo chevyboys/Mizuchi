@@ -301,7 +301,8 @@ Module.addEvent("messageReactionAdd",
         reaction.users.remove(participants.cache[index].user);
         return;
       } else {
-        participants.cache[index].updateAbilityUse();
+        //disabling this since the abuse case isn't as bad as I thought it would be
+        //participants.cache[index].updateAbilityUse();
         reaction.users.remove(participants.cache[index].user)
         return await reaction.message.react(getRandomEmoji());
       }
