@@ -289,7 +289,7 @@ Module.addEvent("messageReactionAdd",
         await removeReaction(reaction)
       } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
     }
-    else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id) || member.roles.cache.hasAny([snowflakes.roles.Admin, snowflakes.roles.Helper, snowflakes.roles.Moderator, snowflakes.roles.CommunityGuide, snowflakes.roles.BotMaster, snowflakes.roles.WorldMaker])) {
+    else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && (config.AdminIds.includes(user.id) || user.id == "314178482752061440" || member.roles.cache.hasAny([snowflakes.roles.Admin, "450044561838833664", snowflakes.roles.Helper, snowflakes.roles.Moderator, snowflakes.roles.CommunityGuide, snowflakes.roles.BotMaster, snowflakes.roles.WorldMaker]))) {
       reaction.remove()
       await reaction.message.react(getRandomEmoji());
     } else if (reaction.emoji.toString().toLowerCase().indexOf("🎁") > -1) {
