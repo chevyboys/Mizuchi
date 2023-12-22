@@ -241,8 +241,8 @@ Module.addEvent("messageReactionAdd",
           participants.cache.push(new Participant({ user: user, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0 }));
           index = participants.cache.length - 1;
         }
-
-        if ((participants.cache[index].status != "ACTIVE" || participants.cache[index].adjustedCount > 50) && message.channel.id != event.channel) {
+        //if the user is not active, or has found more than 50 sweets, and the message is not in the event channel, remove the reaction and return unless its christmas eve or christmas day
+        if ((participants.cache[index].status != "ACTIVE" || participants.cache[index].adjustedCount > 50) && message.channel.id != event.channel && moment().format("MM/DD") != "12/24" && moment().format("MM/DD") != "12/25") {
           reaction.users.remove(participants.cache[index].user);
           return;
         }
@@ -289,10 +289,11 @@ Module.addEvent("messageReactionAdd",
         await removeReaction(reaction)
       } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
     }
-    else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && (config.AdminIds.includes(user.id) || user.id == "314178482752061440" || member.roles.cache.hasAny([snowflakes.roles.Admin, "450044561838833664", snowflakes.roles.Helper, snowflakes.roles.Moderator, snowflakes.roles.CommunityGuide, snowflakes.roles.BotMaster, snowflakes.roles.WorldMaker]))) {
+    else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id) || member.roles.cache.hasAny([snowflakes.roles.Admin, snowflakes.roles.Helper, snowflakes.roles.Moderator, snowflakes.roles.CommunityGuide, snowflakes.roles.BotMaster, snowflakes.roles.WorldMaker])) {
       reaction.remove()
       await reaction.message.react(getRandomEmoji());
     } else if (reaction.emoji.toString().toLowerCase().indexOf("🎁") > -1) {
+      u.errorHandler("🎁 reaction detected", "Gift reaction detected, Triggered by " + user.username + " in " + message.guild.name + " in channel " + message.channel.name + "\n User participant object information: " + JSON.stringify(participants.cache.find(element => user == element.user)));
       let index = participants.cache.findIndex(element => user == element.user);
       if (index == -1 || (participants.cache[index].status != "SUSPENDED" && participants.cache[index].status != "INACTIVE") || reaction.message.channel.id == event.channel) {
         reaction.users.remove(participants.cache[index].user);
@@ -308,6 +309,7 @@ Module.addEvent("messageReactionAdd",
       }
     } else if (reaction.emoji.toString().toLowerCase().indexOf("✨") > -1) {
       //if the users status is not inactive, remove the reaction, and return
+      u.errorHandler("✨ reaction detected", "Twinkle reaction detected, Triggered by " + user.username + " in " + message.guild.name + " in channel " + message.channel.name + "\n User participant object information: " + JSON.stringify(participants.cache.find(element => user == element.user)));
       let index = participants.cache.findIndex(element => user == element.user);
       if (index == -1 || participants.cache[index].status != "INACTIVE") {
         reaction.users.remove(participants.cache[index].user);
@@ -331,7 +333,8 @@ Module.addEvent("messageReactionAdd",
     async (msg) => {
       if (!active) return;
       if (msg.channel.type == "DM") return;
-      if (flurries.includes(msg.channel.id)) {
+      //if it is the 24th or 25th of december , react to every message
+      if (flurries.includes(msg.channel.id) || msg.channel.id == event.channel || (moment().format("MM/DD") == "12/24" || moment().format("MM/DD") == "12/25")) {
         msg.react(getRandomEmoji());
       } else {
         /*if the channel has:
@@ -457,7 +460,16 @@ Module.addCommand({ //TODO: REMOVE THIS
       });
       participants.write();
       msg.channel.send("Daily reset complete");
-      msg.guild.channels.cache.get(snowflakes.channels.general).send("Go forth and find new sweets!");
+      //if it isn't the 24th or 25th of december
+      if (moment().format("MM/DD") != "12/24" && moment().format("MM/DD") != "12/25") {
+        msg.guild.channels.cache.get(snowflakes.channels.general).send("Go forth and find new sweets!");
+      } else {
+        msg.guild.channels.cache.get(snowflakes.channels.general).send("Radiance wishes you all a Merry Christmas!");
+        NPCSend(msg.guild.channels.cache.get(snowflakes.channels.general), u.embed({
+          description: "Let there be rejoicing and feasting for everyone! The coffers are open for all to enjoy all day long! The cooldown have been removed and restrictions lifted! Go forth and find new sweets!",
+          color: embedColor,
+        }));
+      }
     }
   });
 
