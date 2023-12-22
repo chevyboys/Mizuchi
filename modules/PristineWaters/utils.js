@@ -67,7 +67,7 @@ const colors = [
   {
     name: "Infinite Blue",
     color: "#B5CDFF",
-    award_threshold: 1500
+    award_threshold: 750
   },
   {
     name: "Licorice",
