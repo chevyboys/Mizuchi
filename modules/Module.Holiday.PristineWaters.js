@@ -628,7 +628,7 @@ Module.addInteractionCommand({
 
       case "leaderboard":
         //get the first 25 participants, sorted by the number of sweets they have found
-        let leaderboard = participants.cache.sort((a, b) => b.multidayAdjustedCount + b.adjustedCount - a.multidayAdjustedCount - a.adjustedCount).slice(0, 10);
+        let leaderboard = participants.cache.sort((a, b) => b.multidayAdjustedCount - a.multidayAdjustedCount).slice(0, 10);
         let leaderboardFoundToday = participants.cache.sort((a, b) => b.count - a.count).slice(0, 10);
         let leaderboardGiftedToday = participants.cache.sort((a, b) => b.gifted - a.gifted).slice(0, 10);
         let leaderboardGiftedTotal = participants.cache.sort((a, b) => b.MultiDayGifted + b.gifted - a.MultiDayGifted - a.gifted).slice(0, 10);
