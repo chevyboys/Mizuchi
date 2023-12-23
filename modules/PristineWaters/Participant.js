@@ -265,7 +265,7 @@ class Participant {
   }
 
   get unlockedColors() {
-    return event.colors.filter(c => this.multidayAdjustedCount + this.adjustedCount >= c.award_threshold);
+    return event.colors.filter(c => this.multidayAdjustedCount >= c.award_threshold);
   }
 
   getunlockedColorRoles(client) {
