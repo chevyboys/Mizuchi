@@ -603,7 +603,6 @@ Module.addInteractionCommand({
         })
         break;
 
-
       case "gift":
         let user = interaction.options.getUser("recipient");
         await participants.gift(interaction.user.id, user.id, interaction.client).then((result) => {
