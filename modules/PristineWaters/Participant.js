@@ -122,7 +122,7 @@ class Participant {
     let channel = guild.channels.cache.get(snowflakes.channels.botSpam);
 
     //if the user has just hit an award threshold, give them the role
-    let justUnlocked = event.colors.find(c => c.award_threshold == this.multidayAdjustedCount);
+    let justUnlocked = event.colors.find(c => c.award_threshold == this.multidayAdjustedCount + this.adjustedCount);
     if (justUnlocked) {
       let colorRole = guild.roles.cache.find(r => r.name.toLowerCase() == ("Pristine " + justUnlocked.name).toLowerCase());
       if (!colorRole) {
@@ -237,7 +237,7 @@ class Participant {
   }
 
   get multidayAdjustedCount() {
-    return this.#_MultiDayCount + this.#_MultiDayReceived - this.#_MultiDayGifted + this.adjustedCount;
+    return this.#_MultiDayCount + this.#_MultiDayReceived - this.#_MultiDayGifted;
   }
 
   get gifted() {
