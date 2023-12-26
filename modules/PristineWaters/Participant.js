@@ -290,10 +290,10 @@ class Participant {
     this.#_lastSuspension = 0;
   }
 
-  getWriteable(guild) {
+  async getWriteable(guild) {
     return {
       user: this.#_user,
-      name: guild ? guild.members.cache.get(this.#_user).displayName : undefined,
+      name: guild ? await guild.members.fetch(this.#_user)?.displayName : undefined,
       count: this.#_count,
       MultiDayCount: this.#_MultiDayCount,
       currency: this.#_currency,

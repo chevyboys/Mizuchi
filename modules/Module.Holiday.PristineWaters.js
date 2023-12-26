@@ -127,8 +127,9 @@ class Participants {
       this.write();
     }
   }
-  write(guild) {
-    fs.writeFileSync(this.#_savePath, JSON.stringify(this.cache.map(element => element.getWriteable(guild)), 0, 4));
+  async write(guild) {
+    const writeable = await Promise.all(this.cache.map(async (element) => await element.getWriteable(guild)));
+    return fs.writeFileSync(this.#_savePath, JSON.stringify(writeable, 0, 4));
   }
   async gift(giver, reciever, client) {
     let egg = [
@@ -413,8 +414,9 @@ Module.addCommand({ //TODO: REMOVE THIS
   guild: snowflakes.guilds.PrimaryServer,
   permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
   process: async (msg) => {
-    participants.write(msg.guild);
-    msg.channel.send("Cache written");
+    participants.write(msg.guild).then(() => {
+      msg.channel.send("Cache written");
+    });
   }
 })
 
