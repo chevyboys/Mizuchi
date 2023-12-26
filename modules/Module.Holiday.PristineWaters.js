@@ -127,8 +127,8 @@ class Participants {
       this.write();
     }
   }
-  write() {
-    fs.writeFileSync(this.#_savePath, JSON.stringify(this.cache.map(element => element.getWriteable()), 0, 4));
+  write(guild) {
+    fs.writeFileSync(this.#_savePath, JSON.stringify(this.cache.map(element => element.getWriteable(guild)), 0, 4));
   }
   async gift(giver, reciever, client) {
     let egg = [
@@ -408,8 +408,36 @@ Module.addCommand({ //TODO: REMOVE THIS
     fs.unlinkSync('./data/holiday/cache.json');
     await msg.channel.send("Roles cleaned");
   }
-})/*.addCommand({
-  name: "flurry",
+}).addCommand({
+  name: "write",
+  guild: snowflakes.guilds.PrimaryServer,
+  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+  process: async (msg) => {
+    participants.write(msg.guild);
+    msg.channel.send("Cache written");
+  }
+})
+
+
+
+
+
+/*.addCommand({
+name: "flurry",
+guild: snowflakes.guilds.PrimaryServer,
+permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.Admin)
+  || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
+  || msg.member.roles.cache.has(snowflakes.roles.WorldMaker)
+  || msg.member.roles.cache.has(snowflakes.roles.Moderator)
+  || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
+process: async (msg) => {
+  if (msg.content.includes("extended")) extendedFlurry(msg.channel, 180, msg.content.includes("hidden"));
+  else flurry(msg.channel, msg.content.includes("hidden"));
+  u.clean(msg, 0);
+}
+}).addCommand(
+{
+  name: "blizzard",
   guild: snowflakes.guilds.PrimaryServer,
   permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.Admin)
     || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
@@ -417,62 +445,48 @@ Module.addCommand({ //TODO: REMOVE THIS
     || msg.member.roles.cache.has(snowflakes.roles.Moderator)
     || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
   process: async (msg) => {
-    if (msg.content.includes("extended")) extendedFlurry(msg.channel, 180, msg.content.includes("hidden"));
-    else flurry(msg.channel, msg.content.includes("hidden"));
+    if (msg.content.includes("extended")) blizzard(msg.channel, 180, msg.content.includes("hidden"));
+    else blizzard(msg.channel, 0, msg.content.includes("hidden"));
     u.clean(msg, 0);
+    //notify mods that a blizzard was started in the mod requests channel
+    let embed = u.embed({
+      description: "A " + (msg.content.includes("extended") ? "grand " : "") + "feast everywhere has been started by " + msg.member.displayName + " using the &blizzard command!\nIt will last for " +
+        (msg.content.includes("extended") ? "three hours" : "ten minutes") + "." + (msg.content.includes("hidden") ? "\nThis feast was hidden." : ""),
+      color: embedColor,
+    });
+    msg.guild.channels.cache.get(snowflakes.channels.modRequests).send({ embeds: [embed] });
   }
-}).addCommand(
-  {
-    name: "blizzard",
-    guild: snowflakes.guilds.PrimaryServer,
-    permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.Admin)
-      || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
-      || msg.member.roles.cache.has(snowflakes.roles.WorldMaker)
-      || msg.member.roles.cache.has(snowflakes.roles.Moderator)
-      || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
-    process: async (msg) => {
-      if (msg.content.includes("extended")) blizzard(msg.channel, 180, msg.content.includes("hidden"));
-      else blizzard(msg.channel, 0, msg.content.includes("hidden"));
-      u.clean(msg, 0);
-      //notify mods that a blizzard was started in the mod requests channel
-      let embed = u.embed({
-        description: "A " + (msg.content.includes("extended") ? "grand " : "") + "feast everywhere has been started by " + msg.member.displayName + " using the &blizzard command!\nIt will last for " +
-          (msg.content.includes("extended") ? "three hours" : "ten minutes") + "." + (msg.content.includes("hidden") ? "\nThis feast was hidden." : ""),
-        color: embedColor,
-      });
-      msg.guild.channels.cache.get(snowflakes.channels.modRequests).send({ embeds: [embed] });
-    }
 
-  }
+}
 )
-  .addCommand({
-    name: "dailyreset",
-    guild: snowflakes.guilds.PrimaryServer,
-    permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.Admin)
-      || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
-      || msg.member.roles.cache.has(snowflakes.roles.WorldMaker)
-      || msg.member.roles.cache.has(snowflakes.roles.Moderator)
-      || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
-    process: async (msg) => {
-      if (!active) return msg.channel.send("The event is not active");
-      participants.cache.forEach(async (element) => {
-        element.dailyReset();
-        (await msg.guild.members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
-      });
-      participants.write();
-      msg.channel.send("Daily reset complete");
-      //if it isn't the 24th or 25th of december
-      if (moment().format("MM/DD") != "12/24" && moment().format("MM/DD") != "12/25") {
-        msg.guild.channels.cache.get(snowflakes.channels.general).send("Go forth and find new sweets!");
-      } else {
-        msg.guild.channels.cache.get(snowflakes.channels.general).send("Radiance wishes you all a Merry Christmas!");
-        NPCSend(msg.guild.channels.cache.get(snowflakes.channels.general), u.embed({
-          description: "Let there be rejoicing and feasting for everyone! The coffers are open for all to enjoy all day long! The cooldown have been removed and restrictions lifted! Go forth and find new sweets!",
-          color: embedColor,
-        }));
-      }
+.addCommand({
+  name: "dailyreset",
+  guild: snowflakes.guilds.PrimaryServer,
+  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.Admin)
+    || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
+    || msg.member.roles.cache.has(snowflakes.roles.WorldMaker)
+    || msg.member.roles.cache.has(snowflakes.roles.Moderator)
+    || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
+  process: async (msg) => {
+    if (!active) return msg.channel.send("The event is not active");
+    participants.cache.forEach(async (element) => {
+      element.dailyReset();
+      (await msg.guild.members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
+    });
+    participants.write();
+    msg.channel.send("Daily reset complete");
+    //if it isn't the 24th or 25th of december
+    if (moment().format("MM/DD") != "12/24" && moment().format("MM/DD") != "12/25") {
+      msg.guild.channels.cache.get(snowflakes.channels.general).send("Go forth and find new sweets!");
+    } else {
+      msg.guild.channels.cache.get(snowflakes.channels.general).send("Radiance wishes you all a Merry Christmas!");
+      NPCSend(msg.guild.channels.cache.get(snowflakes.channels.general), u.embed({
+        description: "Let there be rejoicing and feasting for everyone! The coffers are open for all to enjoy all day long! The cooldown have been removed and restrictions lifted! Go forth and find new sweets!",
+        color: embedColor,
+      }));
     }
-  });
+  }
+});
 */
 
 //Things for the command interaction
