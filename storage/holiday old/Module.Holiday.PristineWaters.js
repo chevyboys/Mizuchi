@@ -1,16 +1,16 @@
 //Initalization, imports, etc
 const { MessageReaction, User, CommandInteraction, Message, MessageSelectMenu, MessageActionRow, } = require('discord.js');
-const snowflakes = require('../config/snowflakes.json')
+const snowflakes = require('../../config/snowflakes.json')
 const Module = new (require("augurbot")).Module;
 const fs = require('fs');
-const config = require('../config/config.json');
-const u = require('../utils/Utils.Generic');
-const event = require("./PristineWaters/utils");
+const config = require('../../config/config.json');
+const u = require('../../utils/Utils.Generic');
+const event = require("../../modules/PristineWaters/utils");
 const odds = event.odds;
-const Participant = require("./PristineWaters/Participant");
-const NPCSend = require("./PristineWaters/NPC");
+const Participant = require("../../modules/PristineWaters/Participant");
+const NPCSend = require("../../modules/PristineWaters/NPC");
 const moment = require("moment");
-const manipulateImage = require('./PristineWaters/imageManipulation');
+const manipulateImage = require('../../modules/PristineWaters/imageManipulation');
 const embedColor = event.colors.find(c => c.name.toLowerCase().includes("blurple")).color || event.colors[event.colors.length - 1].color;
 const endedButNotCleaned = true;
 
@@ -24,7 +24,7 @@ if (!fs.existsSync('./data/holiday/active.json')) {
   fs.writeFileSync('./data/holiday/active.json', JSON.stringify({ active: false }));
   active = false;
 } else {
-  active = require('../data/holiday/active.json').active;
+  active = require('../../data/holiday/active.json').active;
 }
 
 //if active.json is true, set active to true
