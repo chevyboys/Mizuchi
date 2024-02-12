@@ -1,5 +1,5 @@
 const Augur = require("augurbot");
-const snowflakes = require('../../config/snowflakes.json');
+const snowflakes = require('../../../config/snowflakes.json');
 const colors = [
   {
     name: "Raspberry",
