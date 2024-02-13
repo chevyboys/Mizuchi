@@ -35,8 +35,9 @@ Module.addEvent("messageCreate", async (msg) => {
   if (!msg.author.bot && eventRunning && msg.content?.toLowerCase().replaceAll(' ', "").indexOf('begone') > -1 && (msg.author?.id == ("431220192128008192") || config.AdminIds.indexOf(msg.author.id) > -1)) {
     eventRunning = false;
     return;
-  } else if (!msg.author.bot && eventRunning && msg.content?.toLowerCase().replaceAll(' ', "").indexOf('invokemypower') > -1 && (msg.author?.id == ("431220192128008192") || config.AdminIds.indexOf(msg.author.id) > -1)) {
+  } else if (!msg.author.bot && eventRunning && msg.content?.toLowerCase().replaceAll(' ', "").indexOf('invokemypower') > -1)) {
     updateColor();
+    msg.react("♥️");
   }
   else if (!msg.author.bot && !eventRunning && msg.content?.toLowerCase().replaceAll(' ', "").indexOf('bymypower,bydivinepower') > -1 && (msg.author?.id == ("431220192128008192") || config.AdminIds.indexOf(msg.author.id) > -1)) {
     const holiday0 = await roleGuild.roles.fetch(snowflakes.roles.Holiday[0]);
