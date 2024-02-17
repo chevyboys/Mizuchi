@@ -1,14 +1,14 @@
-const snowflakes = require("../config/snowflakes.json");
+const snowflakes = require("../../config/snowflakes.json");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
-const RoleClient = require("../utils/Utils.RolesLogin");
-const NPCSend = require("./Barf/NPC.js");
+const RoleClient = require("../../utils/Utils.RolesLogin.js");
+const NPCSend = require("../../modules/Barf/NPC.js");
 let roleGuild = RoleClient.guilds.cache.get(snowflakes.guilds.PrimaryServer);
 let eventRunning = false;
 let shouldUpdateColor = false;
-let config = require("../config/config.json");
+let config = require("../../config/config.json");
 
-const u = require("../utils/Utils.Generic")
+const u = require("../../utils/Utils.Generic.js")
 
 const colors = ["#C00000", "#FF3334", "#FF0000", "#FF6F77", "#FFBBC1", "#e4adff", "#e0c2ff", "#FF8896", "#FC245C", "#FC8CB4", "#820123", "#960228"]
 async function updateColor() {
