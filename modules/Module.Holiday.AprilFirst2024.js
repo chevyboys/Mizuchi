@@ -292,13 +292,23 @@ Module.addEvent("messageReactionAdd",
         // Write cache to a JSON file
         participants.write();
 
-
-        await removeReaction(reaction)
+        //if there is at least one reaction already on the message, remove the reaction
+        if (reaction.count > 1) {
+          await removeReaction(reaction)
+        }
       } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
     }
     else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id) || member.roles.cache.hasAny([snowflakes.roles.Admin, snowflakes.roles.Helper, snowflakes.roles.Moderator, snowflakes.roles.CommunityGuide, snowflakes.roles.BotMaster, snowflakes.roles.WorldMaker])) {
       reaction.remove()
-      await reaction.message.react(getRandomEmoji());
+      try {
+        await reaction.message.react(getRandomEmoji());
+      } catch (error) {
+        if ((error.stack ? error.stack : error.toString()).toLowerCase().includes("missing permissions")) {
+          u.errorHandler(error, "Holiday reaction error: Missing manage messages permissions in " + reaction.message.guild.name + " in channel **" + reaction.message.channel.name + "**");
+          return reaction.users.remove(reaction.message.client.user.id);
+        } else if ((error.stack ? error.stack : error.toString()).toLowerCase().includes("unknown message")) return;
+        else u.errorHandler(error, "Holiday reaction error in " + reaction.message.guild.name + " in channel **" + reaction.message.channel.name + "**");
+      }
     } else if (reaction.emoji.toString().toLowerCase().indexOf("😈") > -1) {
       u.errorHandler("😈 reaction detected", "Gift reaction detected, Triggered by " + user.username + " in " + message.guild.name + " in channel " + message.channel.name + "\n User participant object information: " + JSON.stringify(participants.cache.find(element => user == element.user)));
       let index = participants.cache.findIndex(element => user == element.user);

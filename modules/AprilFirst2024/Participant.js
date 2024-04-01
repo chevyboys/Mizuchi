@@ -80,7 +80,7 @@ class Participant {
 
   canUseAbility(cooldown = 10) {
     //minutes
-    return (Date.now() - this.#_lastAbilityUse) > (cooldown * 60 * 1000);
+    return true;
   }
 
   async updateCount(client) {
@@ -124,10 +124,10 @@ class Participant {
     //if the user has just hit an award threshold, give them the role
     let justUnlocked = event.colors.find(c => c.award_threshold == this.multidayAdjustedCount + this.adjustedCount);
     if (justUnlocked) {
-      let colorRole = guild.roles.cache.find(r => r.name.toLowerCase() == ("Spooky " + justUnlocked.name).toLowerCase());
+      let colorRole = guild.roles.cache.find(r => r.name.toLowerCase() == ("spooky " + justUnlocked.name).toLowerCase());
       if (!colorRole) {
         await event.generateRoles(guild).then(() => {
-          colorRole = guild.roles.cache.find(r => r.name.toLowerCase() == ("Spooky " + justUnlocked.name).toLowerCase());
+          colorRole = guild.roles.cache.find(r => r.name.toLowerCase() == ("spooky " + justUnlocked.name).toLowerCase());
           if (!colorRole) throw new Error("Could not find role " + "Spooky " + justUnlocked.name.toLowerCase());
           NPCSend(channel, u.embed(
             {
@@ -159,7 +159,7 @@ class Participant {
     }
 
 
-    if (this.adjustedCount > 50 && !this.#_status === "INACTIVE") {
+    if (this.adjustedCount > 500 && !this.#_status === "INACTIVE") {
       this.#_status = "INACTIVE";
       this.lastAbilityUse = Date.now() - 1000 * 60 * 60 * 24;
       throw new Error("Participant <@" + this.#_user + "> has reached the maximum count for the event without recieving the inactive status");
@@ -180,14 +180,14 @@ class Participant {
           }
         );
         break;
-      case 54:
-      case 53:
-      case 52:
-      case 51: if (!event.roles[1].role) {
+      case 504:
+      case 503:
+      case 502:
+      case 501: if (!event.roles[1].role) {
         await event.generateRoles(guild);
       }
         if (member.roles.cache.has(event.roles[1].role.id)) { break }
-      case 50: if (!event.roles[1].role) {
+      case 500: if (!event.roles[1].role) {
         await event.generateRoles(guild);
       }
         await member.roles.add(event.roles[1].role);
