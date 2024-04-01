@@ -469,7 +469,19 @@ Module.addCommand({ //TODO: REMOVE THIS
     }
 
   }
-)
+).addCommand({
+  name: "generateRoles",
+  guild: snowflakes.guilds.PrimaryServer,
+  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.Admin)
+    || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
+    || msg.member.roles.cache.has(snowflakes.roles.WorldMaker)
+    || msg.member.roles.cache.has(snowflakes.roles.Moderator)
+    || msg.member.roles.cache.has(snowflakes.roles.CommunityGuide),
+  process: async (msg) => {
+    await event.generateRoles(msg.guild);
+    await msg.react("✔");
+  }
+})
   .addCommand({
     name: "dailyreset",
     guild: snowflakes.guilds.PrimaryServer,
