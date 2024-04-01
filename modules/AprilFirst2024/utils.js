@@ -34,7 +34,33 @@ const colors = [
     name: "Tyrant's Shadow",
     color: "#141414",
     award_threshold: 500
-  }
+  },
+  {
+    name: "Spooky Sword Sword",
+    color: "#949494",
+    award_threshold: 600
+  },
+  {
+    name: "Spooky Spook",
+    color: "#ffffff",
+    award_threshold: 700
+  },
+  {
+    name: "Actually Just Green",
+    color: "#00ff55",
+    award_threshold: 800
+  },
+  {
+    name: "Might be orange",
+    color: "#ffaa00",
+    award_threshold: 900
+  },
+  {
+    name: "Spooky rowo color",
+    color: "#992237",
+    award_threshold: 999
+  },
+
 ]
 
 const roles = [
