@@ -18,10 +18,10 @@ let commandStats = {};
 async function logInteraction(interaction) {
   try {
     let command = interaction.commandName;
-    let user = interaction.user;
+    let user = interaction.member;
     let time = new Date();
     let options = interaction.options;
-    console.log(`User: ${user.username}#${user.discriminator} used command: ${command} at ${time} with options: ${options}`);
+    console.log(`User: ${user.username} used command: ${command} at ${time} with options: ${options}`);
   } catch (error) {
     console.error(`Error logging interaction: ${error}`);
   }
@@ -29,7 +29,7 @@ async function logInteraction(interaction) {
   let webhook = u.errorLog;
   let embed = new Discord.MessageEmbed()
     .setTitle("Interaction Command Used")
-    .setDescription(`User: ${user.username}#${user.discriminator} used command: ${command} at ${time} with options: ${optionsToString(options)}`)
+    .setDescription(`User: ${user.username} used command: ${command} at ${time} with options: ${optionsToString(options)}`)
     .setColor("#e0c2ff");
   webhook.send({ embeds: [embed] });
 
