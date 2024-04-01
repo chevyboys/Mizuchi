@@ -4,10 +4,15 @@ const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic");
 
 //a function for making the discord slash command options object more readable
-function optionsToString(options) {
+function optionsToString(options, spacing = true, depth = 1,) {
   let optionsString = "";
+  let depthString = "";
+  for (let i = 0; i < depth; i++) {
+    depthString += "--";
+  }
   for (let option of options) {
-    optionsString += `${option.name}: ${option.value}\n`;
+    optionsString += (spacing ? (`\n` + depthString) : "") + `**${option.name}**${option.value ? `: ${option.value}` : ""}${option.options ? " with options:" : ""}`;
+    if (option.options?.length > 0) optionsString += optionsToString(option.options, spacing, depth + 1);
   }
   return optionsString;
 }
@@ -18,31 +23,41 @@ let commandStats = {};
 async function logInteraction(interaction) {
   try {
     let command = interaction.commandName;
-    let user = interaction.member;
+    //if the command is a subcommand, add the subcommand name to the command name
+    if (interaction.options.getSubcommand()) {
+      command += ` ${interaction.options.getSubcommand()}`;
+    }
     let time = new Date();
-    let options = interaction.options;
-    console.log(`User: ${user.username} used command: ${command} at ${time} with options: ${options}`);
+    let options = interaction.options.data;
+    //if the command is a subcommand, remove the subcommand options from the options object
+    if (interaction.options.getSubcommand()) {
+      options = interaction.options.data[0].options;
+    }
+    console.log(`User: ${interaction.member} used command: ${command} at ${time} with options: ${optionsToString(options)}`);
+
+    //also log it to the u.errorLog webhood
+    let webhook = u.errorLog;
+    let embed = new Discord.MessageEmbed()
+      .setTitle(`${interaction.member.displayName} used ${command}`)
+      .setDescription(`options: ${optionsToString(options)}\nTime: ${time.toISOString()}\n Guild: ${interaction.guild.name}\n Channel: ${interaction.channel.name}\n Ephemeris: ${interaction.ephemeral}\n Interaction ID: ${interaction.id}\n Command ID: ${interaction.commandId}\n\n copy-pasteable command: \`</${command}:${interaction.commandId}>\``)
+      .setColor("#e0c2ff")
+      .setFooter(`User ID: ${interaction.member.id}, Command ${commandStats[command] ? `used ${commandStats[command].uses} times used by ${commandStats[command].users.length} users` : "not used before"}`);
+    webhook.send({ embeds: [embed] });
+
+    //store basic information about the interaction in commandStats, so we can see which commands are being used most frequently, and the number of unique users who have used each command
+
+    if (commandStats[command]) {
+      commandStats[command].uses++;
+      if (!commandStats[command].users.includes(interaction.member.id)) {
+        commandStats[command].users.push(interaction.member.id);
+      }
+    } else {
+      commandStats[command] = { uses: 1, users: [interaction.member.id] };
+    }
   } catch (error) {
     console.error(`Error logging interaction: ${error}`);
   }
-  //also log it to the u.errorLog webhood
-  let webhook = u.errorLog;
-  let embed = new Discord.MessageEmbed()
-    .setTitle("Interaction Command Used")
-    .setDescription(`User: ${user.username} used command: ${command} at ${time} with options: ${optionsToString(options)}`)
-    .setColor("#e0c2ff");
-  webhook.send({ embeds: [embed] });
 
-  //store basic information about the interaction in commandStats, so we can see which commands are being used most frequently, and the number of unique users who have used each command
-
-  if (commandStats[command]) {
-    commandStats[command].uses++;
-    if (!commandStats[command].users.includes(user.id)) {
-      commandStats[command].users.push(user.id);
-    }
-  } else {
-    commandStats[command] = { uses: 1, users: [user.id] };
-  }
 }
 
 //event hook on the module for logging each command interaction
