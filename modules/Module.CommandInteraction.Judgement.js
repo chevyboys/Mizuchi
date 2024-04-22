@@ -79,6 +79,10 @@ const Command = {
         const spire = interaction.options.getString("spire");
         const request = new JudgementRequest(requester.id, spire);
         console.log(request.toString());
+        if (spire.toLowerCase() == "spider") {
+          interaction.reply({ content: "No : )", ephemeral: true });
+          return;
+        }
 
         if (requests.find(req => req.requester == requester)) {
           interaction.reply({ content: "You already have a request in.", ephemeral: true });
