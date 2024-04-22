@@ -8,7 +8,7 @@ const MessageActionRow = require("discord.js").MessageActionRow;
 const MessageButton = require("discord.js").MessageButton;
 
 
-const SPIRES = ["Hydra", "Pheonix", "Serpent", "Tiger", "Tortoise"].map(f => f.toLowerCase());
+const SPIRES = ["Hydra", "Phoenix ", "Serpent", "Tiger", "Tortoise"].map(f => f.toLowerCase());
 
 /**
  * A class to represent a Judgement Request
@@ -214,8 +214,8 @@ Module.addInteractionCommand(Command)
             "value": "Hydra"
           },
           {
-            "name": "Pheonix",
-            "value": "Pheonix"
+            "name": "Phoenix ",
+            "value": "Phoenix "
           },
           {
             "name": "Serpent",
