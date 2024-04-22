@@ -1,0 +1,55 @@
+{
+  "name": "judgement",
+  "description": "Request a judgement from the Voices of the Tower",
+  "options": [
+    {
+      "name": "request",
+      "description": "Request a judgement",
+      "type": 1,
+      "options": [
+        {
+          "name": "spire",
+          "description": "The spire you wish to visit",
+          "type": 3,
+          "required": true,
+          "choices": [
+            {
+              "name": "Hydra",
+              "value": "Hydra"
+            },
+            {
+              "name": "Pheonix",
+              "value": "Pheonix"
+            },
+            {
+              "name": "Serpent",
+              "value": "Serpent"
+            },
+            {
+              "name": "Tiger",
+              "value": "Tiger"
+            },
+            {
+              "name": "Tortise",
+              "value": "Tortise"
+            },
+            {
+              "name": "Random",
+              "value": "Random"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "view",
+      "description": "View the current Judgement Requests",
+      "type": 1
+    },
+    {
+      "name": "judge",
+      "description": "Judge the current Judgement Requests",
+      "type": 1
+    }
+  ]
+}

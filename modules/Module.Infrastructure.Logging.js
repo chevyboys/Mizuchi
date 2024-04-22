@@ -5,6 +5,7 @@ const Augur = require("augurbot"),
 
 //a function for making the discord slash command options object more readable
 function optionsToString(options, spacing = true, depth = 1,) {
+  if (!options) return "";
   let optionsString = "";
   let depthString = "";
   for (let i = 0; i < depth; i++) {
@@ -21,16 +22,30 @@ let commandStats = {};
 
 //each time an interaction command is used, log the user, command name, time, and command options
 async function logInteraction(interaction) {
+  //if the interaction is a component interaction, log it as a component interaction
+  if (interaction.isButton() || interaction.isSelectMenu()) {
+
+    let time = new Date();
+    console.log(`User: ${interaction.member} used component interaction: ${interaction.customId} at ${time}`);
+    //also log it to the u.errorLog webhood
+    let webhook = u.errorLog;
+    let embed = new Discord.MessageEmbed()
+      .setTitle(`${interaction.member.displayName} used component interaction: ${interaction.customId}`)
+      .setDescription(`Label: ${interaction.component.label}\nTime: ${time.toISOString()}\n Guild: ${interaction.guild.name}\n Channel: ${interaction.channel.name}\n Ephemeris: ${interaction.ephemeral}\n Interaction ID: ${interaction.id}\n\n messageLink: [click here](https://discord.com/channels/${interaction.guild.id}/${interaction.channel.id}/${interaction.message.id})`)
+      .setColor("#e0c2ff");
+    webhook.send({ embeds: [embed] });
+    return;
+  }
   try {
     let command = interaction.commandName;
     //if the command is a subcommand, add the subcommand name to the command name
-    if (interaction.options.getSubcommand()) {
+    if (interaction.options?.getSubcommand()) {
       command += ` ${interaction.options.getSubcommand()}`;
     }
     let time = new Date();
-    let options = interaction.options.data;
+    let options = interaction.options?.data;
     //if the command is a subcommand, remove the subcommand options from the options object
-    if (interaction.options.getSubcommand()) {
+    if (interaction.options?.getSubcommand()) {
       options = interaction.options.data[0].options;
     }
     console.log(`User: ${interaction.member} used command: ${command} at ${time} with options: ${optionsToString(options)}`);

@@ -95,9 +95,6 @@ const Module = new Augur.Module()
       new SlashCommandBuilder().setName("links")
         .setDescription("Handy links to things around the fandom"),
       new SlashCommandBuilder()
-        .setName("judgement")
-        .setDescription("Begin your journey to find your attunement."),
-      new SlashCommandBuilder()
         .setName("thank")
         .setDescription("Thanks someone for helping out")
         .addUserOption(option =>

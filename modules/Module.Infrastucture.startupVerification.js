@@ -86,7 +86,8 @@ Module.setInit(async () => {
       './data/helpers',
       './data/welcome',
       './data/holiday',
-      './data/question'
+      './data/question',
+      './data/judgement'
     ]
 
 
@@ -96,7 +97,10 @@ Module.setInit(async () => {
       }
     }
 
-
+    const judgementRequests = './data/judgement/requests.json';
+    if (!fs.existsSync(judgementRequests)) {
+      fs.writeFileSync(judgementRequests, JSON.stringify([], 0, 2));
+    }
 
     const welcomeOveride = './data/welcome/welcomeOveride.json'
     if (!fs.existsSync(welcomeOveride)) {
