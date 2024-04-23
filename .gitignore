@@ -16,7 +16,8 @@ faq/*
 package-lock.json
 config/snowflakes.json
 package-lock.json
-Judgement
+Judgement/*
+!Judgement/JudgementRequest*
 avatar/*
 dist/config/config.js
 .gitignore

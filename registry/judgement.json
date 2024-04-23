@@ -47,9 +47,88 @@
       "type": 1
     },
     {
-      "name": "judge",
-      "description": "Judge the current Judgement Requests",
+      "name": "select",
+      "description": "Select candidates for judgement",
       "type": 1
+    },
+    {
+      "name": "remove",
+      "description": "Remove a user's judgement request",
+      "type": 1,
+      "options": [
+        {
+          "name": "user",
+          "description": "The user to remove",
+          "type": 6,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "judge",
+      "description": "Enter a code to calculate a user's attunement",
+      "type": 1,
+      "options": [
+        {
+          "name": "code",
+          "description": "The comma seperated codes to use for judging",
+          "type": 3,
+          "required": true
+        },
+        {
+          "name": "user",
+          "description": "The user to judge",
+          "type": 6,
+          "required": true
+        },
+        {
+          "name": "spire",
+          "description": "The spire to judge for",
+          "type": 3,
+          "required": true,
+          "choices": [
+            {
+              "name": "Hydra",
+              "value": "Hydra"
+            },
+            {
+              "name": "Phoenix",
+              "value": "Phoenix "
+            },
+            {
+              "name": "Serpent",
+              "value": "Serpent"
+            },
+            {
+              "name": "Tiger",
+              "value": "Tiger"
+            },
+            {
+              "name": "Tortoise",
+              "value": "Tortoise"
+            }
+          ]
+        },
+        {
+          "name": "notes",
+          "description": "Any notes to add to the judgement",
+          "type": 3
+        }
+      ]
+    },
+    {
+      "name": "admin",
+      "description": "Opens the admin console for the selected request",
+      "type": 1,
+      "options": [
+        {
+          "name": "request",
+          "description": "The request to view",
+          "type": 3,
+          "required": true,
+          "autocomplete": true
+        }
+      ]
     }
   ]
 }

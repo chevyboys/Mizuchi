@@ -35,6 +35,9 @@ async function logInteraction(interaction) {
       .setColor("#e0c2ff");
     webhook.send({ embeds: [embed] });
     return;
+  } else if (interaction.isAutocomplete()) {
+    //don't log autocomplete interactions, as the volume of them is too high
+    return;
   }
   try {
     let command = interaction.commandName;
