@@ -23,7 +23,7 @@ let removeRequestButton = new MessageButton()
 
 function removeRequestButtonForUser(guildMember) {
   return new MessageButton()
-    .setCustomId('removeJudgementRequest')
+    .setCustomId('removeJudgementRequest' + guildMember.id)
     .setLabel('Remove ' + guildMember.displayName)
     .setStyle('DANGER')
     .setDisabled(false)
@@ -36,9 +36,10 @@ let IsAllowedToJudge = (interaction) => interaction.member.roles.cache.find(role
 function isAllowedToBeJudged(member) {
   //anyone with the status of on hold cannot be judged
   try {
-    return !requests.get(member.id).status == JudgementRequestStatus.hold;
+    return requests.get(member.id).status != JudgementRequestStatus.hold;
   }
   catch (e) {
+    u.errorLog.send({ content: "Error in isAllowedToBeJudged: " + e });
     return false;
   }
 }
@@ -146,11 +147,16 @@ const Command = {
           //get three random requests, ensure they are unique, and have not been gotten in the last 10 requests
           let selectedRequests = [];
           let i = 0;
-          while (i < 3 && i < requests.requests.length) {
+          let loopCount = 0;
+          if (requests.requests.length < 10) {
+            lastRequests = [];
+          }
+          while (i < 3 && i < requests.requests.length && loopCount < 15) {
+            loopCount++;
             let request = requests.requests[Math.floor(Math.random() * requests.requests.length)];
-            if (!selectedRequests.includes(request) && !lastRequests.includes(request) && isAllowedToBeJudged(request.requester)) {
+            if (!selectedRequests.includes(request) && !lastRequests.includes(request) && isAllowedToBeJudged(interaction.guild.members.cache.get(request.requester))) {
               selectedRequests.push(request);
-              lastRequests.push(request);
+              if (requests.requests.length > 10) lastRequests.push(request);
               i++;
             }
           }
@@ -164,8 +170,8 @@ const Command = {
             row.addComponents(
               removeRequestButtonForUser(interaction.guild.members.cache.get(request.requester))
             );
-            components.push(row);
           }
+          components.push(row);
           //display the requests to the user
           let requestString = selectedRequests.map(req => req.toUserString(interaction.guild)).join("\n");
           if (requestString == "") {
@@ -273,25 +279,24 @@ Module.addInteractionCommand(Command)
         interaction.reply({ content: "You don't seem to have a request in my memory crystals", ephemeral: true });
       }
     }
-  })
-  .addInteractionHandler({
-    customId: `removeJudgementRequest`, process: async (interaction) => {
-      //remove the request from the list
-      const targetName = interaction.component.label.toLowerCase().replace("remove ", "")
-      const target = interaction.guild.members.cache.find(member => member.displayName.toLowerCase() == targetName);
-
-      if (target) {
-        try {
-          requests.remove(target.id);
-          interaction.reply({ content: "Request removed", ephemeral: true });
-        } catch (e) {
-          interaction.reply({ content: "Request not found", ephemeral: true });
-        }
-      } else {
-        interaction.reply({ content: "User not found", ephemeral: true });
+  }).addEvent("interactionCreate", async (interaction) => {
+    // handle anything that starts with customId: `removeJudgementRequest`, and process it
+    if (!interaction.isButton() || !interaction.customId.startsWith("removeJudgementRequest")) return;
+    //remove the request from the list
+    const targetId = interaction.customId.toLowerCase().replace("removejudgementrequest", "")
+    if (targetId) {
+      try {
+        requests.remove(targetId);
+        interaction.reply({ content: "Request removed", ephemeral: true });
+      } catch (e) {
+        interaction.reply({ content: "Request not found", ephemeral: true });
       }
-
+    } else {
+      interaction.reply({ content: "User not found", ephemeral: true });
     }
+
+
+
   }).addEvent("interactionCreate", async (interaction) => {
     if (!interaction.isAutocomplete() || interaction.commandName != "judgement" || !interaction.options.getSubcommand() == "admin") return;
     if (!IsAllowedToJudge(interaction)) {
@@ -308,12 +313,16 @@ Module.addInteractionCommand(Command)
   .addInteractionHandler({
     customId: `adminJudgementRequestStatus`, process: async (interaction) => {
       //change the status of the request
-      const targetRequestOption = interaction.values[0];
       //search each row to find the remove button
-      let removeButton = interaction.message.components.find(row => row.components.find(component => component.customId == "removeJudgementRequest")).components.find(component => component.customId == "removeJudgementRequest");
-      const targetRequestDisplaynameString = removeButton.label.replace("Remove ", "");
-      //find the guild member with the displayname found in the remove button
-      const targetRequest = requests.get(interaction.guild.members.cache.find(member => member.displayName == targetRequestDisplaynameString));
+      let removeButton =
+        interaction.message.components.find(row =>
+          row.components.find(component =>
+            component.customId.startsWith("removeJudgementRequest"))
+        )?.components.find(component =>
+          component.customId.startsWith("removeJudgementRequest"))
+        || interaction.message.components.find(row => row.components.find(component => component.customId == "removeSelfJudgementRequest")).components.find(component => component.customId == "removeSelfJudgementRequest");
+      const targetId = removeButton.customId.replace("removeJudgementRequest", "");
+      const targetRequest = requests.get(targetId);
       if (!targetRequest) {
         return interaction.reply({ content: "No request found", ephemeral: true });
       }
@@ -326,19 +335,17 @@ Module.addInteractionCommand(Command)
   .addInteractionHandler({
     customId: `adminJudgementRequestSpire`, process: async (interaction) => {
       //change the spire of the request
-      const targetRequestOption = interaction.values[0];
       //search each row to find the remove button
       let removeButton =
         interaction.message.components.find(row =>
           row.components.find(component =>
-            component.customId == "removeJudgementRequest")
+            component.customId.startsWith("removeJudgementRequest"))
         )?.components.find(component =>
-          component.customId == "removeJudgementRequest")
+          component.customId.startsWith("removeJudgementRequest"))
         || interaction.message.components.find(row => row.components.find(component => component.customId == "removeSelfJudgementRequest")).components.find(component => component.customId == "removeSelfJudgementRequest");
-      const targetRequestDisplaynameString = removeButton.label.replace("Remove ", "");
       //find the guild member with the displayname found in the remove button
-      const targetRequest = removeButton.customId == "removeJudgementRequest" ?
-        requests.get(interaction.guild.members.cache.find(member => member.displayName == targetRequestDisplaynameString)) :
+      const targetRequest = removeButton.customId.startsWith("removeJudgementRequest") ?
+        requests.get(interaction.guild.members.cache.get(removeButton.customId.replace("removeJudgementRequest", ""))) :
         requests.get(interaction.user.id);
       if (!targetRequest) {
         return interaction.reply({ content: "No request found", ephemeral: true });
@@ -346,7 +353,7 @@ Module.addInteractionCommand(Command)
       const spire = interaction.values[0];
       requests.setSpire(targetRequest.requester, spire);
 
-      if (removeButton.customId == "removeJudgementRequest") { return interaction.update({ content: "Admin Options for ```" + targetRequest.toUserString(interaction.guild) + " - " + targetRequest.status + "```", ephemeral: true }); }
+      if (removeButton.customId.startsWith("removeJudgementRequest")) { return interaction.update({ content: "Admin Options for ```" + targetRequest.toUserString(interaction.guild) + " - " + targetRequest.status + "```", ephemeral: true }); }
       else {
         return interaction.update({ content: "Your spire has been updated to " + spire, ephemeral: true });
       }
