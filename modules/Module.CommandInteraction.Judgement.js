@@ -200,14 +200,8 @@ const Command = {
             interaction.reply({ content: "No score function found", ephemeral: true });
             return;
           }
-          let result = score(interaction, requests);
-          if (typeof result == "string") {
-            interaction.reply({ content: result, ephemeral: true });
-          } else if (result instanceof Discord.MessageEmbed) {
-            interaction.reply({ embeds: [result], ephemeral: true });
-          } else if (result instanceof Discord.Message) {
-            interaction.reply({ content: result.content, ephemeral: true });
-          }
+          score(interaction, requests);
+          //all replies will be handled in the score function
         } catch (e) {
           interaction.reply({ content: "There was an error scoring the judgement", ephemeral: true });
         }
