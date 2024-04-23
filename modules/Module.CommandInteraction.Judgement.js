@@ -109,8 +109,8 @@ const Command = {
         let requestString = requests.requests.slice(0, 100).map(
           (req, index) =>
             (index + 1) + ": "
-              + req.toUserString(interaction.guild)
-              + IsAllowedToJudge(interaction) ? "" : " - " + req.status
+            + req.toUserString(interaction.guild)
+            + (IsAllowedToJudge(interaction) ? (" - " + req.status) : "")
         ).join("\n");
         if (requestString == "") {
           requestString = "There are no requests at this time.";
