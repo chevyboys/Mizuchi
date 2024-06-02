@@ -141,11 +141,11 @@ async function pride(msg) {
       roleGuild = await RoleClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
     }
     try {
-      member.roles.add(snowflakes.roles.Holiday);
+      member.roles.add(snowflakes.roles.Holiday[0]);
       console.log("Added holiday role to " + msg.member.displayName)
     } catch (error) {
       const modRequests = msg.guild.channels.cache.get(snowflakes.channels.modRequests);
-      modRequests.send("I couldn't add the <@&" + snowflakes.roles.Holiday + " role to " + msg.member.displayName)
+      modRequests.send("I couldn't add the <@&" + snowflakes.roles.Holiday[0] + " role to " + msg.member.displayName)
       throw error;
     }
     //create callback to remove user from array after 8 hours
@@ -157,7 +157,7 @@ async function pride(msg) {
     //set role to random hexcolor
     let color = Math.floor(Math.random() * 16777215).toString(16);
     try {
-      roleGuild.roles.fetch(snowflakes.roles.Holiday).then(role => {
+      roleGuild.roles.fetch(snowflakes.roles.Holiday[0]).then(role => {
         role.setColor(color);
       });
 
@@ -169,7 +169,7 @@ async function pride(msg) {
       let index = prideRepliedUsers.indexOf(msg.author.id);
       if (index > -1) {
         prideRepliedUsers.splice(index, 1);
-        await member.roles.remove(snowflakes.roles.Holiday);
+        await member.roles.remove(snowflakes.roles.Holiday[0]);
       }
     }
       , milisecondsUntilMidnight);
@@ -214,7 +214,7 @@ removePrideRole = async () => {
   }
 
   const roleGuild = RoleClient.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-  const role = await roleGuild.roles.fetch(snowflakes.roles.Holiday);
+  const role = await roleGuild.roles.fetch(snowflakes.roles.Holiday[0]);
   const members = await role.members.fetch();
   members.forEach(async member => {
     await member.roles.remove(role);
@@ -239,7 +239,7 @@ if (new Date().getMonth() == 5) {
   Module.setClockwork(() => {
     try {
       return setInterval(removePrideRole, 60 * 60 * 1000);
-    } catch (e) { u.errorHandler(e, "cakeOrJoinDay Clockwork Error"); }
+    } catch (e) { u.errorHandler(e, "pride Clockwork Error"); }
 
   })
 }
