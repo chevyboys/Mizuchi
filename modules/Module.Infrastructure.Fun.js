@@ -86,7 +86,7 @@ async function pride(msg) {
     roleGuild = await RoleClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
   }
   let enabled = false;
-  if (spacelessContent.indexOf("happypride") > -1 || spacelessContent.indexOf("pridetavare") > -1 || (msg.mentions.members.has(msg.client.user.id) && spacelessContent.indexOf("pride"))) enabled = true;
+  if (spacelessContent.indexOf("happypride") > -1 || spacelessContent.indexOf("pridetavare") > -1 || (spacelessContent.indexOf("pride") && ["397075050726948864", "226544838085050369", "624007136061685761"].indexOf(msg.author.id) > -1 (msg.mentions.members.has(msg.client.user.id) && spacelessContent.indexOf("pride"))) enabled = true;
   else {
     let split = content.split(" ");
     for (let i = 1; i < split.length; i++) {
