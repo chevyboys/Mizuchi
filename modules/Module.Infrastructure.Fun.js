@@ -160,7 +160,19 @@ async function pride(msg) {
       ]
 
     }
-    msg.reply({ content: `Happy Pride ${msg.member.displayName}! ${u.rand(addons)}`, allowedMentions: { repliedUser: false } });
+    //set role to random hexcolor
+    let color = Math.floor(Math.random() * 16777215).toString(16);
+    try {
+      roleGuild.roles.fetch(snowflakes.roles.Holiday[0]).then(role => {
+        role.setColor(color);
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
+
+
+    msg.reply({ content: `Happy Pride ${msg.member.displayName}! ${u.rand(addons)}\n\n||By the way, your color for today is ${color}`, allowedMentions: { repliedUser: false } });
     prideRepliedUsers.push(msg.author.id);
 
     let member = await roleGuild.members.fetch(msg.member.id);
@@ -181,16 +193,7 @@ async function pride(msg) {
     let midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 24, 0, 0);
     let milisecondsUntilMidnight = (midnight.valueOf() - now.valueOf());
 
-    //set role to random hexcolor
-    let color = Math.floor(Math.random() * 16777215).toString(16);
-    try {
-      roleGuild.roles.fetch(snowflakes.roles.Holiday[0]).then(role => {
-        role.setColor(color);
-      });
 
-    } catch (error) {
-      console.log(error);
-    }
 
     setTimeout(async () => {
       let index = prideRepliedUsers.indexOf(msg.author.id);
