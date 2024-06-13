@@ -80,13 +80,27 @@ async function pride(msg) {
   let mon = new Date().getMonth();
   if (mon != 5) return
   let content = msg?.content?.toLowerCase();
-  let spacelessContent = content.replaceAll(" ", "");
+  //remove all whitespace
+  let spacelessContent = content.replaceAll(/\s/, "").split("");
+  //remove consecutive duplicates
+  for (let i = 0; i < spacelessContent.length; i++) {
+    if (spacelessContent[i] == spacelessContent[i + 1]) {
+      spacelessContent.splice(i, 1);
+      i--;
+    }
+  }
+  spacelessContent = spacelessContent.join("");
+
+
   if (mon != 5) return
   if (!roleGuild) {
     roleGuild = await RoleClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
   }
   let enabled = false;
-  if (spacelessContent.indexOf("happypride") > -1 || spacelessContent.indexOf("pridetavare") > -1 || (spacelessContent.indexOf("pride") && ["397075050726948864", "226544838085050369", "624007136061685761"].indexOf(msg.author.id) > -1 ) || (msg.mentions.members.has(msg.client.user.id) && spacelessContent.indexOf("pride"))) enabled = true;
+  if (spacelessContent.indexOf("hapypride") > -1
+    || spacelessContent.indexOf("pridetavare") > -1
+    || (spacelessContent.indexOf("pride") > -1 && ["397075050726948864", "226544838085050369", "624007136061685761"].indexOf(msg.author.id) > -1)
+    || (msg.mentions.members.has(msg.client.user.id) && spacelessContent.indexOf("pride"))) enabled = true;
   else {
     let split = content.split(" ");
     for (let i = 1; i < split.length; i++) {
@@ -131,8 +145,21 @@ async function pride(msg) {
       "Sometimes, the greatest wisdom comes from embracing our true selves. Carry this 🏳‍🌈 and let it guide you towards your own truth.",
       "Like a gentle breeze, let this 🏳‍🌈 remind you to spread kindness, compassion, and acceptance wherever you go.",
       "In the tapestry of life, every color is important. Embrace this 🏳‍🌈 and celebrate the vibrant diversity that makes us who we are.",
-      "My young friend, take this 🏳‍🌈 and let it remind you that you are loved, cherished, and worthy of acceptance."
+      "My young friend, take this 🏳‍🌈 and let it remind you that you are loved, cherished, and worthy of acceptance.",
+      "🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈",
+      "🟥🟥🟥🟥🟥🟥\n🟧🟧🟧🟧🟧🟧\n🟨🟨🟨🟨🟨🟨\n🟩🟩🟩🟩🟩🟩\n🟦🟦🟦🟦🟦🟦\n🟪🟪🟪🟪🟪🟪"
     ]
+    //on a one in 100 chance, replace the addon with an easter egg
+    if (getRandomInt(100) < 5) {
+      addons = [
+        "You have finally enough pylons 💎🏳‍🌈",
+        "Wuv, twue wuv is what bwings us togethar today🌈",
+        "⬆⬇⬆⬇",
+        "Radiance, thy name is " + msg.member.displayName,
+        "||Find the secret: https://wydds.cc/doc_storage.html||",
+      ]
+
+    }
     msg.reply({ content: `Happy Pride ${msg.member.displayName}! ${u.rand(addons)}`, allowedMentions: { repliedUser: false } });
     prideRepliedUsers.push(msg.author.id);
 
@@ -207,6 +234,7 @@ async function tavareSawThatPing(msg) {
 }
 
 removePrideRole = async () => {
+  return; //disabling roll off. May enable at a future point
   //return if it's not between midnight and 1am
   let now = new Date();
   if (now.getHours() != 0) {
@@ -215,7 +243,7 @@ removePrideRole = async () => {
 
   const roleGuild = RoleClient.guilds.cache.get(snowflakes.guilds.PrimaryServer);
   const role = await roleGuild.roles.fetch(snowflakes.roles.Holiday[0]);
-  const members = await role.members.fetch();
+  const members = await role.members;
   members.forEach(async member => {
     await member.roles.remove(role);
   }
@@ -242,5 +270,15 @@ if (new Date().getMonth() == 5) {
     } catch (e) { u.errorHandler(e, "pride Clockwork Error"); }
 
   })
+    //if someone reacts with a rainbow emoji, give them the pride role
+    .addEvent("messageReactionAdd", async (reaction, user) => {
+      if (reaction.message.guild.id != snowflakes.guilds.PrimaryServer) return;
+      if (reaction.emoji.name == "🏳‍🌈") {
+        let member = await reaction.message.guild.members.fetch(user.id);
+        member.roles.add(snowflakes.roles.Holiday[0]);
+      }
+      reaction.react();
+    }
+    )
 }
 module.exports = Module;
