@@ -272,12 +272,12 @@ if (new Date().getMonth() == 5) {
   })
     //if someone reacts with a rainbow emoji, give them the pride role
     .addEvent("messageReactionAdd", async (reaction, user) => {
-      if (reaction.message.guild.id != snowflakes.guilds.PrimaryServer) return;
+      if (reaction.message.guild.id != snowflakes.guilds.PrimaryServer || reaction.message.author.bot) return;
       if (reaction.emoji.name == "🏳‍🌈") {
         let member = await reaction.message.guild.members.fetch(user.id);
         member.roles.add(snowflakes.roles.Holiday[0]);
+        reaction.react();
       }
-      reaction.react();
     }
     )
 }
