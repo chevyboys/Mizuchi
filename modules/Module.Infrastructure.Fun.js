@@ -172,7 +172,7 @@ async function pride(msg) {
     }
 
 
-    msg.reply({ content: `Happy Pride ${msg.member.displayName}! ${u.rand(addons)}\n\n||By the way, your color for today is ${color}`, allowedMentions: { repliedUser: false } });
+    msg.reply({ content: `Happy Pride ${msg.member.displayName}! ${u.rand(addons)}\n\n||By the way, your color for today is #${color}||`, allowedMentions: { repliedUser: false } });
     prideRepliedUsers.push(msg.author.id);
 
     let member = await roleGuild.members.fetch(msg.member.id);
