@@ -211,6 +211,43 @@ Module
     }
   })
   .addCommand({
+    name: "edit",
+    category: "bot admin",
+    hidden: true,
+    description: "Edit a message by message id",
+    syntax: "<message id> <new content>",
+    process: async (msg, suffix) => {
+      let args = suffix.split(" ");
+      let id = args.shift();
+      let newContent = args.join(" ");
+      let message = await msg.channel.messages.fetch(id);
+      if (message) {
+        message.edit(newContent);
+        msg.react("👌");
+      } else {
+        msg.reply("I couldn't find that message.").then(m => u.clean(m));
+      }
+      u.clean(msg);
+    },
+  })
+  .addCommand({
+    name: "delete",
+    category: "bot admin",
+    hidden: true,
+    description: "Delete a message by message id",
+    syntax: "<message id>",
+    process: async (msg, suffix) => {
+      let message = await msg.channel.messages.fetch(suffix);
+      if (message) {
+        message.delete();
+        msg.react("👌")
+      } else {
+        msg.reply("I couldn't find that message.").then(m => u.clean(m));
+      }
+      u.clean(msg);
+    },
+  })
+  .addCommand({
     name: "avatar",
     category: "Bot Admin",
     hidden: true,
