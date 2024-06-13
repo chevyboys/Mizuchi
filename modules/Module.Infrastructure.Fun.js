@@ -81,7 +81,7 @@ async function pride(msg) {
   if (mon != 5) return
   let content = msg?.content?.toLowerCase();
   //remove all whitespace
-  let spacelessContent = content.replaceAll(/\s/, "").split("");
+  let spacelessContent = content.replaceAll(/\s/g, "").split("");
   //remove consecutive duplicates
   for (let i = 0; i < spacelessContent.length; i++) {
     if (spacelessContent[i] == spacelessContent[i + 1]) {
