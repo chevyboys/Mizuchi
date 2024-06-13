@@ -195,14 +195,16 @@ const Command = {
 
         try {
           try {
-            let score = require('./judgement/score.js')
+            let score = require("./Judgement/score.js");
+            score(interaction, requests);
           } catch (e) {
+            console.log(e);
             interaction.reply({ content: "No score function found", ephemeral: true });
             return;
           }
-          score(interaction, requests);
           //all replies will be handled in the score function
         } catch (e) {
+          console.log(e);
           interaction.reply({ content: "There was an error scoring the judgement", ephemeral: true });
         }
         break;

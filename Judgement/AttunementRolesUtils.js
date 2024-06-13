@@ -44,12 +44,14 @@ const utils = {
       if (attunements.hasOwnProperty.call(attunements, key)) {
         const element = attunements[key];
         let attunement = new Attunement({
-          name: element.name,
-          roleId: key,
+          name: key,
+          roleId: element.id,
           tower: element.tower,
           description: element.description,
-          manaTypes: element.manaTypes
+          manaTypes: element.manaTypes,
+          scoreCode: element.scoreCode
         });
+        attunementArray.push(attunement);
       }
     }
     return attunementArray;

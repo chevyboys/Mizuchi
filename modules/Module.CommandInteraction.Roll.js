@@ -10,7 +10,7 @@ let helpURL = "https://dice-roller.github.io/documentation/guide/notation/"
  * Trims a field to a specific length
  * @param {string} field 
  * @param {number} maxLength 
- * @returns the field trimmed to the specified length, with a ... on the end if the feild needed to be trimmed
+ * @returns the field trimmed to the specified length, with a ... on the end if the field needed to be trimmed
  */
 function trimField(field, maxLength) {
   let preparedField = field.toString().trim()
@@ -30,7 +30,7 @@ let diceEmbed = (titleModifier) => {
   return embed;
 }
 
-let exampleFormater = (example) => example[1] ? `\`\`\`${example[0]}: ${example[1]}\`\`\`` : `\n**${example[0]}**`;
+let exampleFormatter = (example) => example[1] ? `\`\`\`${example[0]}: ${example[1]}\`\`\`` : `\n**${example[0]}**`;
 
 let rollHelpExampleString = () => {
   let validDiceRollExamples = [
@@ -42,8 +42,8 @@ let rollHelpExampleString = () => {
     ["2d8*5", "Rolls and 8 sided die twice, adds them together, then multiplies the result by 5"],
   ]
 
-  let validDiceRollFormated = validDiceRollExamples.map(example => exampleFormater(example))
-  let validDiceRollString = validDiceRollFormated.join("") + "\n"
+  let validDiceRollFormatted = validDiceRollExamples.map(example => exampleFormatter(example))
+  let validDiceRollString = validDiceRollFormatted.join("") + "\n"
 
   return "It seems that wasn't a valid dice roll notation. Examples of valid rolls are: \n\n" + validDiceRollString
 }
@@ -69,8 +69,8 @@ let mathRollHelpExampleString = () => {
     ["The following JavaScript functions are also available for your use:"],
   ]
 
-  let validMathFormated = validMath.map(example => exampleFormater(example))
-  let validMathString = validMathFormated.join("") + "\n"
+  let validMathFormatted = validMath.map(example => exampleFormatter(example))
+  let validMathString = validMathFormatted.join("") + "\n"
 
   return validMathString + `\`${["abs", "ceil", "cos", "exp", "floor", "log", "max", "min", "pow", "round", "sign", "sin", "sqrt", "tan"].join("()`, `")}()\``
 }

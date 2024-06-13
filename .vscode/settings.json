@@ -1,17 +1,19 @@
 {
-
-  "[json]" : {
+  "[json]": {
     "editor.defaultFormatter": "vscode.json-language-features",
     "editor.formatOnSave": true
   },
-
-  "[javascript]" : {
+  "[javascript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features",
     "editor.formatOnSave": true
   },
   "eslint.format.enable": true,
   "eslint.enable": true,
   "cSpell.words": [
-    "augurbot"
+    "attunements",
+    "augurbot",
+    "Datamuse",
+    "gmroll",
+    "tavare"
   ],
 }

@@ -41,6 +41,7 @@ async function logInteraction(interaction) {
   }
   try {
     let command = interaction.commandName;
+
     //if the command is a subcommand, add the subcommand name to the command name
     if (interaction.options?.getSubcommand()) {
       command += ` ${interaction.options.getSubcommand()}`;
@@ -60,6 +61,10 @@ async function logInteraction(interaction) {
       .setDescription(`options: ${optionsToString(options)}\nTime: ${time.toISOString()}\n Guild: ${interaction.guild.name}\n Channel: ${interaction.channel.name}\n Ephemeris: ${interaction.ephemeral}\n Interaction ID: ${interaction.id}\n Command ID: ${interaction.commandId}\n\n copy-pasteable command: \`</${command}:${interaction.commandId}>\``)
       .setColor("#e0c2ff")
       .setFooter(`User ID: ${interaction.member.id}, Command ${commandStats[command] ? `used ${commandStats[command].uses} times used by ${commandStats[command].users.length} users` : "not used before"}`);
+    if (interaction.commandName == "judgement" && interaction.options?.getSubcommand() == "judge") {
+      embed.setDescription(`options: REDACTED\nTime: ${time.toISOString()}\n Guild: ${interaction.guild.name}\n Channel: ${interaction.channel.name}\n Ephemeris: ${interaction.ephemeral}\n Interaction ID: ${interaction.id}\n Command ID: ${interaction.commandId}\n\n copy-pasteable command: \`</${command}:${interaction.commandId}>\``);
+    }
+
     webhook.send({ embeds: [embed] });
 
     //store basic information about the interaction in commandStats, so we can see which commands are being used most frequently, and the number of unique users who have used each command
