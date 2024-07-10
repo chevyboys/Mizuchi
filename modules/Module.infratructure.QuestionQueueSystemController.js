@@ -5,7 +5,7 @@ const { MessageButton, MessageActionRow, Modal, TextInputComponent, MessageSelec
 const { Collection } = require("../utils/Utils.Generic");
 const Questions = new (require("./QuestionQueue/Question"))
 const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
-const debug = false;
+const debug = true;
 
 
 let authors;
@@ -476,7 +476,7 @@ async function processRecycleButton(interaction) {
  */
 async function processTransfer(interaction, forceRequestedAnswerer) {
 
-  let numberOfQuestions = 5
+  let numberOfQuestions = 5;
   let author = authors.find((a) => a.discordId == interaction.member.id || a.Name == forceRequestedAnswerer)
   if (!author) {
     if (!debug)
