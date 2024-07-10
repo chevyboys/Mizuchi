@@ -479,7 +479,7 @@ async function processTransfer(interaction, forceRequestedAnswerer) {
   let numberOfQuestions = 5;
   let author = authors.find((a) => a.discordId == interaction.member.id || a.Name == forceRequestedAnswerer)
   if (!author) {
-    if (!debug)
+    if (!(debug && interaction.member.roles.cache.has(snowflakes.roles.BotMaster)))
       return interaction.reply({ content: "I'm sorry, but only Authors can do that", ephemeral: true })
     else //things to do when debugging
     {
@@ -496,7 +496,7 @@ async function processTransfer(interaction, forceRequestedAnswerer) {
     interaction.reply({ content: `There are no questions to answer! Check back later.` });
     return;
   }
-  interaction.reply({ content: `Transfering questions.`, ephemeral: true });
+  interaction.reply({ content: `Transferring questions.`, ephemeral: true });
 
   for (let i = 0; i < numberOfQuestions && i < sorted.size; i++) {
     // Prepare variables for the message
