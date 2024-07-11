@@ -195,7 +195,7 @@ const Module = new Augur.Module()
     category: "Silly",
     process: async (msg) => {
       try {
-        const arm = "https://cdn.discordapp.com/attachments/488887953939103775/545672817354735636/509442648080121857.png";
+        const arm = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Emoji_u1f4aa.svg/1024px-Emoji_u1f4aa.svg.png";
         const target = await u.getMention(msg, false) || msg.author;
         const staticURL = target.displayAvatarURL({ size: 128, dynamic: false, format: "png" });
 
