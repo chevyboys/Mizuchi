@@ -197,9 +197,9 @@ const Module = new Augur.Module()
       try {
         const arm = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Emoji_u1f4aa.svg/128px-Emoji_u1f4aa.svg.png";
         const target = await u.getMention(msg, false) || msg.author;
-        const staticURL = target.displayAvatarURL({ size: 128, dynamic: false, format: "png" });
+        const staticURL = target.displayAvatarURL({ size: 128, dynamic: false, format: "png" }) || target.avatarURL({ size: 128, dynamic: false, format: "png" });
 
-        const right = await Jimp.read(arm);
+        const right = (await Jimp.read(arm)).flip(true, false);
         const mask = await Jimp.read("./storage/mask.png");
         const avatar = await Jimp.read(staticURL);
         const canvas = new Jimp(368, 128, 0x00000000);
