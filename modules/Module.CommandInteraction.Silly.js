@@ -204,8 +204,10 @@ const Module = new Augur.Module()
         const avatar = await Jimp.read(staticURL);
         const canvas = new Jimp(368, 128, 0x00000000);
         //send mask.png as a reply
-        maskReply = new MessageAttachment(await mask.getBufferAsync(Jimp.MIME_PNG), "mask.png");
-        await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [maskReply] });
+        //maskReply = new MessageAttachment(await mask.getBufferAsync(Jimp.MIME_PNG), "mask.png");
+        //await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [maskReply] });
+        //send just the avatar as a reply
+        avatarReply = new MessageAttachment(await avatar.getBufferAsync(Jimp.MIME_PNG), "avatar.png");
 
         if (Math.random() > 0.5) right.flip(false, true);
         const left = right.clone().flip(true, (Math.random() > 0.5));
