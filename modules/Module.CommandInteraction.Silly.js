@@ -208,6 +208,7 @@ const Module = new Augur.Module()
         //await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [maskReply] });
         //send just the avatar as a reply
         avatarReply = new MessageAttachment(await avatar.getBufferAsync(Jimp.MIME_PNG), "avatar.png");
+        await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [avatarReply] });
 
         if (Math.random() > 0.5) right.flip(false, true);
         const left = right.clone().flip(true, (Math.random() > 0.5));
