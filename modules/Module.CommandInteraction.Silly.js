@@ -214,10 +214,10 @@ const Module = new Augur.Module()
         const left = right.clone().flip(true, (Math.random() > 0.5));
 
         avatar.resize(128, 128);
-        avatar.mask(mask, 0, 0);
+        //avatar.mask(mask, 0, 0);
         //send just the avatar as a reply
-        avatarReply = new MessageAttachment(await avatar.getBufferAsync(Jimp.MIME_PNG), "avatar.png");
-        await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [avatarReply] });
+        //avatarReply = new MessageAttachment(await avatar.getBufferAsync(Jimp.MIME_PNG), "avatar.png");
+        //await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [avatarReply] });
 
         canvas.blit(left, 0, 4);
         canvas.blit(right, 248, 4);
