@@ -221,7 +221,6 @@ const Module = new Augur.Module()
 
         canvas.blit(left, 0, 4);
         canvas.blit(right, 248, 4);
-
         canvas.blit(avatar, 124, 0);
 
         await msg.channel.send({ content: `<@${msg.author.id}> created:`, files: [await canvas.getBufferAsync(Jimp.MIME_PNG)] });

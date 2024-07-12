@@ -123,7 +123,7 @@ const Module = new Augur.Module()
       }
       msg.react("👌").catch(u.noop);
     },
-    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id) || msg.member?.roles.cache.has(snowflakes.roles.BotMaster) || msg.member?.roles.cache.has(snowflakes.roles.Admin)
   }).addCommand({
     name: "dbgetall",
     category: "Bot Admin",
