@@ -667,6 +667,10 @@ function answeredQuestionsComponentsBuilder() {
       .setStyle('SECONDARY')
       .setLabel('Edit Answer')
       .setEmoji('🖊'),
+    new MessageButton()
+      .setCustomId('transferquestionbutton')
+      .setStyle('SECONDARY')
+      .setLabel('📚'),
   )
   ]
 }
@@ -914,7 +918,7 @@ const Module = new Augur.Module()
       if (interaction.channel != snowflakes.channels.ask) restoreToQueue(interaction, interaction.message.id, true);
       else interaction.deferUpdate();
     }
-  })
+  }).addInteractionHandler({ customId: `transferquestionbutton`, process: processTransfer })
   .setInit((data) => { if (data) askedRecently = data; getAuthors() })
   .setUnload(() => { return askedRecently });
 
