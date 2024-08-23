@@ -175,7 +175,8 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
-    (msg.member.roles.cache.has(snowflakes.roles.Holiday[0]) ? (Math.floor(Math.random() * odds / 2) > odds / 2 - 2) : (Math.floor(Math.random() * odds) > odds - 2))
+    (flurriedChannels.includes(msg.channel.id) ||
+      (msg.member.roles.cache.has(snowflakes.roles.Holiday[0]) ? (Math.floor(Math.random() * odds / 2) > odds / 2 - 2) : (Math.floor(Math.random() * odds) > odds - 2)))
   ) {
     msg.react(holidays[0].emoji)
   } else if (
