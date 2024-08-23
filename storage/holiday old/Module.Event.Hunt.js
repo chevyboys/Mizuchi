@@ -166,6 +166,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 }).addEvent("messageCreate", async (msg) => {
 
   if (
+    started &&
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
@@ -173,6 +174,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   ) {
     msg.react(holidays[0].emoji)
   } else if (
+    started &&
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
