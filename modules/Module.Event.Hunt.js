@@ -4,7 +4,7 @@ const u = require("../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
 const moment = require("moment");
-let odds = 35;
+let odds = 20;
 let started = true;
 const holidays = [
   {
@@ -16,6 +16,9 @@ const holidays = [
 
   }
 ]
+
+
+let flurriedChannels = [];
 
 // on server shutdown this cache should be written to database and also be cleared at the end of event (with database clear too)
 let cache = [];
@@ -220,6 +223,28 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   if (holidays[0].emoji == "") {
     holidays[0].emoji = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).emojis.cache.find(emoji => emoji.name === "BotIcon")
   }
-});
+}).addCommand({
+  name: "flurry", process: async (msg) => {
+    let channels = [msg.channel.id];
+    //see if a channel is mentioned in the message
+    if (msg.mentions.channels.size > 0) {
+      channels = msg.mentions.channels.map(channel => channel.id);
+    }
+    //if "all" is mentioned, then get all channels in the guild
+    if (msg.content.indexOf("all") > -1) {
+      channels = msg.guild.channels.cache.map(channel => channel.id);
+    }
+    //add channels to the flurriedChannels array
+    flurriedChannels = flurriedChannels.concat(channels);
+    //remove duplicates
+    flurriedChannels = [...new Set(flurriedChannels)];
+    msg.react("👍");
+    //set a timeout to remove the channel from the flurriedChannels array
+    setTimeout(() => {
+      flurriedChannels = flurriedChannels.filter(channel => !channels.includes(channel));
+    }, 1000 * 10 * 60);
+  }
+})
+  ;
 
 module.exports = Module;
