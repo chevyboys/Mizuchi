@@ -67,7 +67,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         // incase this is changed later instead of if statments
         switch (userCount.count) {
           case 5:
-            u.addRoles(member, snowflakes.roles.Holiday);
+            u.addRoles(member, snowflakes.roles.Holiday[0]);
             member.send({
               content: `If you are reading this, you have found the first secret. Do not speak of this thing. Keep it secret. Keep it safe. The hunt continues...`,
               allowedMentions: { parse: ["users"] }
@@ -118,7 +118,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         // incase this is changed later instead of if statments
         switch (userCount.count) {
           case 5:
-            u.addRoles(member, snowflakes.roles.Holiday);
+            u.addRoles(member, snowflakes.roles.Holiday[0]);
             member.send({
               content: `The creature has been spotted. Be wary. The hunt continues...`,
               allowedMentions: { parse: ["users"] }
@@ -169,7 +169,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
-    (msg.member.roles.cache.has(snowflakes.roles.Holiday) ? (Math.floor(Math.random() * odds / 2) > odds / 2 - 2) : (Math.floor(Math.random() * odds) > odds - 2))
+    (msg.member.roles.cache.has(snowflakes.roles.Holiday[0]) ? (Math.floor(Math.random() * odds / 2) > odds / 2 - 2) : (Math.floor(Math.random() * odds) > odds - 2))
   ) {
     msg.react(holidays[0].emoji)
   } else if (
@@ -177,7 +177,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
-    (msg.member.roles.cache.has(snowflakes.roles.Holiday) ? (Math.floor(Math.random() * 1 / 2) > 1 / 2 - 2) : (Math.floor(Math.random() * 1) > 1 - 2))
+    (msg.member.roles.cache.has(snowflakes.roles.Holiday[0]) ? (Math.floor(Math.random() * 1 / 2) > 1 / 2 - 2) : (Math.floor(Math.random() * 1) > 1 - 2))
   ) {
     msg.react(holidays[0].emoji2);
   }
@@ -185,7 +185,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     if ((config.AdminIds.includes(msg.author.id) || msg.member?.roles.cache.has(snowflakes.roles.BotMaster)) && msg.content.indexOf("🔮") > -1 && !started) {
       started = true;
       msg.delete();
-      let holidayRole = await msg.guild.roles.fetch(snowflakes.roles.Holiday)
+      let holidayRole = await msg.guild.roles.fetch(snowflakes.roles.Holiday[0])
       holidayRole.setName("Found")
       holidayRole.setColor(holidays[0].color)
       msg.channel.send({
@@ -204,8 +204,8 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       const modifierToConvertToBotTime = 7;
       odds = odds > 5 ? odds - 5 : odds;
       if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
-        guild.roles.cache.get(snowflakes.roles.Holiday).members.each((m) =>
-          u.addRoles(m, snowflakes.roles.Holiday, true)
+        guild.roles.cache.get(snowflakes.roles.Holiday[0]).members.each((m) =>
+          u.addRoles(m, snowflakes.roles.Holiday[0], true)
         )
       }
 
