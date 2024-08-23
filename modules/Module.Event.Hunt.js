@@ -182,7 +182,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.react(holidays[0].emoji2);
   }
   else {
-    if ((config.AdminIds.includes(msg.author.id) || msg.member.roles.cache.has(snowflakes.roles.BotMaster)) && msg.content.indexOf("🔮") > -1 && !started) {
+    if ((config.AdminIds.includes(msg.author.id) || msg.member?.roles.cache.has(snowflakes.roles.BotMaster)) && msg.content.indexOf("🔮") > -1 && !started) {
       started = true;
       msg.delete();
       let holidayRole = await msg.guild.roles.fetch(snowflakes.roles.Holiday)
