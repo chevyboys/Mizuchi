@@ -4,7 +4,7 @@ const u = require("../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
 const moment = require("moment");
-let odds = 500;
+let odds = 250;
 let started = false;
 const holidays = [
   {
@@ -48,8 +48,6 @@ class Participant {
     return this.#_user;
   }
 }
-
-
 
 
 
