@@ -4,8 +4,8 @@ const u = require("../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
 const moment = require("moment");
-let odds = 250;
-let started = false;
+let odds = 40;
+let started = true;
 const holidays = [
   {
     name: 'Generic Event',
