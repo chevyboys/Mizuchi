@@ -63,6 +63,10 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       if (index != -1) {
         const userCount = cache[index];
         userCount.updateCount();
+        channel.send({
+          content: `<@${user.id}> ${userCount.count}:${userCount.count2}`,
+          allowedMentions: { parse: ["users"] }
+        });
         // incase this is changed later instead of if statments
         switch (userCount.count) {
           case 5:
