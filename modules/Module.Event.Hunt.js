@@ -10,7 +10,7 @@ const holidays = [
   {
     name: 'Generic Event',
     description: "If you are reading this, you have found the first secret. Do not speak of this thing. Keep it secret. Keep it safe. The hunt continues...",
-    emoji: "",
+    emoji: "<:BotIcon:1017160458186281080>",
     color: "#000e29",
     emoji2: "🦅"
 
