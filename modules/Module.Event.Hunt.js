@@ -10,7 +10,7 @@ const holidays = [
   {
     name: 'Generic Event',
     description: "If you are reading this, you have found the first secret. Do not speak of this thing. Keep it secret. Keep it safe. The hunt continues...",
-    emoji: Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).emojis.cache.find(emoji => emoji.name === "BotIcon"),
+    emoji: "",
     color: "#000e29",
     emoji2: "🦅"
 
@@ -164,7 +164,6 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     } catch (error) { u.errorHandler(error, "Secret reaction error"); }
   }
 }).addEvent("messageCreate", async (msg) => {
-
   if (
     started &&
     msg.author &&
@@ -214,6 +213,10 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 
       , 60 * 60 * 1000);
   } catch (e) { u.errorHandler(e, "Secret Clockwork Error"); }
-})
+}).addEvent("ready", () => {
+  if (holidays[0].emoji == "") {
+    holidays[0].emoji = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).emojis.cache.find(emoji => emoji.name === "BotIcon")
+  }
+});
 
 module.exports = Module;
