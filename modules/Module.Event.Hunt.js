@@ -4,7 +4,7 @@ const u = require("../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
 const moment = require("moment");
-let odds = 30;
+let odds = 500;
 let started = false;
 const holidays = [
   {
@@ -177,7 +177,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
-    (msg.member.roles.cache.has(snowflakes.roles.Holiday[0]) ? (Math.floor(Math.random() * 1 / 2) > 1 / 2 - 2) : (Math.floor(Math.random() * 1) > 1 - 2))
+    (msg.member.roles.cache.has(snowflakes.roles.Holiday[0]) ? (Math.floor(Math.random() * odds * 2 / 2) > odds * 2 / 2 - 2) : (Math.floor(Math.random() * odds * 2) > odds * 2 - 2))
   ) {
     msg.react(holidays[0].emoji2);
   }
@@ -202,7 +202,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
       const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
       const modifierToConvertToBotTime = 7;
-      odds = odds > 5 ? odds - 5 : odds;
+      odds = odds < 1000 ? odds + 50 : odds;
       if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
         guild.roles.cache.get(snowflakes.roles.Holiday[0]).members.each((m) =>
           u.addRoles(m, snowflakes.roles.Holiday[0], true)
