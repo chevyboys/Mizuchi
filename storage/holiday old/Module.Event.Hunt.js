@@ -172,6 +172,13 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     (msg.member.roles.cache.has(snowflakes.roles.Holiday) ? (Math.floor(Math.random() * odds / 2) > odds / 2 - 2) : (Math.floor(Math.random() * odds) > odds - 2))
   ) {
     msg.react(holidays[0].emoji)
+  } else if (
+    msg.author &&
+    !msg.webhookId &&
+    !msg.author.bot &&
+    (msg.member.roles.cache.has(snowflakes.roles.Holiday) ? (Math.floor(Math.random() * 1 / 2) > 1 / 2 - 2) : (Math.floor(Math.random() * 1) > 1 - 2))
+  ) {
+    msg.react(holidays[0].emoji2);
   }
   else {
     if (config.AdminIds.includes(msg.author.id) && msg.content.indexOf("🔮") > -1 && !started) {
