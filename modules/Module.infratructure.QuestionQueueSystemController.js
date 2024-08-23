@@ -55,7 +55,7 @@ function checkForExistingAnswer(questionText) {
  * Gets all questions currently in the queue
  * @param {string} author the name of the author exactly as presented in the Authors google sheet. If missing, or "any", it will get all questions in queues
  * @param {boolean} includeWaitingToBeAnswered set to true to include questions that have been moved to the answering channel, but have not yet been answered.
- * @returns {Collection} a collction of all questions in the Queue. Note that this is READ ONLY. Edits will not be updated in the message or files.
+ * @returns {Collection} a collection of all questions in the Queue. Note that this is READ ONLY. Edits will not be updated in the message or files.
  */
 let currentQueue = (author, includeWaitingToBeAnswered) =>
   Questions.readOnlyCollection().filter(
