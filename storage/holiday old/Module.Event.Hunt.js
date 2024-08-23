@@ -136,7 +136,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
               allowedMentions: { parse: ["users"] }
             });
             break;
-          case 50:
+          case 100:
             console.log({
               content: `Lfqhl grajcfh tifr tc rdbbq tay pxzqbpv. Qqpyqugfe fwla bsl fqgl kvjd emxu mbs fm dtdoeb. Lfq davrp hydiz cs rzc oabsf  aslzda pr dgszs osec.`,
               allowedMentions: { parse: ["users"] }
