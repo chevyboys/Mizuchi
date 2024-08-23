@@ -55,8 +55,8 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   let message = reaction.message;
   //reaction.message.guild.channels.cache.get(snowflakes.channels.secret).send(JSON.stringify(reaction.emoji));
   let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
-  if ((reaction.emoji.name == "BotIcon" > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
-
+  if ((reaction.emoji.name == "BotIcon") && !user.bot && reaction.users.cache.has(message.client.user.id)) {
+    reaction.message.guild.channels.cache.get(snowflakes.channels.secret).send(JSON.stringify(reaction.emoji));
     const member = message.guild.members.cache.get(user.id);
     try {
       const index = cache.findIndex(element => user == element.user);
