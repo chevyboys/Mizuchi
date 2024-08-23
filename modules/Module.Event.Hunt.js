@@ -115,7 +115,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         const member = message.guild.members.cache.get(user.id);
         userCount.updateCount2();
         // incase this is changed later instead of if statments
-        switch (userCount.count) {
+        switch (userCount.count2) {
           case 5:
             u.addRoles(member, snowflakes.roles.Holiday[0]);
             member.send({
