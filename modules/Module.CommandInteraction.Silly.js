@@ -2,7 +2,9 @@
 const Augur = require("augurbot"),
   u = require('../utils/Utils.Generic'),
   Jimp = require("jimp");
-const { MessageAttachment } = require("discord.js");
+const { MessageAttachment, Collection } = require("discord.js");
+const { MessageActionRow, MessageButton } = require("discord.js");
+const snowflakes = require('../config/snowflakes.json');
 
 const supportedFormats = ["png", "jpg", "jpeg", "bmp", "tiff", "gif"];
 
@@ -591,6 +593,129 @@ const Module = new Augur.Module()
     process: async (msg, suffix) => {
       await composite(msg, suffix, Jimp.BLEND_EXCLUSION)
     }
+  }).addCommand({
+    name: "button",
+    description: "For when you need a big red button",
+    category: "Silly",
+    hidden: true,
+    process: async (msg) => {
+      msg.reply({
+        content: "Don't press the button",
+        components: [new MessageActionRow().addComponents(
+          new MessageButton()
+            .setCustomId('dontpushthebutton')
+            .setLabel('🔴')
+            .setStyle('DANGER')
+        )]
+      })
+    }
+  }).addInteractionHandler({
+    customId: `dontpushthebutton`, process: (interaction) => {
+      //This was added to celebrate 150 years of people pushing buttons
+      //Check to see if the user has already pressed the button. If so, add to the counter of how many times they've pressed it
+      let numberOfTimesPressed = 0;
+      if (peopleWhoHavePressedTheButton.has(interaction.user.id)) {
+        peopleWhoHavePressedTheButton.set(interaction.user.id, peopleWhoHavePressedTheButton.get(interaction.user.id) + 1);
+        numberOfTimesPressed = peopleWhoHavePressedTheButton.get(interaction.user.id);
+        let responses = [
+          "You pressed the button!",
+          "You weren't supposed to press the button!",
+          "You pressed the button, didn't you?",
+          "How dare",
+          "How could you?",
+          "You monster",
+          "Nooooo",
+          "Don't press that again",
+          "Huh. You pushed it.",
+          "You definitely shouldn't have done that",
+          "You pressed the button, now what?",
+          "You pressed the button!",
+          "You weren't supposed to press the button!",
+          "You pressed the button, didn't you?",
+          "How dare",
+          "How could you?",
+          "You monster",
+          "Nooooo",
+          "Don't press that again",
+          "Huh. You pushed it.",
+          "You definitely shouldn't have done that",
+          "You pressed the button, now what?",
+          "You pressed the button!",
+          "You weren't supposed to press the button!",
+          "You pressed the button, didn't you?",
+          "How dare",
+          "How could you?",
+          "You monster",
+          "Nooooo",
+          "Don't press that again",
+          "Huh. You pushed it.",
+          "You definitely shouldn't have done that",
+          "You pressed the button, now what?",
+          "No! Not the button!",
+          "Don't do it.... again.",
+          "Don't push it" + (numberOfTimesPressed + 1) + "* times!",
+          "You've pressed it *" + numberOfTimesPressed + "* times!",
+          "You have not enough minerals",
+          "Are you sure you want to do that?",
+          "No. Denied.",
+          "Wasing not of wasing is",
+          "Stahp. That tickles",
+          "I wonder what happens if you press the button 100 times. Will reality cease to exist?",
+          "No. Bad. I'm getting the spray bottle",
+          "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHN5MjBlN2xnY2kzemNxZGZtaWJoaGszcmJpOXJxN2I3bTcxeWlrciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UBMjCB1nwnGnI7vitO/giphy.gif",
+          "No. Bad. I'm getting the spray bottle",
+          "Fine. You win. The secret is at <https://wydds.cc/important.mp4>",
+          "You must get along with Chaos elementals.",
+          "Why must you do this to me.",
+          "You know, there's more to life than pressing buttons.",
+          "You're getting a little too button happy",
+          "You're such a rebel",
+          "How could you do this to me?",
+          "How Dare.",
+          "You know, The first known use of push-button was circa 1874. It's been **150** years. You'd think we'd have learned by now.",
+          "The name came from the French word *bouton* (something that sticks out), rather than from the kind of buttons used on clothing. The initial public reaction was curiosity mixed with fear, some of which was due to widespread fear of electricity, which was a relatively new technology at the time.",
+          "Why do you all keep pressing the button? Does it make you feel powerful?",
+          "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWt2a2thdnN1YjBqYWZqeGU5ZzlnNTZtOGt3enU4cXlmMmJiN2x5OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l2JdSlA1a1zKVAyze/giphy.gif"
+        ];
+
+      } else {
+        //If they haven't pressed the button, add them to the array and set the counter to 1
+        peopleWhoHavePressedTheButton.set(interaction.user.id, 1);
+        numberOfTimesPressed = 1;
+
+        let responses = [
+          "You pressed the button!",
+          "You weren't supposed to press the button!",
+          "You pressed the button, didn't you?",
+          "How dare",
+          "How could you?",
+          "You monster",
+          "Nooooo",
+          "Don't press that again",
+          "Huh. You pushed it.",
+          "You definitely shouldn't have done that",
+          "You pressed the button, now what?",
+          "You pressed the button!",
+          "You weren't supposed to press the button!",
+          "You pressed the button, didn't you?",
+          "How dare",
+          "How could you?",
+          "You monster",
+          "Nooooo",
+        ];
+      }
+
+      let response = responses[Math.floor(Math.random() * responses.length)];
+      interaction.guild.channels.cache.get(snowflakes.channels.secret).send(`<@${interaction.user.id}> pressed the button ${numberOfTimesPressed} times \n\nresponse:\n\`\`\`${response}\`\`\``);
+      interaction.reply({
+        content: response,
+        ephemeral: true
+      })
+    }
   });
+
+
+let peopleWhoHavePressedTheButton = new Collection();
+
 
 module.exports = Module;
