@@ -613,11 +613,12 @@ const Module = new Augur.Module()
     customId: `dontpushthebutton`, process: (interaction) => {
       //This was added to celebrate 150 years of people pushing buttons
       //Check to see if the user has already pressed the button. If so, add to the counter of how many times they've pressed it
+      let responses = [];
       let numberOfTimesPressed = 0;
       if (peopleWhoHavePressedTheButton.has(interaction.user.id)) {
         peopleWhoHavePressedTheButton.set(interaction.user.id, peopleWhoHavePressedTheButton.get(interaction.user.id) + 1);
         numberOfTimesPressed = peopleWhoHavePressedTheButton.get(interaction.user.id);
-        let responses = [
+        responses = [
           "You pressed the button!",
           "You weren't supposed to press the button!",
           "You pressed the button, didn't you?",
@@ -683,7 +684,7 @@ const Module = new Augur.Module()
         peopleWhoHavePressedTheButton.set(interaction.user.id, 1);
         numberOfTimesPressed = 1;
 
-        let responses = [
+        responses = [
           "You pressed the button!",
           "You weren't supposed to press the button!",
           "You pressed the button, didn't you?",
