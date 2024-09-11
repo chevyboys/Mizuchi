@@ -22,7 +22,7 @@ let commandStats = {};
 
 //each time an interaction command is used, log the user, command name, time, and command options
 async function logInteraction(interaction) {
-  if (interactionisButton()) return;
+  if (interaction.isButton()) return;
   //temporary don't log buttons
   //if the interaction is a component interaction, log it as a component interaction
   if (interaction.isButton() || interaction.isSelectMenu()) {
