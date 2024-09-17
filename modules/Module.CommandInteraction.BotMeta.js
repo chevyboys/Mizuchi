@@ -154,7 +154,9 @@ Module
         categories.unshift("General");
 
         let guild = msg.guild || msg.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-        let hasAdmin = guild.members.cache.get(msg.author.id).roles.cache.has(snowflakes.roles.BotMaster) || guild.members.cache.get(msg.author.id).roles.cache.has(snowflakes.roles.BotAssistant) || Module.config.AdminIds.includes(msg.author.id) || Module.config.ownerId == msg.author.id;
+        let member = await guild.members.fetch(msg.author.id);
+        let roles = await member.roles.fetch();
+        let hasAdmin = roles.has(snowflakes.roles.BotMaster) || roles.has(snowflakes.roles.BotAssistant) || Module.config.AdminIds.includes(msg.author.id) || Module.config.ownerId == msg.author.id;
 
         for (let category of categories) {
           let fields = [];
