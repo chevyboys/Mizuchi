@@ -19,14 +19,14 @@ const Module = new Augur.Module()
         process.exit();
       } catch (e) { u.errorHandler(e, msg); }
     },
-    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id) || msg.member.roles.cache.has(snowflakes.roles.BotMaster) || msg.member.roles.cache.has(snowflakes.roles.BotAssistant)
   })
   .addCommand({
     name: "ping",
     category: "Bot Admin",
     description: "Gets the current total ping time for the bot.",
     hidden: true,
-    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member?.roles.cache.some(r => [snowflakes.roles.Moderator, snowflakes.roles.Admin, snowflakes.roles.CommunityGuide].includes(r.id)),
+    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member?.roles.cache.some(r => [snowflakes.roles.Moderator, snowflakes.roles.Admin, snowflakes.roles.CommunityGuide, snowflakes.roles.BotAssistant, snowflakes.roles.BotMaster].includes(r.id)),
     process: async (msg) => {
       let sent = await msg.reply({ content: 'Pinging...', allowedMentions: { repliedUser: false } });
       sent.edit({ content: `Pong! Took ${sent.createdTimestamp - (msg.editedTimestamp ? msg.editedTimestamp : msg.createdTimestamp)}ms`, allowedMentions: { repliedUser: false } });
@@ -37,7 +37,7 @@ const Module = new Augur.Module()
     category: "Bot Admin",
     description: "Shows all custom emoji in the server where it is used",
     hidden: true,
-    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member.roles.cache.has(snowflakes.roles.BotMaster) || msg.member.roles.cache.has(snowflakes.roles.BotAssistant),
     process: async (msg) => {
       let emoji = msg.guild.emojis.cache.map(e => e.toString() + "`" + e.toString() + "`");
       let arrayOfMessagesToSend = [];
@@ -59,7 +59,7 @@ const Module = new Augur.Module()
     category: "Bot Admin",
     description: "gets the id for a role based on name",
     hidden: true,
-    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+    permissions: (msg) => (msg.author.id === Module.config.ownerId) || msg.member.roles.cache.has(snowflakes.roles.BotMaster) || msg.member.roles.cache.has(snowflakes.roles.BotAssistant),
     process: async (msg, suffix) => {
       let roles = msg.guild.roles.cache.map((r) => { return { name: r.name.trim().toLowerCase().replaceAll(" ", ""), id: r.id } }).filter(r => suffix.trim().toLowerCase().replaceAll(" ", "").indexOf(r.name) > -1 || r.name.indexOf(suffix.trim().toLowerCase().replaceAll(" ", "")) > -1).map(r => `${r.name} : ${r.id}`);
       msg.reply(roles.length > 0 ? roles.join("\n") : "I can't find that role");
@@ -123,7 +123,7 @@ const Module = new Augur.Module()
       }
       msg.react("👌").catch(u.noop);
     },
-    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id) || msg.member?.roles.cache.has(snowflakes.roles.BotMaster) || msg.member?.roles.cache.has(snowflakes.roles.Admin)
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id) || msg.member?.roles.cache.has(snowflakes.roles.BotMaster) || msg.member.roles.cache.has(snowflakes.roles.BotAssistant) || msg.member?.roles.cache.has(snowflakes.roles.Admin)
   }).addCommand({
     name: "dbgetall",
     category: "Bot Admin",
@@ -137,7 +137,7 @@ const Module = new Augur.Module()
       u.clean(msg, 10000);
 
     },
-    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id) || msg.member.roles.cache.has(snowflakes.roles.BotAssistant)
   })
 
   .addEvent("ready", () => {

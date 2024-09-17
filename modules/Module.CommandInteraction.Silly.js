@@ -709,7 +709,7 @@ const Module = new Augur.Module()
       if (numberOfTimesPressed == 150) {
         responses = ["You've pressed the button 150 times. You win. Happy 150th anniversary of the push button."];
         //get the top 30 people who have pressed the button
-        let top30 = peopleWhoHavePressedTheButton.sort((a, b) => b - a).slice(0, 30);
+        let top30 = peopleWhoHavePressedTheButton.sort((a, b) => b - a).map().slice(0, 30);
         interaction.guild.channels.cache.get(snowflakes.channels.botSpam).send(`<@${interaction.user.id}> won the game. Current leaderboard: \n\n${top30.map((value, key) => `<@${key}>: ${value}`).join("\n")}`);
       }
       let response = responses[Math.floor(Math.random() * responses.length)];

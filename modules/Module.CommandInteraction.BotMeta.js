@@ -4,6 +4,7 @@ const Augur = require("augurbot");
 const u = require("../utils/Utils.Generic");
 const axios = require("axios").default;
 const snowflakes = require('../config/snowflakes.json');
+const config = require("../config/config.json");
 let previousDiscordIncident;
 
 /*function isURL(str) {
@@ -135,7 +136,7 @@ Module
           .setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : "."))
           .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
         let categories;
-        if (Module.config.AdminIds.includes(msg.author.id)) {
+        if (config.AdminIds.includes(msg.author.id)) {
           categories = commands
             .filter(c => c.category != "General")
             .map(c => c.category)
@@ -152,38 +153,42 @@ Module
 
         categories.unshift("General");
 
-        let i = 1;
+        let guild = msg.guild || msg.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+        let hasAdmin = guild.members.cache.get(msg.author.id).roles.cache.has(snowflakes.roles.BotMaster) || guild.members.cache.get(msg.author.id).roles.cache.has(snowflakes.roles.BotAssistant) || Module.config.AdminIds.includes(msg.author.id) || Module.config.ownerId == msg.author.id;
+
         for (let category of categories) {
-          if ((category == "Bot Admin" && msg.client.config.AdminIds.includes(msg.author.id)) || category != "Bot Admin" && category != "General" && category != "Server Admin" || (category == "Server Admin" && msg.channel.permissionsFor(msg.member).has(["MANAGE_MESSAGES", "MANAGE_CHANNELS"]))) {
-            embed.addField(`${category}`, `᲼`);
-          }
-          // eslint-disable-next-line no-unused-vars
-          for (let [name, command] of commands.filter(c => c.category == category && (!c.hidden || msg.client.config.AdminIds.includes(msg.author.id))).sort((a, b) => a.name.localeCompare(b.name))) {
-            embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
-            if (i == 20) {
+          let fields = [];
+          let i = 0;
+          for (let [name, command] of commands.filter(c => c.category == category && (!c.hidden || msg.client.config.AdminIds.includes(msg.author.id) || hasAdmin)).sort((a, b) => a.name.localeCompare(b.name))) {
+            fields.push({ name: prefix + command.name + " " + command.syntax, value: (command.description ? command.description : "Description") });
+            i++;
+            if (i >= 20) {
+              let embed = u.embed()
+                .setColor(msg.guild.members.cache.get(msg.client.user.id).displayHexColor)
+                .setThumbnail(msg.client.user.displayAvatarURL({ size: 128 }))
+                .setTitle(category + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : "."))
+                .setFields(fields);
               try {
-                await msg.author.send({ embeds: [embed] });
+                await msg.author.send({ content: category, embeds: [embed] });
               } catch (e) {
-                u.errorHandler(e);
                 msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
                 return;
               }
-              embed = u.embed().setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : ".") + " (Cont.)")
-                .setColor(msg.guild ? msg.guild.members.cache.get(msg.client.user.id).displayHexColor : "000000")
-                .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
+              fields = [];
               i = 0;
             }
-            i++;
           }
-          if ((category == "Bot Admin" && msg.client.config.AdminIds.includes(msg.author.id)) || category != "Bot Admin" && category != "General") {
-            embed.addField(`᲼`, `᲼`);
+          let embed = u.embed()
+            .setColor(msg.guild.members.cache.get(msg.client.user.id).displayHexColor)
+            .setThumbnail(msg.client.user.displayAvatarURL({ size: 128 }))
+            .setTitle(category + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : "."))
+            .setFields(fields);
+          try {
+            await msg.author.send({ content: category, embeds: [embed] });
+          } catch (e) {
+            msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
+            return;
           }
-        }
-        try {
-          await msg.author.send({ embeds: [embed] });
-        } catch (e) {
-          msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
-          return;
         }
       } else { // SINGLE COMMAND HELP
         let command = null;
@@ -257,7 +262,7 @@ Module
       msg.client.user.setAvatar(('./avatar/' + (suffix ? suffix.trim() : "base.png")))
       msg.react("👌");
     },
-    permissions: (msg) => (Module.config.AdminIds.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin) || msg.member.roles.cache.has(snowflakes.roles.BotMaster))
+    permissions: (msg) => (Module.config.AdminIds.includes(msg.author.id) || Module.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.Admin) || msg.member.roles.cache.has(snowflakes.roles.BotMaster) || msg.member.roles.cache.has(snowflakes.roles.BotAssistant))
   }).addInteractionCommand({
     name: "status",
     guildId: snowflakes.guilds.PrimaryServer,
@@ -289,15 +294,16 @@ Module
       if (msg.deletable && (msg.client.config.AdminIds.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id)) msg.delete();
       let files = msg.attachments ? Array.from(msg.attachments.values()).map(v => v.attachment) : null
       msg.channel.send({ content: suffix, embeds: msg.embeds, files: files, reply: { messageReference: msg.reference?.messageId || null } });
+      u.errorLog(msg.author.username + " in channel " + msg.channel?.name + " said: " + suffix);
     },
-    permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+    permissions: (msg) => msg.member?.roles.cache.has(snowflakes.roles.BotMaster) || msg.member?.roles.cache.has(snowflakes.roles.BotAssistant) || msg.client.config.AdminIds.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id
   })
   .addCommand({
     name: "pulse",
     category: "Bot Admin",
     hidden: true,
     description: "Check the bot's heartbeat",
-    permissions: (msg) => (Module.config.ownerId === (msg.author.id)) || msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+    permissions: (msg) => (Module.config.ownerId === (msg.author.id)) || msg.member.roles.cache.has(snowflakes.roles.BotMaster) || msg.member.roles.cache.has(snowflakes.roles.BotAssistant),
     process: async function (msg, suffix) {
       if (suffix.indexOf('clockwork') > -1) {
         await alertDiscordStatus(true);
