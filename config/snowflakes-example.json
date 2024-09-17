@@ -35,6 +35,7 @@
   },
   "roles": {
     "BotMaster": "",
+    "BotAssistant": "",
     "Admin": "",
     "Helper": "",
     "Holiday": "",
