@@ -155,7 +155,7 @@ Module
 
         let guild = msg.guild || msg.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
         let member = await guild.members.fetch(msg.author.id);
-        let roles = await member.roles.fetch();
+        let roles = await member.roles.cache;
         let hasAdmin = roles.has(snowflakes.roles.BotMaster) || roles.has(snowflakes.roles.BotAssistant) || Module.config.AdminIds.includes(msg.author.id) || Module.config.ownerId == msg.author.id;
 
         for (let category of categories) {
