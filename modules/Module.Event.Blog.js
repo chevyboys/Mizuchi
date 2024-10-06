@@ -41,9 +41,8 @@ async function blogHandler(force) {
     content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.BlogUpdates}>`,
     "allowed_mentions": {
       "parse": ["everyone, roles"],
-      embeds: [embed]
-
-    }
+    },
+    embeds: [embed]
   });
 }
 
