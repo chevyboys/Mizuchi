@@ -3,6 +3,7 @@
  * A user's inventory
  */
 
+//TODO: for @chevyboys, integrate this file with the controller
 const { Role, Interaction } = require("discord.js");
 
 class Inventory extends Array {
