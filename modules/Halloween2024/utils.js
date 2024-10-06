@@ -1,6 +1,8 @@
 const Augur = require("augurbot");
 const snowflakes = require('../../../config/snowflakes.json');
 const colors = [
+  //TODO: change the colors, instead of a reward threshold
+  //    we should have a role icon
   {
     name: "Raspberry",
     color: "#961547",
