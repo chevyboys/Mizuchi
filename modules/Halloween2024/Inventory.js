@@ -3,7 +3,7 @@
  * A user's inventory
  */
 
-const { Role } = require("discord.js");
+const { Role, Interaction } = require("discord.js");
 
 class Inventory extends Array {
   #_userID;
@@ -33,6 +33,48 @@ class Inventory extends Array {
   addRole(role) {
     //Implement this method @SapphireSapphic
   }
+
+
+  /**
+   * replies to the user with their inventory, and a dropdown menu to select a role to equip
+   * @param {Interaction} interaction 
+   */
+  displayInventory(interaction) {
+    //Implement this method @SapphireSapphic
+  }
+
+  /**
+   * Equips a role from the user's inventory, and removes all other roles from the user that are part of the inventory system
+   * As calculated from the available roles
+   * @param {string} role The role to equip
+   * @returns {boolean} True if the role was equipped, false if the role was not in the inventory
+   */
+  equipRole(role) {
+    //Implement this method @SapphireSapphic
+  }
+
+  /**
+   * Removes a role from the user's inventory
+   * @param {string} role The role to remove
+   * @returns {boolean} True if the role was removed, false if the role was not in the inventory
+   */
+  unequipRole(role) {
+    //Implement this method @SapphireSapphic
+  }
+
+
+  /**
+   * Handles the selection of a role from a dropdown menu
+   * @param {Interaction} interaction 
+   */
+  handleRoleInventorySelectionDropdown(interaction) {
+    //Implement this method @SapphireSapphic
+  }
+
+  /**
+   * Converts the inventory to a JSON string
+   * @returns {string} The JSON string
+   */
 
   toJSON() {
     return this.map(r => r.toString());
