@@ -4,7 +4,7 @@ const fs = require('fs');
 const u = require('../../../utils/Utils.Generic');
 const event = require("./utils");
 const NPCSend = require("./NPC");
-const Inventory = require('./Inventory');
+const Inventory = require('./Inventory.Class');
 
 /**
  * Represents a participant in the Holiday module.

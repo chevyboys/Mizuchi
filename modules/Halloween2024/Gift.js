@@ -10,7 +10,7 @@ let gift = {
    * @param {Interaction} interaction 
    * @param {ParticipantManager} participants 
    */
-  Command: async (interaction, participants) => {
+  giftCommand: async (interaction, participants) => {
     //TODO: Implement this function @jhat0353
   },
   /**

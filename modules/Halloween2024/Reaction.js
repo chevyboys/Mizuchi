@@ -1,5 +1,12 @@
-module.exports = {
-  removeReaction(reaction) {
-    //TODO: Implement this function
+
+let reaction = {
+  /**
+   * 
+   * @param {Reaction} reaction 
+   */
+  remove(reaction) {
   }
 }
+
+
+module.exports = reaction;
