@@ -137,7 +137,7 @@ let event = {
           color: color.color,
           icon: color.role_icon,
           reason: "Holiday Event",
-          position: guild.roles.cache.get(snowflakes.roles.Holiday[0]).position - 1
+          position: guild.roles.cache.get(snowflakes.roles.Holiday[0]).position + 1
         });
         console.log("Created " + role.name + " role");
       } else {
