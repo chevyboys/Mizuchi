@@ -1,7 +1,7 @@
 const { Guild, Role, Message, MessageReaction, User, GuildMember, Collection } = require('discord.js');
-const snowflakes = require('../../../config/snowflakes.json')
+const snowflakes = require('../../config/snowflakes.json')
 const fs = require('fs');
-const u = require('../../../utils/Utils.Generic');
+const u = require('../../utils/Utils.Generic');
 const event = require("./utils");
 const NPCSend = require("./NPC");
 const Inventory = require('./Inventory.Class');

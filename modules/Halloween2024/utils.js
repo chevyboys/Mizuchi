@@ -1,6 +1,6 @@
 const Augur = require("augurbot");
-const snowflakes = require('../../../config/snowflakes.json');
-const NPCSend = require("../Halloween2024/NPC");
+const snowflakes = require('../../config/snowflakes.json');
+const NPCSend = require("./NPC.js");
 const { clean } = require("../../utils/Utils.Generic");
 const colors = [
   //TODO: change the colors, instead of a reward threshold

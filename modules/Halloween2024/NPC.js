@@ -1,5 +1,5 @@
 //Initalization, imports, etc
-const webhookSend = require('../../../utils/Webhook.js');
+const webhookSend = require('../../utils/Webhook.js');
 const event = require('./utils.js');
 
 

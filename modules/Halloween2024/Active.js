@@ -1,3 +1,4 @@
+const fs = require('fs');
 //active should be set based on a file in the same directory as pristine waters called active.json. if it doesn't exist, it should be created with the value of false
 //if active.json exists
 let active;
