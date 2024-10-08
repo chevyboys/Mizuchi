@@ -149,6 +149,24 @@ Module.addEvent("reactionAdd", async (reaction, user) => {
 }).setInit(() => {
   Flurry.init();
   Participants = new ParticipantManager();
+}).addCommand({
+  name: "start",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg) => {
+    begin(msg.guild);
+  }
+}).addCommand({
+  name: "end",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg) => {
+    end(msg.guild);
+  }
+}).addCommand({
+  name: "reset",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg) => {
+    dailyReset();
+  }
 });
 
 //TODO: Add the ability to start the event
