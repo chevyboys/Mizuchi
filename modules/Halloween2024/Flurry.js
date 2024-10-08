@@ -30,6 +30,15 @@ let Flurry = {
     end: (channel) => {
       return true;
     }
+  },
+  /**
+   * 
+   * @param {Message} msg 
+   * @returns {boolean} returns true if the message should have a reaction given because of a flurry. This function does not actually add the reaction, nor does it need to check if the message is spam.
+   */
+
+  reactBecauseOfFlurry: async (msg) => {
+    return false;
   }
 };
 

@@ -22,6 +22,7 @@ const Leaderboard = require('./Leaderboard.js');
 const Spam = require('./Spam.js');
 const Gift = require('./Gift.js');
 const Admin = require('./Admin.js');
+const Flurry = require('./Flurry.js');
 
 
 
