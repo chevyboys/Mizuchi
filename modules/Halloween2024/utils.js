@@ -6,75 +6,60 @@ const colors = [
   {
     name: "Raspberry",
     color: "#961547",
-    award_threshold: 50
+    role_icon: "🍇"
   },
 
   {
     name: "Orange",
     color: "#e07f35",
-    award_threshold: 100
+    role_icon: "🍇"
   },
 
   {
     name: "Gold",
     color: "#fffe7b",
-    award_threshold: 150
+    role_icon: "🍇"
   },
 
   {
     name: "Green",
     color: "#a7ff76",
-    award_threshold: 200
+    role_icon: "🍇"
   },
   {
     name: "Eucalyptus Green",
     color: "#28eaa2",
-    award_threshold: 250
+    role_icon: "🍇"
   },
   {
     name: "Mint",
     color: "#b9ffea",
-    award_threshold: 300
+    role_icon: "🍇"
   },
   {
     name: "frost",
     color: "#b9ebff",
-    award_threshold: 350
+    role_icon: "🍇"
   },
   {
     name: "Deep Purple",
     color: "#310c38",
-    award_threshold: 400
+    role_icon: "🍇"
   },
   {
     name: "Tavare Winter Blue",
     color: "#66a3d8",
-    award_threshold: 450
+    role_icon: "🍇"
   },
   {
     name: "Goddess Blue",
     color: "#9CA9FF",
-    award_threshold: 500
+    role_icon: "🍇"
   },
   {
     name: "Bingus Blurple",
     color: "#c4ccff",
-    award_threshold: 550
-  },
-  {
-    name: "Bot Master Amythest",
-    color: "#e0c2ff",
-    award_threshold: 1000
-  },
-  {
-    name: "Infinite Blue",
-    color: "#B5CDFF",
-    award_threshold: 750
-  },
-  {
-    name: "Licorice",
-    color: "#141414",
-    award_threshold: 2000
+    role_icon: "🍇"
   }
 ]
 
@@ -140,12 +125,13 @@ let event = {
     let promises = [];
     console.log("Generating roles");
     for (const color of colors) {
-      let role = guild.roles.cache.find(r => r.name.toLowerCase() == `mask of the ${color.name.toLowerCase()}`);
+      let role = guild.roles.cache.find(r => r.name.toLowerCase() == `Mask of the ${color.name.toLowerCase()}`);
 
       if (!role) {
         role = await guild.roles.create({
           name: `Mask of the ${color.name}`,
           color: color.color,
+          icon: color.role_icon,
           reason: "Holiday Event",
           position: guild.roles.cache.get(snowflakes.roles.Holiday[0]).position - 1
         });

@@ -41,6 +41,7 @@ class Participant {
   #_lastAbilityUse;
   #_inventory;
   #_manager;
+  #_canSendGift;
 
   /**
    * Creates a new participant.
@@ -53,6 +54,7 @@ class Participant {
    * @param {Date} resolvable.lastAbilityUse - The last time the participant used an ability.
    * @param {Inventory} resolvable.inventory - The inventory of the participant as an array of roles.
    * @param {ParticipantManager} manager - The participant manager.
+   * @param {boolean} canSendGift - Whether the participant can send a gift.
    * @returns {Participant} The new participant.
    */
   constructor(resolvable, manager) {
@@ -66,6 +68,7 @@ class Participant {
     this.#_lastAbilityUse = resolvable.lastAbilityUse ? new Date(resolvable.lastAbilityUse) : Date.now() - 1000 * 60 * event.abilityCooldownMinutes;
     this.#_inventory = new Inventory(resolvable.inventory) || new Inventory();
     this.#_manager = manager;
+    this.#_canSendGift = resolvable.canSendGift || false;
   }
 
   /**
@@ -171,7 +174,29 @@ class Participant {
     return this.#_inventory;
   }
 
+  /**
+   * 
+   * @returns {boolean} Whether the participant can send a gift.
+   * @example
+   * const participant = new Participant({
+   * userID: "1234567890",
+   * Hostile: [1, 2, 3],
+   * Friendly: [4, 5, 6],
+   * status: "ACTIVE",
+   * lastAbilityUse: 1234567890,
+   * canUseAbility: true,
+   * inventory: [snowflakes.roles.Holiday[0], snowflakes.roles.Holiday[1], snowflakes.roles.Holiday[2]]
+   * });
+   * participant.canSendGift;
+   */
+  get canSendGift() {
+    return this.#_canSendGift;
+  }
 
+  set canSendGift(bool) {
+    if (typeof bool !== "boolean") throw new Error("Invalid boolean.");
+    this.#_canSendGift = bool;
+  }
 
   toJSON() {
     return {
@@ -180,7 +205,8 @@ class Participant {
       Friendly: this.Friendly.toJSON(),
       status: this.status,
       lastAbilityUse: this.lastAbilityUse,
-      inventory: this.inventory.toJSON()
+      inventory: this.inventory.toJSON(),
+      canSendGift: this.canSendGift
     }
   }
 

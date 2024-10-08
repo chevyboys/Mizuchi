@@ -5,8 +5,9 @@ module.exports = {
    * 
    * @param {Message} msg 
    * @param {ParticipantManager} participants 
+   * @returns {boolean} returns true if the message is spam
    */
-  spamCommand: async (msg, participants) => {
+  isSpam: async (msg, participants) => {
     //TODO: Implement this function @jhat0353
   }
 }

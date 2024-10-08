@@ -1,9 +1,11 @@
-module.exports = {
+const help = {
   /**
    * 
    * @param {Interaction} interaction 
    */
-  async helpCommand(interaction) {
+  async command(interaction) {
     //TODO: Implement this function
   }
 }
+
+module.exports = help;

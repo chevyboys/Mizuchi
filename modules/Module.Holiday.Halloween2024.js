@@ -16,6 +16,14 @@ const Participants = new ParticipantManager();
 
 const Module = new Augur.Module();
 
+//############### Submodules ################
+const Inventory = require('./Inventory.js');
+const Leaderboard = require('./Leaderboard.js');
+const Spam = require('./Spam.js');
+const Gift = require('./Gift.js');
+const Admin = require('./Admin.js');
+
+
 
 
 //active should be set based on a file in the same directory as pristine waters called active.json. if it doesn't exist, it should be created with the value of false
