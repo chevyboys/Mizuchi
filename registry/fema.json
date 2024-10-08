@@ -1,5 +1,5 @@
 {
-    "name": "fema",
-    "description": "Link to hurricane Milton resources that will be updated as more reliable sources of information become available",
-    "options": []
-  }
+  "name": "fema",
+  "description": "Links to information on current natural disasters",
+  "options": []
+}
