@@ -1,5 +1,16 @@
 let Flurry = {
   //TODO: Add Flurry functions
+  //IF flurries should persist between restarts, you will need to do the following:
+  //- have a function that creates a file in ../../data/holiday/flurries.json if it does not exist
+  //- writes any flurry information to that file
+  // and seperately read that file in at startup.
+
+  /**
+   * run by the controller each time the bot restarts
+   */
+  init: () => {
+    return true;
+  },
 
   /**
    * Starts a flurry in a channel
