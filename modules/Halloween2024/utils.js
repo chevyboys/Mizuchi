@@ -129,7 +129,7 @@ let event = {
     let promises = [];
     console.log("Generating roles");
     for (const color of colors) {
-      let role = guild.roles.cache.find(r => r.name.toLowerCase() == `Mask of the ${color.name.toLowerCase()}`);
+      let role = guild.roles.cache.find(r => r.name.toLowerCase() == `mask of the ${color.name.toLowerCase()}`);
 
       if (!role) {
         role = await guild.roles.create({
