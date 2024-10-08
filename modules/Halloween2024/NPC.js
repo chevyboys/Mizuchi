@@ -14,7 +14,7 @@ function NPCSend(channel, embedOptions, additionalMessageOptions) {
   additionalMessageOptions = additionalMessageOptions || {};
   embedOptions.color = event.colors[event.colors.length - 1].color;
   additionalMessageOptions.embeds = [embedOptions];
-  return webhookSend.webhook(channel, "Archduke Soju Ryotsu", "./avatar/PristineWaters.png", additionalMessageOptions);
+  return webhookSend.webhook(channel, "Mysterious Voice", "./avatar/Halloween.png", additionalMessageOptions);
 }
 
 module.exports = NPCSend;

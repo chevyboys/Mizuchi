@@ -198,6 +198,10 @@ class Participant {
     this.#_canSendGift = bool;
   }
 
+  getCurrentTotalHostileFound() {
+    return this.map(p => p.Hostile.totalToday()).reduce((a, b) => a + b, 0);
+  }
+
   toJSON() {
     return {
       userID: this.userID,

@@ -1,5 +1,7 @@
 const Augur = require("augurbot");
 const snowflakes = require('../../../config/snowflakes.json');
+const NPCSend = require("../Halloween2024/NPC");
+const { clean } = require("../../utils/Utils.Generic");
 const colors = [
   //TODO: change the colors, instead of a reward threshold
   //    we should have a role icon
@@ -78,6 +80,8 @@ const roles = [
 
 
 const avatar = "./avatar/Halloween.png";
+const serverPFP = "";
+const serverBanner = "";
 /**
  * @module Mask of theWaters/utils
  */
@@ -214,10 +218,107 @@ let event = {
   cleanHolidayBotIcon: (client) => {
     return client.user.setAvatar(('./avatar/' + ("base.png")))
   },
-  //TODO: set the server icon to the event icon
-  //TODO: reset the server icon to the default icon
-  //TODO: set the server banner to the event banner
-  //TODO: reset the server banner to the default banner
+  //set the server icon to the event icon
+  setServerHolidayIcon: (guild) => {
+    if (serverPFP && serverPFP != "") {
+      guild.setIcon(serverPFP);
+    }
+  },
+  //reset the server icon to the default icon
+  cleanServerHolidayIcon: (guild) => {
+    guild.setIcon("./img/server/pfp.png");
+  },
+  //set the server banner to the event banner
+  setServerHolidayBanner: (guild) => {
+    if (serverBanner && serverBanner != "") {
+      guild.setBanner(serverBanner);
+    }
+  },
+  //reset the server banner to the default banner
+  cleanServerHolidayBanner: (guild) => {
+    guild.setBanner("./img/server/banner.png");
+  },
+  //send the server-announcements announcement
+  sendAnnouncements: async (guild) => {
+    //Starting announcement
+    //      Guide to disable emoji
+    //      Explanation of events
+    //      Lore explanation
+    //      Ebbing of the tides(Celebrates birth and death)
+    //      Explaining that spam will not help you
+    //      Clarify that there is NOT a lore drop this event
+
+    //get the channel named server-announcements
+    let channel = guild.channels.cache.find(c => c.name == "server-announcements");
+    if (!channel) {
+      console.log("No server-announcements channel found");
+      return;
+    }
+    //send the announcement
+    await NPCSend(channel, {
+      "content": "A message from the void",
+      "tts": false,
+      "embeds": [
+        {
+          "id": 235316008,
+          "description": ">>> *Ah, the Festival of Ebbing Tides, a Dalen festival celebrating the cycle of birth and death. It is said that on the last day of Wilting, the spirits of the dead roam in search of meaning. Benevolent spirits will often seek out their loved ones, but vicious ghosts will need to be exorcised. During this time, it is common to wear costumes designed to scare away vengeful spirits.*",
+          "fields": [
+            {
+              "id": 186563673,
+              "name": "Description:",
+              "value": "This is a server event to celebrate both in world and out of world holidays. We have these periodically. The event can be interacted with by finding reactions to messages, or by using the event command. Send messages to see where the reactions pop up. You may receive various direct messages and bonus XP roles if you participate in the event to help you on your climb to Emerald\n\nAs a note, spam filters will penalize the scores people who send a lot of low effort posts. Make sure you're on topic for the channels you are in. Server rules will still apply."
+            },
+            {
+              "id": 947478087,
+              "name": "How to opt out:",
+              "value": "If you don't like seeing lots of emoji reacts:\n 1. Open your discord user settings\n 2. Open the `Chat` menu\n 3. Disable `Show emoji reactions on messages`",
+              "inline": true
+            }
+          ],
+          "title": "The Ebbing of The Tides  (October 12th-31st)",
+          "color": 0,
+          "footer": {
+            "text": "Spam filter: :white_check_mark: \n Reaction Based: :white_check_mark: \n Secret code: :grey_question:\n Canon Lore drop: :x:\n Worldmaker involved: :x: "
+          }
+        }
+      ],
+      "components": [
+        {
+          "id": 455936111,
+          "type": 1,
+          "components": [
+            {
+              "id": 780175396,
+              "type": 2,
+              "style": 1,
+              "label": "Sign up for Event Pings",
+              "custom_id": "signUpForHolidayUpdates"
+            }
+          ]
+        }
+      ],
+      "username": "Mysterious Voice"
+    }, {
+      content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.MetaUpdates}>, <@&${snowflakes.roles.Updates.HolidayUpdates}>`,
+      allowedMentions: { roles: [snowflakes.roles.Updates.AllUpdates, snowflakes.roles.Updates.MetaUpdates, snowflakes.roles.Updates.HolidayUpdates] }
+    });
+
+    //    TODO: Mod starting message
+    //      Going over mod powers
+    //      - &flurry and &flurry end command
+    //      - &blizzard and &blizzard end command
+    //      - 🔮 reaction
+    //TODO:
+
+  },
+  //event admin permissions check
+  isAdmin: (member) => {
+    return member.permissions.has("ADMINISTRATOR")
+      || member.roles.cache.has(snowflakes.roles.Moderator)
+      || member.roles.cache.has(snowflakes.roles.Admin)
+      || member.roles.cache.has(snowflakes.roles.BotAssistant)
+      || member.roles.cache.has(snowflakes.roles.BotMaster);
+  },
 }
 
 module.exports = event;

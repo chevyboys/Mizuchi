@@ -3,7 +3,7 @@ const snowflakes = require("../config/snowflakes.json");
 //const fs = require('fs');
 //const config = require('../../config/config.json');
 //const u = require('../../utils/Utils.Generic');
-const event = require("../../modules/PristineWaters/utils");
+const event = require("../../modules/Halloween2024/utils");
 const odds = event.odds;
 const ParticipantManager = require("../modules/Halloween2024/Participant");
 // const NPCSend = require("../../modules/PristineWaters/NPC");
@@ -12,67 +12,94 @@ const ParticipantManager = require("../modules/Halloween2024/Participant");
 // const embedColor = event.colors.find(c => c.name.toLowerCase().includes("blurple")).color || event.colors[event.colors.length - 1].color;
 const endedButNotCleaned = false;
 
-const Participants = new ParticipantManager();
-
+let Participants = new ParticipantManager();
+const rolesClient = require("../utils/Utils.RolesLogin.js");
+const rolesClientPrimaryGuild = rolesClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
 const Module = new Augur.Module();
 
 //############### Submodules ################
-const Inventory = require('./Inventory.js');
-const Leaderboard = require('./Leaderboard.js');
-const Spam = require('./Spam.js');
-const Gift = require('./Gift.js');
-const Admin = require('./Admin.js');
-const Flurry = require('./Flurry.js');
-const Help = require('./Help.js');
+const Inventory = require('./Halloween2024/Inventory.js');
+const Leaderboard = require('./Halloween2024/Leaderboard.js');
+const Spam = require('./Halloween2024/Spam.js');
+const Gift = require('./Halloween2024/Gift.js');
+const Admin = require('./Halloween2024/Admin.js');
+const Flurry = require('./Halloween2024/Flurry.js');
+const Help = require('./Halloween2024/Help.js');
+const Reaction = require('./Halloween2024/Reaction.js');
+const Active = require('./Halloween2024/Active.js');
+const { Guild } = require("discord.js");
 
 
-
-
-
-//active should be set based on a file in the same directory as pristine waters called active.json. if it doesn't exist, it should be created with the value of false
-//if active.json exists
-let active;
-if (!fs.existsSync('./data/holiday/active.json')) {
-  fs.writeFileSync('./data/holiday/active.json', JSON.stringify({ active: false }));
-  active = false;
-} else {
-  active = require('../../data/holiday/active.json').active;
-}
-
-//if active.json is true, set active to true
-function setActive(bool) {
-  active = bool;
-  fs.writeFileSync('./data/holiday/active.json', JSON.stringify({ active: bool }));
-}
 
 //############### Functions ################
-async function begin() {
+//get random emoji from eventEmoji
+function getRandomEmoji() {
+  return event.emoji[Math.floor(Math.random() * event.emoji.length)];
+}
+
+
+/**
+ * 
+ * @param {Guild} guild 
+ */
+
+async function begin(guild) {
   //TODO: Implement this function
-  // TODO: Event build and teardown
-  //    TODO: Send announcement
-  //    TODO:   Create / Rename roles
-  //    TODO: Set role colors
-  //    TODO: Unset colors
-  //    TODO:   Delete / Unname roles
-  //    TODO: Starting announcement
-  //    TODO: Guid to disable emoji
-  //    TODO: Explanation of events
-  //    TODO: Lore explanation
-  //    TODO: Ebbing of the tides(Celebrates birth and death)
-  //    TODO: Explaining that spam will not help you
-  //    TODO: Clarify that there is NOT a lore drop this event
-  //    TODO: Mod starting message
-  //    TODO: Going over mod powers
+  // Event build and teardown
+  //    Send announcement
+  //    Create / Rename roles
+  event.generateRoles(guild);
+  //    Set bot icon
+  event.setHolidayBotIcon(guild.client)
+  //    Set bot name
+  guild.client.user.setUsername("Twilight's Edge");
+  //    Set bot status
+  guild.client.user.setActivity(`More than ${ParticipantManager.getCurrentTotalHostileFound()} Ghosts caught!`);
+  //    Starting announcement
+  event.sendAnnouncements(guild);
+  //    Set server icon
+  event.setServerHolidayIcon(guild);
+  //    Set server banner
+  event.setServerHolidayBanner(guild);
+  // Set event as active
+  Active.setActive(true);
+
+
   //See https://docs.google.com/document/d/1p6DZ28IPDP8wNqNs-IUN_HjogpcMK7b5W7Auvm9NHq8/edit
 
 }
 
-async function end() {
+async function end(guild) {
   //TODO: Implement this function
+  // Unset colors
+  // Delete / Unname roles
+  event.cleanRoles(guild);
+  // For each role in snowflakes.roles.Holiday, remove the role from all members
+  for (const role of snowflakes.roles.Holiday) {
+    event.cleanRoleMembers(role);
+  };
+  event.cleanHolidayBotIcon(guild.client);
+  // Set bot name
+  guild.client.user.setUsername("Tavare");
+  // Set bot status
+  guild.client.user.setActivity("The event has ended!");
+  //set the server icon to the default icon
+  event.cleanServerHolidayIcon(guild);
+  //reset the server banner to the default banner
+  event.cleanServerHolidayBanner(guild);
+  //set the event as inactive
+  Active.setActive(false);
 }
 
 async function dailyReset() {
   //TODO: Implement this function
+  for (const role of snowflakes.roles.Holiday) {
+    event.cleanRoleMembers(role);
+  };
+  //reset the status of all participants
+  Participants.each(p => {
+    p.status = "ACTIVE";
+  })
 }
 
 
@@ -80,30 +107,49 @@ async function dailyReset() {
 //################ Module adds ################
 
 Module.addEvent("reactionAdd", async (reaction, user) => {
-  // TODO: handle receiving a reaction
+  // Handle receiving a reaction
+  Reaction.onAdd(reaction, user, Participants);
 }).addInteractionCommand({
   name: "holiday",
   guildId: snowflakes.guilds.PrimaryServer,
   process: async (interaction) => {
     //TODO: Do something if the event is not yet active
-
-
-    //TODO: Implement this function
     //Handle subcommands
     switch (interaction.options.getSubcommand()) {
-      case "inventory":
-      case "leaderboard":
-      case "admin":
-      case "help":
-      case "gift":
-        break;
+      case "inventory": Inventory.command(interaction, Participants); break;
+      case "leaderboard": Leaderboard.command(interaction, Participants); break;
+      case "admin": Admin.command(interaction, Participants); break;
+      case "help": Help.command(interaction); break;
+      case "gift": Gift.command(interaction, Participants); break;
     }
   }
 }).setClockwork(() => {
   //TODO: Implement this function
-  //Handle daily reset
+  //Handle daily reset at midnight (It has to be midnight because of how we are handling dates)
   //Handle end of event
-})
+}).addInteractionHandler({
+  customId: `signUpForHolidayUpdates`, process: async (interaction) => {
+    let member = await (await rolesClientPrimaryGuild).members.fetch(interaction.member);
+    await member.roles.add(snowflakes.roles.HolidayUpdates);
+    await interaction.editReply({ content: "You now have the <@&" + snowflakes.roles.Holiday + " role", ephemeral: true });
+  }
+}).addCommand({
+  name: "flurry",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg) => {
+    msg.content.indexOf("end") > -1 ? Flurry.end(msg.channel) : Flurry.start(msg.channel);
+
+  }
+}).addCommand({
+  name: "blizzard",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg) => {
+    msg.content.indexOf("end") > -1 ? Flurry.blizzard.end() : Flurry.blizzard.start();
+  }
+}).setInit(() => {
+  Flurry.init();
+  Participants = new ParticipantManager();
+});
 
 //TODO: Add the ability to start the event
 //TODO: Add the ability to end the event manually for testing
