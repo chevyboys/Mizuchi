@@ -266,7 +266,7 @@ let event = {
             {
               "id": 186563673,
               "name": "Description:",
-              "value": "This is a server event to celebrate both in world and out of world holidays. We have these periodically. The event can be interacted with by finding reactions to messages, or by using the event command. Send messages to see where the reactions pop up. You may receive various direct messages and bonus XP roles if you participate in the event to help you on your climb to Emerald\n\nAs a note, spam filters will penalize the scores people who send a lot of low effort posts. Make sure you're on topic for the channels you are in. Server rules will still apply."
+              "value": "This is a server event to celebrate both in world and out of world holidays. We have these periodically. The event can be interacted with by finding reactions to messages, or by using the event command. Send messages to see where the reactions pop up. You may receive various direct messages and bonus XP roles if you participate in the event to help you on your climb to Emerald\n\nAs a note, spam filters will penalize the scores people who send a lot of low effort posts. Make sure you're on topic for the channels you are in. Server rules will still apply.\n\nThe Book Channels and General have been warded against incursion and will be immune to certain parts of the event.",
             },
             {
               "id": 947478087,

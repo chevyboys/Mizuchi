@@ -40,7 +40,7 @@ let reaction = {
           this.remove(reaction);
           break;
         case "👻":
-          if (Participants.get(user.id) && Participants.get(user.id)?.status != "ACTIVE") return;
+          if (Participants.get(user.id) && Participants.get(user.id)?.status != "ACTIVE" && reaction.channel.id != channel.id) return;
           this.remove(reaction);
           if (!reaction.users.cache.has(message.client.user.id)) {
             return;
