@@ -66,7 +66,7 @@ function removeLastUserMessage(member) {
   if (record.length >= 1) {
     // Find the index of the last message with the given member
     const index = record.findIndex(message => message.member === member);
-    Logger.log(index);
+    //Logger.log(index);
     // If a message with the given member is found, remove it
     if (index !== -1) {
       record.splice(index, 1);
