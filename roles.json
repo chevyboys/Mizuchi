@@ -1,0 +1,5526 @@
+{
+  "roles": [
+    {
+      "name": "@everyone",
+      "color": 0,
+      "hoist": false,
+      "position": 0,
+      "permissions": "2221982107422272",
+      "mentionable": false
+    },
+    {
+      "name": "Lan",
+      "color": 0,
+      "hoist": false,
+      "position": 130,
+      "permissions": "32",
+      "mentionable": false
+    },
+    {
+      "name": "Worldmaker",
+      "color": 12632256,
+      "hoist": true,
+      "position": 133,
+      "permissions": "26783004483415",
+      "mentionable": false
+    },
+    {
+      "name": "Emerald E",
+      "color": 6528309,
+      "hoist": true,
+      "position": 86,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Citrine E",
+      "color": 15844417,
+      "hoist": true,
+      "position": 83,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Sunstone E",
+      "color": 15758607,
+      "hoist": true,
+      "position": 81,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Carnelian E",
+      "color": 13386820,
+      "hoist": true,
+      "position": 79,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Quartz E",
+      "color": 9936031,
+      "hoist": true,
+      "position": 77,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Sapphire E",
+      "color": 3430374,
+      "hoist": true,
+      "position": 110,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Server Booster",
+      "color": 13421823,
+      "hoist": false,
+      "position": 85,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Disable Levels",
+      "color": 0,
+      "hoist": false,
+      "position": 71,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "SpiderDivision",
+      "color": 0,
+      "hoist": false,
+      "position": 76,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Pink",
+      "color": 15480197,
+      "hoist": false,
+      "position": 96,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Green",
+      "color": 6528309,
+      "hoist": false,
+      "position": 100,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Yellow",
+      "color": 15844417,
+      "hoist": false,
+      "position": 98,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Orange",
+      "color": 15758607,
+      "hoist": false,
+      "position": 93,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Red",
+      "color": 13386820,
+      "hoist": false,
+      "position": 91,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Gray",
+      "color": 9936031,
+      "hoist": false,
+      "position": 89,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Mana Construct",
+      "color": 1752220,
+      "hoist": true,
+      "position": 117,
+      "permissions": "2147615744",
+      "mentionable": false
+    },
+    {
+      "name": "He/Him",
+      "color": 0,
+      "hoist": false,
+      "position": 11,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "She/Her",
+      "color": 0,
+      "hoist": false,
+      "position": 12,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "They/Them",
+      "color": 0,
+      "hoist": false,
+      "position": 13,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Whisper (Mod)",
+      "color": 12465151,
+      "hoist": true,
+      "position": 127,
+      "permissions": "10436233129686",
+      "mentionable": true
+    },
+    {
+      "name": "Archive Channels",
+      "color": 0,
+      "hoist": false,
+      "position": 73,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Levels Banned",
+      "color": 0,
+      "hoist": false,
+      "position": 104,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Roleplaying Updates",
+      "color": 0,
+      "hoist": false,
+      "position": 66,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Arm-Baby Cultist",
+      "color": 0,
+      "hoist": false,
+      "position": 59,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Heathen",
+      "color": 0,
+      "hoist": false,
+      "position": 57,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Immortal (RP Mod)",
+      "color": 0,
+      "hoist": true,
+      "position": 121,
+      "permissions": "0",
+      "mentionable": true
+    },
+    {
+      "name": "LARPer",
+      "color": 14651085,
+      "hoist": false,
+      "position": 118,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Any Pronouns",
+      "color": 0,
+      "hoist": false,
+      "position": 15,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Salmon",
+      "color": 14319230,
+      "hoist": false,
+      "position": 97,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Brown",
+      "color": 11362816,
+      "hoist": false,
+      "position": 95,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Yellow+",
+      "color": 15786000,
+      "hoist": false,
+      "position": 99,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Green+",
+      "color": 2077988,
+      "hoist": false,
+      "position": 101,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Gray+",
+      "color": 6323595,
+      "hoist": false,
+      "position": 90,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Architect Green",
+      "color": 5497954,
+      "hoist": false,
+      "position": 102,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Meta Updates",
+      "color": 0,
+      "hoist": false,
+      "position": 65,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Artist",
+      "color": 0,
+      "hoist": false,
+      "position": 74,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Blanket Cultist",
+      "color": 0,
+      "hoist": false,
+      "position": 58,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Olde Gaurde",
+      "color": 7419530,
+      "hoist": false,
+      "position": 119,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Ask Pronouns",
+      "color": 0,
+      "hoist": false,
+      "position": 16,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Retired Staff",
+      "color": 0,
+      "hoist": false,
+      "position": 113,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Adult",
+      "color": 0,
+      "hoist": false,
+      "position": 75,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Bot Master",
+      "color": 14729983,
+      "hoist": true,
+      "position": 126,
+      "permissions": "805437440",
+      "mentionable": true
+    },
+    {
+      "name": "Disciple of the Kes",
+      "color": 0,
+      "hoist": false,
+      "position": 129,
+      "permissions": "131072",
+      "mentionable": true
+    },
+    {
+      "name": "Muted",
+      "color": 15730696,
+      "hoist": false,
+      "position": 114,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Cake Elemental",
+      "color": 52945,
+      "hoist": true,
+      "position": 108,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Voice Chat",
+      "color": 0,
+      "hoist": false,
+      "position": 62,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Quartz A",
+      "color": 6323595,
+      "hoist": true,
+      "position": 78,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Carnelian A",
+      "color": 12845313,
+      "hoist": true,
+      "position": 80,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Sunstone A",
+      "color": 15632641,
+      "hoist": true,
+      "position": 82,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Citrine A",
+      "color": 15786000,
+      "hoist": true,
+      "position": 84,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Emerald A",
+      "color": 2077988,
+      "hoist": true,
+      "position": 87,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Sapphire A",
+      "color": 36299,
+      "hoist": true,
+      "position": 111,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Red+",
+      "color": 12845313,
+      "hoist": false,
+      "position": 92,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Orange+",
+      "color": 15632641,
+      "hoist": false,
+      "position": 94,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Podium Audio",
+      "color": 14335782,
+      "hoist": false,
+      "position": 115,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Acolyte",
+      "color": 0,
+      "hoist": false,
+      "position": 56,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Champion",
+      "color": 0,
+      "hoist": false,
+      "position": 55,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Cloudcaller",
+      "color": 0,
+      "hoist": false,
+      "position": 54,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Illusionist",
+      "color": 0,
+      "hoist": false,
+      "position": 53,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Seer",
+      "color": 0,
+      "hoist": false,
+      "position": 52,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Soulblade",
+      "color": 0,
+      "hoist": false,
+      "position": 51,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Wavewalker",
+      "color": 0,
+      "hoist": false,
+      "position": 49,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Wayfarer",
+      "color": 0,
+      "hoist": false,
+      "position": 50,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Analyst",
+      "color": 0,
+      "hoist": false,
+      "position": 48,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Architect",
+      "color": 0,
+      "hoist": false,
+      "position": 47,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Biomancer",
+      "color": 0,
+      "hoist": false,
+      "position": 46,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Controller",
+      "color": 0,
+      "hoist": false,
+      "position": 45,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Forgemaster",
+      "color": 0,
+      "hoist": false,
+      "position": 44,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Illuminator",
+      "color": 0,
+      "hoist": false,
+      "position": 43,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Sentinel",
+      "color": 0,
+      "hoist": false,
+      "position": 42,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Transmuter",
+      "color": 0,
+      "hoist": false,
+      "position": 41,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Diviner",
+      "color": 0,
+      "hoist": false,
+      "position": 40,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Elementalist",
+      "color": 0,
+      "hoist": false,
+      "position": 39,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Enchanter",
+      "color": 0,
+      "hoist": false,
+      "position": 38,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Guardian",
+      "color": 0,
+      "hoist": false,
+      "position": 37,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Mender",
+      "color": 0,
+      "hoist": false,
+      "position": 36,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Shadow",
+      "color": 0,
+      "hoist": false,
+      "position": 35,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Shaper",
+      "color": 0,
+      "hoist": false,
+      "position": 34,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Summoner",
+      "color": 0,
+      "hoist": false,
+      "position": 33,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Conjurer",
+      "color": 0,
+      "hoist": false,
+      "position": 32,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Dancer",
+      "color": 0,
+      "hoist": false,
+      "position": 31,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Mesmer",
+      "color": 0,
+      "hoist": false,
+      "position": 30,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Purifier",
+      "color": 0,
+      "hoist": false,
+      "position": 29,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Pyromancer",
+      "color": 0,
+      "hoist": false,
+      "position": 28,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Shapeshifter",
+      "color": 0,
+      "hoist": false,
+      "position": 27,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Spellsinger",
+      "color": 0,
+      "hoist": false,
+      "position": 26,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Swordmaster",
+      "color": 0,
+      "hoist": false,
+      "position": 25,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Assassin",
+      "color": 0,
+      "hoist": false,
+      "position": 24,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Commander",
+      "color": 0,
+      "hoist": false,
+      "position": 23,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Executioner",
+      "color": 0,
+      "hoist": false,
+      "position": 22,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Juggernaut",
+      "color": 0,
+      "hoist": false,
+      "position": 21,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Legionnaire",
+      "color": 0,
+      "hoist": false,
+      "position": 20,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Saboteur",
+      "color": 0,
+      "hoist": false,
+      "position": 19,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Scourge",
+      "color": 0,
+      "hoist": false,
+      "position": 18,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Shieldbreaker",
+      "color": 0,
+      "hoist": false,
+      "position": 17,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "TTRPG Updates",
+      "color": 0,
+      "hoist": false,
+      "position": 64,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Blog Updates",
+      "color": 0,
+      "hoist": false,
+      "position": 69,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Book Updates",
+      "color": 0,
+      "hoist": false,
+      "position": 68,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "All Updates",
+      "color": 0,
+      "hoist": false,
+      "position": 60,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Server Researcher (Admin)",
+      "color": 4753912,
+      "hoist": true,
+      "position": 135,
+      "permissions": "1099511627784",
+      "mentionable": true
+    },
+    {
+      "name": "Soaring Wings (community guide)",
+      "color": 9693630,
+      "hoist": true,
+      "position": 125,
+      "permissions": "453252599360",
+      "mentionable": true
+    },
+    {
+      "name": "Adventurer",
+      "color": 0,
+      "hoist": false,
+      "position": 72,
+      "permissions": "274877906944",
+      "mentionable": false
+    },
+    {
+      "name": "Staff On Vacation",
+      "color": 367779,
+      "hoist": false,
+      "position": 128,
+      "permissions": "1024",
+      "mentionable": false
+    },
+    {
+      "name": "Jin's Dad/ Dalen Emissary",
+      "color": 0,
+      "hoist": false,
+      "position": 134,
+      "permissions": "17601044546616",
+      "mentionable": false
+    },
+    {
+      "name": "Sound Sorcerer",
+      "color": 0,
+      "hoist": false,
+      "position": 10,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "No Icon",
+      "color": 0,
+      "hoist": false,
+      "position": 120,
+      "permissions": "968619314752",
+      "mentionable": false
+    },
+    {
+      "name": "Onyx",
+      "color": 65800,
+      "hoist": false,
+      "position": 103,
+      "permissions": "549755813888",
+      "mentionable": false
+    },
+    {
+      "name": "Transcendence Sorcerer",
+      "color": 0,
+      "hoist": false,
+      "position": 116,
+      "permissions": "140392131648",
+      "mentionable": false
+    },
+    {
+      "name": "Arcane",
+      "color": 0,
+      "hoist": false,
+      "position": 88,
+      "permissions": "968887750208",
+      "mentionable": false
+    },
+    {
+      "name": "Gaming",
+      "color": 0,
+      "hoist": false,
+      "position": 61,
+      "permissions": "968552205888",
+      "mentionable": true
+    },
+    {
+      "name": "Bot Updates",
+      "color": 0,
+      "hoist": false,
+      "position": 70,
+      "permissions": "968619314752",
+      "mentionable": false
+    },
+    {
+      "name": "Mysterious Bot Entity",
+      "color": 0,
+      "hoist": false,
+      "position": 112,
+      "permissions": "414733110336",
+      "mentionable": false
+    },
+    {
+      "name": "Maximum Booster",
+      "color": 0,
+      "hoist": false,
+      "position": 7,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Adverse Affectation",
+      "color": 0,
+      "hoist": false,
+      "position": 5,
+      "permissions": "551939998208",
+      "mentionable": false
+    },
+    {
+      "name": "Spider",
+      "color": 0,
+      "hoist": false,
+      "position": 105,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Contest Winner Boost",
+      "color": 0,
+      "hoist": false,
+      "position": 6,
+      "permissions": "968619314752",
+      "mentionable": false
+    },
+    {
+      "name": "Mysterious Test Entity",
+      "color": 0,
+      "hoist": false,
+      "position": 8,
+      "permissions": "414733107264",
+      "mentionable": false
+    },
+    {
+      "name": "Blackstone Initiate",
+      "color": 0,
+      "hoist": false,
+      "position": 4,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Worldmaker Councilor",
+      "color": 2020545,
+      "hoist": true,
+      "position": 132,
+      "permissions": "968619314753",
+      "mentionable": false
+    },
+    {
+      "name": "Craig",
+      "color": 0,
+      "hoist": false,
+      "position": 9,
+      "permissions": "68173824",
+      "mentionable": false
+    },
+    {
+      "name": "Voice of the Tower",
+      "color": 0,
+      "hoist": false,
+      "position": 122,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Fae/Faer",
+      "color": 0,
+      "hoist": false,
+      "position": 14,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Holiday 1",
+      "color": 3625,
+      "hoist": true,
+      "position": 106,
+      "permissions": "968619314753",
+      "mentionable": false
+    },
+    {
+      "name": "EasyPoll",
+      "color": 0,
+      "hoist": false,
+      "position": 3,
+      "permissions": "274878393408",
+      "mentionable": false
+    },
+    {
+      "name": "Holiday Participant",
+      "color": 0,
+      "hoist": false,
+      "position": 109,
+      "permissions": "968619314753",
+      "mentionable": false
+    },
+    {
+      "name": "Comic Updates",
+      "color": 0,
+      "hoist": false,
+      "position": 67,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Dyno",
+      "color": 0,
+      "hoist": false,
+      "position": 131,
+      "permissions": "8798227229887",
+      "mentionable": false
+    },
+    {
+      "name": "Holiday 2",
+      "color": 16770189,
+      "hoist": true,
+      "position": 107,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Knowledge Elemental (infrastructure)",
+      "color": 10181046,
+      "hoist": false,
+      "position": 123,
+      "permissions": "0",
+      "mentionable": true
+    },
+    {
+      "name": "Event Staff",
+      "color": 10932202,
+      "hoist": false,
+      "position": 2,
+      "permissions": "110951927242304",
+      "mentionable": false
+    },
+    {
+      "name": "Minecraft",
+      "color": 0,
+      "hoist": false,
+      "position": 63,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Gae'Kes",
+      "color": 0,
+      "hoist": false,
+      "position": 1,
+      "permissions": "0",
+      "mentionable": false
+    },
+    {
+      "name": "Bot Assistant",
+      "color": 11377345,
+      "hoist": true,
+      "position": 124,
+      "permissions": "536870912",
+      "mentionable": false
+    }
+  ],
+  "channelPermissions": [
+    {
+      "id": "443421134109671428",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "846844315862564944",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "443421134109671428",
+          "flags": 0,
+          "name": "general",
+          "rawPosition": 9,
+          "topic": "[No Spoilers] This is a place for general chatting and introductions but no spoilers.",
+          "lastMessageId": "1291207276652396596",
+          "lastPinTimestamp": 1724451536000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1525790236738
+        }
+      }
+    },
+    {
+      "id": "443421134109671430",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "799433034990354483"
+          ],
+          "id": "443421134109671430",
+          "flags": 0,
+          "name": "Voice Chat",
+          "rawPosition": 12,
+          "createdTimestamp": 1525790236738
+        }
+      }
+    },
+    {
+      "id": "443421134109671432",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_VOICE",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "443421134109671430",
+          "permissionOverwrites": [
+            "745800255106187444",
+            "172862815961350144",
+            "443421134109671424",
+            "450044488371535872",
+            "702186427949252679",
+            "898780609504223253",
+            "197050381270777857",
+            "443463591606222848",
+            "799433034990354483",
+            "877216611361247252",
+            "729902037940043907",
+            "869452779813494834"
+          ],
+          "messages": [],
+          "nsfw": false,
+          "id": "443421134109671432",
+          "flags": 0,
+          "name": "Gaming Voice Chat",
+          "rawPosition": 7,
+          "bitrate": 64000,
+          "rtcRegion": null,
+          "userLimit": 0,
+          "videoQualityMode": "FULL",
+          "lastMessageId": "1251040024418582572",
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1525790236738
+        }
+      }
+    },
+    {
+      "id": "443421352477851659",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_NEWS",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "1057980706040578079",
+          "permissionOverwrites": [
+            "902742114486587422",
+            "1012804486697332858",
+            "443421134109671424",
+            "702186427949252679",
+            "839247569401544755",
+            "898780609504223253",
+            "799433034990354483",
+            "487085787326840843",
+            "698014242728706078"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "443421352477851659",
+          "flags": 0,
+          "name": "book-announcements",
+          "rawPosition": 6,
+          "topic": "Announcements directly related to things Rowe is working on like blog posts, book updates and releases.",
+          "lastMessageId": "1289603257538318366",
+          "defaultAutoArchiveDuration": 10080,
+          "defaultThreadRateLimitPerUser": null,
+          "createdTimestamp": 1525790288801
+        }
+      }
+    },
+    {
+      "id": "443461509994119168",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048593978720267",
+          "permissionOverwrites": [
+            "702186427949252679",
+            "799433034990354483",
+            "443421134109671424",
+            "877216611361247252",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "443461509994119168",
+          "flags": 0,
+          "name": "spoilers-general",
+          "rawPosition": 32,
+          "topic": "[Full Spoilers] Every Arcane Ascension Universe book can be discussed in this channel, no matter how new. We recommend muting this channel around a new book release.",
+          "lastMessageId": "1291218876398309589",
+          "lastPinTimestamp": 1699168624000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1525799863099
+        }
+      }
+    },
+    {
+      "id": "443461671789395970",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048593978720267",
+          "permissionOverwrites": [
+            "898780609504223253",
+            "799433034990354483",
+            "443421134109671424",
+            "877216611361247252",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "443461671789395970",
+          "flags": 0,
+          "name": "kaldwyn",
+          "rawPosition": 36,
+          "topic": "[Kaldwyn] You can discuss any old Kaldwyn book in this channel. Old books are books which have been released in audio for at least 4 weeks. Kaldwyn books include *Arcane Ascension*, *Weapons and Wielders*, *Shattered Legacy*, and *Spider Climb*",
+          "lastMessageId": "1291128845260423281",
+          "lastPinTimestamp": 1673905799000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1525799901674
+        }
+      }
+    },
+    {
+      "id": "443461722951385090",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048593978720267",
+          "permissionOverwrites": [
+            "898780609504223253",
+            "799433034990354483",
+            "443421134109671424",
+            "877216611361247252",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "443461722951385090",
+          "flags": 0,
+          "name": "mythralis",
+          "rawPosition": 37,
+          "topic": "[Mythralis] You can discuss any old Mythralis book in this channel. Old books are books which have been released in audio for at least 4 weeks. Mythralis books include *War of Broken Mirrors* and *Luck's Touch*",
+          "lastMessageId": "1290704954612383837",
+          "lastPinTimestamp": 1694990632000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1525799913872
+        }
+      }
+    },
+    {
+      "id": "450048593978720267",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "702186427949252679",
+            "799433034990354483",
+            "443421134109671424",
+            "877216611361247252",
+            "898780609504223253"
+          ],
+          "id": "450048593978720267",
+          "flags": 0,
+          "name": "Book Channels",
+          "rawPosition": 6,
+          "createdTimestamp": 1527370346303
+        }
+      }
+    },
+    {
+      "id": "450048840255537153",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "id": "450048840255537153",
+          "flags": 0,
+          "name": "Offtopic",
+          "rawPosition": 10,
+          "createdTimestamp": 1527370405020
+        }
+      }
+    },
+    {
+      "id": "450048860845244417",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048840255537153",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [
+            "970877129392803961",
+            "994480923477291090",
+            "1038098457610694720",
+            "1257008179947241555",
+            "1257063681175457832"
+          ],
+          "nsfw": false,
+          "id": "450048860845244417",
+          "flags": 0,
+          "name": "life",
+          "rawPosition": 54,
+          "topic": "[No Spoilers] This is the channel for discussing life in general.",
+          "lastMessageId": "1291116522122514484",
+          "lastPinTimestamp": 1687110838000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1527370409929
+        }
+      }
+    },
+    {
+      "id": "450048878717304832",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "450048878717304832",
+          "flags": 0,
+          "name": "memes",
+          "rawPosition": 86,
+          "topic": null,
+          "lastMessageId": "814887645447847957",
+          "lastPinTimestamp": 1584491040241,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1527370414190
+        }
+      }
+    },
+    {
+      "id": "450048899093102602",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "450048899093102602",
+          "flags": 0,
+          "name": "reddit",
+          "rawPosition": 87,
+          "topic": "[Anarchy] Spoilers in this channel are anarchy. Researcher doesn't tag spoilers from the reddit, so who knows what we'll get here. You can talk about any new books or old books here.",
+          "lastMessageId": "822128919390060594",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1527370419048
+        }
+      }
+    },
+    {
+      "id": "450079288201576478",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "697836081420304444",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "450079288201576478",
+          "flags": 0,
+          "name": "fan-art",
+          "rawPosition": 45,
+          "topic": "[Light Spoilers] The place for the server fan art. AI-generated art is not permitted, please post those in the AI art thread.",
+          "lastMessageId": "1290736126914465913",
+          "lastPinTimestamp": 1670375782000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1527377664376
+        }
+      }
+    },
+    {
+      "id": "450204651367956481",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048840255537153",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "450204651367956481",
+          "flags": 0,
+          "name": "bot-commands",
+          "rawPosition": 58,
+          "topic": "[Light Spoilers] This is the channel to run bot commands. Just type \"/\" to see a list of enabled commands.",
+          "lastMessageId": "1291215363136159804",
+          "lastPinTimestamp": 1684357963000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1527407553284
+        }
+      }
+    },
+    {
+      "id": "544174423029055508",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "544174423029055508",
+          "flags": 0,
+          "name": "weapons-and-wielders",
+          "rawPosition": 75,
+          "topic": "[Weapons and Wielders] Discussion and spoilers for Weapon and Wielders.",
+          "lastMessageId": "821770961408884776",
+          "lastPinTimestamp": 1612204689262,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1549811692722
+        }
+      }
+    },
+    {
+      "id": "576166938531594241",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "576166938531594241",
+          "flags": 0,
+          "name": "rp-1",
+          "rawPosition": 94,
+          "topic": "You can't enter until you're attuned!",
+          "lastMessageId": "851884358625263646",
+          "lastPinTimestamp": 1579918195802,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1557439302810
+        }
+      }
+    },
+    {
+      "id": "576207463083147275",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "id": "576207463083147275",
+          "flags": 0,
+          "name": "RP Archive",
+          "rawPosition": 14,
+          "createdTimestamp": 1557448964616
+        }
+      }
+    },
+    {
+      "id": "576207531530256395",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "576207531530256395",
+          "flags": 0,
+          "name": "rp-ooc",
+          "rawPosition": 100,
+          "topic": "Out of character chat, for discussion related to #rp",
+          "lastMessageId": "855284300172623893",
+          "lastPinTimestamp": 1621021247000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1557448980935
+        }
+      }
+    },
+    {
+      "id": "576208247812522005",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "576208247812522005",
+          "flags": 0,
+          "name": "character-introduction",
+          "rawPosition": 102,
+          "topic": "Introduce your characters here!",
+          "lastMessageId": "849800103380385833",
+          "lastPinTimestamp": 1580392359973,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1557449151710
+        }
+      }
+    },
+    {
+      "id": "576907499106729994",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "576907499106729994",
+          "flags": 0,
+          "name": "rp-2",
+          "rawPosition": 95,
+          "topic": null,
+          "lastMessageId": "844001569795866644",
+          "lastPinTimestamp": 1580913771456,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1557615866210
+        }
+      }
+    },
+    {
+      "id": "578706502001360897",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "732372426528391171",
+          "permissionOverwrites": [
+            "902742114486587422",
+            "443421134109671424",
+            "898780609504223253",
+            "450044488371535872",
+            "795898204101017610",
+            "197050381270777857",
+            "799433034990354483"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "578706502001360897",
+          "flags": 0,
+          "name": "andrew-answers",
+          "rawPosition": 27,
+          "topic": "[Full Spoilers] This is where Rowe answers questions. Enable notifications for this channel to get updated when Rowe pops in to answer questions!",
+          "lastMessageId": "1285071893015302207",
+          "lastPinTimestamp": 1593615518707,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1558044781924
+        }
+      }
+    },
+    {
+      "id": "579064279198728209",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "697836081420304444",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "579064279198728209",
+          "flags": 0,
+          "name": "wiki-discussion",
+          "rawPosition": 50,
+          "topic": "[Light Spoilers] This is the channel for discussion and collaboration about the wiki. If you are discussing major plot spoilers, please tag them in this channel.",
+          "lastMessageId": "1285787844127756329",
+          "lastPinTimestamp": 1726544962000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1558130082655
+        }
+      }
+    },
+    {
+      "id": "629758740299644939",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "629758740299644939",
+          "flags": 0,
+          "name": "tabletop",
+          "rawPosition": 84,
+          "topic": null,
+          "lastMessageId": "702786680184111154",
+          "lastPinTimestamp": 1581254886606,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1570216584039
+        }
+      }
+    },
+    {
+      "id": "635676541887447080",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "635676541887447080",
+          "flags": 0,
+          "name": "rp-3",
+          "rawPosition": 96,
+          "topic": null,
+          "lastMessageId": "830491847016316939",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1571627497885
+        }
+      }
+    },
+    {
+      "id": "665779869552082945",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "665779869552082945",
+          "flags": 0,
+          "name": "rp-announcements",
+          "rawPosition": 93,
+          "topic": null,
+          "lastMessageId": "841776049356144651",
+          "lastPinTimestamp": 1590615340607,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1578804690493
+        }
+      }
+    },
+    {
+      "id": "670385884373319701",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "670385884373319701",
+          "flags": 0,
+          "name": "rp-4",
+          "rawPosition": 97,
+          "topic": null,
+          "lastMessageId": "854468421306548284",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1579902850002
+        }
+      }
+    },
+    {
+      "id": "670490753763639298",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "670490753763639298",
+          "flags": 0,
+          "name": "rp-6",
+          "rawPosition": 99,
+          "topic": null,
+          "lastMessageId": "809233192175403028",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1579927852813
+        }
+      }
+    },
+    {
+      "id": "671378758573359125",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "732372426528391171",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "877216611361247252",
+            "898780609504223253"
+          ],
+          "messages": [
+            "1291220594003804253",
+            "1291221110398128128",
+            "1291220630812754023",
+            "1291221162386264227",
+            "1291221238051508255",
+            "1291221284109418528"
+          ],
+          "threads": [],
+          "nsfw": false,
+          "id": "671378758573359125",
+          "flags": 0,
+          "name": "question-discussion",
+          "rawPosition": 25,
+          "topic": "[Full Spoilers] This channel is for preparing questions for Rowe to answer in <#578706502001360897>",
+          "lastMessageId": "1291221284109418528",
+          "lastPinTimestamp": 1719444243000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1580139569658
+        }
+      }
+    },
+    {
+      "id": "677347543750934528",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "443421134109671430",
+          "permissionOverwrites": [
+            "729902037940043907",
+            "799433034990354483",
+            "443421134109671424",
+            "450044488371535872"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "677347543750934528",
+          "flags": 0,
+          "name": "general-voice-text",
+          "rawPosition": 63,
+          "topic": "[Light Spoilers] This channel may have more spoilers depending on what is currently happening in the Voice Chat. Beware.",
+          "lastMessageId": "1290933762690908172",
+          "lastPinTimestamp": 1692681880000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1581562638939
+        }
+      }
+    },
+    {
+      "id": "686288825130942622",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "686288825130942622",
+          "flags": 0,
+          "name": "other",
+          "rawPosition": 88,
+          "topic": null,
+          "lastMessageId": "822203916178423839",
+          "lastPinTimestamp": 1606443129558,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1583694406541
+        }
+      }
+    },
+    {
+      "id": "689538681840992267",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "689538681840992267",
+          "flags": 0,
+          "name": "spider-climb",
+          "rawPosition": 79,
+          "topic": "[On-Topic Spoilers] Discussion of Spider Climb. Minor spoilers for W&W written and unwritten.\nhttps://forums.sufficientvelocity.com/threads/spider-climb-a-jrpg-style-dungeon-crawl-in-the-arcane-ascension-weapons-and-wielders-universe.63681/",
+          "lastMessageId": "732074744651710505",
+          "lastPinTimestamp": 1587909666137,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1584469232760
+        }
+      }
+    },
+    {
+      "id": "694692624795172864",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "694692624795172864",
+          "flags": 0,
+          "name": "spider-division",
+          "rawPosition": 89,
+          "topic": "RSS feed for Spider Climb.",
+          "lastMessageId": "704035090107334768",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1585698028516
+        }
+      }
+    },
+    {
+      "id": "697275365915230238",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "697275365915230238",
+          "flags": 0,
+          "name": "question-queue-archive",
+          "rawPosition": 71,
+          "topic": "[Full Spoilers] Messages sent in this channel are automatically converted into questions for Rowe. Upvote any question you like (<:dawn:689946338796109828>), including your own!",
+          "lastMessageId": "846954518959620127",
+          "lastPinTimestamp": 1592668351724,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1586313801984
+        }
+      }
+    },
+    {
+      "id": "697545105812357140",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "697836081420304444",
+          "permissionOverwrites": [
+            "902742114486587422",
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [
+            "1280341208975020113"
+          ],
+          "nsfw": false,
+          "id": "697545105812357140",
+          "flags": 0,
+          "name": "server-meta",
+          "rawPosition": 43,
+          "topic": "[Light Spoilers] For discussion about the server as a whole. Suggestions, complaints, or compliments? Here's a good place.",
+          "lastMessageId": "1290858795861409886",
+          "lastPinTimestamp": 1667654616000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1586378112987
+        }
+      }
+    },
+    {
+      "id": "697836081420304444",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "799433034990354483",
+            "898780609504223253"
+          ],
+          "id": "697836081420304444",
+          "flags": 0,
+          "name": "Community",
+          "rawPosition": 9,
+          "createdTimestamp": 1586447486978
+        }
+      }
+    },
+    {
+      "id": "697837382765903963",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "896242048309559296",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "697837382765903963",
+          "flags": 0,
+          "name": "rules",
+          "rawPosition": 0,
+          "topic": "Welcome! Thank you for reading not only the rules, but also the channel description. You're extra cool.",
+          "lastMessageId": "1017159780655173703",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1586447797243
+        }
+      }
+    },
+    {
+      "id": "697838146519433346",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "697838146519433346",
+          "flags": 0,
+          "name": "diamantine-spoilers",
+          "rawPosition": 76,
+          "topic": "[New] Discussion of new books and audio releases. Books are new until 4 weeks after audio release.",
+          "lastMessageId": "740618797974683679",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1586447979336
+        }
+      }
+    },
+    {
+      "id": "697838191704539276",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "697838191704539276",
+          "flags": 0,
+          "name": "new-readers",
+          "rawPosition": 73,
+          "topic": "[Any] This channel is a blank slate, for if you are still reading a series. History is disabled by default, so any spoilers will be wiped away by the Dominion of Time. If you would like to see history, go to #bot-spam and use the !seer command.",
+          "lastMessageId": "732656150599696495",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1586447990109
+        }
+      }
+    },
+    {
+      "id": "697869453605601352",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "697836081420304444",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "697869453605601352",
+          "flags": 0,
+          "name": "resh-fest",
+          "rawPosition": 48,
+          "topic": "[Light Spoilers] MEMES! This is the place for all your favorite memes. Bonus points for book rated memes. (You don't win anything, just our undying love and appreciation.) Reminder that all memes have to abide by server rules and TOS.",
+          "lastMessageId": "1291062554507870208",
+          "lastPinTimestamp": 1702278656000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1586455443527
+        }
+      }
+    },
+    {
+      "id": "699079502575304704",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "id": "699079502575304704",
+          "flags": 0,
+          "name": "Retired Channels",
+          "rawPosition": 13,
+          "createdTimestamp": 1586743941683
+        }
+      }
+    },
+    {
+      "id": "699163559552221194",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "698014242728706078"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "699163559552221194",
+          "flags": 0,
+          "name": "live-events",
+          "rawPosition": 96,
+          "topic": null,
+          "lastMessageId": "990402759180300338",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1586763982428
+        }
+      }
+    },
+    {
+      "id": "699707768008998942",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "1278859694647148617",
+            "795898204101017610",
+            "799433034990354483",
+            "698014242728706078",
+            "443421134109671424"
+          ],
+          "messages": [
+            "1291220837185359997",
+            "1291220851370229770",
+            "1291220851982860410",
+            "1291220858500812841",
+            "1291221277238890529",
+            "1291221279730307082",
+            "1291221355806855208"
+          ],
+          "threads": [],
+          "nsfw": false,
+          "id": "699707768008998942",
+          "flags": 0,
+          "name": "fire-temple",
+          "rawPosition": 24,
+          "topic": "Testing grounds for bots and their commands. This channel does not exist.",
+          "lastMessageId": "1291221355806855208",
+          "lastPinTimestamp": 1667510192000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1586893731835
+        }
+      }
+    },
+    {
+      "id": "700936381983227924",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "700936381983227924",
+          "flags": 0,
+          "name": "kester-corner",
+          "rawPosition": 78,
+          "topic": "[Full Spoilers] Questions for Kester's live Q&A today at 3pm PDT or 6pm EDT",
+          "lastMessageId": "701186613056766002",
+          "lastPinTimestamp": 1587186681593,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1587186656233
+        }
+      }
+    },
+    {
+      "id": "702950902583263252",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "702950902583263252",
+          "flags": 0,
+          "name": "npc-introduction",
+          "rawPosition": 103,
+          "topic": "A channel to store all those character concepts you've been dreaming up. Put the NPCs here so people can call on them for their RP.",
+          "lastMessageId": "849842293972271115",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1587666955372
+        }
+      }
+    },
+    {
+      "id": "703291767637671968",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "272937604339466240",
+            "799433034990354483",
+            "443421134109671424",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "703291767637671968",
+          "flags": 0,
+          "name": "citadel",
+          "rawPosition": 16,
+          "topic": "Secret staff section for surveillance and security of shenanigans.",
+          "lastMessageId": "1290350077206069431",
+          "lastPinTimestamp": 1725214262000,
+          "defaultAutoArchiveDuration": 10080,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1587748223934
+        }
+      }
+    },
+    {
+      "id": "703695980897370222",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048593978720267",
+          "permissionOverwrites": [
+            "877216611361247252",
+            "799433034990354483",
+            "443421134109671424",
+            "702186427949252679",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "703695980897370222",
+          "flags": 0,
+          "name": "standalone",
+          "rawPosition": 38,
+          "topic": "[Standalone] This channel is for Rowe novels that do not fit into the other channels. These include *How to Defeat a Demon King in Ten Easy Steps*, Rowe's Dragon Ball Z Fanfic, and his hidden first publications, if you can find them.",
+          "lastMessageId": "1285015932724318320",
+          "lastPinTimestamp": 1649433980000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1587844595885
+        }
+      }
+    },
+    {
+      "id": "704404481047003227",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "704404481047003227",
+          "flags": 0,
+          "name": "writing",
+          "rawPosition": 85,
+          "topic": "Talk about writing here. Do authorly things. Summon demons to produce manuscripts or whatever ya'll do.",
+          "lastMessageId": "708237323485052970",
+          "lastPinTimestamp": 1588906498009,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1588013515484
+        }
+      }
+    },
+    {
+      "id": "704404499158007889",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048840255537153",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [
+            "938581958563364865"
+          ],
+          "nsfw": false,
+          "id": "704404499158007889",
+          "flags": 0,
+          "name": "media",
+          "rawPosition": 55,
+          "topic": "Share your favorite music, books, YouTube channels, TikToks, Spotify playlists...if it's a form of media, it goes here!\n\\||Tag and label|| major plot spoilers for media discussed in this channel. There is more leeway in older and less culturally relevant works, but be mindful that not everyone has read every book.",
+          "lastMessageId": "1291078314773057619",
+          "lastPinTimestamp": 1666190873000,
+          "defaultThreadRateLimitPerUser": 0,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1588013519802
+        }
+      }
+    },
+    {
+      "id": "708569984833683476",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048840255537153",
+          "permissionOverwrites": [
+            "443421134109671424",
+            "702186427949252679",
+            "450044488371535872",
+            "729902037940043907",
+            "443463591606222848",
+            "799433034990354483",
+            "698014242728706078",
+            "789339350777069609"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "708569984833683476",
+          "flags": 0,
+          "name": "plentiful-pets",
+          "rawPosition": 51,
+          "topic": "[No Spoilers] This is the channel to share pictures or discuss your pet stuff. We like other animals too! Not just pets!",
+          "lastMessageId": "1291203891861524600",
+          "lastPinTimestamp": 1642391461000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1589006648978
+        }
+      }
+    },
+    {
+      "id": "715305941544992830",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "715305941544992830",
+          "flags": 0,
+          "name": "rp-5",
+          "rawPosition": 98,
+          "topic": null,
+          "lastMessageId": "855282691717333072",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1590612626206
+        }
+      }
+    },
+    {
+      "id": "719565848360124468",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "880252831733522442",
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "id": "719565848360124468",
+          "flags": 0,
+          "name": "Administration",
+          "rawPosition": 4,
+          "createdTimestamp": 1591628267136
+        }
+      }
+    },
+    {
+      "id": "723635481430065192",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "723635481430065192",
+          "flags": 0,
+          "name": "secret-mafia-2020-6-20",
+          "rawPosition": 80,
+          "topic": "For the AA themed game of mafia!",
+          "lastMessageId": "727715624809267251",
+          "lastPinTimestamp": 1593547240142,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1592598543270
+        }
+      }
+    },
+    {
+      "id": "729861995871862955",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "443421134109671424",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "729861995871862955",
+          "flags": 0,
+          "name": "rp-moderation",
+          "rawPosition": 90,
+          "topic": null,
+          "lastMessageId": "851185312965197854",
+          "lastPinTimestamp": 1620919995000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1594083059996
+        }
+      }
+    },
+    {
+      "id": "730821816150523914",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "730821816150523914",
+          "flags": 0,
+          "name": "rp-guide-and-intro",
+          "rawPosition": 91,
+          "topic": null,
+          "lastMessageId": "787719294171349022",
+          "lastPinTimestamp": 1607379173699,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1594311898983
+        }
+      }
+    },
+    {
+      "id": "730823850312335381",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "730823850312335381",
+          "flags": 0,
+          "name": "rp-fanart",
+          "rawPosition": 105,
+          "topic": "Welcome to the channel to store all your favorite rp character art!!",
+          "lastMessageId": "850566542042988554",
+          "lastPinTimestamp": 1622679767000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1594312383965
+        }
+      }
+    },
+    {
+      "id": "732372426528391171",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "799433034990354483",
+            "702186427949252679",
+            "898780609504223253"
+          ],
+          "id": "732372426528391171",
+          "flags": 0,
+          "name": "Ask the Authors/LARPers",
+          "rawPosition": 5,
+          "createdTimestamp": 1594681593306
+        }
+      }
+    },
+    {
+      "id": "732546808794054716",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "732546808794054716",
+          "flags": 0,
+          "name": "secret-mafia-2020-7-15",
+          "rawPosition": 81,
+          "topic": null,
+          "lastMessageId": "735941025020903424",
+          "lastPinTimestamp": 1595293161559,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1594723169278
+        }
+      }
+    },
+    {
+      "id": "733474581431582821",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "732372426528391171",
+          "permissionOverwrites": [
+            "172862815961350144",
+            "443421134109671424",
+            "450044488371535872",
+            "898780609504223253",
+            "702186427949252679",
+            "729902037940043907",
+            "799433034990354483",
+            "443463591606222848",
+            "698014242728706078"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "733474581431582821",
+          "flags": 0,
+          "name": "kester-bombs™",
+          "rawPosition": 29,
+          "topic": "This channel is a repository of interesting quotations from Kester and other LAPRers. If you see something worth cataloging, contact a moderator to suggest it for collection.",
+          "lastMessageId": "1290887683085963265",
+          "lastPinTimestamp": 1621655578000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1594944367512
+        }
+      }
+    },
+    {
+      "id": "752342321332224011",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "752342321332224011",
+          "flags": 0,
+          "name": "aa3-beta-readers",
+          "rawPosition": 98,
+          "topic": "please just give dawn legs i’m begging u",
+          "lastMessageId": "785596538625065000",
+          "lastPinTimestamp": 1603651367854,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1599442787250
+        }
+      }
+    },
+    {
+      "id": "754300814809497650",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "754300814809497650",
+          "flags": 0,
+          "name": "tis-spoilers",
+          "rawPosition": 74,
+          "topic": "[TIS/AA3] This is a channel for discussing TIS during its spoiler period.",
+          "lastMessageId": "821681854561124352",
+          "lastPinTimestamp": 1608234557662,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1599909728482
+        }
+      }
+    },
+    {
+      "id": "758670485138571274",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "758670485138571274",
+          "flags": 0,
+          "name": "aa3-alpha-readers",
+          "rawPosition": 97,
+          "topic": null,
+          "lastMessageId": "786330480207331359",
+          "lastPinTimestamp": 1603207186240,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1600951539073
+        }
+      }
+    },
+    {
+      "id": "759449266862686209",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "759449266862686209",
+          "flags": 0,
+          "name": "resting-ground",
+          "rawPosition": 72,
+          "topic": "[Old Readers] The is the burial grounds for Cryptid's live read through of the AU. She's an old reader now. Press F to pay respects.",
+          "lastMessageId": "761657494451781762",
+          "lastPinTimestamp": 1601504633849,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1601137215105
+        }
+      }
+    },
+    {
+      "id": "759511419296153710",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "759511419296153710",
+          "flags": 0,
+          "name": "secret-mafia-2020-9-28",
+          "rawPosition": 82,
+          "topic": null,
+          "lastMessageId": "765587107879583755",
+          "lastPinTimestamp": 1602600590441,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1601152033400
+        }
+      }
+    },
+    {
+      "id": "780164617829744660",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "780164617829744660",
+          "flags": 0,
+          "name": "rp-group-introduction",
+          "rawPosition": 104,
+          "topic": null,
+          "lastMessageId": "786019217521901580",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1606076139648
+        }
+      }
+    },
+    {
+      "id": "784055509773713438",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "784055509773713438",
+          "flags": 0,
+          "name": "soulbrand-spoilers",
+          "rawPosition": 77,
+          "topic": null,
+          "lastMessageId": "821053473218101259",
+          "lastPinTimestamp": 1607003885794,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1607003800577
+        }
+      }
+    },
+    {
+      "id": "785160606676025384",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048593978720267",
+          "permissionOverwrites": [
+            "877216611361247252",
+            "799433034990354483",
+            "443421134109671424",
+            "702186427949252679",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "785160606676025384",
+          "flags": 0,
+          "name": "tag-all-spoilers",
+          "rawPosition": 31,
+          "topic": "\\||Tag and label all spoilers|| in this channel. This is the server reading room and is designed to support discussion of any Rowe book, no matter where in the series you are.",
+          "lastMessageId": "1291028605039542387",
+          "lastPinTimestamp": 1694819267000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1607267276210
+        }
+      }
+    },
+    {
+      "id": "786685374264639560",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "786685374264639560",
+          "flags": 0,
+          "name": "council-of-mods",
+          "rawPosition": 92,
+          "topic": null,
+          "lastMessageId": "787448861811540009",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1607630809132
+        }
+      }
+    },
+    {
+      "id": "786696369271603271",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "896242048309559296",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "786696369271603271",
+          "flags": 0,
+          "name": "audit-log",
+          "rawPosition": 5,
+          "topic": "Audit log to store all server actions taken.",
+          "lastMessageId": "1291221360751804461",
+          "lastPinTimestamp": 1607633610261,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1607633430546
+        }
+      }
+    },
+    {
+      "id": "790122314476814377",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "790122314476814377",
+          "flags": 0,
+          "name": "secret-mafia-2020-12-20",
+          "rawPosition": 83,
+          "topic": null,
+          "lastMessageId": "798353176176099338",
+          "lastPinTimestamp": 1610401087999,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1608450239534
+        }
+      }
+    },
+    {
+      "id": "793023572805287937",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048840255537153",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [
+            "1028689565399122030"
+          ],
+          "nsfw": false,
+          "id": "793023572805287937",
+          "flags": 0,
+          "name": "art-corner",
+          "rawPosition": 53,
+          "topic": "[No Spoilers] The channel for discussing creative projects or art in general. This is a no spoiler zone, so please \\||tag and label|| any major spoilers in this channel. AI-generated art is not permitted, please post those in the AI art thread.",
+          "lastMessageId": "1290888109369725000",
+          "lastPinTimestamp": 1678663797000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1609141953422
+        }
+      }
+    },
+    {
+      "id": "795508504819269653",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "958225648931995681",
+          "permissionOverwrites": [
+            "902742114486587422",
+            "939765691358265374",
+            "795507539584352256",
+            "443421134109671424",
+            "439909686138109954",
+            "877216611361247252",
+            "799433034990354483",
+            "645343657075146772"
+          ],
+          "messages": [],
+          "threads": [
+            "884631353197494273",
+            "1011788816169836634"
+          ],
+          "nsfw": true,
+          "id": "795508504819269653",
+          "flags": 0,
+          "name": "wydds-basement",
+          "rawPosition": 43,
+          "topic": "Therapy hours and a bag of dicks. \n\n[Light Spoilers] This is the server 18+ channel. Check the channel pins for the channel-specific rules.",
+          "lastMessageId": "1291191241773551636",
+          "lastPinTimestamp": 1693013591000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1609734407382
+        }
+      }
+    },
+    {
+      "id": "798826246104285184",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "799730362204291082",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "798826308477779988"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "798826246104285184",
+          "flags": 0,
+          "name": "kesters-game-ooc",
+          "rawPosition": 66,
+          "topic": "Kester’s Kids",
+          "lastMessageId": "1290026182775148565",
+          "lastPinTimestamp": 1678575813000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1610525418545
+        }
+      }
+    },
+    {
+      "id": "799023178529112064",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_VOICE",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "799730362204291082",
+          "permissionOverwrites": [
+            "172862815961350144",
+            "799433034990354483",
+            "314178482752061440",
+            "443421134109671424",
+            "163542417130258432",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "nsfw": false,
+          "id": "799023178529112064",
+          "flags": 0,
+          "name": "Kester’s TTRPG Game",
+          "rawPosition": 4,
+          "bitrate": 63813,
+          "rtcRegion": null,
+          "userLimit": 0,
+          "videoQualityMode": null,
+          "lastMessageId": "1099495142613848074",
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1610572370894
+        }
+      }
+    },
+    {
+      "id": "799730362204291082",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "798826308477779988",
+            "898780609504223253"
+          ],
+          "id": "799730362204291082",
+          "flags": 0,
+          "name": "Server TTRPG's",
+          "rawPosition": 11,
+          "createdTimestamp": 1610740976621
+        }
+      }
+    },
+    {
+      "id": "799730625707245590",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "799730362204291082",
+          "permissionOverwrites": [
+            "172862815961350144",
+            "799433034990354483",
+            "119216893516185600",
+            "798826308477779988",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "799730625707245590",
+          "flags": 0,
+          "name": "kesters-game-gossip",
+          "rawPosition": 62,
+          "topic": "For talking about BEANS during the ttrpg game",
+          "lastMessageId": "1263521234692472842",
+          "lastPinTimestamp": 1691378532000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1610741039445
+        }
+      }
+    },
+    {
+      "id": "799731860816658472",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "799730362204291082",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "798826308477779988",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "799731860816658472",
+          "flags": 0,
+          "name": "ttrpg-announcements",
+          "rawPosition": 59,
+          "topic": "Announcement channel for when ttrpg games are running.",
+          "lastMessageId": "1137450131235553320",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1610741333918
+        }
+      }
+    },
+    {
+      "id": "800457548897320970",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "799730362204291082",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "798826308477779988",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "800457548897320970",
+          "flags": 0,
+          "name": "game-descriptions",
+          "rawPosition": 60,
+          "topic": null,
+          "lastMessageId": "1145579982245072946",
+          "lastPinTimestamp": 1622505468000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1610914351439
+        }
+      }
+    },
+    {
+      "id": "801871915844894740",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "799730362204291082",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "798826308477779988"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "801871915844894740",
+          "flags": 0,
+          "name": "in-character-chat",
+          "rawPosition": 61,
+          "topic": "The In-Character Channel for Kester's Kids.\n\nSee archived threads for other older RP stories.",
+          "lastMessageId": "1259683738179076126",
+          "lastPinTimestamp": 1682347486000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1611251562797
+        }
+      }
+    },
+    {
+      "id": "802390907202437161",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "172862815961350144",
+            "369002981749817345",
+            "635130492362031105",
+            "443421134109671424",
+            "439909686138109954",
+            "163542417130258432",
+            "450044488371535872",
+            "236649253223530506",
+            "799433034990354483",
+            "314178482752061440",
+            "222931052635750411",
+            "263320248847958016",
+            "146796376364285952"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "802390907202437161",
+          "flags": 0,
+          "name": "ww3-beta-readers",
+          "rawPosition": 94,
+          "topic": "This channel is a special case, but you know that. Spoilers for every book except Soulbrand.",
+          "lastMessageId": "852886703064875008",
+          "lastPinTimestamp": 1612598363679,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1611375299979
+        }
+      }
+    },
+    {
+      "id": "814863911962148865",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "697836081420304444",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "814863911962148865",
+          "flags": 0,
+          "name": "art-gallery",
+          "rawPosition": 44,
+          "topic": "[Light Spoilers] Gallery of art made by our wonderful artists!",
+          "lastMessageId": "1290835322946457632",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1614349096051
+        }
+      }
+    },
+    {
+      "id": "822274037199011840",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048840255537153",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "822274037199011840",
+          "flags": 0,
+          "name": "academia",
+          "rawPosition": 52,
+          "topic": "[No Spoilers] The channel for discussion about academia.",
+          "lastMessageId": "1290399726600192092",
+          "lastPinTimestamp": 1630800222000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1616115807581
+        }
+      }
+    },
+    {
+      "id": "822274180597809162",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048840255537153",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [
+            "917090200465866822",
+            "979032069034356786",
+            "1142281615444287568",
+            "1249536059902136320"
+          ],
+          "nsfw": false,
+          "id": "822274180597809162",
+          "flags": 0,
+          "name": "gaming",
+          "rawPosition": 56,
+          "topic": "[No Spoilers] This is the place for discussion of gaming and arranging server game nights.",
+          "lastMessageId": "1290882742401237033",
+          "lastPinTimestamp": 1680198318000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1616115841770
+        }
+      }
+    },
+    {
+      "id": "823578704512155688",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048593978720267",
+          "permissionOverwrites": [
+            "702186427949252679",
+            "799433034990354483",
+            "443421134109671424",
+            "877216611361247252",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "823578704512155688",
+          "flags": 0,
+          "name": "spoilers-headcanon",
+          "rawPosition": 33,
+          "topic": "[Full Spoilers] This channel is for more loose and flexible discussion of the books. If you want to invent head canon for content in the books, ship, or generally not worry about book continuity, this is a good space to do so. \n\n Note: This is not a place to challenge or debate headcanon. It is meant as a safe space for people to express ideas.",
+          "lastMessageId": "1291106384410054686",
+          "lastPinTimestamp": 1694992972000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1616426864508
+        }
+      }
+    },
+    {
+      "id": "823578762297081887",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048593978720267",
+          "permissionOverwrites": [
+            "877216611361247252",
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "823578762297081887",
+          "flags": 0,
+          "name": "spoilers-debates",
+          "rawPosition": 34,
+          "topic": "[Full Spoilers] This channel is specifically for debates. Please confine continually reoccurring debates to this chat and remember to be respectful to each other.",
+          "lastMessageId": "1291160955795013682",
+          "lastPinTimestamp": 1630800129000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1616426878285
+        }
+      }
+    },
+    {
+      "id": "825197735249838130",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "732372426528391171",
+          "permissionOverwrites": [
+            "545140445689151490",
+            "799433034990354483",
+            "443421134109671424",
+            "1012804486697332858",
+            "163409047901569025",
+            "450044488371535872"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "825197735249838130",
+          "flags": 0,
+          "name": "author-archive",
+          "rawPosition": 30,
+          "topic": "[Full Spoilers] This is a project to transcribe Rowe quotes into a single database. Authors may post lore bits in here from time to time.",
+          "lastMessageId": "1285644256303910962",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1616812871516
+        }
+      }
+    },
+    {
+      "id": "841315284135575573",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_STAGE_VOICE",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "892244787594408066",
+          "permissionOverwrites": [
+            "745800255106187444",
+            "1012804486697332858",
+            "443421134109671424",
+            "877216611361247252",
+            "702186427949252679",
+            "795898204101017610",
+            "197050381270777857",
+            "799433034990354483",
+            "288884919365533696",
+            "698014242728706078",
+            "729902037940043907",
+            "450044488371535872",
+            "789339350777069609"
+          ],
+          "messages": [],
+          "nsfw": false,
+          "id": "841315284135575573",
+          "flags": 0,
+          "name": "Andrew Q&A",
+          "rawPosition": 0,
+          "bitrate": 39938,
+          "rtcRegion": "us-west",
+          "userLimit": 10000,
+          "videoQualityMode": null,
+          "lastMessageId": "1284317705863958559",
+          "rateLimitPerUser": 0,
+          "topic": null,
+          "createdTimestamp": 1620655594620
+        }
+      }
+    },
+    {
+      "id": "841319025887412294",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "841319025887412294",
+          "flags": 0,
+          "name": "andrew-qa3",
+          "rawPosition": 66,
+          "topic": "This is the text chat for Rowe's Q&A! No AA3 spoilers or specific questions please, we'll be focusing on prep for soulbrand, future plans, and meta-series system stuff!",
+          "lastMessageId": "841454996205469696",
+          "lastPinTimestamp": 1620672494000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 15,
+          "createdTimestamp": 1620656486723
+        }
+      }
+    },
+    {
+      "id": "841491239697514536",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "1278859694647148617",
+            "172862815961350144",
+            "369002981749817345",
+            "699523356881321986",
+            "443421134109671424",
+            "702186427949252679",
+            "877216611361247252",
+            "795898204101017610",
+            "441084828604039168",
+            "799433034990354483",
+            "698014242728706078",
+            "481877237604417548"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "841491239697514536",
+          "flags": 0,
+          "name": "earth-temple",
+          "rawPosition": 19,
+          "topic": null,
+          "lastMessageId": "1290851871283478549",
+          "lastPinTimestamp": 1669690851000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1620697545695
+        }
+      }
+    },
+    {
+      "id": "844377214875336724",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "732372426528391171",
+          "permissionOverwrites": [
+            "795898204101017610",
+            "799433034990354483",
+            "443421134109671424",
+            "907098629913858059",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "844377214875336724",
+          "flags": 0,
+          "name": "question-queue",
+          "rawPosition": 26,
+          "topic": "Where questions for Rowe and Kayleigh are submitted and voted on by the community. The top most voted questions will be transferred to #andrew-answers / #kayleigh-answers when the authors are available to answer questions!",
+          "lastMessageId": "1291216222167502879",
+          "lastPinTimestamp": 1666081078000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1621385615796
+        }
+      }
+    },
+    {
+      "id": "846844315862564944",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "id": "846844315862564944",
+          "flags": 0,
+          "name": "General and Welcome",
+          "rawPosition": 2,
+          "createdTimestamp": 1621973818508
+        }
+      }
+    },
+    {
+      "id": "849090068060569611",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "576207463083147275",
+          "permissionOverwrites": [
+            "729857822652629172",
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "849090068060569611",
+          "flags": 0,
+          "name": "tps-question-and-answer",
+          "rawPosition": 101,
+          "topic": null,
+          "lastMessageId": "852733696205389855",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1622509247556
+        }
+      }
+    },
+    {
+      "id": "852504545429946368",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "703418566489276526",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "852504545429946368",
+          "flags": 0,
+          "name": "andrew-qa4",
+          "rawPosition": 70,
+          "topic": "This is the text chat for Rowe's Q&A! There are no specific spoiler restrictions on this Q&A, but please be mindful that a lot of people come to these Q&As and it is likely that not everyone here has read every book. Please do not randomly drop huge plot spoilers in the chat. Do not randomly spoil the god beast/visage dance-off in AA7, that would be uncool.",
+          "lastMessageId": "852773504868286465",
+          "lastPinTimestamp": 1623327229000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 60,
+          "createdTimestamp": 1623323322399
+        }
+      }
+    },
+    {
+      "id": "862030989323665470",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "896242048309559296",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "869452779813494834",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "862030989323665470",
+          "flags": 0,
+          "name": "roles",
+          "rawPosition": 2,
+          "topic": "This is the place to get new roles.",
+          "lastMessageId": "1119371903010877500",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1625594603616
+        }
+      }
+    },
+    {
+      "id": "872519458697146368",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "635130492362031105",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "872519458697146368",
+          "flags": 0,
+          "name": "transition-team",
+          "rawPosition": 95,
+          "topic": null,
+          "lastMessageId": "872980024553250828",
+          "lastPinTimestamp": 1628096354000,
+          "defaultAutoArchiveDuration": 60,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1628095249581
+        }
+      }
+    },
+    {
+      "id": "872535646911201280",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "910380893900791838",
+            "795898204101017610",
+            "799433034990354483",
+            "443421134109671424",
+            "702186427949252679",
+            "877216611361247252"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "872535646911201280",
+          "flags": 0,
+          "name": "denis-diner",
+          "rawPosition": 22,
+          "topic": "All the waffles to go with all the convos. Talk and chill to your heart's content! BYO favored caffeinated beverages.",
+          "lastMessageId": "1288547374444187710",
+          "lastPinTimestamp": 1698776188000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1628099109152
+        }
+      }
+    },
+    {
+      "id": "872535850888601650",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_VOICE",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "1278859694647148617",
+            "799433034990354483",
+            "443421134109671424",
+            "702186427949252679",
+            "877216611361247252"
+          ],
+          "messages": [],
+          "nsfw": false,
+          "id": "872535850888601650",
+          "flags": 0,
+          "name": "Deni's After Dark - 24/7 waffles",
+          "rawPosition": 3,
+          "bitrate": 64000,
+          "rtcRegion": null,
+          "userLimit": 0,
+          "videoQualityMode": null,
+          "lastMessageId": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1628099157784
+        }
+      }
+    },
+    {
+      "id": "872865226893176832",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "846844315862564944",
+          "permissionOverwrites": [
+            "702186427949252679",
+            "799433034990354483",
+            "443421134109671424",
+            "1012804486697332858",
+            "450044488371535872",
+            "237335364023484418"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "872865226893176832",
+          "flags": 0,
+          "name": "salaris-secrets",
+          "rawPosition": 10,
+          "topic": "🤔",
+          "lastMessageId": "1284270144088178760",
+          "lastPinTimestamp": 1668558127000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1628177687143
+        }
+      }
+    },
+    {
+      "id": "873048423656484874",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "556827751080919090",
+            "880252831733522442",
+            "635130492362031105",
+            "443421134109671424",
+            "197050381270777857",
+            "799433034990354483",
+            "869452779813494834"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "873048423656484874",
+          "flags": 0,
+          "name": "the-library",
+          "rawPosition": 16,
+          "topic": null,
+          "lastMessageId": "1289970135175528612",
+          "lastPinTimestamp": 1670275153000,
+          "defaultAutoArchiveDuration": 10080,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1628221364655
+        }
+      }
+    },
+    {
+      "id": "877220551528153088",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "877216611361247252",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "877220551528153088",
+          "flags": 0,
+          "name": "anchor-room",
+          "rawPosition": 20,
+          "topic": "A place for the Soaring Wings to converse with each other as well as the mods and admins.",
+          "lastMessageId": "1291220958983487549",
+          "lastPinTimestamp": 1667033330000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1629216077454
+        }
+      }
+    },
+    {
+      "id": "879741091421749289",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "697836081420304444",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "879744933026742313",
+            "443421134109671424",
+            "869452779813494834"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "879741091421749289",
+          "flags": 0,
+          "name": "unclaimed-lands",
+          "rawPosition": 47,
+          "topic": "Chaos for kidz\n\nFULL SPOILERS. Any and all discussions and memes can be had here. Media rules apply to non-Rowe works. \\||Tag and label|| major plot spoilers for outside media discussed in this channel. There is more leeway in older and less culturally relevant works, but be mindful that not everyone has read every book.",
+          "lastMessageId": "1288191494062342288",
+          "lastPinTimestamp": 1703804529000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1629817020994
+        }
+      }
+    },
+    {
+      "id": "890252718772478012",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "284155807220629514",
+            "443421134109671424",
+            "702186427949252679",
+            "877216611361247252",
+            "799433034990354483",
+            "703418566489276526",
+            "869452779813494834"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "890252718772478012",
+          "flags": 0,
+          "name": "summit-the-spoopy-spider-spire",
+          "rawPosition": 69,
+          "topic": "Server events channel! Current event: Spoopy - - Check Threads -->",
+          "lastMessageId": "905469239656333344",
+          "lastPinTimestamp": 1635766626000,
+          "defaultAutoArchiveDuration": 10080,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1632323188251
+        }
+      }
+    },
+    {
+      "id": "890582879531315230",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "846844315862564944",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "890582879531315230",
+          "flags": 0,
+          "name": "introductions",
+          "rawPosition": 8,
+          "topic": "Welcome all new users! Please introduce yourself if you feel comfortable.",
+          "lastMessageId": "1291179294399397949",
+          "lastPinTimestamp": 1635373244000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1632401904710
+        }
+      }
+    },
+    {
+      "id": "892244787594408066",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "902742114486587422",
+            "880252831733522442",
+            "284155807220629514",
+            "443421134109671424",
+            "702186427949252679",
+            "898780609504223253",
+            "877216611361247252",
+            "799433034990354483"
+          ],
+          "id": "892244787594408066",
+          "flags": 0,
+          "name": "Events",
+          "rawPosition": 3,
+          "createdTimestamp": 1632798134469
+        }
+      }
+    },
+    {
+      "id": "896242048309559296",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253",
+            "869452779813494834"
+          ],
+          "id": "896242048309559296",
+          "flags": 0,
+          "name": "Rules",
+          "rawPosition": 0,
+          "createdTimestamp": 1633751155689
+        }
+      }
+    },
+    {
+      "id": "896242956128911370",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "896242048309559296",
+          "permissionOverwrites": [
+            "880252831733522442",
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253",
+            "869452779813494834"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "896242956128911370",
+          "flags": 0,
+          "name": "spoiler-policy",
+          "rawPosition": 1,
+          "topic": "A comprehensive list of Climbers Court spoiler policy by channel.",
+          "lastMessageId": "1167103863418003586",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1633751372130
+        }
+      }
+    },
+    {
+      "id": "896530453077569576",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "443421134109671430",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "896530453077569576",
+          "flags": 0,
+          "name": "extra-voice-text",
+          "rawPosition": 64,
+          "topic": "Run the bot-commands for music vc here.",
+          "lastMessageId": "1237911454708006922",
+          "lastPinTimestamp": 1635622046000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1633819916744
+        }
+      }
+    },
+    {
+      "id": "898352409053659187",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "1057980706040578079",
+          "permissionOverwrites": [
+            "902742114486587422",
+            "880252831733522442",
+            "1012804486697332858",
+            "443421134109671424",
+            "898780609504223253",
+            "450044488371535872",
+            "795898204101017610",
+            "702186427949252679",
+            "799433034990354483",
+            "907098629913858059",
+            "869452779813494834"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "898352409053659187",
+          "flags": 0,
+          "name": "server-announcements",
+          "rawPosition": 7,
+          "topic": null,
+          "lastMessageId": "1285288733234561155",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1634254304899
+        }
+      }
+    },
+    {
+      "id": "903834256348950548",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "869452779813494834",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "903834256348950548",
+          "flags": 0,
+          "name": "mod-mailbox-citadel",
+          "rawPosition": 17,
+          "topic": "Landing page for mod application submissions and other relevant forms. Please start at thread rather than talking in the main channel.",
+          "lastMessageId": "1283274698242785352",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1635561279142
+        }
+      }
+    },
+    {
+      "id": "903834689368907806",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "880252831733522442",
+            "443421134109671424",
+            "869452779813494834"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "903834689368907806",
+          "flags": 0,
+          "name": "mod-mailbox-library",
+          "rawPosition": 25,
+          "topic": "A landing page for feedback forms and ban appeal submissions. Please create a thread rather than talking in the main channel.",
+          "lastMessageId": "959269494411366400",
+          "defaultAutoArchiveDuration": 10080,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1635561382382
+        }
+      }
+    },
+    {
+      "id": "912193946162196500",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "892244787594408066",
+          "permissionOverwrites": [
+            "745800255106187444",
+            "902742114486587422",
+            "1012804486697332858",
+            "443421134109671424",
+            "877216611361247252",
+            "450044488371535872",
+            "795898204101017610",
+            "729902037940043907",
+            "799433034990354483",
+            "898780609504223253",
+            "703418566489276526",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "912193946162196500",
+          "flags": 0,
+          "name": "live-q-and-a-chat",
+          "rawPosition": 12,
+          "topic": "Live Q&A chat. Check Pins for Rules.",
+          "lastMessageId": "1284742450153394197",
+          "lastPinTimestamp": 1697512131000,
+          "defaultAutoArchiveDuration": 10080,
+          "defaultThreadRateLimitPerUser": 0,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1637554384509
+        }
+      }
+    },
+    {
+      "id": "914308709964980254",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "1278859694647148617",
+            "939765691358265374",
+            "443421134109671424",
+            "702186427949252679",
+            "795898204101017610",
+            "799433034990354483",
+            "907098629913858059"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "914308709964980254",
+          "flags": 0,
+          "name": "mod-requests",
+          "rawPosition": 18,
+          "topic": null,
+          "lastMessageId": "1291121817792286811",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1638058583490
+        }
+      }
+    },
+    {
+      "id": "918144138799611966",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "896242048309559296",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "869452779813494834",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "918144138799611966",
+          "flags": 0,
+          "name": "appeals",
+          "rawPosition": 4,
+          "topic": "This channel is for pleading your case should you be muted for any reason.",
+          "lastMessageId": "948430867607486494",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1638973020983
+        }
+      }
+    },
+    {
+      "id": "918685304049766420",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "896242048309559296",
+          "permissionOverwrites": [
+            "902742114486587422",
+            "907098629913858059",
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253",
+            "869452779813494834"
+          ],
+          "messages": [
+            "1285086551725969408",
+            "1285086556381777972",
+            "1285086547539918909",
+            "1285086465482690691",
+            "1285086559971971107"
+          ],
+          "threads": [],
+          "nsfw": false,
+          "id": "918685304049766420",
+          "flags": 0,
+          "name": "faq",
+          "rawPosition": 3,
+          "topic": "You have questions? We have answers.",
+          "lastMessageId": "1285086559971971107",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1639102044833
+        }
+      }
+    },
+    {
+      "id": "930839752855416972",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "902742114486587422",
+            "880252831733522442",
+            "443421134109671424",
+            "702186427949252679",
+            "877216611361247252",
+            "799433034990354483",
+            "703418566489276526",
+            "869452779813494834"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "930839752855416972",
+          "flags": 0,
+          "name": "secret-mc-bday-surprise",
+          "rawPosition": 68,
+          "topic": "The one rule of surprise channel is we don't talk about surprise channel.",
+          "lastMessageId": "976137784752476160",
+          "lastPinTimestamp": 1652799710000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1641999891247
+        }
+      }
+    },
+    {
+      "id": "957494803447300126",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_VOICE",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "958225648931995681",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "795507539584352256",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "nsfw": false,
+          "id": "957494803447300126",
+          "flags": 0,
+          "name": "Basement Banter",
+          "rawPosition": 3,
+          "bitrate": 64000,
+          "rtcRegion": null,
+          "userLimit": 0,
+          "videoQualityMode": null,
+          "lastMessageId": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1648354950535
+        }
+      }
+    },
+    {
+      "id": "958225648931995681",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "799433034990354483",
+            "795507539584352256",
+            "443421134109671424",
+            "898780609504223253"
+          ],
+          "id": "958225648931995681",
+          "flags": 0,
+          "name": "Spider Spire",
+          "rawPosition": 8,
+          "createdTimestamp": 1648529197677
+        }
+      }
+    },
+    {
+      "id": "958881605131337749",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "958225648931995681",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "795507539584352256",
+            "443421134109671424",
+            "645343657075146772"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "958881605131337749",
+          "flags": 0,
+          "name": "basement-vc-text",
+          "rawPosition": 44,
+          "topic": null,
+          "lastMessageId": "1290999628359274609",
+          "lastPinTimestamp": 1685758031000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1648685589822
+        }
+      }
+    },
+    {
+      "id": "983685372078862346",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "172862815961350144",
+            "443421134109671424",
+            "450044488371535872",
+            "702186427949252679",
+            "877216611361247252",
+            "443463591606222848",
+            "983992309358153738",
+            "703418566489276526",
+            "698014242728706078",
+            "799433034990354483"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "983685372078862346",
+          "flags": 0,
+          "name": "top-secret-birthday-event",
+          "rawPosition": 67,
+          "topic": null,
+          "lastMessageId": "1016939492961165382",
+          "lastPinTimestamp": 1654909283000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1654599268694
+        }
+      }
+    },
+    {
+      "id": "995726853576851506",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "1278859694647148617",
+            "880174731410681908",
+            "880252831733522442",
+            "443421134109671424",
+            "877216611361247252",
+            "702186427949252679",
+            "795898204101017610",
+            "799433034990354483"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "995726853576851506",
+          "flags": 0,
+          "name": "vacation-valley",
+          "rawPosition": 21,
+          "topic": null,
+          "lastMessageId": "1119370589216460871",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1657470181603
+        }
+      }
+    },
+    {
+      "id": "1012805760536825886",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048593978720267",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "702186427949252679",
+            "877216611361247252"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "1012805760536825886",
+          "flags": 0,
+          "name": "expanded-universe",
+          "rawPosition": 39,
+          "topic": null,
+          "lastMessageId": "1065903319555514388",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1661542110333
+        }
+      }
+    },
+    {
+      "id": "1033201348012949525",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_VOICE",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "443421134109671430",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424"
+          ],
+          "messages": [],
+          "nsfw": false,
+          "id": "1033201348012949525",
+          "flags": 0,
+          "name": "General Voice Chat",
+          "rawPosition": 6,
+          "bitrate": 64000,
+          "rtcRegion": null,
+          "userLimit": 0,
+          "videoQualityMode": null,
+          "lastMessageId": "1290939459730145303",
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1666404797319
+        }
+      }
+    },
+    {
+      "id": "1037575094559584356",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_FORUM",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048840255537153",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "877216611361247252",
+            "702186427949252679"
+          ],
+          "threads": [
+            "1037579293598949376",
+            "1037589344766140456",
+            "1037591163055636490",
+            "1037593822420537364",
+            "1037596676967383080",
+            "1038169442623950859",
+            "1040146439986221076",
+            "1053686432260173924",
+            "1064363931923120300",
+            "1156782624572964924",
+            "1171116703258775652",
+            "1223637700569993266"
+          ],
+          "id": "1037575094559584356",
+          "flags": 0,
+          "name": "lydias-library",
+          "rawPosition": 57,
+          "availableTags": [
+            {
+              "id": "1037576122394738719",
+              "name": "Progression Fantasy",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1037576145790570527",
+              "name": "Cultivation",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1037576329983438849",
+              "name": "Sci-Fi",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1037576805743333447",
+              "name": "Dragons",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1037577025810087976",
+              "name": "Urban",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1037577095007715389",
+              "name": "Wuxia",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1037577165597851730",
+              "name": "YA",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1037577818915221604",
+              "name": "Trans-rep",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1037577874372309012",
+              "name": "LGBTQ-rep",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1037577929212837978",
+              "name": "Swords",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1038167843163885629",
+              "name": "Epic Fantasy",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1038168855400415334",
+              "name": "Hard Magic",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1156781860140093540",
+              "name": "High Fantasy",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1156781948623147089",
+              "name": "Slice of Life",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1156782053208096860",
+              "name": "Adventure",
+              "moderated": true,
+              "emoji": null
+            },
+            {
+              "id": "1156782142701961286",
+              "name": "LitRPG",
+              "moderated": true,
+              "emoji": null
+            }
+          ],
+          "defaultReactionEmoji": null,
+          "defaultThreadRateLimitPerUser": 0,
+          "rateLimitPerUser": 0,
+          "defaultAutoArchiveDuration": 10080,
+          "nsfw": false,
+          "topic": "Format for posts:\n\n```\nThis thread is for discussion on the [series name] by [author].\n\nThe books in this series include:\n<list books in series in chronological order>\n```\n**Only Whispers may create a new book thread. At least 2 moderators must join each thread.  New forum threads may be requested in #media. All normal server rules apply. **",
+          "defaultForumLayout": "GALLERY_VIEW",
+          "createdTimestamp": 1667447579756
+        }
+      }
+    },
+    {
+      "id": "1037881274641154048",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_FORUM",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "697836081420304444",
+          "permissionOverwrites": [
+            "795898204101017610",
+            "799433034990354483",
+            "443421134109671424"
+          ],
+          "threads": [
+            "1037884654532956261",
+            "1040848717009391636"
+          ],
+          "id": "1037881274641154048",
+          "flags": 16,
+          "name": "tavares-teacup",
+          "rawPosition": 49,
+          "availableTags": [
+            {
+              "id": "1037884329734439034",
+              "name": "Update",
+              "moderated": true,
+              "emoji": {
+                "id": "948373212721446942",
+                "name": null
+              }
+            },
+            {
+              "id": "1037884362202566676",
+              "name": "Critical Notice",
+              "moderated": true,
+              "emoji": {
+                "id": "787628807237402654",
+                "name": null
+              }
+            },
+            {
+              "id": "1037887105810051172",
+              "name": "WIP",
+              "moderated": true,
+              "emoji": {
+                "id": "784704729372557322",
+                "name": null
+              }
+            },
+            {
+              "id": "1037979441676161064",
+              "name": "Issue",
+              "moderated": false,
+              "emoji": {
+                "id": "774285866947444756",
+                "name": null
+              }
+            },
+            {
+              "id": "1037980078937739324",
+              "name": "Feature Request",
+              "moderated": false,
+              "emoji": {
+                "id": "805339465899311155",
+                "name": null
+              }
+            },
+            {
+              "id": "1037982397553180682",
+              "name": "Reference",
+              "moderated": true,
+              "emoji": {
+                "id": "842511049486893136",
+                "name": null
+              }
+            },
+            {
+              "id": "1039673342317297704",
+              "name": "Resolved",
+              "moderated": false,
+              "emoji": {
+                "id": "774285524696825906",
+                "name": null
+              }
+            }
+          ],
+          "defaultReactionEmoji": null,
+          "defaultThreadRateLimitPerUser": 0,
+          "rateLimitPerUser": 30,
+          "defaultAutoArchiveDuration": 10080,
+          "nsfw": false,
+          "topic": "Hey Everyone! If you're reading this that means you're being awesome. Here in Tavare's Teacup (name subject to change) there are a few rules to help keep everything running smoothly and awesomely. Here's a quick overview on when you should/should not do anything in regards to the bot.\n\n**Minor grammatical mistake or non-urgent bug:**\nReport it in the form, these aren't super urgent so there isn't a necessity to contact anyone directly!\n\n**\"Minor incident\"** \nThese are things you should ping Ghost about. These include errors from the bot, or bugs such as using the cakeday command and it not functioning as expected.\n\n**\"Major incident\"**\nThese are incidents that need attention as soon as possible, so ping the Botmaster Role! This includes commands related to the question queue not functioning properly.\n\n**\"Critical Incident\"**\nThese are red alert incidents, if the bot server is compromised, the bot starts spamming or sending out scam links, ping the Whisper and Researcher roles ***IMMEDIATELY.*** They will kick the bot and then contact the bot masters to rectify the situation.\n\nIn all these cases. pings are the required form of contact. Bot masters or staff members may need to bring other members into the conversation and it is easier if it's where everything can easily be seen, so please don't DM the botmasters!",
+          "defaultForumLayout": "NOT_SET",
+          "createdTimestamp": 1667520578776
+        }
+      }
+    },
+    {
+      "id": "1039677439913242734",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "697836081420304444",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "698014242728706078",
+            "443421134109671424",
+            "877216611361247252",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "1039677439913242734",
+          "flags": 0,
+          "name": "tarren-tales",
+          "rawPosition": 46,
+          "topic": "[Light Spoilers] Fanfiction! If you want to share or write fanfiction of Rowe's books, this is the place.",
+          "lastMessageId": "1287161525550710856",
+          "lastPinTimestamp": 1672073135000,
+          "defaultThreadRateLimitPerUser": 0,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1667948817948
+        }
+      }
+    },
+    {
+      "id": "1043772056996675584",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "892244787594408066",
+          "permissionOverwrites": [
+            "172862815961350144",
+            "1012804486697332858",
+            "443421134109671424",
+            "877216611361247252",
+            "702186427949252679",
+            "795898204101017610",
+            "450044488371535872",
+            "799433034990354483",
+            "961597708303478785"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "1043772056996675584",
+          "flags": 0,
+          "name": "q-and-a-questions",
+          "rawPosition": 13,
+          "topic": "Ask questions here! Check pins for rules!",
+          "lastMessageId": "1284963058946543794",
+          "lastPinTimestamp": 1726270021000,
+          "defaultAutoArchiveDuration": 10080,
+          "defaultThreadRateLimitPerUser": 0,
+          "rateLimitPerUser": 120,
+          "createdTimestamp": 1668925050735
+        }
+      }
+    },
+    {
+      "id": "1048495498182533210",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "732372426528391171",
+          "permissionOverwrites": [
+            "902742114486587422",
+            "443421134109671424",
+            "1012804486697332858",
+            "450044488371535872",
+            "795898204101017610",
+            "799433034990354483",
+            "443463591606222848",
+            "698014242728706078"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "1048495498182533210",
+          "flags": 0,
+          "name": "kayleigh-answers",
+          "rawPosition": 28,
+          "topic": "[Full Spoilers] This is where Kayleigh answers questions. Enable notifications for this channel to get updates when Kayleigh answers questions!",
+          "lastMessageId": "1126861645264732162",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1670051206871
+        }
+      }
+    },
+    {
+      "id": "1057980706040578079",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "799433034990354483"
+          ],
+          "id": "1057980706040578079",
+          "flags": 0,
+          "name": "Announcements",
+          "rawPosition": 1,
+          "createdTimestamp": 1672312656651
+        }
+      }
+    },
+    {
+      "id": "1066419767159836803",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_CATEGORY",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": null,
+          "permissionOverwrites": [
+            "799433034990354483",
+            "443421134109671424",
+            "877216611361247252",
+            "702186427949252679"
+          ],
+          "id": "1066419767159836803",
+          "flags": 0,
+          "name": "Adaptations",
+          "rawPosition": 7,
+          "createdTimestamp": 1674324685612
+        }
+      }
+    },
+    {
+      "id": "1066420315711877120",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_FORUM",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "1066419767159836803",
+          "permissionOverwrites": [
+            "1065772953742086244",
+            "799433034990354483",
+            "443421134109671424",
+            "702186427949252679",
+            "877216611361247252"
+          ],
+          "threads": [
+            "1066429266184654941"
+          ],
+          "id": "1066420315711877120",
+          "flags": 0,
+          "name": "tapas-forum",
+          "rawPosition": 40,
+          "availableTags": [
+            {
+              "id": "1066421098222207068",
+              "name": "Tapas",
+              "moderated": false,
+              "emoji": null
+            },
+            {
+              "id": "1066421163502342214",
+              "name": "tag all spoilers",
+              "moderated": false,
+              "emoji": null
+            },
+            {
+              "id": "1066421201704067175",
+              "name": "full comic spoilers",
+              "moderated": false,
+              "emoji": null
+            },
+            {
+              "id": "1066421225489965056",
+              "name": "no book spoilers",
+              "moderated": false,
+              "emoji": null
+            },
+            {
+              "id": "1066427379330863204",
+              "name": "full book spoilers",
+              "moderated": false,
+              "emoji": null
+            }
+          ],
+          "defaultReactionEmoji": {
+            "id": "813613188809228299",
+            "name": null
+          },
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "defaultAutoArchiveDuration": 10080,
+          "nsfw": false,
+          "topic": "This is the forum to discuss anything and everything about the new Tapas adaptation!\n\nReminders:\n\n**DO NOT REPOST FULL PANELS.**\n  - Single panels for memes, icons, or reactions is fine! Multi-panel reposts will be deleted.",
+          "defaultSortOrder": "LATEST_ACTIVITY",
+          "defaultForumLayout": "NOT_SET",
+          "createdTimestamp": 1674324816397
+        }
+      }
+    },
+    {
+      "id": "1091624284075593771",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "699079502575304704",
+          "permissionOverwrites": [
+            "799433034990354483",
+            "703418566489276526",
+            "443421134109671424",
+            "877216611361247252",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "1091624284075593771",
+          "flags": 0,
+          "name": "corn",
+          "rawPosition": 65,
+          "topic": null,
+          "lastMessageId": "1091976833009991700",
+          "lastPinTimestamp": 1680406191000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1680333910722
+        }
+      }
+    },
+    {
+      "id": "1146810277539618906",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "450048593978720267",
+          "permissionOverwrites": [
+            "898780609504223253",
+            "799433034990354483",
+            "443421134109671424",
+            "702186427949252679",
+            "877216611361247252"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "1146810277539618906",
+          "flags": 0,
+          "name": "dania",
+          "rawPosition": 35,
+          "topic": "[Dania] You can discuss any Dania books in this channel. Current books include Edge of the Woods: The Lost Edge",
+          "lastMessageId": "1291129821103132734",
+          "lastPinTimestamp": 1694567762000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1693491276870
+        }
+      }
+    },
+    {
+      "id": "1157738440843079720",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "892244787594408066",
+          "permissionOverwrites": [
+            "880174731410681908",
+            "1119369568238964828",
+            "443421134109671424",
+            "702186427949252679",
+            "877216611361247252",
+            "795898204101017610",
+            "799433034990354483",
+            "939954142124863519",
+            "698014242728706078",
+            "703418566489276526",
+            "907098629913858059"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "1157738440843079720",
+          "flags": 0,
+          "name": "inktober-2023",
+          "rawPosition": 11,
+          "topic": "Intober Event - running through October!\n\nShare your artwork/writings and musings!",
+          "lastMessageId": "1168521853657157662",
+          "lastPinTimestamp": 1696101706000,
+          "defaultAutoArchiveDuration": 10080,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1696096754037
+        }
+      }
+    },
+    {
+      "id": "1163215532208705696",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_STAGE_VOICE",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "892244787594408066",
+          "permissionOverwrites": [
+            "729902037940043907",
+            "799433034990354483",
+            "443421134109671424",
+            "1012804486697332858"
+          ],
+          "messages": [],
+          "nsfw": false,
+          "id": "1163215532208705696",
+          "flags": 0,
+          "name": "Kayleigh Q&A",
+          "rawPosition": 1,
+          "bitrate": 64000,
+          "rtcRegion": null,
+          "userLimit": 10000,
+          "videoQualityMode": null,
+          "lastMessageId": "1163686111944658956",
+          "rateLimitPerUser": 0,
+          "topic": null,
+          "createdTimestamp": 1697402594378
+        }
+      }
+    },
+    {
+      "id": "1170563784222458046",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "795898204101017610",
+            "1170564016045821985",
+            "799433034990354483",
+            "1278859694647148617",
+            "443421134109671424",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "1170563784222458046",
+          "flags": 0,
+          "name": "knowledge-temple",
+          "rawPosition": 24,
+          "topic": null,
+          "lastMessageId": "1289049682793725994",
+          "lastPinTimestamp": 1699155033000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1699154554182
+        }
+      }
+    },
+    {
+      "id": "1175653207570137118",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "1278859694647148617",
+            "172862815961350144",
+            "369002981749817345",
+            "443421134109671424",
+            "1012804486697332858",
+            "450044488371535872",
+            "877216611361247252",
+            "795898204101017610",
+            "702186427949252679",
+            "799433034990354483",
+            "534568602893025291",
+            "340513681270112257"
+          ],
+          "messages": [],
+          "threads": [],
+          "nsfw": false,
+          "id": "1175653207570137118",
+          "flags": 0,
+          "name": "event-staff-thread",
+          "rawPosition": 23,
+          "topic": "This is the thread for planning events with the help of event staff. May be revamped in the future",
+          "lastMessageId": "1289837429267890207",
+          "lastPinTimestamp": 1701595324000,
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1700367967265
+        }
+      }
+    },
+    {
+      "id": "1179840845470503004",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_FORUM",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "892244787594408066",
+          "permissionOverwrites": [
+            "902742114486587422",
+            "1166179561332027522",
+            "443421134109671424",
+            "450044488371535872",
+            "702186427949252679",
+            "795898204101017610",
+            "877216611361247252",
+            "799433034990354483",
+            "1036538103801847849",
+            "1012804486697332858",
+            "443463591606222848"
+          ],
+          "threads": [],
+          "id": "1179840845470503004",
+          "flags": 0,
+          "name": "there-is-no-event-chat",
+          "rawPosition": 14,
+          "availableTags": [
+            {
+              "id": "1179846737796546560",
+              "name": "Event Discussion",
+              "moderated": false,
+              "emoji": null
+            },
+            {
+              "id": "1179846773569757194",
+              "name": "Letter",
+              "moderated": false,
+              "emoji": null
+            }
+          ],
+          "defaultReactionEmoji": {
+            "id": "689946338796109828",
+            "name": null
+          },
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "defaultAutoArchiveDuration": 10080,
+          "nsfw": false,
+          "topic": null,
+          "defaultForumLayout": "NOT_SET",
+          "createdTimestamp": 1701366377943
+        }
+      }
+    },
+    {
+      "id": "1190803278729064530",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_STAGE_VOICE",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "892244787594408066",
+          "permissionOverwrites": [
+            "795898204101017610",
+            "172862815961350144",
+            "1027074193147310080",
+            "799433034990354483",
+            "443421134109671424",
+            "487085787326840843"
+          ],
+          "messages": [],
+          "nsfw": false,
+          "id": "1190803278729064530",
+          "flags": 0,
+          "name": "Judgements",
+          "rawPosition": 2,
+          "bitrate": 64000,
+          "rtcRegion": null,
+          "userLimit": 10000,
+          "videoQualityMode": null,
+          "lastMessageId": "1290893814722072680",
+          "rateLimitPerUser": 0,
+          "topic": null,
+          "createdTimestamp": 1703980025704
+        }
+      }
+    },
+    {
+      "id": "1190807534479605910",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_TEXT",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "892244787594408066",
+          "permissionOverwrites": [
+            "729902037940043907",
+            "1027074193147310080",
+            "799433034990354483",
+            "443421134109671424",
+            "487085787326840843",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "threads": [
+            "1289615605573484618",
+            "1290857598366519339"
+          ],
+          "nsfw": false,
+          "id": "1190807534479605910",
+          "flags": 0,
+          "name": "judgment-taker",
+          "rawPosition": 15,
+          "topic": null,
+          "lastMessageId": "1290862674560811038",
+          "defaultThreadRateLimitPerUser": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1703981040354
+        }
+      }
+    },
+    {
+      "id": "1284966835363647580",
+      "permissions": {
+        "channel": {
+          "type": "GUILD_VOICE",
+          "guild": "443421134109671424",
+          "guildId": "443421134109671424",
+          "parentId": "719565848360124468",
+          "permissionOverwrites": [
+            "272937604339466240",
+            "880252831733522442",
+            "799433034990354483",
+            "443421134109671424",
+            "898780609504223253",
+            "702186427949252679"
+          ],
+          "messages": [],
+          "nsfw": false,
+          "id": "1284966835363647580",
+          "flags": 0,
+          "name": "Test VC",
+          "rawPosition": 4,
+          "bitrate": 64000,
+          "rtcRegion": null,
+          "userLimit": 0,
+          "videoQualityMode": null,
+          "lastMessageId": null,
+          "rateLimitPerUser": 0,
+          "createdTimestamp": 1726430367080
+        }
+      }
+    }
+  ]
+}

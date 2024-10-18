@@ -313,6 +313,7 @@ Module
     }
   })
   .addEvent("messageCreate", async (msg) => {
+    if (!msg) return;
     for (const UpdateRole of Object.values(snowflakes.roles.Updates)) {
       if (msg.mentions.roles.has(UpdateRole) && !msg.mentions.roles.has(snowflakes.roles.Updates.AllUpdates)) {
         return msg.reply({ content: "<@&" + snowflakes.roles.Updates.AllUpdates + ">", allowedMentions: { roles: [snowflakes.roles.Updates.AllUpdates] } })

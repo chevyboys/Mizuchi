@@ -45,35 +45,59 @@ let reaction = {
           if (!reaction.users.cache.has(message.client.user.id)) {
             return;
           } else {
+            $userMention = Participants.totalHostileToday(user.id) < 1 ? "<@" + user.id + ">"
+              : member.displayName;
             Participants.addHostile(user.id);
             const currentHostileCount = Participants.totalHostileToday(user.id);
             reaction.message.guild.client.user.setActivity(`More than ${Participants.getCurrentTotalHostileFound()} Ghosts caught!`);
-            $userMention = Participants.totalHostileToday(user.id) < 1
-              ? "<@" + user.id + ">"
-              : member.displayName;
 
-            NPCSend(channel,
-              u.embed(
-                {
-                  description: `I see <@${user.id}> found a treat in <#${message.channel.id}> `,
-                  footer: {
-                    text: `Found Ghosts today: ${Participants.totalHostileToday(user.id)} | total: ${Participants.totalHostile(user.id)}\nFound Spirits today: ${Participants.totalFriendlyToday(user.id)} | total: ${Participants.totalFriendly(user.id)}`
-                  }
-                }
-              ),
-              {
-                content: $userMention,
-              });
+
 
             //TODO: handle the rewards
             switch (currentHostileCount) {
               case 5:
+                NPCSend(channel,
+                  u.embed(
+                    {
+                      description: `I see <@${user.id}> found a treat in <#${message.channel.id}> `,
+                      footer: {
+                        text: `Found Ghosts today: ${Participants.totalHostileToday(user.id)} | total: ${Participants.totalHostile(user.id)}\nFound Spirits today: ${Participants.totalFriendlyToday(user.id)} | total: ${Participants.totalFriendly(user.id)}`
+                      }
+                    }
+                  ),
+                  {
+                    content: $userMention,
+                  });
                 break;
               case 50:
                 //TODO: Add today's mask to the inventory and equip it
                 Participants.get(user.id).status = "SUSPENDED";
+                NPCSend(channel,
+                  u.embed(
+                    {
+                      description: `<@${user.id}> has fallen to the darkness`,
+                      footer: {
+                        text: `Found Ghosts today: ${Participants.totalHostileToday(user.id)} | total: ${Participants.totalHostile(user.id)}\nFound Spirits today: ${Participants.totalFriendlyToday(user.id)} | total: ${Participants.totalFriendly(user.id)}`
+                      }
+                    }
+                  ),
+                  {
+                    content: $userMention,
+                  });
                 break;
               default:
+                NPCSend(channel,
+                  u.embed(
+                    {
+                      description: `I see <@${user.id}> found a treat in <#${message.channel.id}> `,
+                      footer: {
+                        text: `Found Ghosts today: ${Participants.totalHostileToday(user.id)} | total: ${Participants.totalHostile(user.id)}\nFound Spirits today: ${Participants.totalFriendlyToday(user.id)} | total: ${Participants.totalFriendly(user.id)}`
+                      }
+                    }
+                  ),
+                  {
+                    content: $userMention,
+                  });
             }
           }
 

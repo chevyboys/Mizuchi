@@ -1,6 +1,5 @@
 //Initalization, imports, etc
 const webhookSend = require('../../utils/Webhook.js');
-const event = require('./utils.js');
 
 
 /**
@@ -10,11 +9,12 @@ const event = require('./utils.js');
  * @param {Object} additionalMessageOptions - Additional options for the message.
  * @returns {Promise} - A promise that resolves when the message is sent.
  */
-function NPCSend(channel, embedOptions, additionalMessageOptions) {
+async function NPCSend(channel, embedOptions, additionalMessageOptions) {
   additionalMessageOptions = additionalMessageOptions || {};
-  embedOptions.color = event.colors[event.colors.length - 1].color;
+  embedOptions.color = "#010101";
   additionalMessageOptions.embeds = [embedOptions];
-  return webhookSend.webhook(channel, "Mysterious Voice", "./avatar/Halloween.png", additionalMessageOptions);
+  console.log("NPCSend: ", channel, embedOptions, additionalMessageOptions);
+  return await webhookSend.webhook(channel, "Sinister Voice", "./avatar/Symphony.png", additionalMessageOptions);
 }
 
 module.exports = NPCSend;

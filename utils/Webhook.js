@@ -18,7 +18,6 @@ module.exports = {
       })
         .then(sel => sel.send(message)).catch(err => { throw err });
     }
-    else (await webhook).send(message);
-    return;
+    else return (await webhook).send(message);
   }
 }

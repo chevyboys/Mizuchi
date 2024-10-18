@@ -243,6 +243,17 @@ class ParticipantManager extends Collection {
     super(iterable.map(p => [p.userID, new Participant(p, this)]));
   }
 
+  /*
+   * Gets the total count of Hostile reactions found by all participants for the event.
+    * @returns {Number} The total count.
+    * @example
+    * const participants = new ParticipantManager();
+    * participants.totalEventHostile();
+    */
+  totalEventHostile() {
+    return this.map(p => p.Hostile.total()).reduce((a, b) => a + b, 0);
+  }
+
   /**
    * Adds 1 to the Hostile count of a participant.
    * @param {string} userID - The user ID of the participant.

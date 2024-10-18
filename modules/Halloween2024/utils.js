@@ -1,67 +1,67 @@
 const Augur = require("augurbot");
 const snowflakes = require('../../config/snowflakes.json');
 const NPCSend = require("./NPC.js");
-const { clean } = require("../../utils/Utils.Generic");
+const u = require("../../utils/Utils.Generic");
 const colors = [
   //TODO: change the colors, instead of a reward threshold
   //    we should have a role icon
   {
     name: "Raspberry",
     color: "#961547",
-    role_icon: "🍇"
+    role_icon: "./img/server/Halloween/icon.png"
   },
 
   {
     name: "Orange",
     color: "#e07f35",
-    role_icon: "🍇"
+    role_icon: "./img/server/Halloween/icon.png"
   },
 
   {
     name: "Gold",
     color: "#fffe7b",
-    role_icon: "🍇"
+    role_icon: "./img/server/Halloween/icon.png"
   },
 
   {
     name: "Green",
     color: "#a7ff76",
-    role_icon: "🍇"
+    role_icon: "./img/server/Halloween/icon.png"
   },
   {
     name: "Eucalyptus Green",
     color: "#28eaa2",
-    role_icon: "🍇"
+    role_icon: "./img/server/Halloween/icon.png"
   },
   {
     name: "Mint",
     color: "#b9ffea",
-    role_icon: "🍇"
+    role_icon: "./img/server/Halloween/icon.png"
   },
   {
     name: "frost",
     color: "#b9ebff",
-    role_icon: "🍇"
+    role_icon: "./img/server/Halloween/icon.png"
   },
   {
     name: "Deep Purple",
     color: "#310c38",
-    role_icon: "🍇"
+    role_icon: "./img/server/Halloween/icon.png"
   },
   {
     name: "Tavare Winter Blue",
     color: "#66a3d8",
-    role_icon: "🍇"
+    role_icon: "./img/server/Halloween/icon.png"
   },
   {
     name: "Goddess Blue",
     color: "#9CA9FF",
-    role_icon: "🍇"
+    role_icon: "./img/server/Halloween/icon.png"
   },
   {
     name: "Bingus Blurple",
     color: "#c4ccff",
-    role_icon: "🍇"
+    role_icon: "./img/server/Halloween/icon.png"
   }
 ]
 
@@ -79,9 +79,9 @@ const roles = [
 ]
 
 
-const avatar = "./avatar/Halloween.png";
-const serverPFP = "";
-const serverBanner = "";
+const avatar = "./avatar/Halloween-Twilight.png";
+const serverPFP = "./img/server/Halloween/icon.png";
+const serverBanner = "./img/server/Halloween/banner.png";
 /**
  * @module Mask of theWaters/utils
  */
@@ -131,11 +131,13 @@ let event = {
     for (const color of colors) {
       let role = guild.roles.cache.find(r => r.name.toLowerCase() == `mask of the ${color.name.toLowerCase()}`);
 
+
+
       if (!role) {
         role = await guild.roles.create({
           name: `Mask of the ${color.name}`,
-          color: color.color,
-          icon: color.role_icon,
+          //color: color.color,
+          icon: guild.premiumTier > 1 ? color.role_icon : undefined,
           reason: "Holiday Event",
           position: guild.roles.cache.get(snowflakes.roles.Holiday[0]).position + 1
         });
@@ -219,24 +221,24 @@ let event = {
     return client.user.setAvatar(('./avatar/' + ("base.png")))
   },
   //set the server icon to the event icon
-  setServerHolidayIcon: (guild) => {
+  setServerHolidayIcon: async (guild) => {
     if (serverPFP && serverPFP != "") {
-      guild.setIcon(serverPFP);
+      return await guild.setIcon(serverPFP);
     }
   },
   //reset the server icon to the default icon
-  cleanServerHolidayIcon: (guild) => {
-    guild.setIcon("./img/server/pfp.png");
+  cleanServerHolidayIcon: async (guild) => {
+    return await guild.setIcon("./img/server/default/icon.png");
   },
   //set the server banner to the event banner
   setServerHolidayBanner: (guild) => {
-    if (serverBanner && serverBanner != "") {
+    if (guild.premiumTier > 1 && serverBanner && serverBanner != "") {
       guild.setBanner(serverBanner);
     }
   },
   //reset the server banner to the default banner
-  cleanServerHolidayBanner: (guild) => {
-    guild.setBanner("./img/server/banner.png");
+  cleanServerHolidayBanner: async (guild) => {
+    if (guild.premiumTier > 1) return await guild.setBanner("./img/server/default/banner.png");
   },
   //send the server-announcements announcement
   sendAnnouncements: async (guild) => {
@@ -254,35 +256,31 @@ let event = {
       console.log("No server-announcements channel found");
       return;
     }
+    console.log("Found server-announcements channel");
     //send the announcement
-    await NPCSend(channel, {
-      "content": "A message from the void",
-      "tts": false,
-      "embeds": [
-        {
-          "id": 235316008,
-          "description": ">>> *Ah, the Festival of Ebbing Tides, a Dalen festival celebrating the cycle of birth and death. It is said that on the last day of Wilting, the spirits of the dead roam in search of meaning. Benevolent spirits will often seek out their loved ones, but vicious ghosts will need to be exorcised. During this time, it is common to wear costumes designed to scare away vengeful spirits.*",
-          "fields": [
-            {
-              "id": 186563673,
-              "name": "Description:",
-              "value": "This is a server event to celebrate both in world and out of world holidays. We have these periodically. The event can be interacted with by finding reactions to messages, or by using the event command. Send messages to see where the reactions pop up. You may receive various direct messages and bonus XP roles if you participate in the event to help you on your climb to Emerald\n\nAs a note, spam filters will penalize the scores people who send a lot of low effort posts. Make sure you're on topic for the channels you are in. Server rules will still apply.\n\nThe Book Channels and General have been warded against incursion and will be immune to certain parts of the event.",
-            },
-            {
-              "id": 947478087,
-              "name": "How to opt out:",
-              "value": "If you don't like seeing lots of emoji reacts:\n 1. Open your discord user settings\n 2. Open the `Chat` menu\n 3. Disable `Show emoji reactions on messages`",
-              "inline": true
-            }
-          ],
-          "title": "The Ebbing of The Tides  (October 12th-31st)",
-          "color": 0,
-          "footer": {
-            "text": "Spam filter: :white_check_mark: \n Reaction Based: :white_check_mark: \n Secret code: :grey_question:\n Canon Lore drop: :x:\n Worldmaker involved: :x: "
+    return await NPCSend(channel,
+      {
+        "description": ">>> *Ah, the Festival of Ebbing Tides, a Dalen festival celebrating the cycle of birth and death. It is said that on the last day of Wilting, the spirits of the dead roam in search of meaning. Benevolent spirits will often seek out their loved ones, but vicious ghosts will need to be exorcised. During this time, it is common to wear costumes designed to scare away vengeful spirits.*",
+        "fields": [
+          {
+            "name": "Description:",
+            "value": "This is a server event to celebrate both in world and out of world holidays. We have these periodically. The event can be interacted with by finding reactions to messages, or by using the event command. Send messages to see where the reactions pop up. You may receive various direct messages and bonus XP roles if you participate in the event to help you on your climb to Emerald\n\nAs a note, spam filters will penalize the scores people who send a lot of low effort posts. Make sure you're on topic for the channels you are in. Server rules will still apply.\n\nThe Book Channels and General have been warded against incursion and will be immune to certain parts of the event.",
+          },
+          {
+            "name": "How to opt out:",
+            "value": "If you don't like seeing lots of emoji reacts:\n 1. Open your discord user settings\n 2. Open the `Chat` menu\n 3. Disable `Show emoji reactions on messages`",
+            "inline": true
           }
+        ],
+        "title": "The Ebbing of The Tides  (October 12th-31st)",
+        "color": 0,
+        "footer": {
+          "text": "Spam filter: :white_check_mark: \n Reaction Based: :white_check_mark: \n Secret code: :grey_question:\n Canon Lore drop: :x:\n Worldmaker involved: :x: "
         }
-      ],
-      "components": [
+      }, {
+      content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.MetaUpdates}>, <@&${snowflakes.roles.Updates.HolidayUpdates}>`,
+      allowedMentions: { roles: [snowflakes.roles.Updates.AllUpdates, snowflakes.roles.Updates.MetaUpdates, snowflakes.roles.Updates.HolidayUpdates] },
+      components: [
         {
           "id": 455936111,
           "type": 1,
@@ -297,10 +295,6 @@ let event = {
           ]
         }
       ],
-      "username": "Mysterious Voice"
-    }, {
-      content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.MetaUpdates}>, <@&${snowflakes.roles.Updates.HolidayUpdates}>`,
-      allowedMentions: { roles: [snowflakes.roles.Updates.AllUpdates, snowflakes.roles.Updates.MetaUpdates, snowflakes.roles.Updates.HolidayUpdates] }
     });
 
     //    TODO: Mod starting message

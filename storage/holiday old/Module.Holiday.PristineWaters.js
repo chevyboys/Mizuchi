@@ -224,55 +224,41 @@ function removeReaction(reaction) {
   }
 }
 
-Module/*.addEvent("messageReactionAdd",
+Module.addEvent("messageReactionAdd",
   /**
    * 
    * @param {MessageReaction} reaction 
    * @param {User} user 
    */
-/*async (reaction, user) => {
-  if (!active) return;
-  let message = reaction.message;
-  let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
-  let member = await message.guild.members.fetch(user.id);
-  if (event.emoji.indexOf(reaction.emoji.toString().toLowerCase()) > -1 && !user.bot && reaction.users.cache.has(message.client.user.id) && message.channel.permissionsFor(message.client.user).has("MANAGE_MESSAGES")) {
-    let status;
-    try {
-      let index = participants.cache.findIndex(element => user == element.user);
-      if (!participants.cache[index]) {
-        participants.cache.push(new Participant({ user: user, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0 }));
-        index = participants.cache.length - 1;
-      }
-      //if the user is not active, or has found more than 50 sweets, and the message is not in the event channel, remove the reaction and return unless its christmas eve or christmas day
-      if ((participants.cache[index].status != "ACTIVE" || participants.cache[index].adjustedCount > 50) && message.channel.id != event.channel && moment().format("MM/DD") != "12/24" && moment().format("MM/DD") != "12/25") {
-        reaction.users.remove(participants.cache[index].user);
-        return;
-      }
-      if (index != -1) {
-        const userCount = participants.cache[index];
-        status = await userCount.updateCount(message.client);
-
-      } else {
-        participants.cache.push(new Participant({ user: user }));
-      }
-      NPCSend(channel,
-        u.embed(
-          {
-            description: `I see <@${user.id}> found a treat in <#${message.channel.id}> `,
-            footer: {
-              text: `Found today: ${participants.cache[index].adjustedCount} | total: ${participants.cache[index].MultiDayCount + participants.cache[index].count}\nGifted today: ${participants.cache[index].gifted} | total: ${participants.cache[index].MultiDayGifted + participants.cache[index].gifted}\nReceived today: ${participants.cache[index].received} | total: ${participants.cache[index].MultiDayReceived + participants.cache[index].received}\n`
-            }
-          }
-        ),
-        {
-          content: `<@${user.id}>`,
+  async (reaction, user) => {
+    if (!active) return;
+    let message = reaction.message;
+    let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+    let member = await message.guild.members.fetch(user.id);
+    if (event.emoji.indexOf(reaction.emoji.toString().toLowerCase()) > -1 && !user.bot && reaction.users.cache.has(message.client.user.id) && message.channel.permissionsFor(message.client.user).has("MANAGE_MESSAGES")) {
+      let status;
+      try {
+        let index = participants.cache.findIndex(element => user == element.user);
+        if (!participants.cache[index]) {
+          participants.cache.push(new Participant({ user: user, count: 0, MultiDayCount: 0, currency: 0, gifted: 0, received: 0, multiDayGifted: 0, multiDayReceived: 0 }));
+          index = participants.cache.length - 1;
         }
-      );
-      if (status == "SUSPENDED") {
+        //if the user is not active, or has found more than 50 sweets, and the message is not in the event channel, remove the reaction and return unless its christmas eve or christmas day
+        if ((participants.cache[index].status != "ACTIVE" || participants.cache[index].adjustedCount > 50) && message.channel.id != event.channel && moment().format("MM/DD") != "12/24" && moment().format("MM/DD") != "12/25") {
+          reaction.users.remove(participants.cache[index].user);
+          return;
+        }
+        if (index != -1) {
+          const userCount = participants.cache[index];
+          status = await userCount.updateCount(message.client);
+
+        } else {
+          participants.cache.push(new Participant({ user: user }));
+        }
         NPCSend(channel,
           u.embed(
             {
-              description: `<@${user.id}> is pleasantly full, and shouldn't partake of more sweets for a few minutes, which leaves only one thing to do! Begin leaving some for their compatriots! Instead of finding sweets, react with the 🎁 emoji up to once every sixty seconds to leave something delicious for others to find for the next five minutes!`,
+              description: `I see <@${user.id}> found a treat in <#${message.channel.id}> `,
               footer: {
                 text: `Found today: ${participants.cache[index].adjustedCount} | total: ${participants.cache[index].MultiDayCount + participants.cache[index].count}\nGifted today: ${participants.cache[index].gifted} | total: ${participants.cache[index].MultiDayGifted + participants.cache[index].gifted}\nReceived today: ${participants.cache[index].received} | total: ${participants.cache[index].MultiDayReceived + participants.cache[index].received}\n`
               }
@@ -280,111 +266,125 @@ Module/*.addEvent("messageReactionAdd",
           ),
           {
             content: `<@${user.id}>`,
-            allowedMentions: { users: [user.id] }
           }
         );
+        if (status == "SUSPENDED") {
+          NPCSend(channel,
+            u.embed(
+              {
+                description: `<@${user.id}> is pleasantly full, and shouldn't partake of more sweets for a few minutes, which leaves only one thing to do! Begin leaving some for their compatriots! Instead of finding sweets, react with the 🎁 emoji up to once every sixty seconds to leave something delicious for others to find for the next five minutes!`,
+                footer: {
+                  text: `Found today: ${participants.cache[index].adjustedCount} | total: ${participants.cache[index].MultiDayCount + participants.cache[index].count}\nGifted today: ${participants.cache[index].gifted} | total: ${participants.cache[index].MultiDayGifted + participants.cache[index].gifted}\nReceived today: ${participants.cache[index].received} | total: ${participants.cache[index].MultiDayReceived + participants.cache[index].received}\n`
+                }
+              }
+            ),
+            {
+              content: `<@${user.id}>`,
+              allowedMentions: { users: [user.id] }
+            }
+          );
+        }
+        // Write cache to a JSON file
+        participants.write();
+
+
+        await removeReaction(reaction)
+      } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
+    }
+    else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id) || member.roles.cache.hasAny([snowflakes.roles.Admin, snowflakes.roles.Helper, snowflakes.roles.Moderator, snowflakes.roles.CommunityGuide, snowflakes.roles.BotMaster, snowflakes.roles.WorldMaker])) {
+      reaction.remove()
+      await reaction.message.react(getRandomEmoji());
+    } else if (reaction.emoji.toString().toLowerCase().indexOf("🎁") > -1) {
+      u.errorHandler("🎁 reaction detected", "Gift reaction detected, Triggered by " + user.username + " in " + message.guild.name + " in channel " + message.channel.name + "\n User participant object information: " + JSON.stringify(participants.cache.find(element => user == element.user)));
+      let index = participants.cache.findIndex(element => user == element.user);
+      if (index == -1 || (participants.cache[index].status != "SUSPENDED" && participants.cache[index].status != "INACTIVE") || reaction.message.channel.id == event.channel) {
+        reaction.users.remove(participants.cache[index].user);
+        return;
+      } else if (participants.cache[index].canUseAbility(1) == false) {
+        reaction.users.remove(participants.cache[index].user);
+        return;
+      } else {
+        //disabling this since the abuse case isn't as bad as I thought it would be
+        //participants.cache[index].updateAbilityUse();
+        reaction.users.remove(participants.cache[index].user)
+        return await reaction.message.react(getRandomEmoji());
       }
-      // Write cache to a JSON file
-      participants.write();
-
-
-      await removeReaction(reaction)
-    } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
-  }
-  else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id) || member.roles.cache.hasAny([snowflakes.roles.Admin, snowflakes.roles.Helper, snowflakes.roles.Moderator, snowflakes.roles.CommunityGuide, snowflakes.roles.BotMaster, snowflakes.roles.WorldMaker])) {
-    reaction.remove()
-    await reaction.message.react(getRandomEmoji());
-  } else if (reaction.emoji.toString().toLowerCase().indexOf("🎁") > -1) {
-    u.errorHandler("🎁 reaction detected", "Gift reaction detected, Triggered by " + user.username + " in " + message.guild.name + " in channel " + message.channel.name + "\n User participant object information: " + JSON.stringify(participants.cache.find(element => user == element.user)));
-    let index = participants.cache.findIndex(element => user == element.user);
-    if (index == -1 || (participants.cache[index].status != "SUSPENDED" && participants.cache[index].status != "INACTIVE") || reaction.message.channel.id == event.channel) {
-      reaction.users.remove(participants.cache[index].user);
-      return;
-    } else if (participants.cache[index].canUseAbility(1) == false) {
-      reaction.users.remove(participants.cache[index].user);
-      return;
-    } else {
-      //disabling this since the abuse case isn't as bad as I thought it would be
-      //participants.cache[index].updateAbilityUse();
-      reaction.users.remove(participants.cache[index].user)
-      return await reaction.message.react(getRandomEmoji());
+    } else if (reaction.emoji.toString().toLowerCase().indexOf("✨") > -1) {
+      //if the users status is not inactive, remove the reaction, and return
+      u.errorHandler("✨ reaction detected", "Twinkle reaction detected, Triggered by " + user.username + " in " + message.guild.name + " in channel " + message.channel.name + "\n User participant object information: " + JSON.stringify(participants.cache.find(element => user == element.user)));
+      let index = participants.cache.findIndex(element => user == element.user);
+      if (index == -1 || participants.cache[index].status != "INACTIVE") {
+        reaction.users.remove(participants.cache[index].user);
+        return;
+      } else if (participants.cache[index].canUseAbility(30) == true) {
+        participants.cache[index].updateAbilityUse();
+        flurry(message.channel);
+        reaction.users.remove(participants.cache[index].user);
+        return;
+      } else {
+        removeReaction(reaction)
+        return;
+      }
     }
-  } else if (reaction.emoji.toString().toLowerCase().indexOf("✨") > -1) {
-    //if the users status is not inactive, remove the reaction, and return
-    u.errorHandler("✨ reaction detected", "Twinkle reaction detected, Triggered by " + user.username + " in " + message.guild.name + " in channel " + message.channel.name + "\n User participant object information: " + JSON.stringify(participants.cache.find(element => user == element.user)));
-    let index = participants.cache.findIndex(element => user == element.user);
-    if (index == -1 || participants.cache[index].status != "INACTIVE") {
-      reaction.users.remove(participants.cache[index].user);
-      return;
-    } else if (participants.cache[index].canUseAbility(30) == true) {
-      participants.cache[index].updateAbilityUse();
-      flurry(message.channel);
-      reaction.users.remove(participants.cache[index].user);
-      return;
-    } else {
-      removeReaction(reaction)
-      return;
-    }
-  }
-}).addEvent("messageCreate",
-  /**
-   * 
-   * @param {Message} msg 
-   * @returns 
-   */
-/*async (msg) => {
-  if (!active) return;
-  if (msg.channel.type == "DM") return;
-  //if it is the 24th or 25th of december , react to every message
-  if (flurries.includes(msg.channel.id) || msg.channel.id == event.channel || (moment().format("MM/DD") == "12/24" || moment().format("MM/DD") == "12/25")) {
-    msg.react(getRandomEmoji());
-  } else {
-    /*if the channel has:
-     - More than two messages in the last 10 minutes from non bots
-     - passes a 1% chance to trigger
-     - The triggering message author is not a bot
-     - The triggering message is not in the event channel
-     - The triggering message is not in a DM
-     - The triggering message is not in a channel where the everyone role cannot send messages
-     Then have a flurry in the channel
-    */
-/*if (msg.channel.messages.cache.filter(element => element.createdTimestamp > Date.now() - 10 * 60 * 1000 && !element.author.bot).size > 2 && Math.floor(Math.random() * 100) < 1 && !msg.author.bot && event.channel != msg.channel.id && msg.channel.type != "DM" && msg.guild.roles.everyone.permissionsIn(msg.channel).has("SEND_MESSAGES")) {
-  //if the channel name is general, have a chance for an extended flurry
-  if (msg.channel.name.toLowerCase() == "general" && Math.floor(Math.random() * 100) < 10) {
-    extendedFlurry(msg.channel, 180);
-  }
-  else flurry(msg.channel);
-}
-}
-if (
-msg.author &&
-!msg.webhookId &&
-!msg.author.bot &&
-msg.type == "DEFAULT" &&
-(msg.member.roles.cache.has(snowflakes.roles.Holiday[1]) ? (Math.random() * 100 < odds) : (Math.random() * 100 < odds + 5))
-) {
-msg.react(getRandomEmoji());
-}
-})/*.setClockwork(() => {
-if (!active) return;
-try {
-return setInterval(async () => {
-  let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
-  const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
-  const modifierToConvertToBotTime = 7;
-  if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
+  }).addEvent("messageCreate",
+    /**
+     * 
+     * @param {Message} msg 
+     * @returns 
+     */
+    async (msg) => {
+      if (!active) return;
+      if (msg.channel.type == "DM") return;
+      //if it is the 24th or 25th of december , react to every message
+      if (flurries.includes(msg.channel.id) || msg.channel.id == event.channel || (moment().format("MM/DD") == "12/24" || moment().format("MM/DD") == "12/25")) {
+        msg.react(getRandomEmoji());
+      } else {
+        /*if the channel has:
+         - More than two messages in the last 10 minutes from non bots
+         - passes a 1% chance to trigger
+         - The triggering message author is not a bot
+         - The triggering message is not in the event channel
+         - The triggering message is not in a DM
+         - The triggering message is not in a channel where the everyone role cannot send messages
+         Then have a flurry in the channel
+        */
+        if (msg.channel.messages.cache.filter(element => element.createdTimestamp > Date.now() - 10 * 60 * 1000 && !element.author.bot).size > 2 && Math.floor(Math.random() * 100) < 1 && !msg.author.bot && event.channel != msg.channel.id && msg.channel.type != "DM" && msg.guild.roles.everyone.permissionsIn(msg.channel).has("SEND_MESSAGES")) {
+          //if the channel name is general, have a chance for an extended flurry
+          if (msg.channel.name.toLowerCase() == "general" && Math.floor(Math.random() * 100) < 10) {
+            extendedFlurry(msg.channel, 180);
+          }
+          else flurry(msg.channel);
+        }
+      }
+      if (
+        msg.author &&
+        !msg.webhookId &&
+        !msg.author.bot &&
+        msg.type == "DEFAULT" &&
+        (msg.member.roles.cache.has(snowflakes.roles.Holiday[1]) ? (Math.random() * 100 < odds) : (Math.random() * 100 < odds + 5))
+      ) {
+        msg.react(getRandomEmoji());
+      }
+    }).setClockwork(() => {
+      if (!active) return;
+      try {
+        return setInterval(async () => {
+          let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
+          const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
+          const modifierToConvertToBotTime = 7;
+          if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
 
-    participants.cache.forEach(async (element) => {
-      element.dailyReset();
-      await (await (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
-    });
-  }
-  participants.write();
-}
+            participants.cache.forEach(async (element) => {
+              element.dailyReset();
+              await (await (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
+            });
+          }
+          participants.write();
+        }
 
-  , 60 * 60 * 1000);
-} catch (e) { u.errorHandler(e, "event Clockwork Error"); }
-})*/
+          , 60 * 60 * 1000);
+      } catch (e) { u.errorHandler(e, "event Clockwork Error"); }
+    })
 
 
 
