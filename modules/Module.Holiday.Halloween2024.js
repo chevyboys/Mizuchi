@@ -108,7 +108,7 @@ async function dailyReset(guild) {
   })
 }
 
-
+let today = new Date().getDate();
 
 //################ Module adds ################
 
@@ -135,6 +135,8 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   }
 }).setClockwork(() => {
   if (!Active.getActive) return;
+  if (today == new Date().getDate()) return;
+  today = new Date().getDate();
   try {
     return setInterval(async () => {
       //TODO: Implement this function
@@ -216,6 +218,11 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 });
 
 //TODO: Add automatic slash command registration
+//TODO: Add pinging people in the event channel when they get access to it
+//TODO: Add role icons for masks
+//TODO: Allow people to get masks by hitting 50 ghosts
+//TODO: make sure that each time the bot reacts, it sets a timeout to remove the reaction
+
 
 
 
