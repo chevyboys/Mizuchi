@@ -1,4 +1,28 @@
 const snowflakes = require('../../config/snowflakes.json');
+let flurryChannels = {}
+let flurryBlacklist = [
+  snowflakes.channels.ask,
+  snowflakes.channels.blogAnnouncements,
+  snowflakes.channels.earthTemple,
+  snowflakes.channels.general,
+  snowflakes.channels.faq,
+  snowflakes.channels.introductions,
+  snowflakes.channels.kesterBomb,
+  snowflakes.channels.modRequests,
+  snowflakes.channels.roles,
+  snowflakes.channels.rules,
+  snowflakes.channels.transfer,
+  snowflakes.channels.secret,
+  snowflakes.channels.spoilerPolicy,
+  "785160606676025384",
+  "443461509994119168",
+  "823578704512155688",
+  "823578762297081887",
+  "1146810277539618906",
+  "443461671789395970",
+  "443461722951385090",
+  "703695980897370222"
+]
 
 let Flurry = {
   //TODO: Add Flurry functions
@@ -11,30 +35,6 @@ let Flurry = {
    * run by the controller each time the bot restarts
    */
   init: () => {
-    let flurryChannels = {}
-    let flurryBlacklist = [
-      snowflakes.channels.ask,
-      snowflakes.channels.blogAnnouncements,
-      snowflakes.channels.earthTemple,
-      snowflakes.channels.general,
-      snowflakes.channels.faq,
-      snowflakes.channels.introductions,
-      snowflakes.channels.kesterBomb,
-      snowflakes.channels.modRequests,
-      snowflakes.channels.roles,
-      snowflakes.channels.rules,
-      snowflakes.channels.transfer,
-      snowflakes.channels.secret,
-      snowflakes.channels.spoilerPolicy,
-      "785160606676025384",
-      "443461509994119168",
-      "823578704512155688",
-      "823578762297081887",
-      "1146810277539618906",
-      "443461671789395970",
-      "443461722951385090",
-      "703695980897370222"
-    ]
     return true;
   },
 
@@ -124,7 +124,8 @@ let Flurry = {
    */
 
   reactBecauseOfFlurry: async (msg) => {
-    return !isSpam(msg);
+    let idCheck = msg.channel.id
+    return flurryChannels[idCheck].status
   }
 };
 
