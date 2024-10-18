@@ -87,7 +87,7 @@ function recordLastMessage(member, content, timestamp) {
   return record.push(new userMessage(member, content, timestamp));
 } */
 function recordLastMessage(member, content, timestamp) {
-  Logger.log("record length: " + record.length);
+  //Logger.log("record length: " + record.length);
   if (record.length != 0) {
     removeLastUserMessage(member);
   }
@@ -107,7 +107,7 @@ module.exports = {
    * @param {ParticipantManager} participants 
    * @returns {boolean} returns true if the message is spam
    */
-  isSpam: async (msg, participants) => {
+  isSpam: (msg, participants) => {
     //TODO: Implement this function @jhat0353
 
 
@@ -126,7 +126,7 @@ module.exports = {
       return true;
     }
 
-    let message = getLastUserMessage(member);
+    let message = getLastUserMessage(msg.member);
 
     // check for time limits
     if (timeFromMessage(msg, message) <= 2) { // currently 2 seconds

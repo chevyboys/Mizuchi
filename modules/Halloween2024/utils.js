@@ -120,7 +120,7 @@ let event = {
     "👻",
     //"🧚‍♂️"
   ],
-  odds: 8,
+  odds: 100,
   /**
  * 
  * @param {Guild} guild 
@@ -305,6 +305,7 @@ let event = {
   },
   //event admin permissions check
   isAdmin: (member) => {
+    if (!member || member.user.bot) return false;
     return member.permissions.has("ADMINISTRATOR")
       || member.roles.cache.has(snowflakes.roles.Moderator)
       || member.roles.cache.has(snowflakes.roles.Admin)

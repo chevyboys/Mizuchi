@@ -165,7 +165,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
     msg.content.indexOf("end") > -1 ? Flurry.end(msg.channel) : Flurry.start(msg.channel);
-
+    msg.react("✅");
   }
 }).addCommand({
   name: "blizzard",
@@ -196,13 +196,19 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     dailyReset(msg.guild);
     msg.react("✅");
   }
+}).addEvent("messageCreate", async (msg) => {
+  // Handle receiving a message
+  if (msg.channel.type == "dm") return;
+  if (!Active.getActive) return;
+  if ((await Spam.isSpam(msg))) return;
+  //if there is a flurry or if a random chance based on odds as a percentage is met
+  let roll = Math.floor(Math.random() * 100)
+  if (Flurry.reactBecauseOfFlurry(msg) || roll < odds) {
+    await Reaction.react(msg);
+  }
+
 });
 
-//TODO: Add the ability to start the event
-//TODO: Add the ability to end the event manually for testing
-//TODO: Add the ability to reset the event daily manually for testing
-//TODO: Add the ability for admins to trigger flurries (might go in reactionAdd)
-//TODO: Add the ability for users to send and receive cards with adminLogging
 //TODO: Add automatic slash command registration
 
 
