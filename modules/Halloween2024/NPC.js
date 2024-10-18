@@ -1,6 +1,5 @@
 //Initalization, imports, etc
 const webhookSend = require('../../utils/Webhook.js');
-const event = require('./utils.js');
 
 
 /**
@@ -12,7 +11,7 @@ const event = require('./utils.js');
  */
 function NPCSend(channel, embedOptions, additionalMessageOptions) {
   additionalMessageOptions = additionalMessageOptions || {};
-  embedOptions.color = event.colors[event.colors.length - 1].color;
+  embedOptions.color = "#010101";
   additionalMessageOptions.embeds = [embedOptions];
   return webhookSend.webhook(channel, "Mysterious Voice", "./avatar/Halloween.png", additionalMessageOptions);
 }

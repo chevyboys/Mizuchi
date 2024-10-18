@@ -21,7 +21,9 @@ const Module = new Augur.Module();
 const Inventory = require('./Halloween2024/Inventory.js');
 const Leaderboard = require('./Halloween2024/Leaderboard.js');
 const Spam = require('./Halloween2024/Spam.js');
-const Gift = require('./Halloween2024/Gift.js');
+const Gift = {
+  command: (interaction, Participants) => { return interaction.reply("Coming soon!") }, //TODO: Implement this function
+}//require('./Halloween2024/Gift.js');
 const Admin = require('./Halloween2024/Admin.js');
 const Flurry = require('./Halloween2024/Flurry.js');
 const Help = require('./Halloween2024/Help.js');
@@ -54,7 +56,7 @@ async function begin(guild) {
   //    Set bot name
   guild.client.user.setUsername("Twilight's Edge");
   //    Set bot status
-  guild.client.user.setActivity(`More than ${ParticipantManager.getCurrentTotalHostileFound()} Ghosts caught!`);
+  guild.client.user.setActivity(`More than ${Participants.totalEventHostile()} Ghosts caught!`);
   //    Starting announcement
   event.sendAnnouncements(guild);
   //    Set server icon
