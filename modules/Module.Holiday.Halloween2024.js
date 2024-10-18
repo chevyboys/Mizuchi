@@ -203,7 +203,8 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   if ((await Spam.isSpam(msg))) return;
   //if there is a flurry or if a random chance based on odds as a percentage is met
   let roll = Math.floor(Math.random() * 100)
-  if (Flurry.reactBecauseOfFlurry(msg) || roll < odds) {
+  let flurryReaction = false; //Flurry.reactBecauseOfFlurry(msg);
+  if (flurryReaction || roll < odds) {
     await Reaction.react(msg);
     //remove the reaction in ten minutes
     setTimeout(() => {
