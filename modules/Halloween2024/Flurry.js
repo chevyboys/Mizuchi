@@ -115,6 +115,7 @@ let Flurry = {
 
   reactBecauseOfFlurry: async (msg) => {
     //Check dates to end flurries and blizzards
+    idCheck = msg.channel.id
     for (let x = 0; x <= flurryChannels[0].length - 1; x++) {
       if (Date.now >= flurryChannels[1][x]) {
         Flurry.end(msg.channel)
@@ -127,7 +128,6 @@ let Flurry = {
     if (blizzardActive) {
       return !(flurryBlacklist.includes(idCheck))
     } else {
-      idCheck = channel.id
       return flurryChannels[0].includes(idCheck)
     }
   }
