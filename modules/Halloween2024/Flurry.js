@@ -1,3 +1,6 @@
+const { flush } = require('pm2');
+const snowflakes = require('../../config/snowflakes.json');
+const { channels } = require('../../utils/Utils.RolesLogin');
 let Flurry = {
   //TODO: Add Flurry functions
   //IF flurries should persist between restarts, you will need to do the following:
@@ -9,6 +12,30 @@ let Flurry = {
    * run by the controller each time the bot restarts
    */
   init: () => {
+    let flurryChannels = {}
+    let flurryBlacklist = [
+      snowflakes.channels.ask,
+      snowflakes.channels.blogAnnouncements,
+      snowflakes.channels.earthTemple,
+      snowflakes.channels.general,
+      snowflakes.channels.faq,
+      snowflakes.channels.introductions,
+      snowflakes.channels.kesterBomb,
+      snowflakes.channels.modRequests,
+      snowflakes.channels.roles,
+      snowflakes.channels.rules,
+      snowflakes.channels.transfer,
+      snowflakes.channels.secret,
+      snowflakes.channels.spoilerPolicy,
+      "785160606676025384",
+      "443461509994119168",
+      "823578704512155688",
+      "823578762297081887",
+      "1146810277539618906",
+      "443461671789395970",
+      "443461722951385090",
+      "703695980897370222"
+    ]
     return true;
   },
 
@@ -36,7 +63,18 @@ let Flurry = {
    */
   start: (channel, minutes = 10) => {
     //Check if channel is #general or book channels
-    console.log(`A Flurry has been started in ${channel}!`)
+    let idCheck = channel.id
+    if (flurryBlacklist.includes(idCheck)) {
+      return false;
+    } else if (flurryChannels[idCheck].status) { //flurry is currently active
+      flurryChannels[idCheck].flurryEnd += (minutes * 60)
+      console.log(`The Flurry in ${channel.name} has been extended!`)
+    } else {
+      flurryChannels.assign(flurryChannels, {
+        idCheck: { "status": true, "flurryEnd": Date.now() + (minutes * 60) }
+      })
+      console.log(`A Flurry has been started in ${channel.name}!`)
+    }
     return true;
   },
   /**
@@ -44,7 +82,9 @@ let Flurry = {
    * @param {Channel} channel 
   */
   end: (channel) => {
-    console.log(`The Flurry in ${channel} has come to an end!`)
+    let idCheck = channel.id
+    flurryChannels[idCheck] = { "status": false }
+    console.log(`The Flurry in ${channel.name} has come to an end!`)
     return true;
   },
   blizzard: {
@@ -53,7 +93,17 @@ let Flurry = {
      * @param {Channel} channel 
      */
     start: (channel, minutes = 10) => {
-      console.log(`A Blizzard has been started in ${channel}!`)
+      flurryChannels.entries().forEach(element => {
+        if (flurryChannels[element].status) { //flurry is active
+          flurryChannels[element].flurryEnd += minutes * 60
+        } else {
+          flurryChannels[element] = {
+            "status": true,
+            "flurryEnd": Date.now + (minutes * 60)
+          }
+        }
+      });
+      console.log(`A Blizzard has been started in the server!`)
       return true;
     },
     /**
@@ -61,7 +111,10 @@ let Flurry = {
      * @param {Channel} channel 
     */
     end: (channel) => {
-      console.log(`The Blizzard in ${channel} has come to an end!`)
+      flurryChannels.entries().forEach(element => {
+        flurryChannels[element] = { "status": false }
+      });
+      console.log(`The Blizzard in the server has come to an end!`)
       return true;
     }
   },
@@ -77,3 +130,5 @@ let Flurry = {
 };
 
 module.exports = Flurry;
+module.exports = flurryChannels;
+module.exports = flurryBlacklist;
