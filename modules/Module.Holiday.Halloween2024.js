@@ -205,6 +205,10 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   let roll = Math.floor(Math.random() * 100)
   if (Flurry.reactBecauseOfFlurry(msg) || roll < odds) {
     await Reaction.react(msg);
+    //remove the reaction in ten minutes
+    setTimeout(() => {
+      Reaction.remove(msg);
+    }, 10 * 60 * 1000);
   }
 
 });

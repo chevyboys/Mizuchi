@@ -120,7 +120,7 @@ let event = {
     "👻",
     //"🧚‍♂️"
   ],
-  odds: 100,
+  odds: 8,
   /**
  * 
  * @param {Guild} guild 
