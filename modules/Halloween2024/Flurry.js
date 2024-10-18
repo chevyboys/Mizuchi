@@ -125,10 +125,10 @@ let Flurry = {
       Flurry.blizzard.end()
     }
     //actually reactBecauseOfFlurry
-    if (blizzardActive) {
+    if (blizzardActive == true) {
       return !(flurryBlacklist.includes(idCheck))
     } else {
-      return flurryChannels[0].includes(idCheck)
+      return (flurryChannels[0].includes(idCheck))
     }
   }
 };
