@@ -48,17 +48,21 @@ function timeFromMessage(msg, message) {
   return record.find(message => message.member === member) || null;
 } */
 function getLastUserMessage(member) {
-  return null;
+  //Logger.log("getting user message");
   if (!member) {
     return null;
   }
-  //Logger.log("getting user message");
-  let r = record.find(message => message.member.id == member.id);
-  if (r != null) {
-    //Logger.log("Message: " + r);
-    return r;
+  try {
+    let r = record.find(message => message.member === member);
+    if (r != null) {
+      //Logger.log("Message: " + r);
+      return r;
+    }
   }
-  //Logger.log("Message: not found ")
+  catch (e) {
+    return null;
+  }
+
   return null;
 }
 
@@ -111,7 +115,7 @@ module.exports = {
    * @param {ParticipantManager} participants 
    * @returns {boolean} returns true if the message is spam
    */
-  isSpam: (msg, participants) => {
+  isSpam: async (msg, participants) => {
     //TODO: Implement this function @jhat0353
 
 
@@ -130,7 +134,7 @@ module.exports = {
       return true;
     }
 
-    let message = getLastUserMessage(msg.member);
+    let message = getLastUserMessage(member);
 
     // check for time limits
     if (timeFromMessage(msg, message) <= 2) { // currently 2 seconds
