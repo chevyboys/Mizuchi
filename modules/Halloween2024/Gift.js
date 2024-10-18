@@ -4,7 +4,7 @@
  * Date: 2024
  */
 
-const ParticipantManager = require('participant.js');
+const ParticipantManager = require('./Participant.js');
 const Interaction = require('discord.js')
 
 function sendGift(interaction, participants) {
