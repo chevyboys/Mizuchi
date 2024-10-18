@@ -1,5 +1,6 @@
-const snowflakes = require('../../config/snowflakes.json');
-let flurryChannels = {}
+const snowflakes = require('../../config/snowflakes.json')
+const spam = require('spam.js');
+let flurryChannels = [[], []]
 let flurryBlacklist = [
   snowflakes.channels.ask,
   snowflakes.channels.blogAnnouncements,
@@ -23,6 +24,7 @@ let flurryBlacklist = [
   "443461722951385090",
   "703695980897370222"
 ]
+let blizzardActive = false
 
 let Flurry = {
   //TODO: Add Flurry functions
@@ -42,7 +44,7 @@ let Flurry = {
     let flurryRoll = Math.floor(Math.random() * 100);
     let flurryChance = 0;
     //let flurryMsgAuthor = msg.author.id
-    if (!isSpam(msg)) { //spam check
+    if (!spam.isSpam(msg)) { //spam check
       let lastTenMsgs = await msg.channel.messages.fetch({ limit: 10 });
       if (lastTenMsgs.some((msg) => msg.createdTimestamp >= (Date.now() - 7200))) {
         //At least one of the last 10 messages was within the last two hours
@@ -65,13 +67,12 @@ let Flurry = {
     let idCheck = channel.id
     if (flurryBlacklist.includes(idCheck)) {
       return false;
-    } else if (flurryChannels[idCheck].status) { //flurry is currently active
-      flurryChannels[idCheck].flurryEnd += (minutes * 60)
+    } else if (flurryChannels[0].includes(channel.id)) { //flurry is currently active
+      flurryChannels[1][flurryChannels[0].indexOf(channel.id)] += (minutes * 60)
       console.log(`The Flurry in ${channel.name} has been extended!`)
     } else {
-      flurryChannels.assign(flurryChannels, {
-        idCheck: { "status": true, "flurryEnd": Date.now() + (minutes * 60) }
-      })
+      flurryChannels[0].push(idCheck)
+      flurryChannels[1].push(Date.now + (minutes * 60))
       console.log(`A Flurry has been started in ${channel.name}!`)
     }
     return true;
@@ -82,7 +83,10 @@ let Flurry = {
   */
   end: (channel) => {
     let idCheck = channel.id
-    flurryChannels[idCheck] = { "status": false }
+    if (flurryChannels[0].includes(idCheck)) {
+      flurryChannels[0].splice(flurryChannels[0].indexOf(idCheck), 1)
+      flurryChannels[1].splice(flurryChannels[0].indexOf(idCheck), 1)
+    }
     console.log(`The Flurry in ${channel.name} has come to an end!`)
     return true;
   },
@@ -91,17 +95,8 @@ let Flurry = {
      * Starts a blizzard in all channels
      * @param {Channel} channel 
      */
-    start: (channel, minutes = 10) => {
-      flurryChannels.entries().forEach(element => {
-        if (flurryChannels[element].status) { //flurry is active
-          flurryChannels[element].flurryEnd += minutes * 60
-        } else {
-          flurryChannels[element] = {
-            "status": true,
-            "flurryEnd": Date.now + (minutes * 60)
-          }
-        }
-      });
+    start: (minutes = 10) => {
+      blizzardActive = Date.now + (minutes * 60)
       console.log(`A Blizzard has been started in the server!`)
       return true;
     },
@@ -109,10 +104,8 @@ let Flurry = {
      * Ends a blizzard in all channels
      * @param {Channel} channel 
     */
-    end: (channel) => {
-      flurryChannels.entries().forEach(element => {
-        flurryChannels[element] = { "status": false }
-      });
+    end: () => {
+      blizzardActive = 0
       console.log(`The Blizzard in the server has come to an end!`)
       return true;
     }
@@ -124,8 +117,22 @@ let Flurry = {
    */
 
   reactBecauseOfFlurry: async (msg) => {
-    let idCheck = msg.channel.id
-    return flurryChannels[idCheck].status
+    //Check dates to end flurries and blizzards
+    for (let x = 0; x <= flurryChannels[0].length - 1; x++) {
+      if (Date.now >= flurryChannels[1][x]) {
+        Flurry.end(msg.channel)
+      }
+    }
+    if (Date.now >= blizzardActive) {
+      Flurry.blizzard.end()
+    }
+    //actually reactBecauseOfFlurry
+    if (blizzardActive) {
+      return !(flurryBlacklist.includes(idCheck))
+    } else {
+      let idCheck = msg.channel.id
+      return flurryChannels[idCheck].status
+    }
   }
 };
 
