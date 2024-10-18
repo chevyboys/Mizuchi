@@ -190,10 +190,11 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     end(msg.guild);
   }
 }).addCommand({
-  name: "reset",
+  name: "resetevent",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
     dailyReset(msg.guild);
+    msg.react("✅");
   }
 });
 
