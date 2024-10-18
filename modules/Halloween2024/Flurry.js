@@ -1,4 +1,3 @@
-const { flush } = require('pm2');
 const snowflakes = require('../../config/snowflakes.json');
 const { channels } = require('../../utils/Utils.RolesLogin');
 let Flurry = {
@@ -40,14 +39,14 @@ let Flurry = {
   },
 
   flurryCheck: async (msg) => { //Whether or not a flurry should be started on a random message
-    let flurryRoll = Math.floor(Math.random() * 1000);
+    let flurryRoll = Math.floor(Math.random() * 100);
     let flurryChance = 0;
     //let flurryMsgAuthor = msg.author.id
     if (!isSpam(msg)) { //spam check
       let lastTenMsgs = await msg.channel.messages.fetch({ limit: 10 });
       if (lastTenMsgs.some((msg) => msg.createdTimestamp >= (Date.now() - 7200))) {
         //At least one of the last 10 messages was within the last two hours
-        flurryChance = 100;
+        flurryChance = 10;
       }
     }
     if (flurryChance > flurryRoll) {
@@ -130,5 +129,5 @@ let Flurry = {
 };
 
 module.exports = Flurry;
-module.exports = flurryChannels;
-module.exports = flurryBlacklist;
+//module.exports = flurryChannels;
+//module.exports = flurryBlacklist;
