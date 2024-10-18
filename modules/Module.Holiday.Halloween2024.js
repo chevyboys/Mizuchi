@@ -198,6 +198,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   }
 }).addEvent("messageCreate", async (msg) => {
   // Handle receiving a message
+  if (!Active.getActive) return;
   if (msg.channel.type == "dm") return;
   if (!Active.getActive) return;
   if ((await Spam.isSpam(msg))) return;
