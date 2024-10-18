@@ -9,7 +9,7 @@ const { Role, Interaction } = require("discord.js");
 class Inventory extends Array {
   #_userID;
   constructor() {
-    super();
+    super(); //Needs to be last line in constructor
   }
 
   /**

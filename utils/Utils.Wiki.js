@@ -155,7 +155,9 @@ const wikiFunctions = {
 
   pageEmbed: async (pageName, short) => {
     pageName = pageName.replaceAll(" ", "_");
+    //Pull the wikitext of the desired page
     let wikiPageText = (await axios.get(wikiBasePage + pageName)).data.source;
+    //Follow first redirect if any
     if (wikiPageText.indexOf("#REDIRECT") > -1) {
       let newPageName = wikiPageText.substr(wikiPageText.indexOf("#REDIRECT")).replace("#REDIRECT", " ").trim().replaceAll(" ", "_").replace("[[", "").replace("]]", "");
       wikiPageText = (await axios.get(wikiBasePage + newPageName)).data.source;
