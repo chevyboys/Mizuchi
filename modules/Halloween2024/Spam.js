@@ -48,6 +48,7 @@ function timeFromMessage(msg, message) {
   return record.find(message => message.member === member) || null;
 } */
 function getLastUserMessage(member) {
+  return null;
   if (!member) {
     return null;
   }
