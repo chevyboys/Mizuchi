@@ -79,9 +79,9 @@ const roles = [
 ]
 
 
-const avatar = "./avatar/Halloween.png";
-const serverPFP = "";
-const serverBanner = "";
+const avatar = "./avatar/Halloween-Twilight.png";
+const serverPFP = "./img/server/Halloween/icon.png";
+const serverBanner = "./img/server/Halloween/banner.png";
 /**
  * @module Mask of theWaters/utils
  */
@@ -226,7 +226,7 @@ let event = {
   },
   //reset the server icon to the default icon
   cleanServerHolidayIcon: (guild) => {
-    guild.setIcon("./img/server/pfp.png");
+    guild.setIcon("./img/server/default/icon.png");
   },
   //set the server banner to the event banner
   setServerHolidayBanner: (guild) => {
@@ -236,7 +236,7 @@ let event = {
   },
   //reset the server banner to the default banner
   cleanServerHolidayBanner: (guild) => {
-    guild.setBanner("./img/server/banner.png");
+    guild.setBanner("./img/server/default/banner.png");
   },
   //send the server-announcements announcement
   sendAnnouncements: async (guild) => {

@@ -154,6 +154,7 @@ Module.addEvent("reactionAdd", async (reaction, user) => {
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
     begin(msg.guild);
+    msg.reply("The event has begun!");
   }
 }).addCommand({
   name: "end",
