@@ -121,15 +121,16 @@ let Flurry = {
         Flurry.end(msg.channel)
       }
     }
-    if (Date.now >= blizzardActive) {
+    if (Date.now >= blizzardActive && blizzardActive > 0) {
       Flurry.blizzard.end()
     }
     //actually reactBecauseOfFlurry
-    if (blizzardActive == true) {
+    if (blizzardActive > 0) {
       return !(flurryBlacklist.includes(idCheck))
     } else {
       return (flurryChannels[0].includes(idCheck))
     }
+    return false;
   }
 };
 
