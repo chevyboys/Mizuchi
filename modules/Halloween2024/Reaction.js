@@ -13,7 +13,7 @@ function getRandomEmoji() {
   return event.emoji[Math.floor(Math.random() * event.emoji.length)];
 }
 
-let reaction = {
+let reactionObj = {
   /**
    * 
    * @param {MessageReaction} reaction 
@@ -29,19 +29,17 @@ let reaction = {
     let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
     let member = await message.guild.members.fetch(user.id);
     try {
-
-
       switch (reaction.emoji.toString()) {
         case "🔮": //The Admin add reaction to message
           //check permissions
           if (event.isAdmin(member)) {
-            this.react(message);
+            await reactionObj.react(message);
           }
-          this.remove(reaction);
+          reactionObj.remove(reaction);
           break;
         case "👻":
           if (Participants.get(user.id) && Participants.get(user.id)?.status != "ACTIVE" && reaction.channel.id != channel.id) return;
-          this.remove(reaction);
+          reactionObj.remove(reaction);
           if (!reaction.users.cache.has(message.client.user.id)) {
             return;
           } else {
@@ -49,7 +47,7 @@ let reaction = {
               : member.displayName;
             Participants.addHostile(user.id);
             const currentHostileCount = Participants.totalHostileToday(user.id);
-            reaction.message.guild.client.user.setActivity(`More than ${Participants.getCurrentTotalHostileFound()} Ghosts caught!`);
+            reaction.message.guild.client.user.setActivity(`More than ${Participants.totalEventHostile()} Ghosts caught!`);
 
 
 
@@ -59,15 +57,19 @@ let reaction = {
                 NPCSend(channel,
                   u.embed(
                     {
-                      description: `I see <@${user.id}> found a treat in <#${message.channel.id}> `,
+                      description: `<@${user.id}> has achieved the title of <@&${snowflakes.roles.Holiday[0]}>`,
                       footer: {
-                        text: `Found Ghosts today: ${Participants.totalHostileToday(user.id)} | total: ${Participants.totalHostile(user.id)}\nFound Spirits today: ${Participants.totalFriendlyToday(user.id)} | total: ${Participants.totalFriendly(user.id)}`
+                        text: `Found Ghosts today: ${Participants.totalHostileToday(user.id)} | total: ${Participants.totalHostile(user.id)}\nFound Spirits  today: ${Participants.totalFriendlyToday(user.id)} | total: ${Participants.totalFriendly(user.id)}`
                       }
                     }
                   ),
                   {
                     content: $userMention,
+                    allowedMentions: { parse: ["users"] }
                   });
+
+                await member.roles.add(snowflakes.roles.Holiday[0]);
+
                 break;
               case 50:
                 //TODO: Add today's mask to the inventory and equip it
@@ -83,7 +85,10 @@ let reaction = {
                   ),
                   {
                     content: $userMention,
+                    allowedMentions: { parse: ["users"] }
                   });
+
+                await member.roles.add(snowflakes.roles.Holiday[1]);
                 break;
               default:
                 NPCSend(channel,
@@ -97,6 +102,7 @@ let reaction = {
                   ),
                   {
                     content: $userMention,
+                    allowedMentions: (currentHostileCount == 1 ? { parse: ["users"] } : {})
                   });
             }
           }
@@ -104,6 +110,13 @@ let reaction = {
           break;
         case "🧚‍♂️":
           if (Participants.get(user.id) && Participants.get(user.id)?.status == "BANNED") return;
+          reactionObj.remove(reaction);
+          if (!reaction.users.cache.has(message.client.user.id)) {
+            return;
+          } else {
+            Participants.addFriendly(user.id);
+            const currentFriendlyCount = Participants.totalHostileToday(user.id);
+          }
           break;
 
       }
@@ -133,10 +146,10 @@ let reaction = {
     }
   },
 
-  react: (msg, emoji = getRandomEmoji()) => {
-
+  react: async (msg, emoji = getRandomEmoji()) => {
+    return await msg.react(emoji);
   }
 }
 
 
-module.exports = reaction;
+module.exports = reactionObj;

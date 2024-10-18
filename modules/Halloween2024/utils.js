@@ -118,7 +118,7 @@ let event = {
     "👻",
     "👻",
     "👻",
-    "🧚‍♂️"
+    //"🧚‍♂️"
   ],
   odds: 8,
   /**
@@ -275,18 +275,16 @@ let event = {
         "title": "The Ebbing of The Tides  (October 12th-31st)",
         "color": 0,
         "footer": {
-          "text": "Spam filter: :white_check_mark: \n Reaction Based: :white_check_mark: \n Secret code: :grey_question:\n Canon Lore drop: :x:\n Worldmaker involved: :x: "
+          "text": "Event Traits:\nSpam filter: ✅ \nReaction Based: ✅\nSecret code: ❔\nCanon Lore drop: ❌\nWorldmaker involvement: ❌ "
         }
       }, {
       content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.MetaUpdates}>, <@&${snowflakes.roles.Updates.HolidayUpdates}>`,
       allowedMentions: { roles: [snowflakes.roles.Updates.AllUpdates, snowflakes.roles.Updates.MetaUpdates, snowflakes.roles.Updates.HolidayUpdates] },
       components: [
         {
-          "id": 455936111,
           "type": 1,
           "components": [
             {
-              "id": 780175396,
               "type": 2,
               "style": 1,
               "label": "Sign up for Event Pings",

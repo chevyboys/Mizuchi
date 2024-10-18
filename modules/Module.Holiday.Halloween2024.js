@@ -4,6 +4,7 @@ const snowflakes = require("../config/snowflakes.json");
 //const config = require('../../config/config.json');
 //const u = require('../../utils/Utils.Generic');
 const event = require("./Halloween2024/utils.js");
+const moment = require("moment");
 const odds = event.odds;
 const ParticipantManager = require("../modules/Halloween2024/Participant.js");
 // const NPCSend = require("../../modules/PristineWaters/NPC");
@@ -95,10 +96,11 @@ async function end(guild) {
   await Active.setActive(false);
 }
 
-async function dailyReset() {
+async function dailyReset(guild) {
   //TODO: Implement this function
   for (const role of snowflakes.roles.Holiday) {
-    event.cleanRoleMembers(role);
+    const guildRole = await guild.roles.fetch(role);
+    await event.cleanRoleMembers(guildRole);
   };
   //reset the status of all participants
   Participants.each(p => {
@@ -110,7 +112,7 @@ async function dailyReset() {
 
 //################ Module adds ################
 
-Module.addEvent("reactionAdd", async (reaction, user) => {
+Module.addEvent("messageReactionAdd", async (reaction, user) => {
   // Handle receiving a reaction
   Reaction.onAdd(reaction, user, Participants);
 }).addInteractionCommand({
@@ -118,7 +120,7 @@ Module.addEvent("reactionAdd", async (reaction, user) => {
   guildId: snowflakes.guilds.PrimaryServer,
   process: async (interaction) => {
     //TODO: Do something if the event is not yet active
-    if (!Active.isActive()) {
+    if (!Active.getActive) {
       await interaction.reply({ content: "The event has not yet begun. Please check back later.", ephemeral: true });
       return;
     }
@@ -132,14 +134,31 @@ Module.addEvent("reactionAdd", async (reaction, user) => {
     }
   }
 }).setClockwork(() => {
-  //TODO: Implement this function
-  //Handle daily reset at midnight (It has to be midnight because of how we are handling dates)
-  //Handle end of event
-}).addInteractionHandler({
-  customId: `signUpForHolidayUpdates`, process: async (interaction) => {
+  if (!Active.getActive) return;
+  try {
+    return setInterval(async () => {
+      //TODO: Implement this function
+      //Handle daily reset at midnight (It has to be midnight because of how we are handling dates)
+      //Handle end of event
+
+      const TargetUSTime = 0; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
+      const modifierToConvertToBotTime = 7;
+      if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
+        let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+        dailyReset(guild);
+
+      }
+    }
+
+      , 60 * 1000);
+  } catch (e) { u.errorHandler(e, "event Clockwork Error"); }
+}).addEvent('interactionCreate', async (interaction) => {
+  console.log(interaction);
+  if (interaction.customId == "signUpForHolidayUpdates") {
+    interaction.deferUpdate();
     let member = await (await rolesClientPrimaryGuild).members.fetch(interaction.member);
-    await member.roles.add(snowflakes.roles.HolidayUpdates);
-    await interaction.editReply({ content: "You now have the <@&" + snowflakes.roles.Holiday + " role", ephemeral: true });
+    await member.roles.add(snowflakes.roles.Updates.HolidayUpdates);
+    await interaction.followUp({ content: "You have been signed up for holiday updates!", ephemeral: true });
   }
 }).addCommand({
   name: "flurry",
@@ -174,7 +193,7 @@ Module.addEvent("reactionAdd", async (reaction, user) => {
   name: "reset",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
-    dailyReset();
+    dailyReset(msg.guild);
   }
 });
 

@@ -62,8 +62,8 @@ class Participant {
     if (!resolvable) throw new Error("No resolvable provided.");
     if (!resolvable.userID) throw new Error("No user ID provided.");
     this.#_userID = resolvable.userID;
-    this.#_Hostile = new CountManager(resolvable.Hostile);
-    this.#_Friendly = new CountManager(resolvable.Friendly);
+    this.#_Hostile = resolvable.Hostile ? new CountManager(resolvable.Hostile) : new CountManager([]);
+    this.#_Friendly = resolvable.Friendly ? new CountManager(resolvable.Friendly) : new CountManager([]);
     this.#_status = resolvable.status || "ACTIVE" // ACTIVE, BANNED, SUSPENDED, INACTIVE;
     this.#_lastAbilityUse = resolvable.lastAbilityUse ? new Date(resolvable.lastAbilityUse) : Date.now() - 1000 * 60 * event.abilityCooldownMinutes;
     this.#_inventory = new Inventory(resolvable.inventory) || new Inventory();
@@ -232,15 +232,23 @@ class ParticipantManager extends Collection {
    */
 
   constructor(iterable) {
+    super();
     //if iterable is not provided, try to read the participants from the file
     if (!iterable) {
       try {
-        iterable = JSON.parse(fs.readFileSync('../../data/holiday/participants.json'));
+        //check if the file exists
+        if (fs.existsSync('./data/holiday/participants.json')) {
+          iterable = require("../../data/holiday/participants.json")
+        } else {
+          iterable = [];
+        };
       } catch (e) {
         iterable = [];
       }
     }
-    super(iterable.map(p => [p.userID, new Participant(p, this)]));
+    iterable.forEach(element => {
+      this.set(element.userID, new Participant(element, this));
+    });
   }
 
   /*
@@ -397,7 +405,9 @@ class ParticipantManager extends Collection {
    * writes the participant manager to a file in '../../data/holiday/participants.json'
    */
   write() {
-    fs.writeFileSync('../../data/holiday/participants.json', JSON.stringify(this.toJSON(), null, 2));
+    //If the file doesn't exist, create it
+    if (!fs.existsSync('./data/holiday')) fs.mkdirSync('./data/holiday');
+    fs.writeFileSync('./data/holiday/participants.json', JSON.stringify(this.toJSON(), null, 2));
   }
 
 }
@@ -430,7 +440,10 @@ class CountManager extends Collection {
 
   constructor(iterable) {
     //create a new collection, and if iterable is provided, create a collection from it
-    super(iterable);
+    super();
+    for (const item of iterable) {
+      this.set(item.key, item.value);
+    }
   }
 
   /**
@@ -469,6 +482,10 @@ class CountManager extends Collection {
    */
   total() {
     return Array.from(this.values()).reduce((a, b) => a + b, 0);
+  }
+
+  toJSON() {
+    return this.map((v, k) => { return { key: k, value: v } });
   }
 
 }
