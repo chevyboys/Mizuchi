@@ -38,7 +38,7 @@ let reactionObj = {
           reactionObj.remove(reaction);
           break;
         case "👻":
-          if (Participants.get(user.id) && Participants.get(user.id)?.status != "ACTIVE" && reaction.channel.id != channel.id) return;
+          if (Participants.get(user.id) && Participants.get(user.id)?.status != "ACTIVE" && reaction.message.channel.id != channel.id) return reactionObj.remove(reaction);
           reactionObj.remove(reaction);
           if (!reaction.users.cache.has(message.client.user.id)) {
             return;
@@ -74,6 +74,7 @@ let reactionObj = {
               case 50:
                 //TODO: Add today's mask to the inventory and equip it
                 Participants.get(user.id).status = "SUSPENDED";
+                Participants.write();
                 NPCSend(channel,
                   u.embed(
                     {
@@ -89,6 +90,9 @@ let reactionObj = {
                   });
 
                 await member.roles.add(snowflakes.roles.Holiday[1]);
+
+                //message the user and let them know they can use the star emoji to help spread the ghosts
+                member.user.send("You have been consumed by the darkness. As an ally of the night, you can the ⭐ emoji to spread the ghosts to other messages.");
                 break;
               default:
                 NPCSend(channel,
@@ -118,7 +122,14 @@ let reactionObj = {
             const currentFriendlyCount = Participants.totalHostileToday(user.id);
           }
           break;
-
+        case "⭐":
+          //if the participant has holiday[1] role, and participant.canUseAbility, create a reaction on the message and setLastAbilityUse
+          if (reaction.message.guild.roles.cache.get(snowflakes.roles.Holiday[1]) && Participants.get(user.id).canUseAbility) {
+            reactionObj.react(reaction.message);
+            Participants.get(user.id).setLastAbilityUse();
+          }
+          //remove the star reaction
+          reaction.remove();
       }
 
     } catch (error) {
