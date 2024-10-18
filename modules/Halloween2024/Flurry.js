@@ -1,5 +1,4 @@
 const snowflakes = require('../../config/snowflakes.json')
-const spam = require('spam.js');
 let flurryChannels = [[], []]
 let flurryBlacklist = [
   snowflakes.channels.ask,
@@ -44,12 +43,10 @@ let Flurry = {
     let flurryRoll = Math.floor(Math.random() * 100);
     let flurryChance = 0;
     //let flurryMsgAuthor = msg.author.id
-    if (!spam.isSpam(msg)) { //spam check
-      let lastTenMsgs = await msg.channel.messages.fetch({ limit: 10 });
-      if (lastTenMsgs.some((msg) => msg.createdTimestamp >= (Date.now() - 7200))) {
-        //At least one of the last 10 messages was within the last two hours
-        flurryChance = 10;
-      }
+    let lastTenMsgs = await msg.channel.messages.fetch({ limit: 10 });
+    if (lastTenMsgs.some((msg) => msg.createdTimestamp >= (Date.now() - 7200))) {
+      //At least one of the last 10 messages was within the last two hours
+      flurryChance = 10;
     }
     if (flurryChance > flurryRoll) {
       return true;
