@@ -6,60 +6,60 @@ const colors = [
   //TODO: change the colors, instead of a reward threshold
   //    we should have a role icon
   {
-    name: "Raspberry",
+    name: "Sword",
     color: "#961547",
     role_icon: "./img/server/Halloween/icon.png"
   },
 
   {
-    name: "Orange",
+    name: "Serpent",
     color: "#e07f35",
     role_icon: "./img/server/Halloween/icon.png"
   },
 
   {
-    name: "Gold",
+    name: "Phoenix",
     color: "#fffe7b",
     role_icon: "./img/server/Halloween/icon.png"
   },
 
   {
-    name: "Green",
+    name: "Hydra",
     color: "#a7ff76",
     role_icon: "./img/server/Halloween/icon.png"
   },
   {
-    name: "Eucalyptus Green",
+    name: "Tortise",
     color: "#28eaa2",
     role_icon: "./img/server/Halloween/icon.png"
   },
   {
-    name: "Mint",
+    name: "Spider",
     color: "#b9ffea",
     role_icon: "./img/server/Halloween/icon.png"
   },
   {
-    name: "frost",
+    name: "Mimic",
     color: "#b9ebff",
     role_icon: "./img/server/Halloween/icon.png"
   },
   {
-    name: "Deep Purple",
+    name: "Dragon",
     color: "#310c38",
     role_icon: "./img/server/Halloween/icon.png"
   },
   {
-    name: "Tavare Winter Blue",
+    name: "Oni",
     color: "#66a3d8",
     role_icon: "./img/server/Halloween/icon.png"
   },
   {
-    name: "Goddess Blue",
+    name: "Karvensi",
     color: "#9CA9FF",
     role_icon: "./img/server/Halloween/icon.png"
   },
   {
-    name: "Bingus Blurple",
+    name: "Slime",
     color: "#c4ccff",
     role_icon: "./img/server/Halloween/icon.png"
   }
@@ -139,7 +139,7 @@ let event = {
           //color: color.color,
           icon: guild.premiumTier > 1 ? color.role_icon : undefined,
           reason: "Holiday Event",
-          position: guild.roles.cache.get(snowflakes.roles.Holiday[0]).position + 1
+          position: guild.roles.cache.get(snowflakes.roles.Holiday[0]).position - 1
         });
         console.log("Created " + role.name + " role");
       } else {
