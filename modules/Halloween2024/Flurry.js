@@ -81,8 +81,8 @@ let Flurry = {
   end: (channel) => {
     let idCheck = channel.id
     if (flurryChannels[0].includes(idCheck)) {
-      flurryChannels[0].splice(flurryChannels[0].indexOf(idCheck), 1)
       flurryChannels[1].splice(flurryChannels[0].indexOf(idCheck), 1)
+      flurryChannels[0].splice(flurryChannels[0].indexOf(idCheck), 1)
     }
     console.log(`The Flurry in ${channel.name} has come to an end!`)
     return true;
@@ -127,8 +127,8 @@ let Flurry = {
     if (blizzardActive) {
       return !(flurryBlacklist.includes(idCheck))
     } else {
-      let idCheck = msg.channel.id
-      return flurryChannels[idCheck].status
+      idCheck = channel.id
+      return flurryChannels[0].includes(idCheck)
     }
   }
 };
