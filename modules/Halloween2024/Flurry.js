@@ -1,5 +1,5 @@
 const snowflakes = require('../../config/snowflakes.json');
-const { channels } = require('../../utils/Utils.RolesLogin');
+
 let Flurry = {
   //TODO: Add Flurry functions
   //IF flurries should persist between restarts, you will need to do the following:
