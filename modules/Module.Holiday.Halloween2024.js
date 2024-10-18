@@ -50,21 +50,22 @@ async function begin(guild) {
   // Event build and teardown
   //    Send announcement
   //    Create / Rename roles
-  event.generateRoles(guild);
+  await event.generateRoles(guild);
   //    Set bot icon
-  event.setHolidayBotIcon(guild.client)
+  await event.setHolidayBotIcon(guild.client)
   //    Set bot name
-  guild.client.user.setUsername("Twilight's Edge");
+  await guild.client.user.setUsername("Twilight's Edge");
+  await guild.members.cache.get(guild.client.user.id).setNickname("Twilight's Edge");
   //    Set bot status
-  guild.client.user.setActivity(`More than ${Participants.totalEventHostile()} Ghosts caught!`);
+  await guild.client.user.setActivity({ type: "WATCHING", name: `${Participants.totalEventHostile()} Ghosts caught!` });
   //    Starting announcement
-  event.sendAnnouncements(guild);
+  await event.sendAnnouncements(guild);
   //    Set server icon
-  event.setServerHolidayIcon(guild);
+  await event.setServerHolidayIcon(guild); //Failing silently currently, need to investigate
   //    Set server banner
-  event.setServerHolidayBanner(guild);
+  await event.setServerHolidayBanner(guild); //Failing silently currently, need to investigate
   // Set event as active
-  Active.setActive(true);
+  await Active.setActive(true);
 
 
   //See https://docs.google.com/document/d/1p6DZ28IPDP8wNqNs-IUN_HjogpcMK7b5W7Auvm9NHq8/edit
@@ -72,25 +73,26 @@ async function begin(guild) {
 }
 
 async function end(guild) {
-  //TODO: Implement this function
   // Unset colors
   // Delete / Unname roles
-  event.cleanRoles(guild);
+  await event.cleanRoles(guild);
   // For each role in snowflakes.roles.Holiday, remove the role from all members
   for (const role of snowflakes.roles.Holiday) {
-    event.cleanRoleMembers(role);
+    const guildRole = await guild.roles.fetch(role);
+    await event.cleanRoleMembers(guildRole);
   };
-  event.cleanHolidayBotIcon(guild.client);
+  await event.cleanHolidayBotIcon(guild.client);
   // Set bot name
-  guild.client.user.setUsername("Tavare");
+  await guild.client.user.setUsername("Tavare");
+  await guild.members.cache.get(guild.client.user.id).setNickname("Tavare");
   // Set bot status
-  guild.client.user.setActivity("The event has ended!");
+  await guild.client.user.setActivity(null);
   //set the server icon to the default icon
-  event.cleanServerHolidayIcon(guild);
+  await event.cleanServerHolidayIcon(guild);
   //reset the server banner to the default banner
-  event.cleanServerHolidayBanner(guild);
+  await event.cleanServerHolidayBanner(guild);
   //set the event as inactive
-  Active.setActive(false);
+  await Active.setActive(false);
 }
 
 async function dailyReset() {
@@ -116,6 +118,10 @@ Module.addEvent("reactionAdd", async (reaction, user) => {
   guildId: snowflakes.guilds.PrimaryServer,
   process: async (interaction) => {
     //TODO: Do something if the event is not yet active
+    if (!Active.isActive()) {
+      await interaction.reply({ content: "The event has not yet begun. Please check back later.", ephemeral: true });
+      return;
+    }
     //Handle subcommands
     switch (interaction.options.getSubcommand()) {
       case "inventory": Inventory.command(interaction, Participants); break;
