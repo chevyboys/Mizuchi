@@ -1,8 +1,9 @@
 const { Message } = require("discord.js");
+const event = require('./utils');
 
 class userMessage {
-  constructor(uID, content, timestamp) {
-    this.uID = uID;
+  constructor(member, content, timestamp) {
+    this.member = member;
     this.content = content;
     this.timestamp = timestamp;
   }
@@ -43,12 +44,12 @@ function timeFromMessage(msg, message) {
 }
 
 // Function to find the userMessage by ID
-/**function getLastUserMessage(uID) {
-  return record.find(message => message.uID === uID) || null;
+/**function getLastUserMessage(member) {
+  return record.find(message => message.member === member) || null;
 } */
-function getLastUserMessage(uID) {
+function getLastUserMessage(member) {
   //Logger.log("getting user message");
-  let r = record.find(message => message.uID === uID);
+  let r = record.find(message => message.member.id == member.id);
   if (r != null) {
     //Logger.log("Message: " + r);
     return r;
@@ -60,13 +61,13 @@ function getLastUserMessage(uID) {
 /*
   Remove the last message by a user
 */
-function removeLastUserMessage(uID) {
+function removeLastUserMessage(member) {
 
   if (record.length >= 1) {
-    // Find the index of the last message with the given uID
-    const index = record.findIndex(message => message.uID === uID);
+    // Find the index of the last message with the given member
+    const index = record.findIndex(message => message.member === member);
     Logger.log(index);
-    // If a message with the given uID is found, remove it
+    // If a message with the given member is found, remove it
     if (index !== -1) {
       record.splice(index, 1);
     }
@@ -80,18 +81,18 @@ function removeLastUserMessage(uID) {
   record the last message by a user
 */
 /**
-function recordLastMessage(uID, content, timestamp) {
+function recordLastMessage(member, content, timestamp) {
   //
-  removeLastUserMessage(uID);
-  return record.push(new userMessage(uID, content, timestamp));
+  removeLastUserMessage(member);
+  return record.push(new userMessage(member, content, timestamp));
 } */
-function recordLastMessage(uID, content, timestamp) {
+function recordLastMessage(member, content, timestamp) {
   Logger.log("record length: " + record.length);
   if (record.length != 0) {
-    removeLastUserMessage(uID);
+    removeLastUserMessage(member);
   }
 
-  let b = record.push(new userMessage(uID, content, timestamp));
+  let b = record.push(new userMessage(member, content, timestamp));
   //Logger.log("record length: " + record.length + "b: " + b);
   //Logger.log(record[0]);
   return b;
@@ -106,15 +107,11 @@ module.exports = {
    * @param {ParticipantManager} participants 
    * @returns {boolean} returns true if the message is spam
    */
-  isSpam: async (dmsg, participants) => {
+  isSpam: async (msg, participants) => {
     //TODO: Implement this function @jhat0353
 
-    // convert Message to userMessage
-    let msg = new userMessage(uID = dmsg.member, content = dmsg.content, timestamp = dmsg.timestamp);
 
-    // continue operations
-
-    if (isAdmin(msg.uID)) {
+    if (event.isAdmin(msg.member)) {
       return false;
     }
 
@@ -129,7 +126,7 @@ module.exports = {
       return true;
     }
 
-    let message = getLastUserMessage(uID);
+    let message = getLastUserMessage(member);
 
     // check for time limits
     if (timeFromMessage(msg, message) <= 2) { // currently 2 seconds
@@ -142,7 +139,7 @@ module.exports = {
     }
 
     // record message timestamp and content
-    recordLastMessage(msg.uID, text, msg.timestamp);
+    recordLastMessage(msg.member, text, msg.timestamp);
 
     return false; // passed all checks
 
