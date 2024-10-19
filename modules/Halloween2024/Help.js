@@ -13,6 +13,10 @@ const instructionsHelp = {
     {
       name: "Available Commands",
       value: "These commands are available:\n\`/holiday inventory\`: Manage your event rewards. (Not yet implemented)\n\`holiday leaderboard\`: See how you and others are doing in the event. (Not yet implemented)\n\`/holiday gift\`: Send someone an Ebbing-tide card. (Not yet implemented)"
+    },
+    {
+      name: "Event Credits",
+      value: "__Design__:\nGhost, Dia, SapphireSapphic, Jordan (j0353), Duke, Al, Kester, Elsecaller\n__Code:__\nGhost, Dia, SapphireSapphic, Jordan (j0353)\n__Art Team:__\nJordan, Jonah, Kritta\n__Infrastructure Management:__\nJolteon\n__Special Thanks:__\nAndrew Rowe, Kayleigh Nicol, Pandora, Kritta, Duke, Al, SapphireSapphic, Jordan (j0353), Dia, and all of our wonderful Patreon Patrons that help make events like this possible!"
     }
   ]
 }
