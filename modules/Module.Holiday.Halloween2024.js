@@ -108,7 +108,7 @@ async function dailyReset(guild) {
   })
 }
 
-
+let today = new Date().getDate();
 
 //################ Module adds ################
 
@@ -135,11 +135,14 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   }
 }).setClockwork(() => {
   if (!Active.getActive) return;
+  if (today == new Date().getDate()) return;
+
   try {
     return setInterval(async () => {
       //TODO: Implement this function
       //Handle daily reset at midnight (It has to be midnight because of how we are handling dates)
       //Handle end of event
+      today = new Date().getDate();
 
       const TargetUSTime = 0; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
       const modifierToConvertToBotTime = 7;
@@ -216,6 +219,11 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 });
 
 //TODO: Add automatic slash command registration
+//TODO: Add pinging people in the event channel when they get access to it
+//TODO: Add role icons for masks
+//TODO: Allow people to get masks by hitting 50 ghosts
+//TODO: make sure that each time the bot reacts, it sets a timeout to remove the reaction
+
 
 
 

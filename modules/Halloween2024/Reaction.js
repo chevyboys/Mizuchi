@@ -98,7 +98,7 @@ let reactionObj = {
                 NPCSend(channel,
                   u.embed(
                     {
-                      description: `I see <@${user.id}> found a treat in <#${message.channel.id}> `,
+                      description: `I see <@${user.id}> captured a ghost in <#${message.channel.id}> `,
                       footer: {
                         text: `Found Ghosts today: ${Participants.totalHostileToday(user.id)} | total: ${Participants.totalHostile(user.id)}\nFound Spirits today: ${Participants.totalFriendlyToday(user.id)} | total: ${Participants.totalFriendly(user.id)}`
                       }
