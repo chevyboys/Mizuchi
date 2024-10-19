@@ -29,7 +29,7 @@ const colors = [
     role_icon: "./img/server/Halloween/icon.png"
   },
   {
-    name: "Tortise",
+    name: "Tortoise",
     color: "#28eaa2",
     role_icon: "./img/server/Halloween/icon.png"
   },
