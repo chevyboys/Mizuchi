@@ -192,7 +192,23 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   name: "resetevent",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
-    dailyReset(msg.guild);
+    const participantsRequire = require("../../data/holiday/participants.json");
+    const today = new Date().getDate();
+
+    for (const p of participantsRequire) {
+      let todayHostile = p.Hostile.find(h => h.key == today)?.value || 0;
+      // if yesterday's count exists, add today's count to yesterday's count
+      let yesterdayHostile = p.Hostile.find(h => h.key == today - 1)?.value || 0;
+      if (todayHostile) {
+        if (yesterdayHostile) {
+          p.Hostile.find(h => h.key == today - 1).value = yesterdayHostile + todayHostile;
+        }
+        p.Hostile.find(h => h.key == today).value = 0;
+      }
+    }
+    //write the participants back to the file
+    fs.writeFileSync('./data/holiday/participants.json', JSON.stringify(participantsRequire, null, 2));
+    await dailyReset(msg.guild);
     msg.react("✅");
   }
 }).addEvent("messageCreate", async (msg) => {
