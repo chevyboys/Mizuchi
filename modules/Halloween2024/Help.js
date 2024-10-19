@@ -12,7 +12,7 @@ const instructionsHelp = {
     },
     {
       name: "Available Commands",
-      value: "These commands are available:\n\`/holiday inventory\`: Manage your event rewards. (Not yet implemented)\n\`holiday leaderboard\`: See where you stack up! (Not yet implemented)\n\`/holiday gift\`: Send someone an Ebbing-tide card. (Not yet implemented)"
+      value: "These commands are available:\n\`/holiday inventory\`: Manage your event rewards. (Not yet implemented)\n\`holiday leaderboard\`: See how you and others are doing in the event. (Not yet implemented)\n\`/holiday gift\`: Send someone an Ebbing-tide card. (Not yet implemented)"
     }
   ]
 }
