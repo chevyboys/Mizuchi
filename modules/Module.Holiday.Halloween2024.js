@@ -12,6 +12,7 @@ const ParticipantManager = require("../modules/Halloween2024/Participant.js");
 // const manipulateImage = require('../../modules/PristineWaters/imageManipulation');
 // const embedColor = event.colors.find(c => c.name.toLowerCase().includes("blurple")).color || event.colors[event.colors.length - 1].color;
 const endedButNotCleaned = false;
+const fs = require('fs');
 
 let Participants = new ParticipantManager();
 const rolesClient = require("../utils/Utils.RolesLogin.js");
