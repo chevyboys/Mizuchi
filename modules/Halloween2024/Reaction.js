@@ -231,7 +231,7 @@ let reactionObj = {
       }
       else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id) || member.roles.cache.hasAny([snowflakes.roles.Admin, snowflakes.roles.Helper, snowflakes.roles.Moderator, snowflakes.roles.CommunityGuide, snowflakes.roles.BotMaster, snowflakes.roles.WorldMaker] || event.isAdmin(member))) {
         reaction.remove()
-        await reaction.message.react(getRandomEmoji());
+        await reactionObj.react(reaction.message);
       } else if (reaction.emoji.toString().toLowerCase().indexOf("⭐") > -1) {
         u.errorHandler("⭐ reaction detected", "Gift reaction detected, Triggered by " + user.username + " in " + message.guild.name + " in channel " + message.channel.name + "\n User participant object information: " + JSON.stringify(Participants.get(user.id)));
         let index = Participants.get(user.id);
@@ -287,6 +287,11 @@ let reactionObj = {
   },
 
   react: async (msg, emoji = getRandomEmoji()) => {
+
+    //remove the reaction of the bot in ten minutes if it has not been removed
+    setTimeout(() => {
+      msg.reactions.cache.get(emoji).remove().catch(() => { });
+    }, 1000 * 60 * 10);
     return await msg.react(emoji);
   }
 }
