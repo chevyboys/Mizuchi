@@ -24,6 +24,7 @@ const help = {
    */
   async command(interaction) {
     interaction.reply({ ephemeral: true, embeds: instructionsHelp })
+    return;
   }
 }
 
