@@ -8,7 +8,7 @@ const instructionsHelp = {
     },
     {
       name: "Emoji Events",
-      value: "**Emoji Event**\nThis event is driven by Emoji Reactions. When you see emojis left on messages (👻 or 🧚‍♂️), click on them to \"collect\" them and increase your totals for the event. Collect enough emojis, and something special will happen!"
+      value: "This event is driven by Emoji Reactions. When you see emojis left on messages (👻 or 🧚‍♂️), click on them to \"collect\" them and increase your totals for the event. Collect enough emojis, and something special will happen!"
     },
     {
       name: "Available Commands",
