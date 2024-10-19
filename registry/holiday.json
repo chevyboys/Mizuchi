@@ -1,0 +1,31 @@
+{
+  "name": "holiday",
+  "description": "Interact with the ongoing holiday event!",
+  "options": [
+    {
+      "name": "inventory",
+      "description": "Display what roles you've earned.",
+      "type": 1
+    },
+    {
+      "name": "leaderboard",
+      "description": "Display a leaderboard for who's found the most reacts.",
+      "type": 1
+    },
+    {
+      "name": "admin",
+      "description": "Admin purposes",
+      "type": 1
+    },
+    {
+      "name": "help",
+      "description": "Get an explanation of the event and instructions for how to participate.",
+      "type": 1
+    },
+    {
+      "name": "gift",
+      "description": "Send an Ebbingtide card to someone.",
+      "type": 1
+    }
+  ]
+}
