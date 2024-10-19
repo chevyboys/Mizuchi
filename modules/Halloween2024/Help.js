@@ -1,4 +1,4 @@
-const { embed } = require("../../utils/Utils.Generic");
+const u = require("../../utils/Utils.Generic");
 const instructionsHelp = {
   title: "Ebbing of the Tides 2024 Help",
   fields: [
@@ -23,7 +23,7 @@ const help = {
    * @param {Interaction} interaction 
    */
   async command(interaction) {
-    interaction.reply({ ephemeral: true, embeds: instructionsHelp })
+    interaction.reply({ ephemeral: true, embeds: [instructionsHelp] })
     return;
   }
 }
