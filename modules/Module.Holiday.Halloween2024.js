@@ -203,6 +203,8 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       if (todayHostile) {
         if (yesterdayHostile) {
           p.Hostile.find(h => h.key == today - 1).value = yesterdayHostile + todayHostile;
+        } else {
+          p.Hostile.push({ key: today - 1, value: todayHostile });
         }
         p.Hostile.find(h => h.key == today).value = 0;
       }
