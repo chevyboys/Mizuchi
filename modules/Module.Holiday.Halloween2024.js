@@ -134,8 +134,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     }
   }
 }).setClockwork(() => {
-  if (!Active.getActive) return;
-  if (today == new Date().getDate()) return;
+
 
   try {
     return setInterval(async () => {
@@ -143,14 +142,11 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       //Handle daily reset at midnight (It has to be midnight because of how we are handling dates)
       //Handle end of event
       today = new Date().getDate();
-
-      const TargetUSTime = 0; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
-      const modifierToConvertToBotTime = 7;
-      if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
-        let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-        dailyReset(guild);
-
-      }
+      if (!Active.getActive) return;
+      Participants.write();
+      if (today == new Date().getDate()) return;
+      let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+      dailyReset(guild);
     }
 
       , 60 * 1000);

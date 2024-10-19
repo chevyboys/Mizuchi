@@ -103,6 +103,7 @@ const serverBanner = "./img/server/Halloween/banner.png";
 
 let event = {
   abilityCooldownMinutes: 10,
+  channel: "1296735818475372599",
   avatar: avatar,
   colors: colors,
   roles: roles,
@@ -120,7 +121,7 @@ let event = {
     "👻",
     //"🧚‍♂️"
   ],
-  odds: 8,
+  odds: 100,
   /**
  * 
  * @param {Guild} guild 

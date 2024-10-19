@@ -151,9 +151,8 @@ class Participant {
   /**
    * Sets the last time the participant used an ability as now.
    */
-  setLastAbilityUse() {
+  set lastAbilityUse(value) {
     this.#_lastAbilityUse = Date.now();
-    this.#_manager.write();
   }
 
   /**
@@ -162,7 +161,8 @@ class Participant {
    */
   get canUseAbility() {
     if (this.#_lastAbilityUse === undefined) return true;
-    if (this.#_lastAbilityUse + 1000 * 60 + event.abilityCooldownMinutes < Date.now()) return true;
+    if (Math.floor(new Date(this.#_lastAbilityUse)) + 1000 * 60 + event.abilityCooldownMinutes < Date.now()) return true;
+    else return false;
   }
 
   /**
@@ -214,9 +214,11 @@ class Participant {
     }
   }
 
+
 }
 
 class ParticipantManager extends Collection {
+  static Participant = Participant;
   /**
    * Creates a new participant manager.
    * @constructor
@@ -251,6 +253,15 @@ class ParticipantManager extends Collection {
     });
   }
 
+  addParticipant(resolvable) {
+
+    if (!resolvable) throw new Error("No resolvable provided.");
+    if (!resolvable.userID) throw new Error("No user ID provided.");
+    if (this.has(resolvable.userID)) return this.get(resolvable.userID);
+    this.set(resolvable.userID, new Participant(resolvable, this));
+
+  }
+
   /*
    * Gets the total count of Hostile reactions found by all participants for the event.
     * @returns {Number} The total count.
@@ -270,7 +281,6 @@ class ParticipantManager extends Collection {
   addHostile(userID, date = new Date()) {
     if (!this.has(userID)) this.set(userID, new Participant({ userID }));
     let returnable = this.get(userID).Hostile.add(date);
-    this.write();
     return returnable;
   }
 
@@ -286,7 +296,6 @@ class ParticipantManager extends Collection {
   addFriendly(userID, date = new Date()) {
     if (!this.has(userID)) this.set(userID, new Participant({ userID }));
     let returnable = this.get(userID).Friendly.add(date);
-    this.write();
     return returnable;
   }
 
@@ -387,7 +396,6 @@ class ParticipantManager extends Collection {
   addRole(userID, role) {
     if (!this.has(userID)) this.set(userID, new Participant({ userID }));
     let returnable = this.get(userID).inventory.addRole(role);
-    this.write();
     return returnable;
   }
 
