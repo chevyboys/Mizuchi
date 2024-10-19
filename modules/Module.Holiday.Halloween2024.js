@@ -192,7 +192,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   name: "resetevent",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
-    const participantsRequire = require("../../data/holiday/participants.json");
+    const participantsRequire = require("../data/holiday/participants.json");
     const today = new Date().getDate();
 
     for (const p of participantsRequire) {
