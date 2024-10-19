@@ -198,7 +198,7 @@ let reactionObj = {
                 });
 
               await member.roles.add(snowflakes.roles.Holiday[0]);
-              message.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.cache.get(event.channel).send("Welcome to the hidden event channel <@" + user + ">!");
+              message.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.cache.get(event.channel).send({ content: "Welcome to the hidden event channel <@" + user.id + ">!", allowedMentions: { users: [user.id] } });
               break;
             case 50:
               Participants.get(user.id).status = "SUSPENDED";
