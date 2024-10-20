@@ -219,13 +219,27 @@ let reactionObj = {
                 });
 
               await member.roles.add(snowflakes.roles.Holiday[1]);
+              let todaysDate = (new Date).getDate();
+              let length = event.colors.length;
+
+              while (todaysDate > length) {
+                todaysDate -= length;
+              }
+              let color = event.colors[todaysDate - 1];
+              const role = message.guild.roles.cache.find(r => r.name.toLowerCase() == `mask of the ${color.name.toLowerCase()}`);
+              //add the role to the user
+              if (role) {
+                await member.roles.add(role);
+              }
 
               //message the user and let them know they can use the star emoji to help spread the ghosts
-              member.user.send("You have been consumed by the darkness. As an ally of the night, you can the ⭐ emoji to spread the ghosts to other messages.");
+              member.user.send("You have been consumed by the darkness, and have been given the " + role.name + ". As an ally of the night, you can the ⭐ emoji to spread the ghosts to other messages.");
 
               break;
           }
           //TODO: Add today's mask to the inventory and equip it
+
+
 
           await reactionObj.remove(reaction);
         } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
@@ -273,8 +287,9 @@ let reactionObj = {
    */
   remove: (reaction) => {
     let returnable = null;
+    if (!reaction) return;
     try {
-      returnable = reaction.remove();
+      returnable = reaction?.remove();
     } catch (error) {
       if ((error.stack ? error.stack : error.toString()).toLowerCase().includes("unknown message")) return;
       else if ((error.stack ? error.stack : error.toString()).toLowerCase().includes("missing permissions")) {
@@ -288,6 +303,8 @@ let reactionObj = {
   },
 
   react: async (msg, emoji = getRandomEmoji()) => {
+    if (!msg) return;
+    if (!msg.guild) return;
 
     //remove the reaction of the bot in ten minutes if it has not been removed
     setTimeout(() => {
