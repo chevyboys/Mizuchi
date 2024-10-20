@@ -180,6 +180,7 @@ let reactionObj = {
               content: `<@${user.id}>`,
               allowedMentions: (currentHostileCount == 1 ? { parse: ["users"] } : {})
             });
+          reaction.message.guild.client.user.setActivity(`More than ${Participants.totalEventHostile()} Ghosts caught!`);
           /////////////////////////
           switch (currentHostileCount) {
             case 5:
