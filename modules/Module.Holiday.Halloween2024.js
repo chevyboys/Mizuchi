@@ -221,7 +221,6 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   // Handle receiving a message
   if (!Active.getActive) return;
   if (msg.channel.type == "dm") return;
-  if (!Active.getActive) return;
   if ((await Spam.isSpam(msg))) return;
   //if there is a flurry or if a random chance based on odds as a percentage is met
   let roll = Math.floor(Math.random() * 100)

@@ -305,10 +305,11 @@ let reactionObj = {
   react: async (msg, emoji = getRandomEmoji()) => {
     if (!msg) return;
     if (!msg.guild) return;
-    if (!msg.reactions.cache.get(emoji)) return;
+
 
     //remove the reaction of the bot in ten minutes if it has not been removed
     setTimeout(() => {
+      if (!msg.reactions.cache.get(emoji)) return;
       msg.reactions.cache.get(emoji).remove().catch(() => { });
     }, 1000 * 60 * 15);
     return await msg.react(emoji);
