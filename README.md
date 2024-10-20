@@ -25,3 +25,6 @@ Releases will be named based on the last word in the title of books published by
 - v7.0.0 - Divinity
 - v8.0.0 - Sorcery
 - v9.0.0 - Destiny
+
+Special Thanks to Our github sponsors
+ - Mev

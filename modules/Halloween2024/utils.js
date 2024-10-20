@@ -29,7 +29,7 @@ const colors = [
     role_icon: "./img/server/Halloween/icon.png"
   },
   {
-    name: "Tortise",
+    name: "Tortoise",
     color: "#28eaa2",
     role_icon: "./img/server/Halloween/icon.png"
   },
@@ -103,6 +103,7 @@ const serverBanner = "./img/server/Halloween/banner.png";
 
 let event = {
   abilityCooldownMinutes: 10,
+  channel: "1296735818475372599",
   avatar: avatar,
   colors: colors,
   roles: roles,
@@ -120,7 +121,7 @@ let event = {
     "👻",
     //"🧚‍♂️"
   ],
-  odds: 8,
+  odds: 20,
   /**
  * 
  * @param {Guild} guild 

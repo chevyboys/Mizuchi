@@ -12,6 +12,7 @@ const ParticipantManager = require("../modules/Halloween2024/Participant.js");
 // const manipulateImage = require('../../modules/PristineWaters/imageManipulation');
 // const embedColor = event.colors.find(c => c.name.toLowerCase().includes("blurple")).color || event.colors[event.colors.length - 1].color;
 const endedButNotCleaned = false;
+const fs = require('fs');
 
 let Participants = new ParticipantManager();
 const rolesClient = require("../utils/Utils.RolesLogin.js");
@@ -134,8 +135,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     }
   }
 }).setClockwork(() => {
-  if (!Active.getActive) return;
-  if (today == new Date().getDate()) return;
+
 
   try {
     return setInterval(async () => {
@@ -143,14 +143,11 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       //Handle daily reset at midnight (It has to be midnight because of how we are handling dates)
       //Handle end of event
       today = new Date().getDate();
-
-      const TargetUSTime = 0; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
-      const modifierToConvertToBotTime = 7;
-      if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
-        let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-        dailyReset(guild);
-
-      }
+      if (!Active.getActive) return;
+      Participants.write();
+      if (today == new Date().getDate()) return;
+      let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+      dailyReset(guild);
     }
 
       , 60 * 1000);
@@ -196,7 +193,25 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   name: "resetevent",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
-    dailyReset(msg.guild);
+    const participantsRequire = require("../data/holiday/participants.json");
+    const today = new Date().getDate();
+
+    for (const p of participantsRequire) {
+      let todayHostile = p.Hostile.find(h => h.key == today)?.value || 0;
+      // if yesterday's count exists, add today's count to yesterday's count
+      let yesterdayHostile = p.Hostile.find(h => h.key == today - 1)?.value || 0;
+      if (todayHostile) {
+        if (yesterdayHostile) {
+          p.Hostile.find(h => h.key == today - 1).value = yesterdayHostile + todayHostile;
+        } else {
+          p.Hostile.push({ key: today - 1, value: todayHostile });
+        }
+        p.Hostile.find(h => h.key == today).value = 0;
+      }
+    }
+    //write the participants back to the file
+    fs.writeFileSync('./data/holiday/participants.json', JSON.stringify(participantsRequire, null, 2));
+    await dailyReset(msg.guild);
     msg.react("✅");
   }
 }).addEvent("messageCreate", async (msg) => {
