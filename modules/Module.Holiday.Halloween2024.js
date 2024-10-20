@@ -48,7 +48,6 @@ function getRandomEmoji() {
  */
 
 async function begin(guild) {
-  //TODO: Implement this function
   // Event build and teardown
   //    Send announcement
   //    Create / Rename roles
@@ -98,12 +97,10 @@ async function end(guild) {
 }
 
 async function dailyReset(guild) {
-  //TODO: Implement this function
   for (const role of snowflakes.roles.Holiday) {
     const guildRole = await guild.roles.fetch(role);
     await event.cleanRoleMembers(guildRole);
   };
-  //reset the status of all participants
   Participants.each(p => {
     p.status = "ACTIVE";
   })
@@ -112,15 +109,18 @@ async function dailyReset(guild) {
 let today = new Date().getDate();
 
 //################ Module adds ################
-
+let i = 0;
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
+  i++;
+  if (i % 10 == 0) {
+    Participants.write();
+  }
   // Handle receiving a reaction
   Reaction.onAdd(reaction, user, Participants);
 }).addInteractionCommand({
   name: "holiday",
   guildId: snowflakes.guilds.PrimaryServer,
   process: async (interaction) => {
-    //TODO: Do something if the event is not yet active
     if (!Active.getActive) {
       await interaction.reply({ content: "The event has not yet begun. Please check back later.", ephemeral: true });
       return;
@@ -136,12 +136,8 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   }
 }).setClockwork(() => {
 
-
   try {
     return setInterval(async () => {
-      //TODO: Implement this function
-      //Handle daily reset at midnight (It has to be midnight because of how we are handling dates)
-      //Handle end of event
       today = new Date().getDate();
       if (!Active.getActive) return;
       Participants.write();
@@ -190,9 +186,16 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     end(msg.guild);
   }
 }).addCommand({
+  name: "write",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg) => {
+    Participants.write();
+  }
+}).addCommand({
   name: "resetevent",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
+    Participants.write();
     const participantsRequire = require("../data/holiday/participants.json");
     const today = new Date().getDate();
 
@@ -218,12 +221,11 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   // Handle receiving a message
   if (!Active.getActive) return;
   if (msg.channel.type == "dm") return;
-  if (!Active.getActive) return;
   if ((await Spam.isSpam(msg))) return;
   //if there is a flurry or if a random chance based on odds as a percentage is met
   let roll = Math.floor(Math.random() * 100)
   let flurryReaction = false && Flurry.reactBecauseOfFlurry(msg);
-  if (flurryReaction || roll < odds) {
+  if (flurryReaction || roll < odds || msg.channel.id == event.channel) {
     await Reaction.react(msg);
     //remove the reaction in ten minutes
     setTimeout(() => {
@@ -234,10 +236,8 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 });
 
 //TODO: Add automatic slash command registration
-//TODO: Add pinging people in the event channel when they get access to it
-//TODO: Add role icons for masks
-//TODO: Allow people to get masks by hitting 50 ghosts
-//TODO: make sure that each time the bot reacts, it sets a timeout to remove the reaction
+//TODO: Allow people to get masks by hitting 50 ghosts once inventory comes out
+
 
 
 

@@ -28,3 +28,4 @@ Releases will be named based on the last word in the title of books published by
 
 Special Thanks to Our github sponsors
  - Mev
+ - Carly
