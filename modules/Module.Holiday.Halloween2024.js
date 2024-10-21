@@ -134,7 +134,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       case "gift": Gift.command(interaction, Participants); break;
     }
   }
-}).setClockwork(() => {
+}).setClockwork(async () => {
 
   try {
     return setInterval(async () => {
@@ -143,7 +143,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       Participants.write();
       if (today == new Date().getDate()) return;
       let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-      dailyReset(guild);
+      await dailyReset(guild);
     }
 
       , 60 * 1000);
@@ -203,6 +203,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       let todayHostile = p.Hostile.find(h => h.key == today)?.value || 0;
       // if yesterday's count exists, add today's count to yesterday's count
       let yesterdayHostile = p.Hostile.find(h => h.key == today - 1)?.value || 0;
+
       if (todayHostile) {
         if (yesterdayHostile) {
           p.Hostile.find(h => h.key == today - 1).value = yesterdayHostile + todayHostile;
@@ -215,6 +216,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     //write the participants back to the file
     fs.writeFileSync('./data/holiday/participants.json', JSON.stringify(participantsRequire, null, 2));
     await dailyReset(msg.guild);
+    Participants = new ParticipantManager();
     msg.react("✅");
   }
 }).addEvent("messageCreate", async (msg) => {
