@@ -102,7 +102,7 @@ const serverBanner = "./img/server/Halloween/banner.png";
  */
 
 let event = {
-  abilityCooldownMinutes: 10,
+  abilityCooldownMinutes: 1,
   channel: "1296735818475372599",
   avatar: avatar,
   colors: colors,
