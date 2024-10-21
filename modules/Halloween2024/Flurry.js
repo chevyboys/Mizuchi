@@ -18,7 +18,6 @@ const flurryChannels = []
 const flurryBlacklist = [
   snowflakes.channels.ask,
   snowflakes.channels.blogAnnouncements,
-  snowflakes.channels.earthTemple,
   snowflakes.channels.general,
   snowflakes.channels.faq,
   snowflakes.channels.introductions,
