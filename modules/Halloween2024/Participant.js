@@ -6,6 +6,8 @@ const event = require("./utils");
 const NPCSend = require("./NPC");
 const Inventory = require('./Inventory.Class');
 
+const abilityUsedCollection = new Collection();
+
 /**
  * Represents a participant in the Holiday module.
  * @class
@@ -153,6 +155,11 @@ class Participant {
    */
   set lastAbilityUse(value) {
     this.#_lastAbilityUse = Date.now();
+    abilityUsedCollection.set(this.userID, this.#_lastAbilityUse);
+    //remmove the ability from the collection after the cooldown period
+    setTimeout(() => {
+      abilityUsedCollection.delete(this.userID);
+    }, 1000 * 60 * event.abilityCooldownMinutes);
   }
 
   /**
@@ -160,10 +167,7 @@ class Participant {
    * @returns {boolean} Whether the participant can use an ability right now.
    */
   get canUseAbility() {
-    return false;
-    if (this.#_lastAbilityUse === undefined) return true;
-    if (Math.floor(new Date(this.#_lastAbilityUse)) + 1000 * 60 * event.abilityCooldownMinutes < Date.now()) return true;
-    else return false;
+    return abilityUsedCollection.has(this.userID);
   }
 
   /**
