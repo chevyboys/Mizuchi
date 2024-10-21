@@ -160,8 +160,9 @@ class Participant {
    * @returns {boolean} Whether the participant can use an ability right now.
    */
   get canUseAbility() {
+    return false;
     if (this.#_lastAbilityUse === undefined) return true;
-    if (Math.floor(new Date(this.#_lastAbilityUse)) + 1000 * 60 + event.abilityCooldownMinutes < Date.now()) return true;
+    if (Math.floor(new Date(this.#_lastAbilityUse)) + 1000 * 60 * event.abilityCooldownMinutes < Date.now()) return true;
     else return false;
   }
 
