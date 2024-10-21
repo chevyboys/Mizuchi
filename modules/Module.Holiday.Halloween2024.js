@@ -2,12 +2,12 @@ const Augur = require("augurbot");
 const snowflakes = require("../config/snowflakes.json");
 //const fs = require('fs');
 //const config = require('../../config/config.json');
-//const u = require('../../utils/Utils.Generic');
+const u = require('../utils/Utils.Generic.js');
 const event = require("./Halloween2024/utils.js");
 const moment = require("moment");
 const odds = event.odds;
 const ParticipantManager = require("../modules/Halloween2024/Participant.js");
-// const NPCSend = require("../../modules/PristineWaters/NPC");
+const NPCSend = require("./Halloween2024/NPC.js");
 // const moment = require("moment");
 // const manipulateImage = require('../../modules/PristineWaters/imageManipulation');
 // const embedColor = event.colors.find(c => c.name.toLowerCase().includes("blurple")).color || event.colors[event.colors.length - 1].color;
@@ -134,7 +134,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       case "gift": Gift.command(interaction, Participants); break;
     }
   }
-}).setClockwork(() => {
+}).setClockwork(async () => {
 
   try {
     return setInterval(async () => {
@@ -143,7 +143,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       Participants.write();
       if (today == new Date().getDate()) return;
       let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-      dailyReset(guild);
+      await dailyReset(guild);
     }
 
       , 60 * 1000);
@@ -192,6 +192,14 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     Participants.write();
   }
 }).addCommand({
+  name: "npc",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg, suffix) => {
+    NPCSend(msg.channel, u.embed({ description: suffix }));
+    u.clean(msg, 0);
+  }
+
+}).addCommand({
   name: "resetevent",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
@@ -203,6 +211,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       let todayHostile = p.Hostile.find(h => h.key == today)?.value || 0;
       // if yesterday's count exists, add today's count to yesterday's count
       let yesterdayHostile = p.Hostile.find(h => h.key == today - 1)?.value || 0;
+
       if (todayHostile) {
         if (yesterdayHostile) {
           p.Hostile.find(h => h.key == today - 1).value = yesterdayHostile + todayHostile;
@@ -215,6 +224,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     //write the participants back to the file
     fs.writeFileSync('./data/holiday/participants.json', JSON.stringify(participantsRequire, null, 2));
     await dailyReset(msg.guild);
+    Participants = new ParticipantManager();
     msg.react("✅");
   }
 }).addEvent("messageCreate", async (msg) => {
@@ -223,9 +233,9 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   if (msg.channel.type == "dm") return;
   if ((await Spam.isSpam(msg))) return;
   //if there is a flurry or if a random chance based on odds as a percentage is met
-  let roll = Math.floor(Math.random() * 100)
+  let roll = Math.floor(Math.random() * 100);
   let flurryReaction = false && Flurry.reactBecauseOfFlurry(msg);
-  if (flurryReaction || roll < odds || msg.channel.id == event.channel) {
+  if (flurryReaction || roll < odds || (msg.channel.id == event.channel && roll < odds * 1.25)) {
     await Reaction.react(msg);
     //remove the reaction in ten minutes
     setTimeout(() => {

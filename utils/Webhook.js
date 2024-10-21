@@ -9,7 +9,15 @@ module.exports = {
    * @returns 
    */
   webhook: async (channel, name, avatar, message) => {
-    const webhooks = await channel.fetchWebhooks()
+    let thread = null;
+    if (channel.type == 'GUILD_PUBLIC_THREAD') {
+      thread = channel;
+      channel = await channel.parent;
+      message.threadId = thread.id;
+    }
+
+    let webhooks = await channel.fetchWebhooks()
+
     let webhook = webhooks.find(w => w.name.toLowerCase().indexOf(name.toLowerCase()) > -1);
     if (!webhook) {
       return await channel.createWebhook(name, {
