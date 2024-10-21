@@ -1,6 +1,8 @@
 const snowflakes = require('../../config/snowflakes.json')
 const fs = require('fs');
 const path = require('path');
+const NPCSend = require("./NPC.js");
+const u = require('../../utils/Utils.Generic.js');
 
 const filePath = path.join(__dirname, '../../data/holiday/flurries.json');
 
@@ -96,7 +98,7 @@ let Flurry = {
       // there is no point in checking the last ten messages because the more recent messages will be more recent
       // and therefore if the 10th oldest message is from the last 2 hours, then so are the more recent messages
       // this also did not detect if there are multiple in the last hour because some just detects if any meet the criteria.
-      flurryChance = 5; // 5% chance of a flurry
+      flurryChance = 2; // 2% chance of a flurry
     }
     if (flurryChance > flurryRoll) {
       return true;
@@ -132,9 +134,15 @@ let Flurry = {
 
       flurryChannels.push(new flurry_timer(channel.id, Date.now(), minutes * 60 * 1000));
       console.log(`A Flurry has been started in ${channel.name}!`);
-      console.log(flurryChannels[0]);
+
+      NPCSend(channel, u.embed({ description: "By my power I sunder the protections on this channel! Let a stream of specters rise within it!" }));
+      //u.clean(msg, 0);
+
+
+      //console.log(flurryChannels[0]);
       return true;
-    } catch {
+    } catch (e) {
+      console.error(e);
       return false;
     }
 
