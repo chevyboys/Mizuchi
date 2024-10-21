@@ -161,7 +161,7 @@ class Participant {
    */
   get canUseAbility() {
     if (this.#_lastAbilityUse === undefined) return true;
-    if (Math.floor(new Date(this.#_lastAbilityUse)) + 1000 * 60 + event.abilityCooldownMinutes < Date.now()) return true;
+    if (Math.floor(new Date(this.#_lastAbilityUse)) + 1000 * 60 * event.abilityCooldownMinutes < Date.now()) return true;
     else return false;
   }
 
