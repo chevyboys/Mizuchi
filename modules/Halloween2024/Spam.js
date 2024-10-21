@@ -119,7 +119,7 @@ module.exports = {
     //TODO: Implement this function @jhat0353
 
 
-    if (event.isAdmin(msg.member)) {
+    if (event.isAdmin(msg.member) || msg.author.bot) {
       return false;
     }
 
