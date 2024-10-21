@@ -6,6 +6,8 @@
 
 const ParticipantManager = require('./Participant.js');
 const Interaction = require('discord.js')
+const event = require('./utils');
+
 
 function sendGift(interaction, participants) {
   // send a message to the target user
@@ -24,14 +26,17 @@ let gift = {
   command: async (interaction, participants) => {
     //TODO: Implement this function @jhat0353
 
+    // find some way to figure out who the target of the slash command is
+    let target = null
+
     // dev override allow self-sending for testing | To be disabled later
-    if (isAdmin(participants.get(interaction.user.id))) {
+    if (event.isAdmin(participants.get(interaction.member))) {
       //
       return true;
     }
     // Be sure to handle the cases where:
     // - the sender is trying to gift themselves
-    else if (participants.get(interaction.user.id) != participants.get(interaction.recipient.id)) {
+    else if (participants.get(interaction.member) != target) {
 
 
       // - the sender is trying to gift someone who has blocked Tavare
@@ -40,7 +45,7 @@ let gift = {
       }*/
 
       // - the sender is trying to gift a worldmaker (this is not allowed)
-      if (participants.get(interaction.recipient.id).roles.cache.has(1294112406816952361)) {
+      if (participants.get(interaction.member).roles.cache.has(snowflakes.roles.WorldMaker)) {
 
         return false;
       }
@@ -52,9 +57,9 @@ let gift = {
       // - participants.get(interaction.user.id)?.canSendGift 
       // This handles if a user has gotten a Friendly ghost since they last sent a gift. 
 
-      if (participants.get(interaction.user.id)?.canSendGift) {
+      if (participants.get(interaction.member)?.canSendGift) {
         // code to send the message?
-
+        sendGift();
 
       }
 
