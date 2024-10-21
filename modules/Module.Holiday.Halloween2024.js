@@ -235,7 +235,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   //if there is a flurry or if a random chance based on odds as a percentage is met
   let roll = Math.floor(Math.random() * 100);
   let flurryReaction = false && Flurry.reactBecauseOfFlurry(msg);
-  if (flurryReaction || roll < odds || (msg.channel.id == event.channel && roll < odds * 2)) {
+  if (flurryReaction || roll < odds || (msg.channel.id == event.channel && roll < odds * 1.25)) {
     await Reaction.react(msg);
     //remove the reaction in ten minutes
     setTimeout(() => {
