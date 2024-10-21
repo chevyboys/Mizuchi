@@ -27,7 +27,7 @@ const flurryBlacklist = [
   snowflakes.channels.roles,
   snowflakes.channels.rules,
   snowflakes.channels.transfer,
-  snowflakes.channels.secret,
+  //snowflakes.channels.secret,
   snowflakes.channels.spoilerPolicy,
   "785160606676025384",
   "443461509994119168",
@@ -119,32 +119,32 @@ let Flurry = {
       return false;
     }
 
-    try {
-      let flurry_idx = getFlurryTimerIndex(channel.id);
+    //try {
+    let flurry_idx = getFlurryTimerIndex(channel.id);
 
-      if (flurry_idx >= 0) {
-        if (flurryChannels[flurry_idx].duration > 0) {
-          flurryChannels[flurry_idx].duration = flurryChannels[flurry_idx].duration + (minutes * 60 * 1000);
-        }
-        else {
-          flurryChannels[flurry_idx].duration = (minutes * 60 * 1000);
-        }
-        console.log(`The Flurry in ${channel.name} has been extended!`);
+    if (flurry_idx >= 0) {
+      if (flurryChannels[flurry_idx].duration > 0) {
+        flurryChannels[flurry_idx].duration = flurryChannels[flurry_idx].duration + (minutes * 60 * 1000);
       }
-
-      flurryChannels.push(new flurry_timer(channel.id, Date.now(), minutes * 60 * 1000));
-      console.log(`A Flurry has been started in ${channel.name}!`);
-
-      NPCSend(channel, u.embed({ description: "By my power I sunder the protections on this channel! Let a stream of specters rise within it!" }));
-      //u.clean(msg, 0);
-
-
-      //console.log(flurryChannels[0]);
-      return true;
-    } catch (e) {
-      console.error(e);
-      return false;
+      else {
+        flurryChannels[flurry_idx].duration = (minutes * 60 * 1000);
+      }
+      console.log(`The Flurry in ${channel.name} has been extended!`);
     }
+
+    flurryChannels.push(new flurry_timer(channel.id, Date.now(), minutes * 60 * 1000));
+    console.log(`A Flurry has been started in ${channel.name}!`);
+
+    NPCSend(channel, u.embed({ description: "By my power I sunder the protections on this channel! Let a stream of specters rise within it!" }));
+    //u.clean(msg, 0);
+
+
+    //console.log(flurryChannels[0]);
+    return true;
+    //} catch (e) {
+    console.error(e);
+    return false;
+    //}
 
 
     /*
