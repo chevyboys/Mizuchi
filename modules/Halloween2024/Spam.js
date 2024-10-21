@@ -134,16 +134,18 @@ module.exports = {
       return true;
     }
 
-    let message = getLastUserMessage(member);
+    let message = getLastUserMessage(msg.member);
 
-    // check for time limits
-    if (timeFromMessage(msg, message) <= 2) { // currently 2 seconds
-      return true;
-    }
+    if (message) {
+      // check for time limits
+      if (timeFromMessage(msg, message) <= 2) { // currently 2 seconds
+        return true;
+      }
 
-    // check for duplicates
-    if (isDuplicateMessage(msg, message)) {
-      return true;
+      // check for duplicates
+      if (isDuplicateMessage(msg, message)) {
+        return true;
+      }
     }
 
     // record message timestamp and content
