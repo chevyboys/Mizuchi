@@ -97,9 +97,9 @@ async function end(guild) {
 }
 
 async function dailyReset(guild) {
-  for (const p of Participants) {
-    p[1].status = "ACTIVE";
-  }
+  await Promise.all(Participants.map(async (v, k) => {
+    v.status = "ACTIVE";
+  }));
   Participants.write();
   for (const role of snowflakes.roles.Holiday) {
     const guildRole = await guild.roles.fetch(role);

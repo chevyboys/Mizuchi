@@ -207,13 +207,10 @@ let event = {
 
     return await Promise.all(promises);
   },
-  cleanRoleMembers: (role) => {
-    let removalPromises = [];
-    role.members.forEach(m => {
-      removalPromises.push(m.roles.remove(role));
-    }
-    )
-    return Promise.all(removalPromises);
+  cleanRoleMembers: async (role) => {
+    return await Promise.all(role.members.map(async (v, k) => {
+      v.roles.remove(role);
+    }));
   },
   setHolidayBotIcon: (client) => {
     return client.user.setAvatar(avatar || ('./avatar/' + ("base.png")))
