@@ -139,19 +139,6 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       case "gift": Gift.command(interaction, Participants); break;
     }
   }
-}).setClockwork(async () => {
-
-  try {
-    return setInterval(async () => {
-      today = new Date().getDate();
-      if (!Active.getActive) return;
-      if (today == new Date().getDate()) return;
-      let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-      await dailyReset(guild);
-    }
-
-      , 60 * 1000);
-  } catch (e) { u.errorHandler(e, "event Clockwork Error"); }
 }).addEvent('interactionCreate', async (interaction) => {
   console.log(interaction);
   if (interaction.customId == "signUpForHolidayUpdates") {
