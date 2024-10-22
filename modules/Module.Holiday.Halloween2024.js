@@ -216,7 +216,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     for (const p of participantsRequire) {
       let todayHostile = p.Hostile.find(h => h.key == today)?.value || 0;
       // if yesterday's count exists, add today's count to yesterday's count
-      let yesterdayHostile = p.Hostile.find(h => h.key == today - 1)?.value || 0;
+      let yesterdayHostile = (await p.Hostile.find(h => h.key == today - 1))?.value || 0;
 
       if (todayHostile) {
         if (yesterdayHostile) {
@@ -224,11 +224,10 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         } else {
           p.Hostile.push({ key: today - 1, value: todayHostile });
         }
-        p.Hostile.find(h => h.key == today).value = 0;
+        (p.Hostile.find(h => h.key == today).value = 0);
       }
     }
     //write the participants back to the file
-    fs.writeFileSync('./data/holiday/participants.json', JSON.stringify(participantsRequire, null, 2));
     await dailyReset(msg.guild);
     Participants = new ParticipantManager();
     msg.react("✅");
