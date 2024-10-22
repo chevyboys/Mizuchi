@@ -101,14 +101,14 @@ async function dailyReset(guild) {
     v.status = "ACTIVE";
   }));
   Participants.write();
-  Participants = new ParticipantManager();
+
   for (const role of snowflakes.roles.Holiday) {
     const guildRole = await guild.roles.fetch(role);
     await event.cleanRoleMembers(guildRole);
   };
 
   await u.errorLog.send({ embeds: [u.embed({ title: "Daily Reset", description: "The event has been reset for the day." })] });
-
+  Participants = new ParticipantManager();
 }
 
 let today = new Date().getDate();

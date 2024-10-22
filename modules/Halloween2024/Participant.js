@@ -417,12 +417,18 @@ class ParticipantManager extends Collection {
   /**
    * writes the participant manager to a file in '../../data/holiday/participants.json'
    */
-  write() {
+  async write() {
     //If the file doesn't exist, create it
-    if (!fs.existsSync('./data/holiday')) fs.mkdirSync('./data/holiday');
-    fs.writeFileSync('./data/holiday/participants.json', JSON.stringify(this.toJSON(), null, 2));
-  }
+    let done = new Promise((resolve, reject) => {
+      if (!fs.existsSync('./data/holiday')) fs.mkdirSync('./data/holiday');
+      fs.writeFile('./data/holiday/participants.json', JSON.stringify(this.toJSON(), null, 2), (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+    return done;
 
+  }
 }
 
 /**
