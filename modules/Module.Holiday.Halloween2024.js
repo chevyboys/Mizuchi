@@ -145,7 +145,6 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     return setInterval(async () => {
       today = new Date().getDate();
       if (!Active.getActive) return;
-      Participants.write();
       if (today == new Date().getDate()) return;
       let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
       await dailyReset(guild);
@@ -211,7 +210,6 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   aliases: ["reset", "dailyreset"],
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
-    Participants.write();
     const participantsRequire = require("../data/holiday/participants.json");
     const today = new Date().getDate();
 
