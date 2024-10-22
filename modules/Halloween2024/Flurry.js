@@ -7,10 +7,11 @@ const u = require('../../utils/Utils.Generic.js');
 const filePath = path.join(__dirname, '../../data/holiday/flurries.json');
 
 class flurry_timer {
-  constructor(channel_id, start_time, duration = 600) {
+  constructor(channel_id, start_time, duration = 600, count = 0) {
     this.channel_id = channel_id;
     this.start_time = start_time;
     this.duration = duration;
+    this.count = count;
   }
 }
 
@@ -174,7 +175,7 @@ let Flurry = {
     // needs edited
     let flurry_idx = getFlurryTimerIndex(channel.id);
     if (flurry_idx > -1) {
-      //console.log(`The Flurry in ${channel.name} has come to an end!`);
+      console.log(`The Flurry in ${channel.name} has come to an end!`);
       //console.log(flurryChannels);
       flurryChannels.splice(flurry_idx, 1);
       //console.log(flurryChannels);
@@ -246,6 +247,12 @@ let Flurry = {
         return false;
       }
 
+      flurryChannels[flurry_idx].count = flurryChannels[flurry_idx].count + 1;
+
+      if (flurryChannels[flurry_idx].count > 200) {
+        Flurry.end(msg.channel);
+        return false;
+      }
       return true;
     }
 
