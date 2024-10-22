@@ -223,6 +223,7 @@ class Participant {
 }
 
 class ParticipantManager extends Collection {
+  static singleton = null;
   static Participant = Participant;
   /**
    * Creates a new participant manager.
@@ -256,6 +257,7 @@ class ParticipantManager extends Collection {
     iterable.forEach(element => {
       this.set(element.userID, new Participant(element, this));
     });
+    ParticipantManager.singleton = this;
   }
 
   addParticipant(resolvable) {
@@ -477,7 +479,7 @@ class CountManager extends Collection {
     if (this.has(date)) {
       this.set(date, this.get(date) + ammount);
     } else {
-      this.set(date, 1);
+      this.set(date, ammount);
     }
     return this.totalToday();
   }

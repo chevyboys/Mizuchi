@@ -262,12 +262,15 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg, suffix) => {
     let user = msg.mentions.users.first();
+    if (!user) return msg.reply("Please mention a user.");
     let total = parseInt(suffix.split(" ")[2]);
     let currentTotal = Participants.get(user.id).Hostile.totalPrevious();
-    Participants.get(user.id).Hostile.add(0, total - currentTotal);
+    let toAdd = total - currentTotal;
+    Participants.get(user.id).Hostile.add(0, toAdd);
     msg.react("✅");
     let newTotal = Participants.get(user.id).Hostile.total();
     msg.reply("New total: " + newTotal);
+    Participants.write();
   }
 });
 
