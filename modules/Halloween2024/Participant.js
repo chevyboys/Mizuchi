@@ -474,8 +474,7 @@ class CountManager extends Collection {
    */
   add(date = new Date(), ammount = 1) {
     //convert the date to the day of the month
-    if (date instanceof Date)
-      date = date.getDate();
+    if (date instanceof Date) date = date.getDate();
     if (this.has(date)) {
       this.set(date, this.get(date) + ammount);
     } else {

@@ -261,7 +261,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   name: "addghosts",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg, suffix) => {
-    let user = u.getMention(msg);
+    let user = msg.mentions.users.first() || u.getMention(msg);
     if (!user) return msg.reply("Please mention a user.");
     let total = parseInt(suffix.split(" ")[2]);
     let currentTotal = Participants.get(user.id)?.Hostile.totalPrevious();
