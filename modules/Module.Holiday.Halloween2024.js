@@ -239,7 +239,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         p.Hostile.find(h => h.key == today - 1).value += todayHostile;
       }
 
-      p.Hostile.find(h => h.key == today)?.value = 0;
+      if (p.Hostile.find(h => h.key == today)) p.Hostile.find(h => h.key == today).value = 0;
       p.status = "ACTIVE";
     });
 
