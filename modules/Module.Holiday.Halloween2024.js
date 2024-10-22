@@ -98,7 +98,7 @@ async function end(guild) {
 
 async function dailyReset(guild) {
   for (const p of Participants) {
-    p.status = "ACTIVE";
+    p[1].status = "ACTIVE";
   }
   Participants.write();
   for (const role of snowflakes.roles.Holiday) {
