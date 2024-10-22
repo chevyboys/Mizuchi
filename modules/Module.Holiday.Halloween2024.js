@@ -106,6 +106,8 @@ async function dailyReset(guild) {
     await event.cleanRoleMembers(guildRole);
   };
 
+  await u.errorLog.send({ embeds: [u.embed({ title: "Daily Reset", description: "The event has been reset for the day." })] });
+
 }
 
 let today = new Date().getDate();
@@ -205,6 +207,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 
 }).addCommand({
   name: "resetevent",
+  aliases: ["reset", "dailyreset"],
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
     Participants.write();
