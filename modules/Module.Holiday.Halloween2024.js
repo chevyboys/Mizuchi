@@ -229,8 +229,17 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     }
 
     Participants.map(p => {
-      p.Hostile.find(h => h.key == today - 1).value = p.Hostile.find(h => h.key == today).value + p.Hostile.find(h => h.key == today).value;
-      p.Hostile.find(h => h.key == today).value = 0;
+      let todayHostile = p.Hostile.find(h => h.key == today)?.value || 0;
+
+
+      if (!p.Hostile.find(h => h.key == today - 1)) {
+        p.Hostile.set(today - 1, todayHostile);
+      }
+      else {
+        p.Hostile.find(h => h.key == today - 1).value += todayHostile;
+      }
+
+      p.Hostile.find(h => h.key == today)?.value = 0;
       p.status = "ACTIVE";
     });
 
