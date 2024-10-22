@@ -101,6 +101,7 @@ async function dailyReset(guild) {
     v.status = "ACTIVE";
   }));
   Participants.write();
+  Participants = new ParticipantManager();
   for (const role of snowflakes.roles.Holiday) {
     const guildRole = await guild.roles.fetch(role);
     await event.cleanRoleMembers(guildRole);
