@@ -228,6 +228,22 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       }
     }
 
+    for (const P of Participants) {
+      let todayHostile = P.Hostile.find(h => h.key == today)?.value || 0;
+      // if yesterday's count exists, add today's count to yesterday's count
+      let yesterdayHostile = (await P.Hostile.find(h => h.key == today - 1))?.value || 0;
+
+      if (todayHostile) {
+        if (yesterdayHostile) {
+          P.Hostile.find(h => h.key == today - 1).value = yesterdayHostile + todayHostile;
+        } else {
+          P.Hostile.push({ key: today - 1, value: todayHostile });
+        }
+        (P.Hostile.find(h => h.key == today).value = 0);
+      }
+    }
+
+
     await dailyReset(msg.guild);
     msg.react("✅");
   }
