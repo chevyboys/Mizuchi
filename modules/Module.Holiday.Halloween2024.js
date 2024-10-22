@@ -97,13 +97,15 @@ async function end(guild) {
 }
 
 async function dailyReset(guild) {
+  for (const p of Participants) {
+    p.status = "ACTIVE";
+  }
+  Participants.write();
   for (const role of snowflakes.roles.Holiday) {
     const guildRole = await guild.roles.fetch(role);
     await event.cleanRoleMembers(guildRole);
   };
-  Participants.each(p => {
-    p.status = "ACTIVE";
-  })
+
 }
 
 let today = new Date().getDate();
@@ -161,13 +163,15 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
     msg.content.indexOf("end") > -1 ? Flurry.end(msg.channel) : Flurry.start(msg.channel);
-    msg.react("✅");
+    await msg.react("✅");
+    u.clean(msg, 0);
   }
 }).addCommand({
   name: "blizzard",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
     msg.content.indexOf("end") > -1 ? Flurry.blizzard.end() : Flurry.blizzard.start();
+    u.clean(msg, 0);
   }
 }).setInit(() => {
   Flurry.init();
