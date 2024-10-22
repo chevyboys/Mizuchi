@@ -264,12 +264,12 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     let user = u.getMention(msg);
     if (!user) return msg.reply("Please mention a user.");
     let total = parseInt(suffix.split(" ")[2]);
-    let currentTotal = Participants.get(user.id).Hostile.totalPrevious();
+    let currentTotal = Participants.get(user.id)?.Hostile.totalPrevious();
     let toAdd = total - currentTotal;
     Participants.get(user.id).Hostile.add(0, toAdd);
     msg.react("✅");
     let newTotal = Participants.get(user.id).Hostile.total();
-    msg.reply("New total: " + newTotal);
+    msg.reply("New total: " + newTotal + " Added: " + toAdd);
     Participants.write();
   }
 });
