@@ -257,6 +257,18 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     }, 10 * 60 * 1000);
   }
 
+}).addCommand({
+  name: "addghosts",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg, suffix) => {
+    let user = msg.mentions.users.first();
+    let total = parseInt(suffix.split(" ")[2]);
+    let currentTotal = Participants.get(user.id).Hostile.totalPrevious();
+    Participants.get(user.id).Hostile.add(0, total - currentTotal);
+    msg.react("✅");
+    let newTotal = Participants.get(user.id).Hostile.total();
+    msg.reply("New total: " + newTotal);
+  }
 });
 
 //TODO: Add automatic slash command registration
