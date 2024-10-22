@@ -108,7 +108,7 @@ async function dailyReset(guild) {
   };
 
   await u.errorLog.send({ embeds: [u.embed({ title: "Daily Reset", description: "The event has been reset for the day." })] });
-  Participants = new ParticipantManager();
+
 }
 
 let today = new Date().getDate();
@@ -227,9 +227,8 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         (p.Hostile.find(h => h.key == today).value = 0);
       }
     }
-    //write the participants back to the file
+
     await dailyReset(msg.guild);
-    Participants = new ParticipantManager();
     msg.react("✅");
   }
 }).addEvent("messageCreate", async (msg) => {
