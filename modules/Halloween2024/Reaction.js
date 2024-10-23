@@ -305,14 +305,25 @@ let reactionObj = {
   react: async (msg, emoji = getRandomEmoji()) => {
     if (!msg) return;
     if (!msg.guild) return;
-
+    if (!msg.channel.messages.cache.get(msg.id)) return;
 
     //remove the reaction of the bot in ten minutes if it has not been removed
     setTimeout(() => {
       if (!msg.reactions.cache.get(emoji)) return;
       msg.reactions.cache.get(emoji).remove().catch(() => { });
     }, 1000 * 60 * 15);
-    return await msg.react(emoji);
+
+    try {
+      await msg.react(emoji);
+    } catch (error) {
+      //If its a DiscordAPIError: Unknown Message, ignore it
+      if (error.message == 'Unknown Message') return;
+      else {
+        throw error;
+      }
+    }
+
+    return
   }
 }
 

@@ -223,6 +223,7 @@ class Participant {
 }
 
 class ParticipantManager extends Collection {
+  static singleton = null;
   static Participant = Participant;
   /**
    * Creates a new participant manager.
@@ -256,6 +257,7 @@ class ParticipantManager extends Collection {
     iterable.forEach(element => {
       this.set(element.userID, new Participant(element, this));
     });
+    ParticipantManager.singleton = this;
   }
 
   addParticipant(resolvable) {
@@ -417,12 +419,18 @@ class ParticipantManager extends Collection {
   /**
    * writes the participant manager to a file in '../../data/holiday/participants.json'
    */
-  write() {
+  async write() {
     //If the file doesn't exist, create it
-    if (!fs.existsSync('./data/holiday')) fs.mkdirSync('./data/holiday');
-    fs.writeFileSync('./data/holiday/participants.json', JSON.stringify(this.toJSON(), null, 2));
-  }
+    let done = new Promise((resolve, reject) => {
+      if (!fs.existsSync('./data/holiday')) fs.mkdirSync('./data/holiday');
+      fs.writeFile('./data/holiday/participants.json', JSON.stringify(this.toJSON(), null, 2), (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+    return done;
 
+  }
 }
 
 /**
@@ -464,13 +472,13 @@ class CountManager extends Collection {
    * @param {Date} [date] - The date of the count.
    * @returns {Number} The total count for today.
    */
-  add(date = new Date()) {
+  add(date = new Date(), ammount = 1) {
     //convert the date to the day of the month
-    date = date.getDate();
+    if (date instanceof Date) date = date.getDate();
     if (this.has(date)) {
-      this.set(date, this.get(date) + 1);
+      this.set(date, this.get(date) + ammount);
     } else {
-      this.set(date, 1);
+      this.set(date, ammount);
     }
     return this.totalToday();
   }
@@ -486,7 +494,7 @@ class CountManager extends Collection {
 
   totalPrevious() {
     //get all the values from the collection except for today
-    return this.filter((value, key) => key !== new Date().getDate()).reduce((a, b) => a + b, 0) || 0;
+    return Array.from(this.values()).reduce((a, b) => a + b, 0) - this.totalToday();
   }
 
   /**

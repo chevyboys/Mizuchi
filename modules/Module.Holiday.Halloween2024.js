@@ -97,13 +97,18 @@ async function end(guild) {
 }
 
 async function dailyReset(guild) {
+  await Promise.all(Participants.map(async (v, k) => {
+    v.status = "ACTIVE";
+  }));
+  Participants.write();
+
   for (const role of snowflakes.roles.Holiday) {
     const guildRole = await guild.roles.fetch(role);
     await event.cleanRoleMembers(guildRole);
   };
-  Participants.each(p => {
-    p.status = "ACTIVE";
-  })
+
+  await u.errorLog.send({ embeds: [u.embed({ title: "Daily Reset", description: "The event has been reset for the day." })] });
+
 }
 
 let today = new Date().getDate();
@@ -134,20 +139,6 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       case "gift": Gift.command(interaction, Participants); break;
     }
   }
-}).setClockwork(async () => {
-
-  try {
-    return setInterval(async () => {
-      today = new Date().getDate();
-      if (!Active.getActive) return;
-      Participants.write();
-      if (today == new Date().getDate()) return;
-      let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-      await dailyReset(guild);
-    }
-
-      , 60 * 1000);
-  } catch (e) { u.errorHandler(e, "event Clockwork Error"); }
 }).addEvent('interactionCreate', async (interaction) => {
   console.log(interaction);
   if (interaction.customId == "signUpForHolidayUpdates") {
@@ -161,13 +152,15 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
     msg.content.indexOf("end") > -1 ? Flurry.end(msg.channel) : Flurry.start(msg.channel);
-    msg.react("✅");
+    await msg.react("✅");
+    u.clean(msg, 0);
   }
 }).addCommand({
   name: "blizzard",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
     msg.content.indexOf("end") > -1 ? Flurry.blizzard.end() : Flurry.blizzard.start();
+    u.clean(msg, 0);
   }
 }).setInit(() => {
   Flurry.init();
@@ -201,16 +194,16 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 
 }).addCommand({
   name: "resetevent",
+  aliases: ["reset", "dailyreset"],
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
-    Participants.write();
     const participantsRequire = require("../data/holiday/participants.json");
     const today = new Date().getDate();
 
     for (const p of participantsRequire) {
       let todayHostile = p.Hostile.find(h => h.key == today)?.value || 0;
       // if yesterday's count exists, add today's count to yesterday's count
-      let yesterdayHostile = p.Hostile.find(h => h.key == today - 1)?.value || 0;
+      let yesterdayHostile = (await p.Hostile.find(h => h.key == today - 1))?.value || 0;
 
       if (todayHostile) {
         if (yesterdayHostile) {
@@ -218,13 +211,28 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         } else {
           p.Hostile.push({ key: today - 1, value: todayHostile });
         }
-        p.Hostile.find(h => h.key == today).value = 0;
+        (p.Hostile.find(h => h.key == today).value = 0);
       }
     }
-    //write the participants back to the file
-    fs.writeFileSync('./data/holiday/participants.json', JSON.stringify(participantsRequire, null, 2));
+
+    Participants.map(p => {
+      let todayHostile = p.Hostile.get(today) || 0;
+
+
+      if (!p.Hostile.get(today - 1)) {
+        p.Hostile.set(today - 1, todayHostile);
+      }
+      else {
+        p.Hostile.set(today - 1, p.Hostile.get(today - 1) + todayHostile);
+      }
+
+      if (p.Hostile.set(today, 0));
+      p.status = "ACTIVE";
+    });
+
+
+
     await dailyReset(msg.guild);
-    Participants = new ParticipantManager();
     msg.react("✅");
   }
 }).addEvent("messageCreate", async (msg) => {
@@ -249,6 +257,21 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     }, 10 * 60 * 1000);
   }
 
+}).addCommand({
+  name: "addghosts",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg, suffix) => {
+    let user = msg.mentions.users.first() || u.getMention(msg);
+    if (!user) return msg.reply("Please mention a user.");
+    let total = parseInt(suffix.split(" ")[2]);
+    let currentTotal = Participants.get(user.id)?.Hostile.totalPrevious();
+    let toAdd = total - currentTotal;
+    Participants.get(user.id).Hostile.add(0, toAdd);
+    msg.react("✅");
+    let newTotal = Participants.get(user.id).Hostile.total();
+    msg.reply("New total: " + newTotal + " Added: " + toAdd);
+    Participants.write();
+  }
 });
 
 //TODO: Add automatic slash command registration
