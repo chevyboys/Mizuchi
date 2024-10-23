@@ -79,17 +79,19 @@ let Flurry = {
     } catch (err) {
       console.error("Error saving flurries:".err);
     } */
-  }
-  ,
+  },
+
   flurryCheck: async (msg) => { //Whether or not a flurry should be started on a random message
 
     // check if a channel is in the blacklist
     if (flurryBlacklist.includes(msg.channel.id)) {
+      console.log("channel is blacklisted");
       return false;
     }
 
     // do some math
     let flurryRoll = Math.floor(Math.random() * 100);
+    console.log("FR: " + flurryRoll);
     let flurryChance = 0;
     //let flurryMsgAuthor = msg.author.id
     let prevMessages = await msg.channel.messages.fetch({ limit: 1 });
@@ -98,9 +100,10 @@ let Flurry = {
       // there is no point in checking the last ten messages because the more recent messages will be more recent
       // and therefore if the 10th oldest message is from the last 2 hours, then so are the more recent messages
       // this also did not detect if there are multiple in the last hour because some just detects if any meet the criteria.
-      flurryChance = 2; // 2% chance of a flurry
+      flurryChance = 2; // % chance of a flurry
     }
     if (flurryChance > flurryRoll) {
+      console.log("flurry");
       return true;
     } else {
       return false;
@@ -112,9 +115,8 @@ let Flurry = {
    * @param {Channel} channel 
    */
   start: (channel, minutes = 10) => {
-    //Check if channel is #general or book channels
-    //
 
+    //Check if channel is #general or book channels
     if (flurryBlacklist.includes(channel.id)) {
       return false;
     }
@@ -122,14 +124,19 @@ let Flurry = {
     //try {
     let flurry_idx = getFlurryTimerIndex(channel.id);
 
-    if (flurry_idx >= 0) {
+    if (flurry_idx > -1) {
       if (flurryChannels[flurry_idx].duration > 0) {
+        //minutes = 5
         flurryChannels[flurry_idx].duration = flurryChannels[flurry_idx].duration + (minutes * 60 * 1000);
+        console.log(`The Flurry in ${channel.name} has been extended!`);
+        u.errorHandler(`The Flurry in ${channel.name} has been extended!`);
+        return true;
       }
       else {
         flurryChannels[flurry_idx].duration = (minutes * 60 * 1000);
       }
-      console.log(`The Flurry in ${channel.name} has been extended!`);
+
+
     }
 
     flurryChannels.push(new flurry_timer(channel.id, Date.now(), minutes * 60 * 1000));
@@ -141,10 +148,11 @@ let Flurry = {
 
     //console.log(flurryChannels[0]);
     return true;
-    //} catch (e) {
+    /*} catch (e) {
     console.error(e);
     return false;
-    //}
+    }
+    */
 
 
     /*
@@ -181,7 +189,7 @@ let Flurry = {
       //console.log(flurryChannels);
       return true;
     }
-    console.log('No flurry in ${channel.name}.')
+    console.log('No flurry in ${channel.name}.');
     return false;
     /*
     if (flurryChannels[0].includes(channel_id)) {
@@ -234,6 +242,9 @@ let Flurry = {
       return !(blacklist);
     }
 
+    let check = await Flurry.flurryCheck(msg);
+
+    if (check) Flurry.start(msg.channel);
 
     // Check to see if the message is in a channel with a flurry
     let flurry_idx = getFlurryTimerIndex(msg.channel.id);
