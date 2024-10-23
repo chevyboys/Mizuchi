@@ -83,6 +83,10 @@ let Flurry = {
 
   flurryCheck: async (msg) => { //Whether or not a flurry should be started on a random message
 
+    if (msg.author.bot === true) {
+      return false;
+    }
+
     // check if a channel is in the blacklist
     if (flurryBlacklist.includes(msg.channel.id)) {
       console.log("channel is blacklisted");
@@ -90,7 +94,7 @@ let Flurry = {
     }
 
     // do some math
-    let flurryRoll = Math.floor(Math.random() * 100);
+    let flurryRoll = Math.floor(Math.random() * 1000);
     console.log("FR: " + flurryRoll);
     let flurryChance = 0;
     //let flurryMsgAuthor = msg.author.id
@@ -100,9 +104,9 @@ let Flurry = {
       // there is no point in checking the last ten messages because the more recent messages will be more recent
       // and therefore if the 10th oldest message is from the last 2 hours, then so are the more recent messages
       // this also did not detect if there are multiple in the last hour because some just detects if any meet the criteria.
-      flurryChance = 2; // % chance of a flurry
+      flurryChance = 0.5; // % chance of a flurry
     }
-    if (flurryChance > flurryRoll) {
+    if ((flurryChance * 10) > flurryRoll) {
       console.log("flurry");
       return true;
     } else {
@@ -244,7 +248,7 @@ let Flurry = {
 
     let check = await Flurry.flurryCheck(msg);
 
-    if (check) Flurry.start(msg.channel);
+    if (check) { Flurry.start(msg.channel); }
 
     // Check to see if the message is in a channel with a flurry
     let flurry_idx = getFlurryTimerIndex(msg.channel.id);
