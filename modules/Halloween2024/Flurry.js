@@ -129,6 +129,7 @@ let Flurry = {
         //minutes = 5
         flurryChannels[flurry_idx].duration = flurryChannels[flurry_idx].duration + (minutes * 60 * 1000);
         console.log(`The Flurry in ${channel.name} has been extended!`);
+        u.errorHandler(`The Flurry in ${channel.name} has been extended!`);
         return true;
       }
       else {
