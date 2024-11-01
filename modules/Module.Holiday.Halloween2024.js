@@ -21,7 +21,7 @@ const Module = new Augur.Module();
 
 //############### Submodules ################
 const Inventory = require('./Halloween2024/Inventory.js');
-const Leaderboard = require('./Halloween2024/Leaderboard.js');
+// Not done const Leaderboard = require('./Halloween2024/Leaderboard.js');
 const Spam = require('./Halloween2024/Spam.js');
 const Gift = {
   command: (interaction, Participants) => { return interaction.reply("Coming soon!") }, //TODO: Implement this function
@@ -271,6 +271,21 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     let newTotal = Participants.get(user.id).Hostile.total();
     msg.reply("New total: " + newTotal + " Added: " + toAdd);
     Participants.write();
+  }
+}).addCommand({
+  name: "leaderboard",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg) => {
+    //Leaderboard without using the submodule
+    let participants = Participants.map(p => p);
+    participants.sort((a, b) => b.Hostile.total() - a.Hostile.total());
+    let leaderboard = "";
+    let i = 1;
+    for (const p of participants) {
+      leaderboard += `${i}. <@${p.userID}> - ${p.Hostile.total()}\n`;
+      i++;
+    }
+    msg.reply(leaderboard);
   }
 });
 
