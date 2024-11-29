@@ -82,6 +82,11 @@ let Flurry = {
   },
 
   flurryCheck: async (msg) => { //Whether or not a flurry should be started on a random message
+    // return false if it is not october
+    if (new Date().getMonth() !== 9) {
+      return false;
+    }
+
 
     if (msg.author.bot === true) {
       return false;
