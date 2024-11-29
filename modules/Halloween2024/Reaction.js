@@ -184,7 +184,7 @@ let reactionObj = {
           reaction.message.guild.client.user.setActivity(`More than ${Participants.totalEventHostile()} Ghosts caught!`);
           /////////////////////////
           ///Special event extension code, disable for normal events
-          return;
+          return await reactionObj.remove(reaction);
           /////////////////////////
           switch (currentHostileCount) {
             case 5:
