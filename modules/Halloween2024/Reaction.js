@@ -160,8 +160,9 @@ let reactionObj = {
           }
 
           const participant = Participants.get(user.id);
+          let noGhostUserRole = message.guild.roles.cache.get("1036538103801847849");
           //if the user is not active, or has found more than 50 sweets, and the message is not in the event channel, remove the reaction and return unless its christmas eve or christmas day
-          if ((participant.status != "ACTIVE" || participant.Hostile > 50) && message.channel.id != event.channel && moment().format("MM/DD") != "10/31" && message.channel.id != channel.id) {
+          if (msg.member.roles.cache.has(noGhostUserRole) || ((participant.status != "ACTIVE" || participant.Hostile > 50) && message.channel.id != event.channel && moment().format("MM/DD") != "10/31" && message.channel.id != channel.id)) {
             reaction.users.remove(user);
             return;
           }
@@ -181,6 +182,9 @@ let reactionObj = {
               allowedMentions: (currentHostileCount == 1 ? { parse: ["users"] } : {})
             });
           reaction.message.guild.client.user.setActivity(`More than ${Participants.totalEventHostile()} Ghosts caught!`);
+          /////////////////////////
+          ///Special event extension code, disable for normal events
+          return;
           /////////////////////////
           switch (currentHostileCount) {
             case 5:
