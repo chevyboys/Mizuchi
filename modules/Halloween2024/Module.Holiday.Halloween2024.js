@@ -1,13 +1,13 @@
 const Augur = require("augurbot");
-const snowflakes = require("../config/snowflakes.json");
+const snowflakes = require("../../config/snowflakes.json");
 //const fs = require('fs');
 //const config = require('../../config/config.json');
-const u = require('../utils/Utils.Generic.js');
-const event = require("./Halloween2024/utils.js");
+const u = require('../../utils/Utils.Generic.js');
+const event = require("./utils.js");
 const moment = require("moment");
 const odds = event.odds;
-const ParticipantManager = require("../modules/Halloween2024/Participant.js");
-const NPCSend = require("./Halloween2024/NPC.js");
+const ParticipantManager = require("./Participant.js");
+const NPCSend = require("./NPC.js");
 // const moment = require("moment");
 // const manipulateImage = require('../../modules/PristineWaters/imageManipulation');
 // const embedColor = event.colors.find(c => c.name.toLowerCase().includes("blurple")).color || event.colors[event.colors.length - 1].color;
@@ -15,22 +15,22 @@ const endedButNotCleaned = false;
 const fs = require('fs');
 
 let Participants = new ParticipantManager();
-const rolesClient = require("../utils/Utils.RolesLogin.js");
+const rolesClient = require("../../utils/Utils.RolesLogin.js");
 const rolesClientPrimaryGuild = rolesClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
 const Module = new Augur.Module();
 
 //############### Submodules ################
-const Inventory = require('./Halloween2024/Inventory.js');
+const Inventory = require('./Inventory.js');
 // Not done const Leaderboard = require('./Halloween2024/Leaderboard.js');
-const Spam = require('./Halloween2024/Spam.js');
+const Spam = require('./Spam.js');
 const Gift = {
   command: (interaction, Participants) => { return interaction.reply("Coming soon!") }, //TODO: Implement this function
 }//require('./Halloween2024/Gift.js');
-const Admin = require('./Halloween2024/Admin.js');
-const Flurry = require('./Halloween2024/Flurry.js');
-const Help = require('./Halloween2024/Help.js');
-const Reaction = require('./Halloween2024/Reaction.js');
-const Active = require('./Halloween2024/Active.js');
+const Admin = require('./Admin.js');
+const Flurry = require('./Flurry.js');
+const Help = require('./Help.js');
+const Reaction = require('./Reaction.js');
+const Active = require('./Active.js');
 const { Guild } = require("discord.js");
 
 
@@ -197,7 +197,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   aliases: ["reset", "dailyreset"],
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
-    const participantsRequire = require("../data/holiday/participants.json");
+    const participantsRequire = require("../../data/holiday/participants.json");
     const today = new Date().getDate();
 
     for (const p of participantsRequire) {
