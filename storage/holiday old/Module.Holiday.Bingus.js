@@ -1,7 +1,7 @@
-const snowflakes = require("../config/snowflakes.json");
+const snowflakes = require("../../config/snowflakes.json");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
-const RoleClient = require("../utils/Utils.RolesLogin");
+const RoleClient = require("../../utils/Utils.RolesLogin");
 let roleGuild = RoleClient.guilds.cache.get(snowflakes.guilds.PrimaryServer);
 let eventRunning = false;
 

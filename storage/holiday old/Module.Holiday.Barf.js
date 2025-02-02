@@ -43,8 +43,8 @@ Module.addEvent("messageCreate", async (msg) => {
     const holiday0 = await roleGuild.roles.fetch(snowflakes.roles.Holiday[0]);
     const holiday1 = await roleGuild.roles.fetch(snowflakes.roles.Holiday[1]);
     const general = msg.guild.channels.cache.get(snowflakes.channels.general) || await msg.guild.channels.fetch(snowflakes.channels.general);
-    await NPCSend(general, { description: "Go forth, and steal dungeon floors.", color: "#FF0000", title: "Kester Week Special Event" });
-    await general.send("It's a very special day of the year. A time for celebrating and cherishing the love and freindships around us. Radiance is happy to announce, our Kester Week Celebrations have begun! Enjoy your holiday bonus XP.");
+    await NPCSend(general, { description: "Go forth, and steal dungeon floors.", color: "#FF0000", title: "Be A Real Friend Week Special Event" });
+    await general.send("It's a very special day of the year. A time for celebrating and cherishing the love and freindships around us. Radiance is happy to announce, our Be A Real Friend Week Celebrations have begun! Enjoy your holiday bonus XP.");
     eventRunning = true;
     shouldUpdateColor = true;
     msg.react("👌");
