@@ -140,10 +140,12 @@ async function eventProcess(interaction) {
           if (!holiday_role_map[target.id]) {
             console.log("Creating new role map for " + target.displayName);
             holiday_role_map[target.id] = { roles: [], imprisoned_time: 0 };
+            console.log("Adding " + r.name + " to role map" + target.displayName);
+            holiday_role_map[target.id].roles.push(r.id);
+          } else {
+            console.log("Adding " + r.name + " to role map" + target.displayName);
+            holiday_role_map[target.id].roles.push(r.id);
           }
-          console.log("Adding " + r.name + " to role map" + target.displayName);
-          holiday_role_map[target.id].roles.push(r.id);
-
         }
       }
     });
