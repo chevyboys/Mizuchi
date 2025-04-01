@@ -132,20 +132,17 @@ async function eventProcess(interaction) {
       //make sure we have permission to remove the role
       if (r.id != gremlinRole.id && r.id != interaction.guild.roles.everyone.id && r.id != interaction.guild.roles.premiumSubscriberRole.id && !immuneRoles.includes(r.id)) {
         //check if the role is higher than the bot's role
+        if (!holiday_role_map[target.id]) {
+          console.log("Creating new role map for " + target.displayName);
+          holiday_role_map[target.id] = { roles: [], imprisoned_time: 0 };
+        }
         if (r.position >= interaction.guild.me.roles.highest.position) {
           //do nothing
         } else {
           console.log("Removing role " + r.name + " from " + target.displayName);
           promises.push(target.roles.remove(r));
-          if (!holiday_role_map[target.id]) {
-            console.log("Creating new role map for " + target.displayName);
-            holiday_role_map[target.id] = { roles: [], imprisoned_time: 0 };
-            console.log("Adding " + r.name + " to role map" + target.displayName);
-            holiday_role_map[target.id].roles.push(r.id);
-          } else {
-            console.log("Adding " + r.name + " to role map" + target.displayName);
-            holiday_role_map[target.id].roles.push(r.id);
-          }
+          console.log("Adding " + r.name + " to role map" + target.displayName);
+          holiday_role_map[target.id].roles.push(r.id);
         }
       }
     });
