@@ -84,10 +84,14 @@ const roles = [
   }
 ]
 
+
+let botCommandsChannel = snowflakes.channels.botSpam;
+
 const timeout_minutes = 5;
 
 const avatar = "./avatar/AprilFools-Chaos.png";
 async function eventProcess(interaction) {
+  const botCommandsChannelObject = await interaction.guild.channels.fetch(botCommandsChannel);
   //handle the gremlin subcommand and the capture subcommand
   if (interaction.options.getSubcommand() == "gremlin") {
     //give the user the gremlin role
@@ -95,11 +99,13 @@ async function eventProcess(interaction) {
     if (!member.roles.cache.has(snowflakes.roles.Holiday[1])) {
       let gremlinRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[1]);
       await interaction.member.roles.add(gremlinRole);
-      await interaction.reply(`You are now a gremlin! Use this subcommand again to return to normal.`);
+      botCommandsChannelObject.send({ content: `${interaction.member.displayName} has become a gremlin!` });
+      return await interaction.reply({ content: `You are now a gremlin! Use this subcommand again to return to normal.`, ephemeral: true });
     } else {
       let gremlinRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[1]);
       await interaction.member.roles.remove(gremlinRole);
-      await interaction.reply(`You are no longer a gremlin!`);
+      botCommandsChannelObject.send({ content: `${interaction.member.displayName} is no longer a gremlin!` });
+      return await interaction.reply({ content: `You are no longer a gremlin!`, ephemeral: true });
     }
   } else if (interaction.options.getSubcommand() == "capture") {
     //don't allow the user to capture bots!
@@ -122,6 +128,7 @@ async function eventProcess(interaction) {
       return;
     }
     interaction.reply({ content: "User has been captured!", ephemeral: true });
+    botCommandsChannelObject.send({ content: `${interaction.member.displayName} has captured ${interaction.options.getMember("target").displayName}! for the next five minutes`, allowedMentions: { users: [interaction.options.getMember("target").id] } });
     //send the user to the prison channel by first removing all the roles they have that we have permission to and that are not the gremlin role, then adding the prisoner role
     let target = interaction.options.getMember("target");
     let prisonerRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[0]);
@@ -409,6 +416,27 @@ Module.addCommand({
     }, 5000);
   }
 });
+
+//add an explicit deny for the prisoner role to send messages in each channel the prisoner role can send messages in and see if the bot has permission to manage roles in the channel
+//add an explicit allow for the prisoner role to send messages in the prison channel
+Module.addCommand({
+  name: "prisonbuild",
+  guild: snowflakes.guilds.PrimaryServer,
+  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+  process: async (msg) => {
+    let guild = msg.guild;
+    let promises = [];
+    let prisonerRole = guild.roles.cache.get(snowflakes.roles.Holiday[0]);
+    let prisonChannel = guild.channels.cache.get(event.channel);
+    guild.channels.cache.forEach(c => {
+      if (c.permissionsFor(guild.me).has("MANAGE_ROLES")) {
+        promises.push(c.permissionOverwrites.edit(prisonerRole, { SEND_MESSAGES: false }));
+      }
+    });
+    promises.push(prisonChannel.permissionOverwrites.edit(prisonerRole, { SEND_MESSAGES: true }));
+    await Promise.all(promises);
+  }
+})
 
 // Slash command:
 
