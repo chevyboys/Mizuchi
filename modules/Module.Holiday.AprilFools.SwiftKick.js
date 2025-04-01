@@ -79,14 +79,14 @@ const roles = [
   {
     name: "Gremlin",
     hoist: true,
-    icon: "./avatar/AprilFools-Chaos.png.png",
+    icon: "./avatar/AprilFools-Chaos.png",
     color: "#009922" //green
   }
 ]
 
 const timeout_minutes = .5;
 
-const avatar = "./avatar/AprilFools-Chaos.png.png";
+const avatar = "./avatar/AprilFools-Chaos.png";
 async function eventProcess(interaction) {
   //handle the gremlin subcommand and the capture subcommand
   if (interaction.options.getSubcommand() == "gremlin") {
