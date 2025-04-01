@@ -128,6 +128,8 @@ async function eventProcess(interaction) {
       return;
     }
     interaction.reply({ content: "User has been captured!", ephemeral: true });
+    let prisonChannel = interaction.guild.channels.cache.get(event.channel);
+    prisonChannel.send({ content: `Chaos gremlin <@${interaction.options.getMember("target").id}>, you have been caught!`, allowedMentions: { users: [interaction.options.getMember("target").id] } });
     botCommandsChannelObject.send({ content: `${interaction.member.displayName} has captured ${interaction.options.getMember("target").displayName} for the next five minutes!`, allowedMentions: { users: [interaction.options.getMember("target").id] } });
     //send the user to the prison channel by first removing all the roles they have that we have permission to and that are not the gremlin role, then adding the prisoner role
     let target = interaction.options.getMember("target");
@@ -186,7 +188,7 @@ async function eventProcess(interaction) {
 }
 
 let event = {
-  channel: "1179847252315996210",
+  channel: "1356479161266344088",
   avatar: avatar,
   roles: roles,
   /**
