@@ -127,15 +127,16 @@ async function eventProcess(interaction) {
     let prisonerRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[0]);
     let gremlinRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[1]);
     let promises = [];
+    if (!holiday_role_map[target.id]) {
+      console.log("Creating new role map for " + target.displayName);
+      holiday_role_map[target.id] = { roles: [], imprisoned_time: 0 };
+    }
     target.roles.cache.forEach(r => {
       //don't try to remove server boosters or the everyone role
       //make sure we have permission to remove the role
       if (r.id != gremlinRole.id && r.id != interaction.guild.roles.everyone.id && r.id != interaction.guild.roles.premiumSubscriberRole.id && !immuneRoles.includes(r.id)) {
         //check if the role is higher than the bot's role
-        if (!holiday_role_map[target.id]) {
-          console.log("Creating new role map for " + target.displayName);
-          holiday_role_map[target.id] = { roles: [], imprisoned_time: 0 };
-        }
+
         if (r.position >= interaction.guild.me.roles.highest.position) {
           //do nothing
         } else {
