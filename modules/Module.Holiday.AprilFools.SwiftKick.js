@@ -84,7 +84,7 @@ const roles = [
   }
 ]
 
-const timeout_minutes = .5;
+const timeout_minutes = 5;
 
 const avatar = "./avatar/AprilFools-Chaos.png";
 async function eventProcess(interaction) {
@@ -121,6 +121,7 @@ async function eventProcess(interaction) {
       interaction.reply({ content: "That user is already a prisoner!", ephemeral: true });
       return;
     }
+    interaction.reply({ content: "User has been captured!", ephemeral: true });
     //send the user to the prison channel by first removing all the roles they have that we have permission to and that are not the gremlin role, then adding the prisoner role
     let target = interaction.options.getMember("target");
     let prisonerRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[0]);
@@ -173,7 +174,7 @@ async function eventProcess(interaction) {
         fs.writeFileSync('./data/holiday/cache.json', JSON.stringify({ holiday_role_map: holiday_role_map }));
       }, timeout_minutes * 60000);
     });
-    interaction.reply({ content: "User has been captured!", ephemeral: true });
+
   }
 }
 
