@@ -128,7 +128,7 @@ async function eventProcess(interaction) {
       return;
     }
     interaction.reply({ content: "User has been captured!", ephemeral: true });
-    botCommandsChannelObject.send({ content: `${interaction.member.displayName} has captured ${interaction.options.getMember("target").displayName}! for the next five minutes`, allowedMentions: { users: [interaction.options.getMember("target").id] } });
+    botCommandsChannelObject.send({ content: `${interaction.member.displayName} has captured ${interaction.options.getMember("target").displayName} for the next five minutes!`, allowedMentions: { users: [interaction.options.getMember("target").id] } });
     //send the user to the prison channel by first removing all the roles they have that we have permission to and that are not the gremlin role, then adding the prisoner role
     let target = interaction.options.getMember("target");
     let prisonerRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[0]);
