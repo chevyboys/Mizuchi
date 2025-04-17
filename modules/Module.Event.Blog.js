@@ -63,7 +63,7 @@ Module.setClockwork(() => {
       blogHandler(true);
     } catch (e) { u.errorHandler(e, msg); }
   },
-  permissions: (msg) => Module.config.AdminIds.includes(msg.author.id) || msg.member.roles.cache.has(snowflakes.roles.Admin)
+  permissions: (msg) => Module.config.AdminIds.includes(msg.author.id)
 }).setInit((data) => { if (data) feed = data })
   .setUnload(() => { return feed });
 
