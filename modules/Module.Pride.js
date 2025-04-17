@@ -6,6 +6,7 @@ const Jimp = require("jimp");
 const supportedFormats = ["png", "jpg", "jpeg", "bmp", "tiff", "gif"];
 const snowflakes = require('../config/snowflakes.json');
 const { closest } = require("fastest-levenshtein");
+const ColorThief = require('colorthief');
 
 async function bilateralSmoothing(image) {
   const width = image.getWidth();
@@ -118,8 +119,8 @@ const flagFile = (flagName) => {
 }
 
 const getFlagFromOption = interaction => {
-  if (interaction.options.get("flag").value == "Profile Picture") return interaction.member.displayAvatarURL({ size: 512, format: "png", dynamic: false });
-  else return flagFile(interaction.options.get("flag").value);
+  if (interaction.options.get("flag")?.value == "Profile Picture") return interaction.member.displayAvatarURL({ size: 512, format: "png", dynamic: false });
+  else return flagFile(interaction.options.get("flag")?.value);
 }
 
 const border = async (interaction) => {
@@ -142,8 +143,8 @@ const border = async (interaction) => {
 }
 
 const emoji = async (interaction) => {
-  const emojiOverlay = await Jimp.read(`./storage/emoji/${(u.smartSearchSort(getEmoji(), interaction.options.get("emoji").value)[0]) || closest(interaction.options.get("emoji").value, getEmoji())}/Overlay.png`);
-  const mask = await Jimp.read(`./storage/emoji/${(u.smartSearchSort(getEmoji(), interaction.options.get("emoji").value)[0]) || closest(interaction.options.get("emoji").value, getEmoji())}/Mask.png`)
+  const emojiOverlay = await Jimp.read(`./storage/emoji/${(u.smartSearchSort(getEmoji(), interaction.options.get("emoji")?.value)[0]) || closest(interaction.options.get("emoji")?.value, getEmoji())}/Overlay.png`);
+  const mask = await Jimp.read(`./storage/emoji/${(u.smartSearchSort(getEmoji(), interaction.options.get("emoji")?.value)[0]) || closest(interaction.options.get("emoji")?.value, getEmoji())}/Mask.png`)
   const flag = await Jimp.read(getFlagFromOption(interaction));
   emojiOverlay.resize(300, 300);
   mask.resize(300, 300);
@@ -158,7 +159,7 @@ const emoji = async (interaction) => {
 }
 
 const rune = async (interaction) => {
-  const rune = await Jimp.read(`./storage/runes/${(u.smartSearchSort(getRuneNames(), interaction.options.get("rune").value)[0]) || closest(interaction.options.get("rune").value, getRuneNames())}.png`);
+  const rune = await Jimp.read(`./storage/runes/${(u.smartSearchSort(getRuneNames(), interaction.options.get("rune")?.value)[0]) || closest(interaction.options.get("rune")?.value, getRuneNames())}.png`);
   const flag = await Jimp.read(getFlagFromOption(interaction));
   rune.resize(300, 300);
   flag.resize(300, 300);
@@ -172,17 +173,68 @@ const sword = async (interaction) => {
   const maskBlur = 5;
 
   //Get images
-  const flag1 = (await Jimp.read(getFlagFromOption(interaction)));
+  let flag1;
+  if (interaction.options.get("flag")?.value == "Profile Picture") {
+    let flagTemp;
+    //Get the user's avatar
+    let colorPallet = [];
+    flagTemp = interaction.member.displayAvatarURL({ size: 512, format: "png", dynamic: false });
+    ColorThief.getPalette(flagTemp, 5)
+      .then(palette => {
+        colorPallet = palette;
+        console.log(palette);
+      })
+      .catch(err => {
+        flagTemp = getFlagFromOption(interaction);
+        console.error(err);
+      });
+
+    if (colorPallet.length == 0) {
+      flagTemp = getFlagFromOption(interaction);
+      flag1 = (await Jimp.read(flagTemp));
+    } else {
+      //Create an image that is a perfect sqare that is four stripes, one for each color that is not very dark. If there are not enough colors, simply repeat the colors
+      let colorCount = 0;
+      let colors = [];
+      for (let i = 0; i < colorPallet.length; i++) {
+        u.errorHandler(`Found color: ${colorPallet[i]}`);
+        if (colorPallet[i][0] + colorPallet[i][1] + colorPallet[i][2] > 100) {
+          colors.push(colorPallet[i]);
+          colorCount++;
+        }
+      }
+      if (colorCount < 4) {
+        for (let i = 0; i < 4 - colorCount; i++) {
+          colors.push(colorPallet[i % colorCount]);
+          //send the colors found to the debug channel
+
+        }
+      }
+      //create the square image
+      const squareImage = new Jimp(300, 300, 0x00000000);
+      const stripeWidth = Math.floor(300 / 4);
+      for (let i = 0; i < 4; i++) {
+        const color = Jimp.rgbaToInt(colors[i][0], colors[i][1], colors[i][2], 255);
+        squareImage.scan(i * stripeWidth, 0, stripeWidth, 300, (x, y, idx) => {
+          squareImage.setPixelColor(color, x, y);
+        });
+      }
+      flag1 = squareImage.clone();
+    }
+  } else {
+    let flagTemp = getFlagFromOption(interaction);
+    flag1 = (await Jimp.read(flagTemp));
+  }
+
   flag1.rotate(90);
   flag1.resize(600, 300);
-  flag1.color([{ apply: 'saturate', params: [20 + 0.5 * interaction.options.get("intensity").value || 40] }]);
+  flag1.color([{ apply: 'saturate', params: [20 + 0.5 * interaction.options.get("intensity")?.value || 40] }]);
   flag1.color([{ apply: 'darken', params: [20] }]);
-  flag1;
   const flag2 = flag1.clone().flip(true, false);
-  const saekes1 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getEmoji())}/Base1.png`);
-  const saekes2 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getEmoji())}/Base2.png`);
-  const saekes3 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getEmoji())}/Base3.png`);
-  const saekes4 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword").value)[0]) || closest(interaction.options.get("sword").value, getEmoji())}/Base4.png`);
+  const saekes1 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword")?.value)[0]) || closest(interaction.options.get("sword")?.value, getEmoji())}/Base1.png`);
+  const saekes2 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword")?.value)[0]) || closest(interaction.options.get("sword")?.value, getEmoji())}/Base2.png`);
+  const saekes3 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword")?.value)[0]) || closest(interaction.options.get("sword")?.value, getEmoji())}/Base3.png`);
+  const saekes4 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword")?.value)[0]) || closest(interaction.options.get("sword")?.value, getEmoji())}/Base4.png`);
 
   const saekes1Mask = createMaskFromTransparentImage(saekes1);
   const saekes2Mask = createMaskFromTransparentImage(saekes2);
@@ -211,7 +263,7 @@ const sword = async (interaction) => {
   flagCanvas.composite(flag1, 0, 0);
   flagCanvas.composite(flag2, 600, 0);
   flagCanvas.blur(40);
-  flagCanvas.opacity((interaction.options.get("intensity").value + 50) / 100 || 0.7);
+  flagCanvas.opacity((interaction.options.get("intensity")?.value + 50) / 100 || 0.7);
 
   //create the canvas and composite the images onto it
   const canvas = new Jimp(1200, 300, 0x00000000);
@@ -267,20 +319,20 @@ Module.addEvent("interactionCreate", async (interaction) => {
 
   switch (focusedOption.name) {
     case "flag":
-      let flags = u.smartSearchSort(getFlagNames(), focusedOption.value, 2, 10);
+      let flags = u.smartSearchSort(getFlagNames(), focusedOption?.value, 2, 10);
       flags.push("Profile Picture");
       await interaction.respond(flags.map(flag => ({ name: flag, value: flag })));
       break;
     case "rune":
-      let runes = u.smartSearchSort(getRuneNames(), focusedOption.value, 2, 10);
+      let runes = u.smartSearchSort(getRuneNames(), focusedOption?.value, 2, 10);
       await interaction.respond(runes.map(rune => ({ name: rune, value: rune })));
       break;
     case "emoji":
-      let emoji = u.smartSearchSort(getEmoji(), focusedOption.value, 2, 10);
+      let emoji = u.smartSearchSort(getEmoji(), focusedOption?.value, 2, 10);
       await interaction.respond(emoji.map(emoji => ({ name: emoji, value: emoji })));
       break;
     case "sword":
-      let sword = u.smartSearchSort(getSword(), focusedOption.value, 2, 10);
+      let sword = u.smartSearchSort(getSword(), focusedOption?.value, 2, 10);
       await interaction.respond(sword.map(sword => ({ name: sword, value: sword })));
       break;
     default:
@@ -288,8 +340,8 @@ Module.addEvent("interactionCreate", async (interaction) => {
   }
 
 })
-if (new Date().getMonth() == 5)
-  Module.addInteractionCommand(Command);
+//if (new Date().getMonth() == 5)
+Module.addInteractionCommand(Command);
 module.exports = Module;
 
 
