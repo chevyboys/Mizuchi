@@ -348,7 +348,12 @@ Module.addCommand({
     let prisonerRole = msg.guild.roles.cache.get(snowflakes.roles.Holiday[0]);
     msg.guild.channels.cache.forEach(c => {
       if (c.permissionsFor(msg.guild.me).has("MANAGE_ROLES")) {
-        c.permissionOverwrites.edit(prisonerRole, { SEND_MESSAGES: null });
+        c.permissionOverwrites.delete(prisonerRole).then(() => {
+          console.log("Removed prisoner role permissions from " + c.name);
+        }
+        ).catch(err => {
+          console.log("Failed to remove prisoner role permissions from " + c.name + ": " + err);
+        });
       }
     });
     //delete the active.json file and the cache.json file
