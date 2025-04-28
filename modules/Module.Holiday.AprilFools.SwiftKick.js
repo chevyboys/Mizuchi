@@ -344,6 +344,13 @@ Module.addCommand({
   process: async (msg) => {
     await event.cleanRoles(msg.guild);
     await event.cleanHolidayBotIcon(msg.client);
+    //remove any special permissions any channels have for the prisoner role
+    let prisonerRole = msg.guild.roles.cache.get(snowflakes.roles.Holiday[0]);
+    msg.guild.channels.cache.forEach(c => {
+      if (c.permissionsFor(msg.guild.me).has("MANAGE_ROLES")) {
+        c.permissionOverwrites.edit(prisonerRole, { SEND_MESSAGES: null });
+      }
+    });
     //delete the active.json file and the cache.json file
     fs.unlinkSync('./data/holiday/active.json');
     fs.unlinkSync('./data/holiday/cache.json');
