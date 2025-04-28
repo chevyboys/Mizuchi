@@ -1,9 +1,9 @@
 const Augur = require("augurbot");
 const Module = new Augur.Module();
-const snowflakes = require('../config/snowflakes.json');
-const u = require('../utils/Utils.Generic');
+const snowflakes = require('../../config/snowflakes.json');
+const u = require('../../utils/Utils.Generic.js');
 const fs = require('fs');
-const webhookSend = require('../utils/Webhook.js');
+const webhookSend = require('../../utils/Webhook.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 
@@ -30,7 +30,7 @@ if (!fs.existsSync('./data/holiday/active.json')) {
   fs.writeFileSync('./data/holiday/active.json', JSON.stringify({ active: false }));
   active = false;
 } else {
-  active = require('../data/holiday/active.json').active;
+  active = require('../../data/holiday/active.json').active;
 }
 console.log("April fools event Active? " + active);
 
@@ -39,7 +39,7 @@ if (!fs.existsSync('./data/holiday/cache.json')) {
   fs.writeFileSync('./data/holiday/cache.json', JSON.stringify({ holiday_role_map: {} }));
   holiday_role_map = {};
 } else {
-  holiday_role_map = require('../data/holiday/cache.json').holiday_role_map;
+  holiday_role_map = require('../../data/holiday/cache.json').holiday_role_map;
 }
 
 //check the holiday_role_map for any roles that need to be restored
