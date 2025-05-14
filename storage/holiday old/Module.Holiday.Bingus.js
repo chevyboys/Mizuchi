@@ -1,7 +1,7 @@
-const snowflakes = require("../config/snowflakes.json");
+const snowflakes = require("../../config/snowflakes.json");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
-const RoleClient = require("../utils/Utils.RolesLogin");
+const RoleClient = require("../../utils/Utils.RolesLogin");
 let roleGuild = RoleClient.guilds.cache.get(snowflakes.guilds.PrimaryServer);
 let eventRunning = false;
 
@@ -16,21 +16,21 @@ Module.addEvent("messageCreate", async (msg) => {
     let selys = webhooks.find(w => w.name.toLowerCase().indexOf("selys") > -1);
     if (!selys) {
       selys = await general.createWebhook('Selys', {
-        avatar: './avatar/selysWebhook.png',
+        avatar: './avatar/Winter-selysWebhook.png',
         reason: 'Holiday Event'
       })
         .then(sel => sel.send("My blessing is upon you.")).catch(err => { throw err });
     }
     else (await selys).send("My blessing is upon you.");
     eventRunning = true;
-    const holiday = await roleGuild.roles.fetch(snowflakes.roles.Holiday);
+    const holiday = await roleGuild.roles.fetch(snowflakes.roles.Holiday[0]);
     await holiday.setName("Blessed of the Bingus");
     await holiday.setColor("#C4CBFF")
     try {
       await holiday.setIcon("./avatar/blueStar.png")
     } catch (error) {
       try {
-        await holiday.setIcon("./avatar/selysWebhook.png")
+        await holiday.setIcon("./avatar/Winter-selysWebhook.png")
       } catch (error) {
         console.error(error)
       }

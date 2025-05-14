@@ -29,7 +29,7 @@ const colors = [
     role_icon: "./img/server/Halloween/icon.png"
   },
   {
-    name: "Tortise",
+    name: "Tortoise",
     color: "#28eaa2",
     role_icon: "./img/server/Halloween/icon.png"
   },
@@ -102,25 +102,43 @@ const serverBanner = "./img/server/Halloween/banner.png";
  */
 
 let event = {
-  abilityCooldownMinutes: 10,
+  abilityCooldownMinutes: 1,
+  channel: "1296735818475372599",
   avatar: avatar,
   colors: colors,
   roles: roles,
   emoji: [
     //several emojis
+    //"👻",
+    //"👻",
+    //"👻",
+    //"👻",
+    //"👻",
+    //"👻",
+    //"👻",
+    //"👻",
+    //"👻",
     "👻",
-    "👻",
-    "👻",
-    "👻",
-    "👻",
-    "👻",
-    "👻",
-    "👻",
-    "👻",
-    "👻",
+    "🦃",
+    "🍽",
+    "🍁",
+    "🦃",
+    "🍠",
+    "🍂",
+    "🥧",
+    "🦃",
+    "🦃",
+    "🍽",
+    "🍁",
+    "🦃",
+    "🍠",
+    "🍂",
+    "🥧",
+    "🦃",
+    "🌠"
     //"🧚‍♂️"
   ],
-  odds: 8,
+  odds: 20,
   /**
  * 
  * @param {Guild} guild 
@@ -206,13 +224,10 @@ let event = {
 
     return await Promise.all(promises);
   },
-  cleanRoleMembers: (role) => {
-    let removalPromises = [];
-    role.members.forEach(m => {
-      removalPromises.push(m.roles.remove(role));
-    }
-    )
-    return Promise.all(removalPromises);
+  cleanRoleMembers: async (role) => {
+    return await Promise.all(role.members.map(async (v, k) => {
+      v.roles.remove(role);
+    }));
   },
   setHolidayBotIcon: (client) => {
     return client.user.setAvatar(avatar || ('./avatar/' + ("base.png")))

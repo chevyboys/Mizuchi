@@ -293,7 +293,8 @@ Module
     category: "Fun",
     hidden: true,
     process: (msg, suffix) => {
-      if (msg.deletable && (msg.client.config.AdminIds.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id)) msg.delete();
+      console.log(msg.member.roles.cache.has(snowflakes.roles.BotAssistant));
+      if (msg.deletable && (msg.client.config.AdminIds.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.BotAssistant))) msg.delete();
       let files = msg.attachments ? Array.from(msg.attachments.values()).map(v => v.attachment) : null
       msg.channel.send({ content: suffix, embeds: msg.embeds, files: files, reply: { messageReference: msg.reference?.messageId || null } });
       u.errorHandler(msg.author.username + " in channel " + msg.channel?.name + " said: " + suffix);

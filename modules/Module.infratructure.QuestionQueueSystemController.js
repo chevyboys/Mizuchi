@@ -6,6 +6,7 @@ const { Collection } = require("../utils/Utils.Generic");
 const Questions = new (require("./QuestionQueue/Question"))
 const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
 const debug = true;
+const fs = require("fs");
 
 
 let authors;
@@ -20,6 +21,41 @@ function getAuthors() {
  * A collection of userIds (keys) with the value of a date object of when they can ask again
  */
 let askedRecently = new Collection();
+let blockedUsers = new Collection();
+
+function addBlockedUser(userId) {
+  blockedUsers.set(userId, Date.now());
+  setTimeout(() => {
+    blockedUsers.delete(userId);
+  }, 48 * 60 * 60 * 1000);
+  //write to the file in ../data/blockedUsers.json. formatted as [[userid, value], userid, value]
+  let blockedUsersArray = Array.from(blockedUsers);
+
+  fs.writeFileSync("./data/blockedUsers.json", JSON.stringify(blockedUsersArray));
+  return;
+}
+
+//read blocked users from the file in ../data/blockedUsers.json 
+if (fs.existsSync("./data/blockedUsers.json")) {
+  let blockedUsersFile = fs.readFileSync("./data/blockedUsers.json");
+  if (blockedUsersFile) {
+    let blockedUsersArray = JSON.parse(blockedUsersFile);
+    for (let i = 0; i < blockedUsersArray.length; i++) {
+      if (blockedUsersArray[i][0] && blockedUsersArray[i][1]) {
+        blockedUsers.set(blockedUsersArray[i][0], blockedUsersArray[i][1]);
+      }
+    }
+    //check if the user is still blocked. If not, remove them from the list
+    blockedUsers.forEach((value, key) => {
+      let unblockedTime = value + 48 * 60 * 60 * 1000;
+      if (unblockedTime < Date.now()) {
+        blockedUsers.delete(key);
+      }
+    });
+  }
+} else {
+  fs.writeFileSync("./data/blockedUsers.json", JSON.stringify([]));
+}
 
 //========== Configureables =============================
 //A list of people allowed to answer questions. Botmasters and admins are added in case of any issues.
@@ -210,6 +246,19 @@ async function deleteMessage(messageId, channel) {
 
 //================= question utility functions ===========================
 
+
+async function modAlertCard(interaction, title, message, color) {
+  let interactionIdentifier = interaction.commandName || interaction.customId || 'id: ' + interaction.id;
+  let embed = u.embed()
+    .setColor(color || 0xFF0000)
+    .setTitle(title).setDescription(message)
+    .setFooter({ text: `Triggered by ${interaction.member.displayName} using interaction ${interactionIdentifier}`, iconURL: interaction.member.displayAvatarURL() });
+  let content = `<@&${snowflakes.roles.Moderator}>`;
+  let card = await interaction.guild.channels.cache.get(snowflakes.channels.modRequests).send({ content: content, embeds: [embed], allowedMentions: { roles: [snowflakes.roles.Moderator] } });
+  return card;
+}
+
+
 /**
  * Sets a question to "discarded", and deletes the message that it was in
  * @param {*} interaction the interaction requesting the deletion
@@ -368,6 +417,26 @@ async function ask(interaction, bypassWait) {
     interaction.reply({ content: "You can ask again <t:" + Math.floor(askedRecently.get(interaction.user.id) / 1000) + ":R> . - <@" + interaction.user + ">\nYour question was: " + (interaction.options ? interaction.options.get("question").value : interaction.cleanContent), ephemeral: true });
   } else {
     // Akn
+    if (blockedUsers.has(interaction.user.id)) {
+      interaction.reply({ content: "I'm afraid you aren't permitted to do that. Please reach out to moderation staff.", ephemeral: true });
+      return;
+    }
+
+    //if there is an attempt to ping someone with the worldmaker role or a role within the ask, prevent the question from being asked, and notify the user that question permissions have been suspended for 48 hours
+    let idsOfWorldmakers = interaction.guild.roles.cache.get(snowflakes.roles.WorldMaker).members.map(m => m.id);
+    let interaction_containsWorldmaker = interaction.options.get("question").value.includes("<@&" + snowflakes.roles.WorldMaker) || idsOfWorldmakers.some(id => interaction.options.get("question").value.includes("<@" + id)) || idsOfWorldmakers.some(id => interaction.options.get("question").value.includes("<@!" + id));
+
+    if (
+      interaction.options.get("question").value.includes("<@&") ||
+      interaction.options.get("question").value.includes("<@!") ||
+      interaction_containsWorldmaker
+    ) {
+      interaction.reply({ content: "An attempt to ping a protected user or role was detected. This is not permitted under server rules and the bot terms of service. Please reach out to moderation staff to have Q&A system privileges restored", ephemeral: true });
+      addBlockedUser(interaction.user.id);
+      //notify the moderation staff
+      modAlertCard(interaction, "Question Ping Alert", `${interaction.member.displayName} attempted to ping a protected user or role in the question queue and had question queue permissions suspended for 48 hours. \n\nAttempted question: ${interaction.options.get("question").value}`, 0xFF0000);
+      return;
+    }
 
 
     let questionData = {

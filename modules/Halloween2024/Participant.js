@@ -6,6 +6,8 @@ const event = require("./utils");
 const NPCSend = require("./NPC");
 const Inventory = require('./Inventory.Class');
 
+const abilityUsedCollection = new Collection();
+
 /**
  * Represents a participant in the Holiday module.
  * @class
@@ -151,9 +153,13 @@ class Participant {
   /**
    * Sets the last time the participant used an ability as now.
    */
-  setLastAbilityUse() {
+  set lastAbilityUse(value) {
     this.#_lastAbilityUse = Date.now();
-    this.#_manager.write();
+    abilityUsedCollection.set(this.userID, this.#_lastAbilityUse);
+    //remmove the ability from the collection after the cooldown period
+    setTimeout(() => {
+      abilityUsedCollection.delete(this.userID);
+    }, 1000 * 60 * event.abilityCooldownMinutes);
   }
 
   /**
@@ -161,8 +167,7 @@ class Participant {
    * @returns {boolean} Whether the participant can use an ability right now.
    */
   get canUseAbility() {
-    if (this.#_lastAbilityUse === undefined) return true;
-    if (this.#_lastAbilityUse + 1000 * 60 + event.abilityCooldownMinutes < Date.now()) return true;
+    return abilityUsedCollection.has(this.userID);
   }
 
   /**
@@ -214,9 +219,12 @@ class Participant {
     }
   }
 
+
 }
 
 class ParticipantManager extends Collection {
+  static singleton = null;
+  static Participant = Participant;
   /**
    * Creates a new participant manager.
    * @constructor
@@ -249,6 +257,16 @@ class ParticipantManager extends Collection {
     iterable.forEach(element => {
       this.set(element.userID, new Participant(element, this));
     });
+    ParticipantManager.singleton = this;
+  }
+
+  addParticipant(resolvable) {
+
+    if (!resolvable) throw new Error("No resolvable provided.");
+    if (!resolvable.userID) throw new Error("No user ID provided.");
+    if (this.has(resolvable.userID)) return this.get(resolvable.userID);
+    this.set(resolvable.userID, new Participant(resolvable, this));
+
   }
 
   /*
@@ -270,7 +288,6 @@ class ParticipantManager extends Collection {
   addHostile(userID, date = new Date()) {
     if (!this.has(userID)) this.set(userID, new Participant({ userID }));
     let returnable = this.get(userID).Hostile.add(date);
-    this.write();
     return returnable;
   }
 
@@ -286,7 +303,6 @@ class ParticipantManager extends Collection {
   addFriendly(userID, date = new Date()) {
     if (!this.has(userID)) this.set(userID, new Participant({ userID }));
     let returnable = this.get(userID).Friendly.add(date);
-    this.write();
     return returnable;
   }
 
@@ -387,7 +403,6 @@ class ParticipantManager extends Collection {
   addRole(userID, role) {
     if (!this.has(userID)) this.set(userID, new Participant({ userID }));
     let returnable = this.get(userID).inventory.addRole(role);
-    this.write();
     return returnable;
   }
 
@@ -404,12 +419,18 @@ class ParticipantManager extends Collection {
   /**
    * writes the participant manager to a file in '../../data/holiday/participants.json'
    */
-  write() {
+  async write() {
     //If the file doesn't exist, create it
-    if (!fs.existsSync('./data/holiday')) fs.mkdirSync('./data/holiday');
-    fs.writeFileSync('./data/holiday/participants.json', JSON.stringify(this.toJSON(), null, 2));
-  }
+    let done = new Promise((resolve, reject) => {
+      if (!fs.existsSync('./data/holiday')) fs.mkdirSync('./data/holiday');
+      fs.writeFile('./data/holiday/participants.json', JSON.stringify(this.toJSON(), null, 2), (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+    return done;
 
+  }
 }
 
 /**
@@ -451,13 +472,13 @@ class CountManager extends Collection {
    * @param {Date} [date] - The date of the count.
    * @returns {Number} The total count for today.
    */
-  add(date = new Date()) {
+  add(date = new Date(), ammount = 1) {
     //convert the date to the day of the month
-    date = date.getDate();
+    if (date instanceof Date) date = date.getDate();
     if (this.has(date)) {
-      this.set(date, this.get(date) + 1);
+      this.set(date, this.get(date) + ammount);
     } else {
-      this.set(date, 1);
+      this.set(date, ammount);
     }
     return this.totalToday();
   }
@@ -473,7 +494,7 @@ class CountManager extends Collection {
 
   totalPrevious() {
     //get all the values from the collection except for today
-    return this.filter((value, key) => key !== new Date().getDate()).reduce((a, b) => a + b, 0) || 0;
+    return Array.from(this.values()).reduce((a, b) => a + b, 0) - this.totalToday();
   }
 
   /**

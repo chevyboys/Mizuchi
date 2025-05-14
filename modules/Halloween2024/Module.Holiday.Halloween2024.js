@@ -1,35 +1,36 @@
 const Augur = require("augurbot");
-const snowflakes = require("../config/snowflakes.json");
+const snowflakes = require("../../config/snowflakes.json");
 //const fs = require('fs');
 //const config = require('../../config/config.json');
-//const u = require('../../utils/Utils.Generic');
-const event = require("./Halloween2024/utils.js");
+const u = require('../../utils/Utils.Generic.js');
+const event = require("./utils.js");
 const moment = require("moment");
 const odds = event.odds;
-const ParticipantManager = require("../modules/Halloween2024/Participant.js");
-// const NPCSend = require("../../modules/PristineWaters/NPC");
+const ParticipantManager = require("./Participant.js");
+const NPCSend = require("./NPC.js");
 // const moment = require("moment");
 // const manipulateImage = require('../../modules/PristineWaters/imageManipulation');
 // const embedColor = event.colors.find(c => c.name.toLowerCase().includes("blurple")).color || event.colors[event.colors.length - 1].color;
 const endedButNotCleaned = false;
+const fs = require('fs');
 
 let Participants = new ParticipantManager();
-const rolesClient = require("../utils/Utils.RolesLogin.js");
+const rolesClient = require("../../utils/Utils.RolesLogin.js");
 const rolesClientPrimaryGuild = rolesClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
 const Module = new Augur.Module();
 
 //############### Submodules ################
-const Inventory = require('./Halloween2024/Inventory.js');
-const Leaderboard = require('./Halloween2024/Leaderboard.js');
-const Spam = require('./Halloween2024/Spam.js');
+const Inventory = require('./Inventory.js');
+// Not done const Leaderboard = require('./Halloween2024/Leaderboard.js');
+const Spam = require('./Spam.js');
 const Gift = {
   command: (interaction, Participants) => { return interaction.reply("Coming soon!") }, //TODO: Implement this function
 }//require('./Halloween2024/Gift.js');
-const Admin = require('./Halloween2024/Admin.js');
-const Flurry = require('./Halloween2024/Flurry.js');
-const Help = require('./Halloween2024/Help.js');
-const Reaction = require('./Halloween2024/Reaction.js');
-const Active = require('./Halloween2024/Active.js');
+const Admin = require('./Admin.js');
+const Flurry = require('./Flurry.js');
+const Help = require('./Help.js');
+const Reaction = require('./Reaction.js');
+const Active = require('./Active.js');
 const { Guild } = require("discord.js");
 
 
@@ -47,7 +48,6 @@ function getRandomEmoji() {
  */
 
 async function begin(guild) {
-  //TODO: Implement this function
   // Event build and teardown
   //    Send announcement
   //    Create / Rename roles
@@ -97,29 +97,35 @@ async function end(guild) {
 }
 
 async function dailyReset(guild) {
-  //TODO: Implement this function
+  await Promise.all(Participants.map(async (v, k) => {
+    v.status = "ACTIVE";
+  }));
+  Participants.write();
+
   for (const role of snowflakes.roles.Holiday) {
     const guildRole = await guild.roles.fetch(role);
     await event.cleanRoleMembers(guildRole);
   };
-  //reset the status of all participants
-  Participants.each(p => {
-    p.status = "ACTIVE";
-  })
+
+  await u.errorLog.send({ embeds: [u.embed({ title: "Daily Reset", description: "The event has been reset for the day." })] });
+
 }
 
 let today = new Date().getDate();
 
 //################ Module adds ################
-
+let i = 0;
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
+  i++;
+  if (i % 10 == 0) {
+    Participants.write();
+  }
   // Handle receiving a reaction
   Reaction.onAdd(reaction, user, Participants);
 }).addInteractionCommand({
   name: "holiday",
   guildId: snowflakes.guilds.PrimaryServer,
   process: async (interaction) => {
-    //TODO: Do something if the event is not yet active
     if (!Active.getActive) {
       await interaction.reply({ content: "The event has not yet begun. Please check back later.", ephemeral: true });
       return;
@@ -133,28 +139,6 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
       case "gift": Gift.command(interaction, Participants); break;
     }
   }
-}).setClockwork(() => {
-  if (!Active.getActive) return;
-  if (today == new Date().getDate()) return;
-
-  try {
-    return setInterval(async () => {
-      //TODO: Implement this function
-      //Handle daily reset at midnight (It has to be midnight because of how we are handling dates)
-      //Handle end of event
-      today = new Date().getDate();
-
-      const TargetUSTime = 0; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
-      const modifierToConvertToBotTime = 7;
-      if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
-        let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-        dailyReset(guild);
-
-      }
-    }
-
-      , 60 * 1000);
-  } catch (e) { u.errorHandler(e, "event Clockwork Error"); }
 }).addEvent('interactionCreate', async (interaction) => {
   console.log(interaction);
   if (interaction.customId == "signUpForHolidayUpdates") {
@@ -168,13 +152,15 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
     msg.content.indexOf("end") > -1 ? Flurry.end(msg.channel) : Flurry.start(msg.channel);
-    msg.react("✅");
+    await msg.react("✅");
+    u.clean(msg, 0);
   }
 }).addCommand({
   name: "blizzard",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
     msg.content.indexOf("end") > -1 ? Flurry.blizzard.end() : Flurry.blizzard.start();
+    u.clean(msg, 0);
   }
 }).setInit(() => {
   Flurry.init();
@@ -193,22 +179,77 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     end(msg.guild);
   }
 }).addCommand({
-  name: "resetevent",
+  name: "write",
   permissions: (msg) => event.isAdmin(msg.member),
   process: async (msg) => {
-    dailyReset(msg.guild);
+    Participants.write();
+  }
+}).addCommand({
+  name: "npc",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg, suffix) => {
+    NPCSend(msg.channel, u.embed({ description: suffix }));
+    u.clean(msg, 0);
+  }
+
+}).addCommand({
+  name: "resetevent",
+  aliases: ["reset", "dailyreset"],
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg) => {
+    const participantsRequire = require("../../data/holiday/participants.json");
+    const today = new Date().getDate();
+
+    for (const p of participantsRequire) {
+      let todayHostile = p.Hostile.find(h => h.key == today)?.value || 0;
+      // if yesterday's count exists, add today's count to yesterday's count
+      let yesterdayHostile = (await p.Hostile.find(h => h.key == today - 1))?.value || 0;
+
+      if (todayHostile) {
+        if (yesterdayHostile) {
+          p.Hostile.find(h => h.key == today - 1).value = yesterdayHostile + todayHostile;
+        } else {
+          p.Hostile.push({ key: today - 1, value: todayHostile });
+        }
+        (p.Hostile.find(h => h.key == today).value = 0);
+      }
+    }
+
+    Participants.map(p => {
+      let todayHostile = p.Hostile.get(today) || 0;
+
+
+      if (!p.Hostile.get(today - 1)) {
+        p.Hostile.set(today - 1, todayHostile);
+      }
+      else {
+        p.Hostile.set(today - 1, p.Hostile.get(today - 1) + todayHostile);
+      }
+
+      if (p.Hostile.set(today, 0));
+      p.status = "ACTIVE";
+    });
+
+
+
+    await dailyReset(msg.guild);
     msg.react("✅");
   }
 }).addEvent("messageCreate", async (msg) => {
   // Handle receiving a message
   if (!Active.getActive) return;
   if (msg.channel.type == "dm") return;
-  if (!Active.getActive) return;
   if ((await Spam.isSpam(msg))) return;
   //if there is a flurry or if a random chance based on odds as a percentage is met
-  let roll = Math.floor(Math.random() * 100)
-  let flurryReaction = false && Flurry.reactBecauseOfFlurry(msg);
-  if (flurryReaction || roll < odds) {
+  let roll = Math.floor(Math.random() * 100);
+  let flurryReaction = await Flurry.reactBecauseOfFlurry(msg); //false &&
+  //console.log(flurryReaction);
+  /*if (flurryReaction) {
+    console.log("Flurry Reaction: True");
+  } */
+  if (flurryReaction == true || roll < odds || msg.channel.id == event.channel) {
+    //console.log(roll);
+    //console.log(flurryReaction);
     await Reaction.react(msg);
     //remove the reaction in ten minutes
     setTimeout(() => {
@@ -216,13 +257,41 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     }, 10 * 60 * 1000);
   }
 
+}).addCommand({
+  name: "addghosts",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg, suffix) => {
+    let user = msg.mentions.users.first() || u.getMention(msg);
+    if (!user) return msg.reply("Please mention a user.");
+    let total = parseInt(suffix.split(" ")[2]);
+    let currentTotal = Participants.get(user.id)?.Hostile.totalPrevious();
+    let toAdd = total - currentTotal;
+    Participants.get(user.id).Hostile.add(0, toAdd);
+    msg.react("✅");
+    let newTotal = Participants.get(user.id).Hostile.total();
+    msg.reply("New total: " + newTotal + " Added: " + toAdd);
+    Participants.write();
+  }
+}).addCommand({
+  name: "leaderboard",
+  permissions: (msg) => event.isAdmin(msg.member),
+  process: async (msg) => {
+    //Leaderboard without using the submodule
+    let participants = Participants.map(p => p);
+    participants.sort((a, b) => b.Hostile.total() - a.Hostile.total());
+    let leaderboard = "";
+    let i = 1;
+    for (const p of participants) {
+      leaderboard += `${i}. <@${p.userID}> - ${p.Hostile.total()}\n`;
+      i++;
+    }
+    msg.reply(leaderboard);
+  }
 });
 
 //TODO: Add automatic slash command registration
-//TODO: Add pinging people in the event channel when they get access to it
-//TODO: Add role icons for masks
-//TODO: Allow people to get masks by hitting 50 ghosts
-//TODO: make sure that each time the bot reacts, it sets a timeout to remove the reaction
+//TODO: Allow people to get masks by hitting 50 ghosts once inventory comes out
+
 
 
 
