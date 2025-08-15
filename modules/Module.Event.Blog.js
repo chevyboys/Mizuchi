@@ -40,7 +40,7 @@ async function blogHandler(force) {
     "./avatar/base.png", {
     content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.BlogUpdates}>`,
     "allowed_mentions": {
-      "parse": ["everyone, roles"],
+      "parse": ["everyone", "roles"],
     },
     embeds: [embed]
   });
