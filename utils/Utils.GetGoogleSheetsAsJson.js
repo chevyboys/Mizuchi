@@ -12,7 +12,7 @@ function convertCSVToJSON(rawResult, horizontal = false) {
     let lines = rawResult.split("\n").map(line => line.split(","));
     let result = {};
     //parse each row into it's own array in the result object with the first column as the key
-    for (let i = 1; i < lines.length; i++) {
+    for (let i = 0; i < lines.length; i++) {
       let row = lines[i];
       let key = row[0];
       result[key] = [];
