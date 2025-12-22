@@ -7,6 +7,7 @@ const supportedFormats = ["png", "jpg", "jpeg", "bmp", "tiff", "gif"];
 const snowflakes = require('../config/snowflakes.json');
 const { closest } = require("fastest-levenshtein");
 const ColorThief = require('colorthief');
+const https = require('https'); // or 'https' for https:// URLs
 
 async function bilateralSmoothing(image) {
   const width = image.getWidth();
@@ -170,8 +171,7 @@ const rune = async (interaction) => {
 }
 
 const sword = async (interaction) => {
-  const maskBlur = 5;
-
+  const maskBlur = 10;
   //Get images
   let flag1;
   if (interaction.options.get("flag")?.value == "Profile Picture") {
@@ -179,16 +179,38 @@ const sword = async (interaction) => {
     //Get the user's avatar
     let colorPallet = [];
     flagTemp = interaction.member.displayAvatarURL({ size: 512, format: "png", dynamic: false });
-    ColorThief.getPalette(flagTemp, 5)
-      .then(palette => {
-        colorPallet = palette;
-        console.log(palette);
-      })
-      .catch(err => {
-        flagTemp = getFlagFromOption(interaction);
-        console.error(err);
+    //write the avatar to a tmp file
+    //random numbers for file name
+    const randomNum = Math.floor(Math.random() * 1000000);
+    let filename = "/tmp/" + randomNum + "file.jpg";
+    const file = fs.createWriteStream(filename);
+    const request = async (flagTemp) => {
+      await new Promise((resolve, reject) => {
+        https.get(flagTemp, (response) => {
+          response.pipe(file);
+          file.on("finish", () => {
+            file.close(resolve);
+          });
+          file.on("error", (err) => {
+            fs.unlink(filename, () => reject(err));
+          });
+        }).on("error", (err) => {
+          fs.unlink(filename, () => reject(err));
+        });
       });
 
+      return filename;
+    };
+
+    await request(flagTemp);
+
+    colorPallet = await ColorThief.getPalette(filename, 5);
+    //delete the tmp file
+    fs.unlink(filename, (err) => {
+      if (err) {
+        u.errorHandler(err);
+      }
+    });
     if (colorPallet.length == 0) {
       flagTemp = getFlagFromOption(interaction);
       flag1 = (await Jimp.read(flagTemp));
@@ -198,11 +220,17 @@ const sword = async (interaction) => {
       let colors = [];
       for (let i = 0; i < colorPallet.length; i++) {
         u.errorHandler(`Found color: ${colorPallet[i]}`);
-        if (colorPallet[i][0] + colorPallet[i][1] + colorPallet[i][2] > 100) {
+        if (colorPallet[i][0] + colorPallet[i][1] + colorPallet[i][2] > 200) {
           colors.push(colorPallet[i]);
           colorCount++;
         }
       }
+      //if we found no colors, use the first color
+      if (colorCount == 0) {
+        colors.push(colorPallet[0]);
+        colorCount++;
+      }
+      //if we found less than 4 colors, repeat the colors
       if (colorCount < 4) {
         for (let i = 0; i < 4 - colorCount; i++) {
           colors.push(colorPallet[i % colorCount]);
@@ -228,8 +256,10 @@ const sword = async (interaction) => {
 
   flag1.rotate(90);
   flag1.resize(600, 300);
-  flag1.color([{ apply: 'saturate', params: [20 + 0.5 * interaction.options.get("intensity")?.value || 40] }]);
-  flag1.color([{ apply: 'darken', params: [20] }]);
+  if (interaction.options.get("flag")?.value != "Profile Picture") {
+    flag1.color([{ apply: 'saturate', params: [20 + 0.5 * interaction.options.get("intensity")?.value || 40] }]);
+    flag1.color([{ apply: 'darken', params: [20] }]);
+  }
   const flag2 = flag1.clone().flip(true, false);
   const saekes1 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword")?.value)[0]) || closest(interaction.options.get("sword")?.value, getEmoji())}/Base1.png`);
   const saekes2 = await Jimp.read(`./storage/sword/${(u.smartSearchSort(getSword(), interaction.options.get("sword")?.value)[0]) || closest(interaction.options.get("sword")?.value, getEmoji())}/Base2.png`);
@@ -263,7 +293,9 @@ const sword = async (interaction) => {
   flagCanvas.composite(flag1, 0, 0);
   flagCanvas.composite(flag2, 600, 0);
   flagCanvas.blur(40);
-  flagCanvas.opacity((interaction.options.get("intensity")?.value + 50) / 100 || 0.7);
+  let flagOverlay = flagCanvas.clone();
+  if (interaction.options.get("flag")?.value == "Profile Picture") flagCanvas.opacity((interaction.options.get("intensity")?.value + 0) / 100 || 0.20);
+  flagOverlay.opacity((interaction.options.get("intensity")?.value + 50) / 100 || 0.70);
 
   //create the canvas and composite the images onto it
   const canvas = new Jimp(1200, 300, 0x00000000);
@@ -273,7 +305,8 @@ const sword = async (interaction) => {
   canvas.blit(saekes4, 900, 0);
 
   //Combine canvases
-  canvas.composite(flagCanvas, 0, 0, { mode: Jimp.BLEND_OVERLAY });
+  if (interaction.options.get("flag")?.value == "Profile Picture") canvas.composite(flagCanvas, 0, 0, { mode: Jimp.BLEND_HARDLIGHT });
+  canvas.composite(flagOverlay, 0, 0, { mode: Jimp.BLEND_OVERLAY });
   canvas.mask(maskCanvas, 0, 0);
 
   canvas.rotate(90);

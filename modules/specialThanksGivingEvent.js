@@ -13,7 +13,7 @@ const RoleClient = require("../utils/Utils.RolesLogin");
 
 async function setHolidayRole() {
   const guild = await RoleClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
-  const holidayRole = await guild.roles.fetch(snowflakes.roles.Holiday);
+  const holidayRole = await guild.roles.fetch(snowflakes.roles.Holiday[0]);
   holidayRole.setHoist(true)
   holidayRole.setColor("#f5a442")
   return await holidayRole.setName("Appreciated")
@@ -21,10 +21,10 @@ async function setHolidayRole() {
 
 async function unsetHolidayRole() {
   const guild = await RoleClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
-  const holidayRole = await guild.roles.fetch(snowflakes.roles.Holiday);
+  const holidayRole = await guild.roles.fetch(snowflakes.roles.Holiday[0]);
   holidayRole.setHoist(false)
   holidayRole.setColor("#00000")
-  return await holidayRole.setName("Holiday")
+  return await holidayRole.setName("Holiday 1")
 }
 
 let thankProcess = async (interaction, bypassWait) => {
@@ -41,14 +41,14 @@ let thankProcess = async (interaction, bypassWait) => {
     removeRoleTime: d.valueOf()
   }
   fs.writeFileSync(`./data/holiday/${member.id}.json`, JSON.stringify(data, null, 4));
-  u.addRoles(member, [snowflakes.roles.Holiday]);
-  interaction.reply({ content: `${member.displayName} has been given the <@&${snowflakes.roles.Holiday}> role for 1 hour`, ephemeral: true });
+  u.addRoles(member, [snowflakes.roles.Holiday[0]]);
+  interaction.reply({ content: `${member.displayName} has been given the <@&${snowflakes.roles.Holiday[0]}> role for 1 hour`, ephemeral: true });
 
   //notify bot commands
   let modCardEmbed = u.embed()
-    .setColor(interaction.guild.roles.cache.get(snowflakes.roles.Holiday).hexColor)
+    .setColor(interaction.guild.roles.cache.get(snowflakes.roles.Holiday[0]).hexColor)
     .setAuthor({ iconURL: member.displayAvatarURL(), name: "Happy Thanksgiving!" })
-    .setDescription(`Happy Thanksgiving ${member}!\n${interaction.member.displayName} sent you a big thankyou, and The <@&${snowflakes.roles.Holiday}> role was given to you for the next hour.`)
+    .setDescription(`Happy Thanksgiving ${member}!\n${interaction.member.displayName} sent you a big thankyou, and The <@&${snowflakes.roles.Holiday[0]}> role was given to you for the next hour.`)
     .addField("Reason:", "```" + reason + "```")
   interaction.guild.channels.cache.get(snowflakes.channels.botSpam).send({ content: `<@${member.id}>`, embeds: [modCardEmbed], allowedMentions: { parse: ["users"] }, })
   if (!interaction.member.roles.cache.has(snowflakes.roles.Admin) && !interaction.member.roles.cache.has(snowflakes.roles.Moderator) && !interaction.member.roles.cache.has(snowflakes.roles.BotMaster)) {
@@ -66,9 +66,10 @@ const lastOfNov = new Date(today.getFullYear(), 10, 30).getDay();
 const turkyDay = (lastOfNov >= 4 ? 34 : 27) - lastOfNov;
 function thanksgiving() {
   const now = new Date();
-  return (now.getDate() == turkyDay && now.getMonth() == 10)
+  return (now.getMonth() == 10)
 }
 function thanksgivingTomorrow() {
+  return false;
   const now = new Date();
   return (now.getDate() == turkyDay - 1 && now.getMonth() == 10)
 }
@@ -129,8 +130,8 @@ const kickoff = () => {
   startTime.setDate(turkyDay)
   startTime.setHours(0)
   let endTime = new Date()
-  endTime.setMonth(10)
-  endTime.setDate(turkyDay + 1)
+  endTime.setMonth(11)
+  endTime.setDate(1)
   endTime.setHours(0)
 
   const guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
@@ -153,8 +154,8 @@ const kickoff = () => {
 
         "\n\nAn hour of boosts to each person you can grant," +
         "\nThough stacking more than one? well sadly you can't" +
-        "\nA ten percent to all who receive" +
-        "\nAt least until midnight, then the bonuses leave*")
+        "\nA bonus xp to all who receive" +
+        "\nAt least until december, then the bonuses leave*")
         .setTitle("Thanksgiving special event")
         .setImage("https://i.swncdn.com/media/800w/via/5333-thanksgiving.jpg")
         .addFields([{
@@ -182,7 +183,7 @@ let endTurkey = async () => {
   let oldThanks = rawData.filter(thank => thank.removeRoleTime < now)
   for (const oldThank of oldThanks) {
     let member = await guild.members.fetch(oldThank.member);
-    await u.addRoles(member, [snowflakes.roles.Holiday], true);
+    await u.addRoles(member, [snowflakes.roles.Holiday[0]], true);
     fs.unlinkSync(`./data/holiday/${member.id}.json`);
   }
 }
