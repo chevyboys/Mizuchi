@@ -6,6 +6,7 @@ const Discord = require("discord.js"),
   fs = require('fs'),
   { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandStringOption } = require('@discordjs/builders'),
   { REST, DiscordAPIError } = require('@discordjs/rest');
+const client = require("./Utils.RolesLogin");
 
 function IsJsonString(str) {
   try {
@@ -16,7 +17,8 @@ function IsJsonString(str) {
   return true;
 }
 
-let hasRegisteredCommandsThisRun = false
+let hasRegisteredCommandsThisRun = false;
+client.hasRegisteredCommandsThisRun = false;
 
 const registrar = {
   getCommandId: async (Module, commandName) => {
@@ -57,6 +59,7 @@ const registrar = {
       command.toJSON()
       registeredCommands.push(await rest.post(Routes.applicationGuildCommands(Module.client.user.id, snowflakes.guilds.PrimaryServer), { body: command }));
     }
+    client.hasRegisteredCommandsThisRun = true;
     return registeredCommands;
   },
   /**

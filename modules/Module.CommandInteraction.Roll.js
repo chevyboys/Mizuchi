@@ -4,7 +4,36 @@ const Augur = require("augurbot"),
 const { DiceRoll } = require('@dice-roller/rpg-dice-roller');
 const Discord = require("discord.js");
 const { get } = require("selenium-webdriver/http");
-let helpURL = "https://dice-roller.github.io/documentation/guide/notation/"
+let helpURL = "https://dice-roller.github.io/documentation/guide/notation/";
+const gs = require("../utils/Utils.GetGoogleSheetsAsJson.js");
+const { SlashCommandBuilder } = require('@discordjs/builders');
+
+
+let rollData = {};
+//load roll data from google sheets
+(async () => {
+  try {
+    //for a test, write the roll data to a json file
+    rollData = await gs(snowflakes.sheets.rolls, true);
+
+  } catch (error) {
+    u.errorHandler(error, "Error loading roll data from Google Sheets");
+  }
+})();
+
+//lowercase all the keys in rollData and replace any spaces with underscores
+// rollData = Object.fromEntries(
+//   Object.entries(rollData).map((value, key) => [key.toLowerCase().replace(/ /g, "_"), value])
+// );
+// 
+// Object.entries(rollData).forEach(async ([key, value]) => {
+//   await u.errorHandler(`Loaded ${value.length} entries for roll data key: ${key}`);
+// });
+// 
+// const fs = require("fs");
+// fs.writeFileSync("./data/rollData.json", JSON.stringify(rollData, null, 2));
+
+
 
 /**
  * Trims a field to a specific length
@@ -19,6 +48,41 @@ function trimField(field, maxLength) {
   } else trimmedField = preparedField;
   return trimmedField;
 }
+
+/* Example csv data for dominions from Google Sheets
+prime dominion,air,light,motion,water,life,mental,earth,shadow,enhancement,flame,death,perception,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+deep dominion,Acuity,Adaptation,Alteration,Banishment,Blight,Blood,Bone,Breath,Chaos,Clarity,Coercion,Communication,Constellations,Dawn,Density,Destiny,Dreams,Enervation,Heat,Ice,Incineration,Lies,Lightning,Madness,Memory,Metal,Peace,Poison,Protection,Purity,Rain,Ruin,Sand,Secrets,Shade,Sight,Sound,Spirit,Supremacy,Tides,Time,Tranquility,Transcendence,Travel,Vitality,Void,War,Wood,,,,,,,,,,,,
+dominion,air,light,motion,water,life,mental,earth,shadow,enhancement,flame,death,perception,Acuity,Adaptation,Alteration,Banishment,Blight,Blood,Bone,Breath,Chaos,Clarity,Coercion,Communication,Constellations,Dawn,Density,Destiny,Dreams,Enervation,Heat,Ice,Incineration,Lies,Lightning,Madness,Memory,Metal,Peace,Poison,Protection,Purity,Rain,Ruin,Sand,Secrets,Shade,Sight,Sound,Spirit,Supremacy,Tides,Time,Tranquility,Transcendence,Travel,Vitality,Void,War,Wood
+air deep,Communication,Breath,Rain,Lightning,Blight,Sound,Vitality,Travel,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+light deep,Destiny,Spirit,Peace,Purity,Banishment,Sight,Constellations,Vitality,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+motion deep,Acuity,Adaptation,Tides,Heat,Chaos,Time,Constellations,Travel,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+transferance deep,Acuity,Adaptation,Tides,Heat,Chaos,Time,Constellations,Travel,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+water deep,Tides,Peace,Rain,Sand,Poison,Ice,Clarity,Blood,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+life deep,Adaptation,Spirit,Breath,Wood,Shade,Protection,Transcendence,Blood,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+knowledge deep,Acuity,Destiny,Communication,Tranquility,Secrets,Memory,Transcendence,Clarity,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+mental deep,Acuity,Destiny,Communication,Tranquility,Secrets,Memory,Transcendence,Clarity,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+earth deep,Tranquility,Wood,Sand,Metal,Bone,Alteration,Density,Enervation,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+umbral deep,Secrets,Shade,Poison,War,Supremacy,Dreams,Void,Enervation,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+shadow deep,Secrets,Shade,Poison,War,Supremacy,Dreams,Void,Enervation,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+stability deep,Memory,Protection,Ice,Dawn,Ruin,Coercion,Void,Density,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+enhancement deep,Memory,Protection,Ice,Dawn,Ruin,Coercion,Void,Density,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+fire deep,Heat,Purity,Lightning,Metal,War,Dawn,Incineration,Lies,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+death deep,Chaos,Banishment,Blight,Bone,Supremacy,Ruin,Incineration,Madness,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+perception deep,Time,Sight,Sound,Alteration,Dreams,Coercion,Lies,Madness,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+deception deep,Time,Sight,Sound,Alteration,Dreams,Coercion,Lies,Madness,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+spire,Spider,Serpent,Hydra,Tortise,Pheonix,Tiger,Dragon,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+continent,Kaldwyn,Mythralis,Dania,Vylin Tor,Tyrennia,Vashen,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+attunement,Assassin,Commander,Executioner,Juggernaut,Legionnaire,Saboteur,Scourge,Shieldbreaker,Conjurer,Mesmer,Dancer,Purifier,Pyromancer,Shapshifter,Spellsinger,Swordmaster,Diviner,Elementalist,Mender,Gaurdian,Enchanter,Summoner,Shaper,Shadow,Analyst,Architect,Biomancer,Controller,Forgemaster,Illuminator,Sentinel,Transmuter,Acolyte,Champion,Cloudcaller,Illusionist,Seer,Soulblade,Wavewalker,Wayfarer,,,,,,,,,,,,,,,,,,,,
+Attunement Spider,Paladin,Arbiter,Hierophant,Chronomancer,Necromancer,Soverign,Whisper,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Attunement Serpent,Diviner,Elementalist,Mender,Gaurdian,Enchanter,Summoner,Shaper,Shadow,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Attunement Hydra,Assassin,Commander,Executioner,Juggernaut,Legionnaire,Saboteur,Scourge,Shieldbreaker,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Attunement Tortise,Acolyte,Champion,Cloudcaller,Illusionist,Seer,Soulblade,Wavewalker,Wayfarer,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Attunement Pheonix,Conjurer,Mesmer,Dancer,Purifier,Pyromancer,Shapshifter,Spellsinger,Swordmaster,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Attunement Tiger,Analyst,Architect,Biomancer,Controller,Forgemaster,Illuminator,Sentinel,Transmuter,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Attunement Dragon,[Redacted],,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+*/
+
+
 
 //Functions to do with building the Dice Roll help UI
 let diceEmbed = (titleModifier) => {
@@ -255,7 +319,8 @@ function getRandomDominion(type, interaction) {
  */
 
 let rollProcess = (interaction, hiddenResponse = false) => {
-  {
+  const subcommand = interaction.options.getSubcommand();
+  if (subcommand === "dice") {
     let diceString = interaction?.options?.get("dice")?.value;
     if (!diceString || diceString == "" || diceString.toLowerCase() == "help") {
       return replyWithRollHelp(interaction)
@@ -276,14 +341,11 @@ let rollProcess = (interaction, hiddenResponse = false) => {
           let embed = diceEmbed(diceRoll.notation)
           switch (diceRoll.total) {
             case diceRoll.minTotal:
-              DiceResultStringPrefix += "diff\n- ";
               embed.setColor("#FF0000")
               break;
             case diceRoll.maxTotal:
-              DiceResultStringPrefix += "css\n";
               embed.setColor("#00FF00")
               break;
-
             default:
               break;
           }
@@ -309,33 +371,76 @@ let rollProcess = (interaction, hiddenResponse = false) => {
       }
     }
   }
+  if (subcommand == "help") {
+    return replyWithRollHelp(interaction)
+  }
+  //if the sub command is a key in rollData, get a random entry from that key
+  if (rollData[subcommand]) {
+    let entries = rollData[subcommand];
+    let randomEntry = entries[Math.floor(Math.random() * entries.length)];
+    let embed = u.embed()
+      .setTitle(`Random ${subcommand}`)
+      .setDescription(randomEntry);
+    return interaction.reply({ embeds: [embed] });
+  }
 }
 
-//Register commands
 
-const Module = new Augur.Module()
-
-
-
-
+const Module = new Augur.Module();
 
 //Run commands
-Module
-  .addInteractionCommand({
-    name: "roll",
-    guildId: snowflakes.guilds.PrimaryServer,
-    process: async (interaction) => {
-      rollProcess(interaction);
-    }
-  }).addInteractionCommand({
-    name: "gmroll",
-    guildId: snowflakes.guilds.PrimaryServer,
-    process: async (interaction) => {
-      rollProcess(interaction, true);
-    }
-  })
-
-
-
+Module.addEvent("ready", async () => {
+  //wait for 40 seconds to ensure the client is fully ready without using outside functions
+  await new Promise(resolve => setTimeout(resolve, 40000));
+  u.errorHandler("Registering Roll Command");
+  const guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+  const commands = guild.commands;
+  //register the command if it doesn't exist
+  const command_for_registration = new SlashCommandBuilder()
+    .setName("roll")
+    .setDescription("Roll some dice")
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName("dice")
+        .setDescription("Roll some dice using dice notation")
+        .addStringOption(option =>
+          option
+            .setName("dice")
+            .setDescription("The dice to roll, or 'help' for more information")
+            .setRequired(true)
+        )
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName("help")
+        .setDescription("Get help with dice notation")
+    )
+  //dynamically add subcommands based on rollData keys
+  Object.keys(rollData).forEach(key => {
+    command_for_registration.addSubcommand(subcommand =>
+      subcommand
+        .setName(key)
+        .setDescription(`Get a random ${key} entry`)
+    )
+  });
+  //register the command
+  const registeredCommand = await commands.create(command_for_registration.toJSON());
+  Module.client.interactions.commands.set(registeredCommand.id,
+    {
+      category: undefined,
+      commandId: registeredCommand.id,
+      description: registeredCommand.name,
+      enabled: true,
+      guildId: guild.id,
+      hidden: false,
+      info: registeredCommand.name,
+      name: registeredCommand.name,
+      permissions: true,
+      process: (interaction) => rollProcess(interaction),
+      syntax: "",
+      execute: (interaction) => rollProcess(interaction)
+    })
+  return registeredCommand;
+});
 
 module.exports = Module;

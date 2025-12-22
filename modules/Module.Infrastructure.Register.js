@@ -115,24 +115,24 @@ const Module = new Augur.Module()
             .setRequired(false)
             .setDescription("The number of days to give an xp boost")
         ),
-      new SlashCommandBuilder()
-        .setName("roll")
-        .setDescription("rolls a dice of any reasonable size")
-        .addStringOption(option =>
-          option
-            .setName("dice")
-            .setDescription("The dice you want to roll. If you aren't sure how, instead enter 'help'")
-            .setRequired(true)
-        ),
-      new SlashCommandBuilder()
-        .setName("gmroll")
-        .setDescription("rolls a dice of any reasonable size")
-        .addStringOption(option =>
-          option
-            .setName("dice")
-            .setDescription("The dice you want to roll in private. If you aren't sure how, instead enter 'help'")
-            .setRequired(true)
-        ),
+      //new SlashCommandBuilder()
+      //  .setName("roll")
+      //  .setDescription("rolls a dice of any reasonable size")
+      //  .addStringOption(option =>
+      //    option
+      //      .setName("dice")
+      //      .setDescription("The dice you want to roll. If you aren't sure how, instead enter 'help'")
+      //      .setRequired(true)
+      //  ),
+      //new SlashCommandBuilder()
+      //  .setName("gmroll")
+      //  .setDescription("rolls a dice of any reasonable size")
+      //  .addStringOption(option =>
+      //    option
+      //      .setName("dice")
+      //      .setDescription("The dice you want to roll in private. If you aren't sure how, instead enter 'help'")
+      //      .setRequired(true)
+      //  ),
       new SlashCommandBuilder()
         .setName("pulse")
         .setDescription("Get's the bot's and discord's pulse")
