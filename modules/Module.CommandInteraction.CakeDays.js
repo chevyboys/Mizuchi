@@ -2,6 +2,7 @@ const optButtons = require("../utils/Utils.CakedayOptButtons")
 const Augur = require("augurbot"),
   u = require("../utils/Utils.Generic"),
   snowflakes = require('../config/snowflakes.json'),
+  config = require("../config/config.json"),
   db = require("../utils/Utils.Database"),
   moment = require("moment"),
 
@@ -20,6 +21,7 @@ async function celebrate() {
 
 
 async function testcakeOrJoinDays(guild) {
+  console.log("Running testcakeOrJoinDays");
   try {
     if (!guild || guild == undefined) guild = await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer)
     const curDate = moment();
@@ -35,18 +37,26 @@ async function testcakeOrJoinDays(guild) {
     ];
 
     let cakeOrJoinDayPeeps = (await db.User.getMost()).filter(user => user.cakeDay != null && user.cakeDay != "opt-out");
-    let people_with_a_cakeday = cakeOrJoinDayPeeps.filter(async (peep) => {
-
-      if (peep.cakeDay.length < 3) {
-        //use the server join date as their cakeOrJoinDay
-        peep.cakeDay = (await guild.members.fetch(peep.userID)).joinedAt;
-      }
-
-      let startOfThriceFoldNameDate = moment(peep.cakeDay).subtract(1, 'days');
-      let endOfThriceFoldNameDate = moment(peep.cakeDay).add(1, 'days');
-      return curDate.isBetween(startOfThriceFoldNameDate, endOfThriceFoldNameDate, 'day', '[]');
-    }
-    );
+    let people_with_a_cakeday = (await Promise.all(
+      cakeOrJoinDayPeeps.map(async (peep) => {
+        let cakeOrJoinDayDate = peep.cakeDay;
+        // fallback to join date if invalid
+        if (!cakeOrJoinDayDate || cakeOrJoinDayDate.length < 3) {
+          try {
+            const member = await guild.members.fetch(peep.userID);
+            cakeOrJoinDayDate = member.joinedAt;
+          } catch {
+            return null; // skip if member not found
+          }
+        }
+        let start = moment(cakeOrJoinDayDate).subtract(1, 'days').year(curDate.year());
+        let end = moment(cakeOrJoinDayDate).add(1, 'days').year(curDate.year());
+        if (curDate.isBetween(start, end, 'day', '[]')) {
+          return peep; // include this person
+        }
+        return null; // exclude
+      })
+    )).filter(Boolean); // remove nulls
 
     let total_people_right_now = 0;
     let peopleByYearsInGuild = {
@@ -82,21 +92,23 @@ async function testcakeOrJoinDays(guild) {
       //No one to celebrate today
     }
 
+    let valid_ansi_colors = [31, 32, 33, 34, 35, 36, 37];
+
     let embed = u.embed()
       .setTitle("Thrice Fold Name Day")
       .setColor(guild.roles.cache.get(snowflakes.roles.CakeDay).color || guild.members.me.displayHexColor)
       .setFooter({ text: "Thrice-fold Name Days are a once a year three day celebration of you joining the server. To set your thrice-fold name day or opt out, use /nameday" })
-      .setDescription((total_people_right_now == 1 ? "1 person" : `${total_people_right_now} people`) + " celebrate their thrice-fold name day today!\n\n");
+      .setDescription("The name day is an old tradition, older even than me. Though in many cultures it has degenerated into a ceremony of toys and cakes, we remember the true purpose of the day: The choosing. \n\nWe ask you to tell us this year, what " + (total_people_right_now == 1 ? "is" : "are") + " your name" + (total_people_right_now == 1 ? ", child" : "s, children") + " ?\n\n");
     //add a field for each year group
     let embedFeilds = [];
     for (const [years, people] of Object.entries(peopleByYearsInGuild)) {
       let embedField = {
-        name: `${years} year${years == 1 ? "" : "s"} in the guild:`,
-        value: "",
+        name: `${years} year${years == 1 ? "" : "s"}:`,
+        value: "\`\`\`ansi\n\[2;" + valid_ansi_colors[Math.floor(Math.random() * valid_ansi_colors.length)] + "m",
         inline: true
       };
       for (const person of people) {
-        embedField.value += `**${u.escapeMarkdown(person.member.displayName)}**\n`;
+        embedField.value += `${(person.member.displayName)}\n`;
         //Give them the role
         try {
           await person.member.roles.add(snowflakes.roles.CakeDay, "Thrice-fold Name Day Celebration");
@@ -105,6 +117,7 @@ async function testcakeOrJoinDays(guild) {
           u.errorHandler(e, "cakeOrJoinDay role add error");
         }
       }
+      embedField.value += "\[0m\`\`\`";
       embedFeilds.push(embedField);
     }
     embed.addFields(embedFeilds);
@@ -131,20 +144,33 @@ async function testcakeOrJoinDays(guild) {
       embeds.push(currentEmbed);
     }
     let channel = await guild.channels.fetch(snowflakes.channels.general);
+    //content for the first message
+    let content = ((total_people_right_now == 1 ? "A child joins" : "Children join") + " us today for an old tradition. We are honored that you would join us on your name day.");
     //send all embeds
+    let first = true;
     for (const em of embeds) {
+
       //check if we are on the last embed to add buttons
       if (em == embeds[embeds.length - 1]) {
-        channel.send({ embeds: [em], components: [optButtons] });
-      } else {
-        if (em == embeds[0]) {
-          channel.send({
-            content: ((total_people_right_now == 1 ? "A child" : "Children") + " join us today for an old tradition. We are honored that you would join us on your name day.\n\nThe name day is an old tradtion, older even than me. Though in many cultures it has degenerated into a ceremony of toys and cakes, we remember the true purpose of the day: The choosing. We ask you to tell us this year, what " + (total_people_right_now == 1 ? "is" : "are") + " your name" + (total_people_right_now == 1 ? ", child" : "s, children") + "?\n\n"),
-            embeds: [em], components: []
-          });
-        } else {
-          channel.send({ embeds: [em] });
+        if (first) {
+          //first and last, add content
+          channel.send({ content: content, embeds: [em], components: optButtons });
+          first = false;
+          continue;
         }
+        //last embed, add buttons
+        channel.send({ embeds: [em], components: optButtons });
+      } else {
+        if (first) {
+          //first embed, add content
+          channel.send({ content: content, embeds: [em] });
+          first = false;
+          continue;
+        }
+        //normal embed
+
+        channel.send({ embeds: [em] });
+
       }
     }
 
@@ -250,25 +276,54 @@ Module
         if (userCake.cakeDay.indexOf("opt") > -1) {
           userCake = null;
         }
+        interaction.deferReply({ ephemeral: true });
 
-
-        let users = await db.User.getMost();
-        let now = new Date(Date.now());
+        //get people with cakeOrJoinDays in the next 7 days
+        //filter to only those with a cakeOrJoinDay set, not opted out, not the user themselves, and with a date in the future within 7 days
         //return new Date(`${ userDbObj.cakeDay } ${ now.getFullYear() }`) > now;
-        let sortedUsers = await users.filter(u => u.cakeDay.indexOf("opt") > -1 && moment(u.cakeDay).isBetween(moment(), moment().add(30, 'days'), 'day', '[]')).sort((a, b) => {
-          let aDate = new Date(`${a.cakeDay} ${now.getFullYear()}`);
-          let bDate = new Date(`${b.cakeDay} ${now.getFullYear()}`);
+        let cakeOrJoinDayPeeps = (await db.User.getMost()).filter(user => user.cakeDay != null
+          && user.cakeDay != "opt-out"
+          && user.userID != interaction.member.id
+          && moment(new Date(`${user.cakeDay} ${moment().year()}`)).isAfter(moment())
+          && moment(new Date(`${user.cakeDay} ${moment().year()}`)).diff(moment(), 'days') <= 7
+        );
+
+        //sort by nearest date in the future
+        cakeOrJoinDayPeeps.sort((a, b) => {
+          let aDate = new Date(`${a.cakeDay} ${moment().year()}`);
+          let bDate = new Date(`${b.cakeDay} ${moment().year()}`);
           return aDate - bDate;
+        });
+        //limit to 10 results
+        cakeOrJoinDayPeeps = cakeOrJoinDayPeeps.slice(0, 10);
+
+        for (const peep of cakeOrJoinDayPeeps) {
+          //use the join date if cakeOrJoinDay is invalid
+          if (peep.cakeDay.length < 3) {
+            peep.cakeDay = (await interaction.guild.members.fetch(peep.userID)).joinedAt;
+          }
+          try {
+            let member = await interaction.guild.members.fetch(peep.userID);
+            peep.displayName = member.displayName;
+          } catch (error) {
+            //member not found, remove from list
+            cakeOrJoinDayPeeps = cakeOrJoinDayPeeps.filter(p => p.userID != peep.userID);
+            continue;
+          }
         }
-          //get the top 5 upcoming
-        ).slice(0, 5);
+
+
 
         let upcomingCakeUsers = "\n\n**Upcoming Name Days:**\n";
-        for (const uData of sortedUsers) {
-          let member = await interaction.guild.members.fetch(uData.userID);
-          if (!member) continue;
-          //just use the raw date string from the database
-          upcomingCakeUsers += `**${u.escapeMarkdown(member.displayName)}** - ${uData.cakeDay}\n`;
+        for (const uData of cakeOrJoinDayPeeps) {
+          try {
+            //just use the raw date string from the database
+            upcomingCakeUsers += `**${(uData.displayName)}** - ${uData.cakeDay}\n`;
+          } catch {
+            continue;
+          }
+
+
         }
 
 
@@ -281,7 +336,7 @@ Module
           .setTitle("Upcoming Name Days:")
           .setDescription("```" + userCakeString + "```" + upcomingCakeUsers)
           .setColor("#ea596e");
-        interaction.reply({ embeds: [embed], ephemeral: true, allowedMentions: { parse: ['users'] } });
+        interaction.editReply({ embeds: [embed], ephemeral: true, allowedMentions: { parse: ['users'] } });
 
 
       }
