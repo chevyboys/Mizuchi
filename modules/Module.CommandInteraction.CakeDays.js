@@ -105,7 +105,7 @@ async function testcakeOrJoinDays(guild) {
       let embedField = {
         name: `${years} year${years == 1 ? "" : "s"}:`,
         value: "\`\`\`ansi\n\[2;" + valid_ansi_colors[Math.floor(Math.random() * valid_ansi_colors.length)] + "m",
-        inline: true
+        inline: false
       };
       for (const person of people) {
         embedField.value += `${(person.member.displayName)} - ${person.userData.cakeDay}\n`;
