@@ -68,6 +68,10 @@ async function testcakeOrJoinDays(guild) {
         peopleByYearsInGuild[yearsInGuild].push({ member: member, userData: person });
         total_people_right_now += 1;
       } catch (e) {
+        if (e.code === 10007) {
+          // Unknown Member — user not in guild
+          continue;
+        }
         u.errorHandler(e, "cakeOrJoinDay member fetch error");
         continue;
       }
