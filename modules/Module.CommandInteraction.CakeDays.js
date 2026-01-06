@@ -276,7 +276,7 @@ Module
         if (userCake.cakeDay.indexOf("opt") > -1) {
           userCake = null;
         }
-        interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         //get people with cakeOrJoinDays in the next 7 days
         //filter to only those with a cakeOrJoinDay set, not opted out, not the user themselves, and with a date in the future within 7 days
