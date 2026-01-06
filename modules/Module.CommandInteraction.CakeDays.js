@@ -108,7 +108,7 @@ async function testcakeOrJoinDays(guild) {
         inline: true
       };
       for (const person of people) {
-        embedField.value += `${(person.member.displayName)}\n`;
+        embedField.value += `${(person.member.displayName)} - ${person.userData.cakeDay}\n`;
         //Give them the role
         try {
           await person.member.roles.add(snowflakes.roles.CakeDay, "Thrice-fold Name Day Celebration");
