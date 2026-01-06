@@ -93,18 +93,27 @@ async function testcakeOrJoinDays(guild) {
     }
 
     let valid_ansi_colors = [31, 32, 33, 34, 35, 36, 37];
+    let ansi_colors_used = [];
 
     let embed = u.embed()
       .setTitle("Thrice Fold Name Day")
       .setColor(guild.roles.cache.get(snowflakes.roles.CakeDay).color || guild.members.me.displayHexColor)
       .setFooter({ text: "Thrice-fold Name Days are a once a year three day celebration of you joining the server. To set your thrice-fold name day or opt out, use /nameday" })
-      .setDescription("The name day is an old tradition, older even than me. Though in many cultures it has degenerated into a ceremony of toys and cakes, we remember the true purpose of the day: The choosing. \n\nWe ask you to tell us this year, what " + (total_people_right_now == 1 ? "is" : "are") + " your name" + (total_people_right_now == 1 ? ", child" : "s, children") + " ?\n\n");
+      .setDescription("The name day is an old tradition, older even than me. Though in many cultures it has degenerated into a ceremony of toys and cakes, we remember the true purpose of the day: The choosing. \n\nWe ask you to tell us this year, what " + (total_people_right_now == 1 ? "is" : "are") + " your name" + (total_people_right_now == 1 ? ", child" : "s, children") + "?\n\n");
     //add a field for each year group
     let embedFeilds = [];
     for (const [years, people] of Object.entries(peopleByYearsInGuild)) {
+      let avaiilable_colors = valid_ansi_colors.filter(color => !ansi_colors_used.includes(color));
+      if (avaiilable_colors.length == 0) {
+        //reset used colors
+        ansi_colors_used = [];
+        avaiilable_colors = valid_ansi_colors;
+      }
+      let chosen_color = avaiilable_colors[Math.floor(Math.random() * avaiilable_colors.length)];
+      ansi_colors_used.push(chosen_color);
       let embedField = {
         name: `${years} year${years == 1 ? "" : "s"}:`,
-        value: "\`\`\`ansi\n\[2;" + valid_ansi_colors[Math.floor(Math.random() * valid_ansi_colors.length)] + "m",
+        value: "\`\`\`ansi\n\[2;" + chosen_color + "m",
         inline: false
       };
       for (const person of people) {
@@ -112,7 +121,6 @@ async function testcakeOrJoinDays(guild) {
         //Give them the role
         try {
           await person.member.roles.add(snowflakes.roles.CakeDay, "Thrice-fold Name Day Celebration");
-          //Send them a DM
         } catch (e) {
           u.errorHandler(e, "cakeOrJoinDay role add error");
         }
@@ -177,27 +185,21 @@ async function testcakeOrJoinDays(guild) {
     //remove the role for people who's celebration is over
     let cakeDayRole = guild.roles.cache.get(snowflakes.roles.CakeDay);
     let membersWithRole = cakeDayRole.members;
+    //ignore the members from peopleByYearsInGuild, since we just added the role to them and they should keep it for now
+    let ignoreMemberIds = [];
+    for (const people of Object.values(peopleByYearsInGuild)) {
+      for (const person of people) {
+        ignoreMemberIds.push(person.member.id);
+      }
+    }
+    //remove the role from anyone not in ignoreMemberIds
     for (const [memberId, member] of membersWithRole) {
-      try {
-        let personData = await db.User.get(memberId);
-        if (!personData || personData.cakeDay == null || personData.cakeDay == "opt-out") {
-          //no cakeOrJoinDay set, remove role
-          await member.roles.remove(snowflakes.roles.CakeDay, "No thrice-fold Name Day set");
-          continue;
+      if (!ignoreMemberIds.includes(memberId)) {
+        try {
+          await member.roles.remove(snowflakes.roles.CakeDay, "Thrice-fold Name Day Celebration Over");
+        } catch (e) {
+          u.errorHandler(e, "cakeOrJoinDay role remove error");
         }
-        //use the join date if cakeOrJoinDay is invalid
-        if (personData.cakeDay.length < 3) {
-          personData.cakeDay = (await guild.members.fetch(memberId)).joinedAt;
-        }
-        let startOfThriceFoldNameDate = moment(personData.cakeDay).subtract(1, 'days');
-        let endOfThriceFoldNameDate = moment(personData.cakeDay).add(1, 'days');
-        if (!curDate.isBetween(startOfThriceFoldNameDate, endOfThriceFoldNameDate, 'day', '[]')) {
-          //not in their cakeOrJoinDay, remove role
-          await member.roles.remove(snowflakes.roles.CakeDay, "Thrice-fold Name Day period over");
-        }
-      } catch (e) {
-        u.errorHandler(e, "cakeOrJoinDay role removal error");
-        continue;
       }
     }
 
