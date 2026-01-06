@@ -224,7 +224,38 @@ const Module = new Augur.Module()
     console.log("registering commands, please wait");
     u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Registering Commands")] });
     // Push the commands to discord (GUILD specific)
-    await guild.commands.set(commands)
+    try {
+      await guild.commands.set(commands)
+    } catch (error) {
+      // check for strings like
+      //Ready Handler: /home/tavare/Mizuchi/modules/Module.Infrastructure.Register.js
+      //Trace: DiscordAPIError: Invalid Form Body
+      //13.description: Must be 100 or fewer in length.
+      console.error("There was an error registering commands: ", error);
+      if (error.toString().indexOf("DiscordAPIError") > -1) {
+        //get the part after "DiscordAPIError:, if its invalid form body, parse out the command number
+        let errorMessage = error.toString().split("DiscordAPIError:")[1].trim();
+        if (errorMessage.indexOf("Invalid Form Body") > -1) {
+          let fieldErrors = errorMessage.split("\n").slice(1); //skip the first line
+          fieldErrors.forEach(fe => {
+            let match = fe.match(/(\d+)\.(\w+): (.+)/); //matches patterns like "13.description: Must be 100 or fewer in length."
+            if (match) {
+              let commandIndex = parseInt(match[1]);
+              let fieldName = match[2];
+              let issue = match[3];
+              let command = commands[commandIndex];
+              console.error(`Command "${command.name}" has an issue with its "${fieldName}": ${issue}`);
+              u.errorLog.send({
+                embeds: [u.embed().setColor("RED").setTitle("Command Registration Error")
+                  .setDescription(`Command "**${command.name}**" has an issue with its "**${fieldName}**": ${issue}`)]
+              });
+            }
+          });
+        }
+
+      }
+
+    }
 
     console.log("command registration complete")
     u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Command Registration Complete!")] });

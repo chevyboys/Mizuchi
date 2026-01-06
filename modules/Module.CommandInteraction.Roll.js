@@ -391,8 +391,6 @@ const Module = new Augur.Module();
 //Run commands
 Module.addEvent("ready", async () => {
   //wait for 40 seconds to ensure the client is fully ready without using outside functions
-  await new Promise(resolve => setTimeout(resolve, 40000));
-  u.errorHandler("Registering Roll Command");
   const guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
   const commands = guild.commands;
   //register the command if it doesn't exist
@@ -423,24 +421,9 @@ Module.addEvent("ready", async () => {
         .setDescription(`Get a random ${key} entry`)
     )
   });
-  //register the command
-  const registeredCommand = await commands.create(command_for_registration.toJSON());
-  Module.client.interactions.commands.set(registeredCommand.id,
-    {
-      category: undefined,
-      commandId: registeredCommand.id,
-      description: registeredCommand.name,
-      enabled: true,
-      guildId: guild.id,
-      hidden: false,
-      info: registeredCommand.name,
-      name: registeredCommand.name,
-      permissions: true,
-      process: (interaction) => rollProcess(interaction),
-      syntax: "",
-      execute: (interaction) => rollProcess(interaction)
-    })
-  return registeredCommand;
+  //write the json to the registry folder for loading on next startup
+  fs = require("fs");
+  fs.writeFileSync(`./registry/roll.json`, JSON.stringify(command_for_registration.toJSON(), null, 2));
 });
 
 module.exports = Module;

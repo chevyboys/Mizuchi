@@ -1,0 +1,21 @@
+{
+  "name": "nameday",
+  "description": "Tell us when to celebrate your thrice-fold name day! it defaults to the day you joined the server.",
+  "options": [
+    {
+      "type": 3,
+      "name": "date",
+      "description": "the \"[month]/[day]\" of when your nameday is"
+    },
+    {
+      "type": 6,
+      "name": "target",
+      "description": "see when this person's name day is. Admins can use both date and target to set someone's nameday"
+    },
+    {
+      "type": 5,
+      "name": "opt-out",
+      "description": "set to true to opt-out of nameday announcements, set to false to opt-in"
+    }
+  ]
+}
