@@ -239,7 +239,12 @@ const Module = new Augur.Module()
     u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Registering Commands")] });
     // Push the commands to discord (GUILD specific)
     try {
-      await guild.commands.set(commands)
+      let registeredCommands = await guild.commands.set(commands);
+      u.errorLog.send({
+        embeds: [u.embed().setColor("BLUE").setDescription(
+          "Registered " + registeredCommands.size + " commands successfully!\n" + registeredCommands.map((c, id) => `${c.name} ${id}`).join(",\n")
+        )]
+      });
     } catch (error) {
       // check for strings like
       //Ready Handler: /home/tavare/Mizuchi/modules/Module.Infrastructure.Register.js
@@ -252,7 +257,7 @@ const Module = new Augur.Module()
         if (errorMessage.indexOf("Invalid Form Body") > -1) {
           let fieldErrors = errorMessage.split("\n").slice(1); //skip the first line
           fieldErrors.forEach(fe => {
-            let match = fe.match(/(\d+)\.(\w+): (.+)/); //matches patterns like "13.description: Must be 100 or fewer in length."
+            let match = fe.match(/(\d+)\.?(\w*): (.*)/); //matches patterns like "13.description: Must be 100 or fewer in length."
             if (match) {
               let commandIndex = parseInt(match[1]);
               let fieldName = match[2];
