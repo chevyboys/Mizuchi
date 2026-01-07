@@ -7,11 +7,6 @@ const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
 
 
 
-
-
-
-
-
 const Module = new Augur.Module()
   .addEvent("ready", async () => {
     let authors = await gs(snowflakes.sheets.authors);
