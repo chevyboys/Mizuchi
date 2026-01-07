@@ -70,7 +70,7 @@ async function testcakeOrJoinDays(guild) {
         //If they joined in the last three days, skip them
         if (curDate.diff(joinedAt, 'days') < 3) continue;
         //check if they have the role already, meaning we've already celebrated them
-        if (member.roles.cache.has(snowflakes.roles.CakeDay)) continue;
+        //if (member.roles.cache.has(snowflakes.roles.CakeDay)) continue;
         let yearsInGuild = curDate.diff(joinedAt, 'years');
         if (!peopleByYearsInGuild[yearsInGuild]) {
           peopleByYearsInGuild[yearsInGuild] = [];
