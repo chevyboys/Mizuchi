@@ -5,10 +5,10 @@ const { DiceRoll } = require('@dice-roller/rpg-dice-roller');
 const Discord = require("discord.js");
 const { get } = require("selenium-webdriver/http");
 let helpURL = "https://dice-roller.github.io/documentation/guide/notation/";
-const gs = require("../utils/Utils.GetGoogleSheetsAsJson.js");
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 
+const gs = require("../utils/Utils.GetGoogleSheetsAsJson.js");
 let rollData = {};
 //load roll data from google sheets
 (async () => {
@@ -387,43 +387,13 @@ let rollProcess = (interaction, hiddenResponse = false) => {
 
 
 const Module = new Augur.Module();
+Module
+  .addInteractionCommand({
+    name: "roll",
+    guildId: snowflakes.guilds.PrimaryServer,
+    process: async (interaction) => {
+      rollProcess(interaction);
+    }
 
-//Run commands
-Module.addEvent("ready", async () => {
-  //wait for 40 seconds to ensure the client is fully ready without using outside functions
-  const guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-  const commands = guild.commands;
-  //register the command if it doesn't exist
-  const command_for_registration = new SlashCommandBuilder()
-    .setName("roll")
-    .setDescription("Roll some dice")
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName("dice")
-        .setDescription("Roll some dice using dice notation")
-        .addStringOption(option =>
-          option
-            .setName("dice")
-            .setDescription("The dice to roll, or 'help' for more information")
-            .setRequired(true)
-        )
-    )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName("help")
-        .setDescription("Get help with dice notation")
-    )
-  //dynamically add subcommands based on rollData keys
-  Object.keys(rollData).forEach(key => {
-    command_for_registration.addSubcommand(subcommand =>
-      subcommand
-        .setName(key)
-        .setDescription(`Get a random ${key} entry`)
-    )
   });
-  //write the json to the registry folder for loading on next startup
-  fs = require("fs");
-  fs.writeFileSync(`./registry/roll.json`, JSON.stringify(command_for_registration.toJSON(), null, 2));
-});
-
 module.exports = Module;

@@ -4,6 +4,46 @@ const fs = require('fs');
 const { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandStringOption } = require('@discordjs/builders');
 const snowflakes = require('../config/snowflakes.json');
 const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
+let rollData = {};
+//load roll data from google sheets
+(async () => {
+  try {
+    //for a test, write the roll data to a json file
+    rollData = await gs(snowflakes.sheets.rolls, true);
+
+  } catch (error) {
+    u.errorHandler(error, "Error loading roll data from Google Sheets");
+  }
+})();
+
+
+const rollCommand = new SlashCommandBuilder()
+  .setName("roll")
+  .setDescription("Roll some dice")
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName("dice")
+      .setDescription("Roll some dice using dice notation")
+      .addStringOption(option =>
+        option
+          .setName("dice")
+          .setDescription("The dice to roll, or 'help' for more information")
+          .setRequired(true)
+      )
+  )
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName("help")
+      .setDescription("Get help with dice notation")
+  )
+//dynamically add subcommands based on rollData keys
+Object.keys(rollData).forEach(key => {
+  command_for_registration.addSubcommand(subcommand =>
+    subcommand
+      .setName(key)
+      .setDescription(`Get a random ${key} entry`)
+  )
+});
 
 
 const Module = new Augur.Module()
@@ -115,24 +155,7 @@ const Module = new Augur.Module()
             .setRequired(false)
             .setDescription("The number of days to give an xp boost")
         ),
-      //new SlashCommandBuilder()
-      //  .setName("roll")
-      //  .setDescription("rolls a dice of any reasonable size")
-      //  .addStringOption(option =>
-      //    option
-      //      .setName("dice")
-      //      .setDescription("The dice you want to roll. If you aren't sure how, instead enter 'help'")
-      //      .setRequired(true)
-      //  ),
-      //new SlashCommandBuilder()
-      //  .setName("gmroll")
-      //  .setDescription("rolls a dice of any reasonable size")
-      //  .addStringOption(option =>
-      //    option
-      //      .setName("dice")
-      //      .setDescription("The dice you want to roll in private. If you aren't sure how, instead enter 'help'")
-      //      .setRequired(true)
-      //  ),
+      rollCommand,
       new SlashCommandBuilder()
         .setName("pulse")
         .setDescription("Get's the bot's and discord's pulse")
