@@ -242,7 +242,7 @@ const Module = new Augur.Module()
       let registeredCommands = await guild.commands.set(commands);
       u.errorLog.send({
         embeds: [u.embed().setColor("BLUE").setDescription(
-          "Registered " + registeredCommands.size + " commands successfully!\n" + registeredCommands.map((c, id) => `\`\`\`${c.name} ${id}\`\`\``).join(",\n")
+          "Registered " + registeredCommands.size + " commands successfully!\n" + registeredCommands.map((c, id) => `\`\`\`${c.name} ${id}\`\`\``).join(" ")
         )]
       });
     } catch (error) {
