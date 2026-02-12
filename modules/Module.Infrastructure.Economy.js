@@ -238,7 +238,7 @@ Module.addInteractionCommand({
 }).addEvent("ready", async () => {
   // Initialize tournament points currency
   let currencies = await UtilsDatabase.Economy.getValidCurrencies();
-  tournamentPointsCurrency = currencies.find(c => c.id == "2");
+  tournamentPointsCurrency = currencies.find(c => c.id == "1");
   tournamentPointsCurrencyEmoji = tournamentPointsCurrency ? tournamentPointsCurrency.emoji : null;
   console.log(`Tournament Points Currency initialized: ${tournamentPointsCurrency ? tournamentPointsCurrency.name : 'Not found'}`);
 })
