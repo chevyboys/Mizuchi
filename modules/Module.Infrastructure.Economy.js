@@ -5,6 +5,9 @@ const Augur = require("augurbot"),
   snowflakes = require('../config/snowflakes.json'),
   UtilsDatabase = require("../utils/Utils.Database");
 
+//an object who's keys correspond to message IDs, and values are the user IDs of who caught the emoji in that message, to prevent multiple people from getting currency from reacting to the same message 
+let who_caught_the_emoji_cache = {};
+
 
 async function createLeaderboardMessageObject(guild, currency = null) {
   let botMember = guild.members.cache.get(guild.client.user.id);
@@ -76,6 +79,10 @@ async function createLeaderboardMessageObject(guild, currency = null) {
   return { embeds: [embed], components: [row] };
 
 }
+
+let currencies = await UtilsDatabase.Economy.getValidCurrencies();
+let tournamentPointsCurrency = currencies.find(c => c.id === "1");
+let tournamentPointsCurrencyEmoji = tournamentPointsCurrency ? tournamentPointsCurrency.emoji : null;
 
 function canGrantCurrency(member) {
   return member.permissions.has("ADMINISTRATOR")
@@ -229,6 +236,55 @@ Module.addInteractionCommand({
     replyObject.ephemeral = true;
     interaction.update(replyObject);
   }
-});
+})
+  // add a rare chance for the emoji of currency 'Tournament Points' to be added to messages in the server.
+  .addMessageHandler({
+    process: async (message) => {
+      if (message.author.bot) return;
+      let randomNum = Math.random();
+      let member = await message.guild.members.fetch(message.author.id).catch(() => null);
+      if (randomNum < 0.001 || (member && member.roles.cache.has(snowflakes.roles.BotMaster))) { // 0.1% chance
+
+        if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
+        message.react(tournamentPointsCurrency.emoji).catch(() => { });
+      }
+    }
+  })
+  //if someone reacts to a message with Tournament Points emoji, give a tournament point to that user if criteria is met
+  .addReactionHandler({
+    emoji: tournamentPointsCurrencyEmoji, process: async (reaction, user) => {
+      if (user.bot) return;
+      let message = reaction.message;
+      //try to remove the reaction (entirely, not just from one user), if the bot doesn't have permission to manage messages, just ignore the error and continue
+      try {
+        await reaction.message.reactions.resolve(reaction.emoji.name)?.remove();
+      } catch (error) {
+        //ignore error
+      }
+
+      //check if the message already has a recorded user who caught the emoji in the cache, and if it does, don't give currency to anyone
+      if (who_caught_the_emoji_cache[message.id]) return;
+      let guild = message.guild;
+      if (!guild) return;
+      let member = await guild.members.fetch(user.id).catch(() => null);
+      if (!member) return;
+      let bot_channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+      if (!bot_channel) return;
+
+      //give the user a tournament point
+      await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, 1, guild.client.user.id);
+      who_caught_the_emoji_cache[message.id] = user.id;
+
+      //send a message to the bot channel announcing who caught the emoji
+      let botMember = guild.members.cache.get(guild.client.user.id);
+      let botColor = botMember ? botMember.displayHexColor : null;
+      let embed = u.embed()
+        .setTitle(`Tournament Point Caught!`)
+        .setDescription(`<@${user.id}> has earned a ${tournamentPointsCurrency.emoji} ${tournamentPointsCurrency.name} in <#${message.channel.id}>!`)
+        .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+        .setColor(botColor);
+      bot_channel.send({ embeds: [embed] });
+    }
+  });
 
 module.exports = Module;
