@@ -7,34 +7,60 @@ const Augur = require("augurbot"),
 
 
 async function createLeaderboardMessageObject(guild, currency = null) {
+  let botMember = guild.members.cache.get(guild.client.user.id);
+  let botColor = botMember ? botMember.displayHexColor : null;
+
   let embed = u.embed()
     .setTitle(`Currency Leaderboard`)
     .setDescription(`Select a currency from the dropdown below to see the leaderboard for that currency.`);
 
+  if (botColor) embed.setColor(botColor);
+
   let currencies = await UtilsDatabase.Economy.getValidCurrencies();
-  let options = currencies.map(c => ({ label: c.name, value: c.id }));
+  let options = [];
+  for (let currency of currencies) {
+    let option = { label: currency.name, value: String(currency.id), emoji: currency.emoji || undefined };
+    if (currency.emoji) {
+      // Parse custom emoji format <:name:id> or <a:name:id>
+      const customEmojiMatch = currency.emoji.match(/^<(a)?:(\w+):(\d+)>$/);
+      if (customEmojiMatch) {
+        option.emoji = { name: customEmojiMatch[2], id: customEmojiMatch[3], animated: !!customEmojiMatch[1] };
+      } else {
+        option.emoji = currency.emoji; // Unicode emoji
+      }
+    }
+    options.push(option);
+  }
+
+  // If there are no currencies, return early without a select menu
+  if (options.length === 0) {
+    embed.setDescription(`No currencies have been created yet.`);
+    return { embeds: [embed], components: [] };
+  }
 
   let placeholder = "Select a currency";
   if (currency) {
-    let currencyObj = currencies.find(c => c.id === currency || c.name.toLowerCase() === currency.toLowerCase());
+    let currencyObj = currencies.find(c => c.id == currency || c.name.toLowerCase() == currency.toLowerCase());
     if (currencyObj) {
       placeholder = currencyObj.name;
+
+      let leaderboard = await UtilsDatabase.Economy.getLeaderboard(currencyObj.id);
+      if (leaderboard.length === 0) {
+        let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
+        embed.setDescription(`No one has any ${currencyDisplay} yet.`);
+      } else {
+        let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
+        let description = `Top ${leaderboard.length} users with the most ${currencyDisplay}`;
+        for (let entry of leaderboard) {
+          let guildMember = await guild.members.fetch(entry.userID).catch(() => null);
+          let username = guildMember ? guildMember.displayName : entry.username;
+          description += `\n**${username}**: ${entry.total}`;
+        }
+        embed.setDescription(description);
+      }
     } else {
       placeholder = "Currency not found";
-    }
-
-    let leaderboard = await UtilsDatabase.Economy.getLeaderboard(currencyObj.id);
-    if (leaderboard.length === 0) {
-      embed.setDescription(`No one has any ${currencyObj.name} yet.`);
-    } else {
-      let emoji = currencyObj.emoji || "";
-      let description = `Top ${leaderboard.length} users with the most ${emoji}:`;
-      for (let entry of leaderboard) {
-        let guildMember = await guild.members.fetch(entry.userID).catch(() => null);
-        let username = guildMember ? guildMember.displayName() : entry.username;
-        description += `\n**${username}**: ${entry.total}`;
-      }
-      embed.setDescription(description);
+      embed.setDescription(`Currency not found.`);
     }
   }
 
@@ -69,18 +95,25 @@ Module.addInteractionCommand({
     switch (subcommand) {
       case "balance": {
         let user = interaction.options.getUser("user") || interaction.user;
+        let member = await interaction.guild.members.fetch(user.id).catch(() => null);
+        let displayName = member ? member.displayName : user.username;
         let balanceTotalObject = await UtilsDatabase.User.getBalance(user.id);
 
-        if (balanceTotalObject === null) {
-          return interaction.reply({ content: `${user.tag} doesn't have any balances yet.`, ephemeral: true });
+        if (balanceTotalObject.currencies.length === 0) {
+          return interaction.reply({ content: `${displayName} doesn't have any balances yet.`, ephemeral: true });
         }
 
+        let botMember = interaction.guild.members.cache.get(interaction.client.user.id);
+        let embedColor = (member && member.displayHexColor) ? member.displayHexColor : (botMember ? botMember.displayHexColor : null);
+
         let embed = u.embed()
-          .setTitle(`${user.tag}'s Balance`)
+          .setTitle(`${displayName}'s Balance`)
           .setThumbnail(user.displayAvatarURL({ dynamic: true }));
 
+        if (embedColor) embed.setColor(embedColor);
         for (let currency of balanceTotalObject.currencies) {
-          embed.addFields({ name: currency.name, value: currency.amount.toString(), inline: true });
+          let currencyDisplay = currency.emoji ? `${currency.emoji} ${currency.name}` : currency.name;
+          embed.addFields({ name: currencyDisplay, value: "```" + currency.total.toString() + "```", inline: true });
         }
         interaction.reply({ embeds: [embed], ephemeral: true });
         break;
@@ -99,16 +132,17 @@ Module.addInteractionCommand({
         let currencyOption = interaction.options.getString("currency");
 
         let currencies = await UtilsDatabase.Economy.getValidCurrencies();
-        let currencyObj = currencies.find(c => c.id === currencyOption || c.name.toLowerCase() === currencyOption.toLowerCase());
+        let currencyObj = currencies.find(c => c.id == currencyOption || c.name.toLowerCase() === currencyOption.toLowerCase());
         if (!currencyObj) {
           return interaction.reply({ content: `Currency not found.`, ephemeral: true });
         }
 
         //check if the user has enough of the currency to give
         let giverBalance = await UtilsDatabase.User.getBalance(interaction.user.id);
-        let giverCurrency = giverBalance.currencies.find(c => c.id === currencyObj.id);
-        if (!giverCurrency || giverCurrency.amount < amount) {
-          return interaction.reply({ content: `You don't have enough ${currencyObj.name} to give.`, ephemeral: true });
+        let giverCurrency = giverBalance.currencies.find(c => c.id == currencyObj.id);
+        if (!giverCurrency || giverCurrency.total < amount) {
+          let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
+          return interaction.reply({ content: `You don't have enough ${currencyDisplay} to give.`, ephemeral: true });
         }
 
         //don't allow giving negative amounts
@@ -129,7 +163,20 @@ Module.addInteractionCommand({
         await UtilsDatabase.Economy.newTransaction(targetUser.id, giverCurrency.id, amount, interaction.user.id);
 
         //send a success message
-        interaction.reply({ content: `You gave ${amount} ${currencyObj.name} ${currencyObj.emoji || ""} to ${targetUser.tag}.`, ephemeral: false });
+        let targetMember = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
+        let targetDisplayName = targetMember ? targetMember.displayName : targetUser.username;
+        let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
+
+        let botMember = interaction.guild.members.cache.get(interaction.client.user.id);
+        let embedColor = botMember ? botMember.displayHexColor : null;
+
+        let embed = u.embed()
+          .setTitle(`Balance Transfer`)
+          .setThumbnail(targetMember.user.displayAvatarURL({ dynamic: true }))
+          .setDescription(`You gave \`${amount}\` ${currencyDisplay} to ${targetDisplayName}.`);
+        if (embedColor) embed.setColor(embedColor);
+
+        interaction.reply({ embeds: [embed], ephemeral: false });
         break;
       }
 
@@ -142,7 +189,7 @@ Module.addInteractionCommand({
         let currencyOption = interaction.options.getString("currency");
 
         let currencies = await UtilsDatabase.Economy.getValidCurrencies();
-        let currencyObj = currencies.find(c => c.id === currencyOption || c.name.toLowerCase() === currencyOption.toLowerCase());
+        let currencyObj = currencies.find(c => c.id == currencyOption || c.name.toLowerCase() === currencyOption.toLowerCase());
         if (!currencyObj) {
           return interaction.reply({ content: `Currency not found.`, ephemeral: true });
         }
@@ -157,7 +204,20 @@ Module.addInteractionCommand({
         //add the amount to the target user
         await UtilsDatabase.Economy.newTransaction(targetUser.id, currencyObj.id, amount, interaction.user.id);
         //send a success message
-        interaction.reply({ content: `You granted ${amount} ${currencyObj.name} ${currencyObj.emoji || ""} to ${targetUser.tag}.`, ephemeral: false });
+        let grantTargetMember = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
+        let grantTargetDisplayName = grantTargetMember ? grantTargetMember.displayName : targetUser.username;
+        let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
+
+        let botMember = interaction.guild.members.cache.get(interaction.client.user.id);
+        let embedColor = botMember ? botMember.displayHexColor : null;
+
+        let embed = u.embed()
+          .setTitle(`Balance Grant`)
+          .setThumbnail(grantTargetMember.user.displayAvatarURL({ dynamic: true }))
+          .setDescription(`You granted \`${amount}\` ${currencyDisplay} to ${grantTargetDisplayName}.`);
+        if (embedColor) embed.setColor(embedColor);
+
+        interaction.reply({ embeds: [embed], ephemeral: false });
         break;
       }
     }
@@ -170,85 +230,5 @@ Module.addInteractionCommand({
     interaction.update(replyObject);
   }
 });
-
-//To register this command, add this json to the registrar folder:
-/*
-{
-  "name": "economy",
-  "description": "Manage and view currency balances",
-  "options": [
-    {
-      "type": 1,
-      "name": "balance",
-      "description": "Check your currency balances or someone else's balance",
-      "options": [
-        {
-          "type": 6,
-          "name": "user",
-          "description": "The user to check the balance of",
-          "required": false
-        }
-      ]
-    },
-    {
-      "type": 1,
-      "name": "leaderboard",
-      "description": "Check the currency leaderboard for a specific currency",
-      "options": []
-    },
-    {
-      "type": 1,
-      "name": "give",
-      "description": "Give a specific amount of currency to a user",
-      "options": [
-        {
-          "type": 6,
-          "name": "user",
-          "description": "The user to give the currency to",
-          "required": true
-        },
-        {
-          "type": 4,
-          "name": "amount",
-          "description": "The amount of currency to give",
-          "required": true
-        },
-        {
-          "type": 3,
-          "name": "currency",
-          "description": "The currency to give (name or ID)",
-          "required": true
-        }
-      ]
-    },
-    {
-      "type": 1,
-      "name": "grant",
-      "description": "Grant a specific amount of currency to a user (admin only)",
-      "options": [
-        {
-          "type": 6,
-          "name": "user",
-          "description": "The user to grant the currency to",
-          "required": true
-        },
-        {
-          "type": 4,
-          "name": "amount",
-          "description": "The amount of currency to grant (can be negative to take away currency)",
-          "required": true
-        },
-        {
-          "type": 3,
-          "name": "currency",
-          "description": "The currency to grant (name or ID)",
-          "required": true
-        }
-      ]
-    }
-  ]
-}
-*/
-
 
 module.exports = Module;

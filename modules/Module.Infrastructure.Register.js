@@ -4,6 +4,7 @@ const fs = require('fs');
 const { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandStringOption } = require('@discordjs/builders');
 const snowflakes = require('../config/snowflakes.json');
 const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
+const UtilsDatabase = require("../utils/Utils.Database");
 
 
 
@@ -220,6 +221,93 @@ const Module = new Augur.Module()
     ].map(command => command.toJSON());
 
     u.errorLog.send({ embeds: [u.embed().setColor("BLUE").setDescription("Reading Commands, preparing to register")] });
+
+    // Build the economy command dynamically with currency choices from the database
+    let currencies = await UtilsDatabase.Economy.getValidCurrencies();
+    let currencyChoices = currencies.slice(0, 25).map(currency => ({
+      name: currency.name,
+      value: String(currency.id)
+    }));
+
+    const economyCommand = {
+      "name": "economy",
+      "description": "Manage and view currency balances",
+      "options": [
+        {
+          "type": 1,
+          "name": "balance",
+          "description": "Check your currency balances or someone else's balance",
+          "options": [
+            {
+              "type": 6,
+              "name": "user",
+              "description": "The user to check the balance of",
+              "required": false
+            }
+          ]
+        },
+        {
+          "type": 1,
+          "name": "leaderboard",
+          "description": "Check the currency leaderboard for a specific currency",
+          "options": []
+        },
+        {
+          "type": 1,
+          "name": "give",
+          "description": "Give a specific amount of currency to a user",
+          "options": [
+            {
+              "type": 6,
+              "name": "user",
+              "description": "The user to give the currency to",
+              "required": true
+            },
+            {
+              "type": 4,
+              "name": "amount",
+              "description": "The amount of currency to give",
+              "required": true
+            },
+            {
+              "type": 3,
+              "name": "currency",
+              "description": "The currency to give",
+              "required": true,
+              "choices": currencyChoices
+            }
+          ]
+        },
+        {
+          "type": 1,
+          "name": "grant",
+          "description": "Grant a specific amount of currency to a user (admin only)",
+          "options": [
+            {
+              "type": 6,
+              "name": "user",
+              "description": "The user to grant the currency to",
+              "required": true
+            },
+            {
+              "type": 4,
+              "name": "amount",
+              "description": "The amount of currency to grant (can be negative to take away currency)",
+              "required": true
+            },
+            {
+              "type": 3,
+              "name": "currency",
+              "description": "The currency to grant",
+              "required": true,
+              "choices": currencyChoices
+            }
+          ]
+        }
+      ]
+    };
+
+    commands.push(economyCommand);
 
     let registryFiles = fs.readdirSync('./registry/');
     let dummyFetch = (await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer)).commands.fetch();

@@ -3,7 +3,16 @@ const Discord = require("discord.js");
 const snowflakes = require("../config/snowflakes.json")
 const config = require("../config/config.json")
 let hasBeenInitialized = false;
-const con = mysql.createConnection(config.mySQL);
+// Ensure charset is set in the connection string
+let connectionString = config.mySQL;
+if (typeof connectionString === 'string') {
+  if (connectionString.includes('?')) {
+    connectionString += '&charset=utf8mb4';
+  } else {
+    connectionString += '?charset=utf8mb4';
+  }
+}
+const con = mysql.createConnection(connectionString);
 const Augur = require("augurbot");
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 const days = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"]
@@ -37,7 +46,7 @@ function assertIsCakeDay(string) {
 function parseUserID(user) {
   let userID = user.id || user.userID?.user?.id || user.userID?.userId || user.userID || user.Id || user;
   if (!assertIsSnowflake(userID)) {
-    reject("INVALD DISCORD ID at Database.parseUserID: " + JSON.stringify(user));
+    reject("INVALID DISCORD ID at Database.parseUserID: " + JSON.stringify(user));
   }
   else return userID;
 }
@@ -46,7 +55,7 @@ function parseUserID(user) {
 /**
  * An object representing the user object in the database
  * @member {Discord.Snowflake} userID the user or member id of the person to store
- * @member {string} username //a cleaned version of the username. Stored only for convinence, should not be referenced.
+ * @member {string} username //a cleaned version of the username. Stored only for convenience, should not be referenced.
  * @member {string} cakeDay // A cakeDay string e.g. Jan 01
  * @member {number} currentXP = 0] // Does nothing currently. Will be ignored
  * @member {number} totalXP = 0] // Does nothing currently. Will be ignored
@@ -64,7 +73,7 @@ class DBUserObject {
    * Creates a DBUserObject
    * @param {Object} constructionObj the basic construction object
    * @param {Discord.Snowflake} constructionObj.userID the user or member id of the person to store
-   * @param {string} constructionObj.username //a cleaned version of the username. Stored only for convinence, should not be referenced.
+   * @param {string} constructionObj.username //a cleaned version of the username. Stored only for convenience, should not be referenced.
    * @param {string} constructionObj.cakeDay // A cakeDay string e.g. Jan 01
    * @param {number} [constructionObj.currentXP = 0] // Does nothing currently. Will be ignored
    * @param {number} [constructionObj.totalXP = 0] // Does nothing currently. Will be ignored
@@ -111,7 +120,7 @@ let privateDataBaseActions = {
     UserObject: DBUserObject,
     /**
              * Update will find a user and update their records, or if the user doesn't exist, it will create them, then update them
-             * @param {Object} userDataBaseObject - An object containing member variables named each collum you wish to change for the user, with the values equalling the new value.
+             * @param {Object} userDataBaseObject - An object containing member variables named each column you wish to change for the user, with the values equalling the new value.
              * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userDataBaseObject.userID - The ID of the user to find, or an object that has an ID;
              * @param {string} [userDataBaseObject.cakeDay] - the MM-DD formatted day to celebrate this person
              * @param {number} [userDataBaseObject.currentXP] - the XP the user has in the current season
@@ -126,7 +135,7 @@ let privateDataBaseActions = {
       if (user.roles && Array.isArray(user.roles)) {
         user.roles = JSON.stringify(user.roles)
       }
-      //only set prooperties that we already have in the database as a colum. If not specified, leave it the same.
+      //only set properties that we already have in the database as a column. If not specified, leave it the same.
       let query = `UPDATE users SET `
       for (const property in user) {
         if (property != "userID" && typeof user[property] != "function" && !(user[property] instanceof Function) && Object.prototype.toString.call(user[property]) != '[object Function]') {
@@ -168,8 +177,8 @@ class DBUserCurrencyTotalObject {
 }
 
 class DBCurrencyTotalObject {
-  constructor(currencyID, name, emoji, total) {
-    this.currencyID = currencyID;
+  constructor(id, name, emoji, total) {
+    this.id = id;
     this.name = name;
     this.emoji = emoji;
     this.total = total;
@@ -184,9 +193,9 @@ class DBCurrencyObject {
   }
 }
 
-//Cache for valid currencies that are in the database to avoid quering the database every time we need to determine the list of valid currencies. This is an object with the currency ID as the key and the value being a DBCurrencyObject representing that currency. 
+//Cache for valid currencies that are in the database to avoid querying the database every time we need to determine the list of valid currencies. This is an object with the currency ID as the key and the value being a DBCurrencyObject representing that currency. 
 //This cache is updated on bot restart
-let ValidCurrenciesCache = {};
+let ValidCurrenciesCache = [];
 
 class LeaderboardEntryObject {
   constructor(userID, username, total, currencyName, currencyEmoji) {
@@ -251,11 +260,11 @@ let DataBaseActions = {
           if (!result || result == undefined) {
             reject("No transactions for userID " + userID + " were found. Trying SQL:" + query);
           } else {
-            let userCurrencyArray = {};
+            let userCurrencyArray = [];
             let resultArray = JSON.parse(JSON.stringify(result));
             resultArray.forEach(element => {
               //each element should be an entry object with the name of the currency, the id of the currency, and the total amount of that currency the user has
-              userCurrencyArray[element.id] = new DBCurrencyTotalObject(element.id, element.name, element.emoji, element.total);
+              userCurrencyArray.push(new DBCurrencyTotalObject(element.id, element.name, element.emoji, element.total));
             });
             if (error) reject(error);
             else fulfill(new DBUserCurrencyTotalObject(userID, userCurrencyArray));
@@ -354,21 +363,21 @@ let DataBaseActions = {
     /** gets all the valid currencies from the cache
       * @returns {DBCurrencyObject[]} the valid currency objects if they exist
     */
-    getValidCurrencies: () => {
-      if (Object.keys(ValidCurrenciesCache).length == 0) {
+    getValidCurrencies: async () => {
+      if (ValidCurrenciesCache.length == 0) {
         con.query("SELECT * FROM currency WHERE active;", function (error, result) {
           if (error) console.log("Error loading currency cache: " + error);
           else {
             let arrayOfCurrencies = JSON.parse(JSON.stringify(result));
             arrayOfCurrencies.forEach(currency => {
-              ValidCurrenciesCache[currency.id] = new DBCurrencyObject(currency.id, currency.name, currency.emoji);
+              ValidCurrenciesCache.push(new DBCurrencyObject(currency.id, currency.name, currency.emoji));
             });
             console.log("Currency cache loaded with " + arrayOfCurrencies.length + " currencies.")
           }
         });
 
       }
-      return Object.values(ValidCurrenciesCache);
+      return ValidCurrenciesCache;
     },
     /**
      * Creates a new transaction in the database
@@ -382,7 +391,7 @@ let DataBaseActions = {
       await userIdResolvable;
       let userID = await parseUserID(userIdResolvable);
       let initatedbyuserid = await parseUserID(initiatedByUserIdResolvable);
-      let currency = ValidCurrenciesCache[currencyId];
+      let currency = ValidCurrenciesCache.find(c => c.id == currencyId);
       if (!currency) throw new Error("Invalid currency ID");
       return new Promise((fulfill, reject) => {
         let sql = `INSERT INTO \`transaction\` (\`userID\`, \`currencyID\`, \`amount\`, \`initatedbyuserid\`) VALUES (${con.escape(userID)}, ${con.escape(currencyId)}, ${con.escape(amount)}, ${con.escape(initatedbyuserid)})`;
@@ -411,7 +420,7 @@ let DataBaseActions = {
     */
 
     getLeaderboard: async (currencyId, limit = 10) => {
-      let currency = ValidCurrenciesCache[currencyId];
+      let currency = ValidCurrenciesCache[ValidCurrenciesCache.findIndex(c => c.id == currencyId)];
       if (!currency) throw new Error("Invalid currency ID");
       return new Promise((fulfill, reject) => {
         let sql = `SELECT users.userID, users.username, SUM(transaction.amount) as total, currency.name as currencyName, currency.emoji as currencyEmoji FROM users LEFT JOIN transaction ON users.userID = transaction.userid LEFT JOIN currency ON transaction.currencyid = currency.id WHERE transaction.currencyid=${con.escape(currencyId)} AND currency.active GROUP BY users.userID ORDER BY total DESC LIMIT ${con.escape(limit)}`;
@@ -438,6 +447,8 @@ let DataBaseActions = {
       })
       hasBeenInitialized = true;
     }
+    // initialize the currency cache
+    DataBaseActions.Economy.getValidCurrencies();
     return con;
   }
 
