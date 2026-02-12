@@ -80,9 +80,8 @@ async function createLeaderboardMessageObject(guild, currency = null) {
 
 }
 
-let currencies = await UtilsDatabase.Economy.getValidCurrencies();
-let tournamentPointsCurrency = currencies.find(c => c.id === "1");
-let tournamentPointsCurrencyEmoji = tournamentPointsCurrency ? tournamentPointsCurrency.emoji : null;
+let tournamentPointsCurrency = null;
+let tournamentPointsCurrencyEmoji = null;
 
 function canGrantCurrency(member) {
   return member.permissions.has("ADMINISTRATOR")
@@ -236,6 +235,12 @@ Module.addInteractionCommand({
     replyObject.ephemeral = true;
     interaction.update(replyObject);
   }
+}).addEvent("ready", async () => {
+  // Initialize tournament points currency
+  let currencies = await UtilsDatabase.Economy.getValidCurrencies();
+  tournamentPointsCurrency = currencies.find(c => c.id == "1");
+  tournamentPointsCurrencyEmoji = tournamentPointsCurrency ? tournamentPointsCurrency.emoji : null;
+  console.log(`Tournament Points Currency initialized: ${tournamentPointsCurrency ? tournamentPointsCurrency.name : 'Not found'}`);
 })
   // add a rare chance for the emoji of currency 'Tournament Points' to be added to messages in the server.
   .addMessageHandler({
