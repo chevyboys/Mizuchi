@@ -238,7 +238,7 @@ Module.addInteractionCommand({
 }).addEvent("ready", async () => {
   // Initialize tournament points currency
   let currencies = await UtilsDatabase.Economy.getValidCurrencies();
-  tournamentPointsCurrency = currencies.find(c => c.id == "1");
+  tournamentPointsCurrency = currencies.find(c => c.id == "2");
   tournamentPointsCurrencyEmoji = tournamentPointsCurrency ? tournamentPointsCurrency.emoji : null;
   console.log(`Tournament Points Currency initialized: ${tournamentPointsCurrency ? tournamentPointsCurrency.name : 'Not found'}`);
 })
@@ -257,11 +257,11 @@ Module.addInteractionCommand({
   //if someone reacts to a message with Tournament Points emoji, give a tournament point to that user if criteria is met
   .addEvent("messageReactionAdd", async (reaction, user) => {
     //make sure the emoji is the tournament points emoji, and that the user isn't a bot
-    if (user.bot || reaction.emoji.name !== tournamentPointsCurrency.emoji) return;
+    if (user.bot || reaction.emoji.toString() != tournamentPointsCurrency.emoji) return;
     let message = reaction.message;
     //try to remove the reaction (entirely, not just from one user), if the bot doesn't have permission to manage messages, just ignore the error and continue
     try {
-      await reaction.message.reactions.resolve(reaction.emoji.name)?.remove();
+      await reaction.remove();
     } catch (error) {
       //ignore error
     }
