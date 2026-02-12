@@ -286,6 +286,9 @@ Module.addInteractionCommand({
     if (!member) return;
     let bot_channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
     if (!bot_channel) return;
+    //make sure the bot has reacted to the message with the tournament points emoji, if it hasn't, don't give currency to anyone (this is to prevent people from adding the emoji themselves and getting currency)
+    let botReactions = message.reactions.cache.filter(r => r.emoji.toString() === tournamentPointsCurrency.emoji && r.users.cache.has(guild.client.user.id));
+    if (botReactions.size === 0) return;
 
     //give the user a tournament point
     await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, 1, guild.client.user.id);
