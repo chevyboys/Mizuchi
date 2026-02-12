@@ -247,8 +247,7 @@ Module.addInteractionCommand({
     if (message.author.bot) return;
     let randomNum = Math.random();
     let member = await message.guild.members.fetch(message.author.id).catch(() => null);
-    if (randomNum < 0.001 || (member && member.roles.cache.has(snowflakes.roles.BotMaster))) { // 0.1% chance
-
+    if (randomNum < 0.001) { // 0.1% chance
       if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
       message.react(tournamentPointsCurrency.emoji).catch(() => { });
     }
@@ -256,8 +255,21 @@ Module.addInteractionCommand({
   )
   //if someone reacts to a message with Tournament Points emoji, give a tournament point to that user if criteria is met
   .addEvent("messageReactionAdd", async (reaction, user) => {
+    //if the user is a botmaster and the emoji is 👆, remove the reaction and replace it with the tournament points emoji
+    if (user.bot) return;
+    if (reaction.emoji.toString() === "👆" && canGrantCurrency(reaction.message.guild.members.cache.get(user.id))) {
+      try {
+        await reaction.remove();
+        await reaction.message.react(tournamentPointsCurrency.emoji);
+      } catch (error) {
+        //ignore error
+      }
+      return;
+    }
+
+
     //make sure the emoji is the tournament points emoji, and that the user isn't a bot
-    if (user.bot || reaction.emoji.toString() != tournamentPointsCurrency.emoji) return;
+    if (reaction.emoji.toString() != tournamentPointsCurrency.emoji) return;
     let message = reaction.message;
     //try to remove the reaction (entirely, not just from one user), if the bot doesn't have permission to manage messages, just ignore the error and continue
     try {
