@@ -255,40 +255,39 @@ Module.addInteractionCommand({
   }
   )
   //if someone reacts to a message with Tournament Points emoji, give a tournament point to that user if criteria is met
-  .addReactionHandler({
-    emoji: tournamentPointsCurrencyEmoji, process: async (reaction, user) => {
-      if (user.bot) return;
-      let message = reaction.message;
-      //try to remove the reaction (entirely, not just from one user), if the bot doesn't have permission to manage messages, just ignore the error and continue
-      try {
-        await reaction.message.reactions.resolve(reaction.emoji.name)?.remove();
-      } catch (error) {
-        //ignore error
-      }
-
-      //check if the message already has a recorded user who caught the emoji in the cache, and if it does, don't give currency to anyone
-      if (who_caught_the_emoji_cache[message.id]) return;
-      let guild = message.guild;
-      if (!guild) return;
-      let member = await guild.members.fetch(user.id).catch(() => null);
-      if (!member) return;
-      let bot_channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
-      if (!bot_channel) return;
-
-      //give the user a tournament point
-      await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, 1, guild.client.user.id);
-      who_caught_the_emoji_cache[message.id] = user.id;
-
-      //send a message to the bot channel announcing who caught the emoji
-      let botMember = guild.members.cache.get(guild.client.user.id);
-      let botColor = botMember ? botMember.displayHexColor : null;
-      let embed = u.embed()
-        .setTitle(`Tournament Point Caught!`)
-        .setDescription(`<@${user.id}> has earned a ${tournamentPointsCurrency.emoji} ${tournamentPointsCurrency.name} in <#${message.channel.id}>!`)
-        .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-        .setColor(botColor);
-      bot_channel.send({ embeds: [embed] });
+  .addEvent("messageReactionAdd", async (reaction, user) => {
+    //make sure the emoji is the tournament points emoji, and that the user isn't a bot
+    if (user.bot || reaction.emoji.name !== tournamentPointsCurrency.emoji) return;
+    let message = reaction.message;
+    //try to remove the reaction (entirely, not just from one user), if the bot doesn't have permission to manage messages, just ignore the error and continue
+    try {
+      await reaction.message.reactions.resolve(reaction.emoji.name)?.remove();
+    } catch (error) {
+      //ignore error
     }
+
+    //check if the message already has a recorded user who caught the emoji in the cache, and if it does, don't give currency to anyone
+    if (who_caught_the_emoji_cache[message.id]) return;
+    let guild = message.guild;
+    if (!guild) return;
+    let member = await guild.members.fetch(user.id).catch(() => null);
+    if (!member) return;
+    let bot_channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+    if (!bot_channel) return;
+
+    //give the user a tournament point
+    await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, 1, guild.client.user.id);
+    who_caught_the_emoji_cache[message.id] = user.id;
+
+    //send a message to the bot channel announcing who caught the emoji
+    let botMember = guild.members.cache.get(guild.client.user.id);
+    let botColor = botMember ? botMember.displayHexColor : null;
+    let embed = u.embed()
+      .setTitle(`Tournament Point Caught!`)
+      .setDescription(`<@${user.id}> has earned a ${tournamentPointsCurrency.emoji} ${tournamentPointsCurrency.name} in <#${message.channel.id}>!`)
+      .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+      .setColor(botColor);
+    bot_channel.send({ embeds: [embed] });
   });
 
 module.exports = Module;
