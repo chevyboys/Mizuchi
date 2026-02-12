@@ -243,18 +243,17 @@ Module.addInteractionCommand({
   console.log(`Tournament Points Currency initialized: ${tournamentPointsCurrency ? tournamentPointsCurrency.name : 'Not found'}`);
 })
   // add a rare chance for the emoji of currency 'Tournament Points' to be added to messages in the server.
-  .addMessageHandler({
-    process: async (message) => {
-      if (message.author.bot) return;
-      let randomNum = Math.random();
-      let member = await message.guild.members.fetch(message.author.id).catch(() => null);
-      if (randomNum < 0.001 || (member && member.roles.cache.has(snowflakes.roles.BotMaster))) { // 0.1% chance
+  .addEvent("messageCreate", async (message) => {
+    if (message.author.bot) return;
+    let randomNum = Math.random();
+    let member = await message.guild.members.fetch(message.author.id).catch(() => null);
+    if (randomNum < 0.001 || (member && member.roles.cache.has(snowflakes.roles.BotMaster))) { // 0.1% chance
 
-        if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
-        message.react(tournamentPointsCurrency.emoji).catch(() => { });
-      }
+      if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
+      message.react(tournamentPointsCurrency.emoji).catch(() => { });
     }
-  })
+  }
+  )
   //if someone reacts to a message with Tournament Points emoji, give a tournament point to that user if criteria is met
   .addReactionHandler({
     emoji: tournamentPointsCurrencyEmoji, process: async (reaction, user) => {
