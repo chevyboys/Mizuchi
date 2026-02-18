@@ -385,16 +385,17 @@ let DataBaseActions = {
      * @param {number} currencyId 
      * @param {number} amount 
      * @param {Discord.User|Discord.GuildMember|Discord.Snowflake|DBUserObject.userID|DBUserObject} initiatedByUserIdResolvable 
+     * @param {string} reason the reason for the transaction, could also be considered the category. E.g. "gift", "purchase", "prize", etc. Should be a simple string that can be used to easily identify the transaction in the future, and group it with similar transactions.
      * @returns 
      */
-    newTransaction: async (userIdResolvable, currencyId, amount, initiatedByUserIdResolvable) => {
+    newTransaction: async (userIdResolvable, currencyId, amount, initiatedByUserIdResolvable, reason) => {
       await userIdResolvable;
       let userID = await parseUserID(userIdResolvable);
       let initatedbyuserid = await parseUserID(initiatedByUserIdResolvable);
       let currency = ValidCurrenciesCache.find(c => c.id == currencyId);
       if (!currency) throw new Error("Invalid currency ID");
       return new Promise((fulfill, reject) => {
-        let sql = `INSERT INTO \`transaction\` (\`userID\`, \`currencyID\`, \`amount\`, \`initatedbyuserid\`) VALUES (${con.escape(userID)}, ${con.escape(currencyId)}, ${con.escape(amount)}, ${con.escape(initatedbyuserid)})`;
+        let sql = `INSERT INTO \`transaction\` (\`userID\`, \`currencyID\`, \`amount\`, \`initatedbyuserid\`, \`reason\`) VALUES (${con.escape(userID)}, ${con.escape(currencyId)}, ${con.escape(amount)}, ${con.escape(initatedbyuserid)}, ${con.escape(reason)})`;
         con.query(sql, function (error, result) {
           if (error) reject(error);
           else fulfill(result);

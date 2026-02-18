@@ -165,8 +165,8 @@ Module.addInteractionCommand({
         }
 
         //subtract the amount from the giver and add it to the target user
-        await UtilsDatabase.Economy.newTransaction(interaction.user.id, giverCurrency.id, -amount, interaction.user.id);
-        await UtilsDatabase.Economy.newTransaction(targetUser.id, giverCurrency.id, amount, interaction.user.id);
+        await UtilsDatabase.Economy.newTransaction(interaction.user.id, giverCurrency.id, -amount, interaction.user.id, `give`);
+        await UtilsDatabase.Economy.newTransaction(targetUser.id, giverCurrency.id, amount, interaction.user.id, `give`);
 
         //send a success message
         let targetMember = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
@@ -208,7 +208,7 @@ Module.addInteractionCommand({
         //we do allow granting negative amounts, as this can be used to take currency away from users
 
         //add the amount to the target user
-        await UtilsDatabase.Economy.newTransaction(targetUser.id, currencyObj.id, amount, interaction.user.id);
+        await UtilsDatabase.Economy.newTransaction(targetUser.id, currencyObj.id, amount, interaction.user.id, `grant`);
         //send a success message
         let grantTargetMember = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
         let grantTargetDisplayName = grantTargetMember ? grantTargetMember.displayName : targetUser.username;
@@ -307,7 +307,7 @@ Module.addInteractionCommand({
     }
 
     //give the user a tournament point
-    await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, 1, guild.client.user.id);
+    await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, 1, guild.client.user.id, `reaction caught`);
     who_caught_the_emoji_cache[message.id] = user.id;
 
     //send a message to the bot channel announcing who caught the emoji
