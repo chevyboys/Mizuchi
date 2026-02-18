@@ -255,9 +255,9 @@ Module.addInteractionCommand({
   )
   //if someone reacts to a message with Tournament Points emoji, give a tournament point to that user if criteria is met
   .addEvent("messageReactionAdd", async (reaction, user) => {
-    //if the user is a botmaster and the emoji is 👆, remove the reaction and replace it with the tournament points emoji
+    //if the user is a botmaster and the emoji is 👈, remove the reaction and replace it with the tournament points emoji
     if (user.bot) return;
-    if (reaction.emoji.toString() === "👆" && canGrantCurrency(reaction.message.guild.members.cache.get(user.id))) {
+    if (reaction.emoji.toString() === "👈" && canGrantCurrency(reaction.message.guild.members.cache.get(user.id))) {
       try {
         await reaction.remove();
         await reaction.message.react(tournamentPointsCurrency.emoji);
@@ -288,7 +288,23 @@ Module.addInteractionCommand({
     if (!bot_channel) return;
     //make sure the bot has reacted to the message with the tournament points emoji, if it hasn't, don't give currency to anyone (this is to prevent people from adding the emoji themselves and getting currency)
     let botReactions = message.reactions.cache.filter(r => r.emoji.toString() === tournamentPointsCurrency.emoji && r.users.cache.has(guild.client.user.id));
-    if (botReactions.size === 0) return;
+    if (botReactions.size === 0) {
+      let modLogs = guild.channels.cache.get(snowflakes.channels.modRequests); // #mod-logs
+      if (modLogs) {
+        let embed = u.embed()
+          .setTitle(`Suspicious Reaction Detected`)
+          .setDescription(`A reaction with the ${tournamentPointsCurrency.emoji} emoji was added to a message that didn't have a bot reaction, by <@${user.id}> in <#${message.channel.id}>. This may indicate an attempt to exploit the tournament points system.`)
+          .addFields(
+            { name: "Message Content", value: message.content || "No content", inline: false },
+            { name: "Message Author", value: `<@${message.author.id}>`, inline: true },
+            { name: "Reaction User", value: `<@${user.id}>`, inline: true },
+            { name: "Message Link", value: `[Jump to Message](https://discord.com/channels/${guild.id}/${message.channel.id}/${message.id})`, inline: false }
+          )
+          .setTimestamp();
+        modLogs.send({ embeds: [embed] });
+      }
+      return;
+    }
 
     //give the user a tournament point
     await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, 1, guild.client.user.id);
