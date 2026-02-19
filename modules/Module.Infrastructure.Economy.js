@@ -149,11 +149,13 @@ function canGrantCurrency(member) {
     || member.roles.cache.has(snowflakes.roles.BotMaster);
 }
 
-function weighted_random(items, weights) {
+function weighted_random(options) {
   var i;
 
-  for (i = 1; i < weights.length; i++)
-    weights[i] += weights[i - 1];
+  var weights = [options[0].weight];
+
+  for (i = 1; i < options.length; i++)
+    weights[i] = options[i].weight + weights[i - 1];
 
   var random = Math.random() * weights[weights.length - 1];
 
@@ -161,7 +163,7 @@ function weighted_random(items, weights) {
     if (weights[i] > random)
       break;
 
-  return items[i];
+  return options[i].item;
 }
 
 
@@ -174,9 +176,6 @@ const currencyEmoji = [
 ]
 
 const odds_of_catching_currency = 1 / 5000; // 0.05% chance for a currency to appear in a message
-
-const currencyEmoji_precomputedWeights = currencyEmoji.map(c => 50 / c.value);
-const currencyEmoji_precomputedmap = currencyEmoji.map(c => c.emoji);
 
 Module.addInteractionCommand({
   name: "economy",
@@ -388,7 +387,7 @@ Module.addInteractionCommand({
       if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
 
       //get weighted random emoji from the currencyEmoji array, where the weights are determined by the value of each emoji (higher value emojis are more rare)
-      let emoji = weighted_random(currencyEmoji_precomputedmap, currencyEmoji_precomputedWeights);
+      let emoji = weighted_random(currencyEmoji.map(c => ({ item: c.emoji, weight: 1 / c.value * 50 })));
       message.react(emoji).catch(() => { });
     }
   }
@@ -400,7 +399,7 @@ Module.addInteractionCommand({
     if (reaction.emoji.toString() === "👈" && canGrantCurrency(reaction.message.guild.members.cache.get(user.id))) {
       try {
         await reaction.remove();
-        await reaction.message.react(weighted_random(currencyEmoji_precomputedmap, currencyEmoji_precomputedWeights));
+        await reaction.message.react(weighted_random(currencyEmoji.map(c => ({ item: c.emoji, weight: 1 / c.value * 50 }))));
       } catch (error) {
         //ignore error
       }
