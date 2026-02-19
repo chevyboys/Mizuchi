@@ -1,5 +1,7 @@
 const db = require("./Utils.Database");
 const econDB = db.Economy;
+const snowflakes = require('../config/snowflakes.json');
+const u = require("./Utils.Generic");
 /**
  * A class representing an item that can be purchased in the shop.
  * @member {string} name the name of the item
@@ -25,6 +27,10 @@ class Item {
     this.description = description;
     this.price = price;
     this.currencyId = currencyId;
+    const validCurrencies = econDB.getValidCurrencies().then(currencies => {
+      let currency = currencies.find(c => c.id === currencyId);
+      this.currency = currency;
+    });
     /* A callback function that will be called when a user purchases the item. 
     It should take the following parameters: (interaction)
      and return a promise that resolves when the purchase has been processed.*/
@@ -51,7 +57,19 @@ class Item {
           interaction.user.id,
           `Purchase of ${this.name}`
         );
+
+        const currencyName = this.currency ? this.currency.name : "Unknown Currency";
+        const currencyEmoji = this.currency ? this.currency.emoji : "";
+
+        //send a message in bot-logs channel about the purchase
+        let logChannel = await interaction.client.channels.fetch(snowflakes.channels.botSpam);
+        let embed = u.embed().setTitle(`${interaction.user.tag} purchased ${this.name}`)
+          .setDescription(`**Item:** ${this.name}\n**Price:** ${this.price} ${currencyEmoji} ${currencyName}\n**User:** <@${interaction.user.id}>\n They have ${userBalance.total - this.price} ${currencyEmoji} ${currencyName} remaining after this purchase.`)
+          .setTimestamp();
+        await logChannel.send({ embeds: [embed] });
+        return Promise.resolve(result);
       }
+      return Promise.resolve(result);
     } else {
       return Promise.resolve();
     }
