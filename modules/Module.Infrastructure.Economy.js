@@ -409,7 +409,7 @@ Module.addInteractionCommand({
 
 
     //make sure the emoji is the tournament points emoji, and that the user isn't a bot
-    if (currencyEmoji.some(c => c.emoji != reaction.emoji.toString())) {
+    if (!currencyEmoji.some(c => c.emoji == reaction.emoji.toString())) {
       return;
     }
     //find the corresponding value for the emoji that was reacted with
