@@ -175,7 +175,7 @@ const currencyEmoji = [
 
 const odds_of_catching_currency = 1 / 5000; // 0.05% chance for a currency to appear in a message
 
-const currencyEmoji_precomputedWeights = currencyEmoji.map(c => c.value);
+const currencyEmoji_precomputedWeights = currencyEmoji.map(c => 50 / c.value);
 const currencyEmoji_precomputedmap = currencyEmoji.map(c => c.emoji);
 
 Module.addInteractionCommand({
