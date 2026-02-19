@@ -102,7 +102,7 @@ async function createShopMessageObject(guild, selectedItemId = null) {
 
   let options = Object.keys(shopItemsCache).map(itemId => {
     let item = shopItemsCache[itemId];
-    return { label: `${item.emoji || ""} ${item.price}: ${item.name}`, value: itemId };
+    return { label: `${item.emoji || ""} ${item.price}: ${item.name}`, value: itemId, emoji: item.currency ? item.currency.emoji : undefined };
   });
 
   // If there are no items in the shop, return early without a select menu
