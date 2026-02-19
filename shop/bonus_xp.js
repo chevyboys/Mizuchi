@@ -20,7 +20,7 @@ module.exports = new ShopItem(
       member: member.id,
       removeRoleTime: d.valueOf()
     }
-    fs.writeFileSync(`../data/helpers/${member.id}.json`, JSON.stringify(data, null, 4));
+    fs.writeFileSync(`./data/helpers/${member.id}.json`, JSON.stringify(data, null, 4));
     u.addRoles(member, [snowflakes.roles.Helper]);
     await interaction.reply({ content: `You have given yourself the bonus XP <@&${snowflakes.roles.Helper}> role for ${days} day(s)`, ephemeral: true });
     return Promise.resolve({ success: true });
