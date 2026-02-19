@@ -162,6 +162,11 @@ let privateDataBaseActions = {
   }
 }
 
+/**
+ * An object representing the total amount of a specific currency a user has in the database
+ * @member {Discord.Snowflake} userID the user or member id of the person to store
+ * @member {DBCurrencyTotalObject[]} currencies an array of objects representing the total amount of each currency the user has in the database
+ */
 class DBUserCurrencyTotalObject {
   userID = "";
   currencies = [];

@@ -1,7 +1,6 @@
 const Discord = require("discord.js"),
   config = require("../config/config.json"),
   snowflakes = require("../config/snowflakes.json"),
-
   errorLog = new Discord.WebhookClient(config.Webhooks.error);
 const { distance, closest } = require('fastest-levenshtein');
 const rolesClient = require("./Utils.RolesLogin");
@@ -274,7 +273,7 @@ const utils = {
     embed.setDescription(stack);
     errorLog.send({ embeds: [embed] });
   },
-  errorLog,
+  errorLog: errorLog,
   /**
    * Fetch partial Discord objects
    * @param {*} obj The Discord object to fetch.

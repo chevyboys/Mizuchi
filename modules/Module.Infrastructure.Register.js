@@ -303,6 +303,13 @@ const Module = new Augur.Module()
               "choices": currencyChoices
             }
           ]
+        },
+        //the shop command
+        {
+          "type": 1,
+          "name": "shop",
+          "description": "View the shop and purchase items",
+          "options": []
         }
       ]
     };

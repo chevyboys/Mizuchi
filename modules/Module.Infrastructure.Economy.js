@@ -3,11 +3,13 @@ const Augur = require("augurbot"),
   Module = new Augur.Module(),
   u = require("../utils/Utils.Generic"),
   snowflakes = require('../config/snowflakes.json'),
+  fs = require("fs"),
+  ShopItem = require("../utils/Class.ShopItem"),
   UtilsDatabase = require("../utils/Utils.Database");
 
 //an object who's keys correspond to message IDs, and values are the user IDs of who caught the emoji in that message, to prevent multiple people from getting currency from reacting to the same message 
 let who_caught_the_emoji_cache = {};
-
+const shopItemsCache = {};
 
 async function createLeaderboardMessageObject(guild, currency = null) {
   let botMember = guild.members.cache.get(guild.client.user.id);
@@ -80,8 +82,64 @@ async function createLeaderboardMessageObject(guild, currency = null) {
 
 }
 
+async function createShopMessageObject(guild, selectedItemId = null) {
+  let botMember = guild.members.cache.get(guild.client.user.id);
+  let botColor = botMember ? botMember.displayHexColor : null;
+
+  let embed = u.embed()
+    .setTitle(`Shop`)
+    .setDescription(`Browse and purchase items from the shop.`);
+
+  //If there is a selected item, show the details of that item, and make sure the purchase button is enabled
+  if (selectedItemId && shopItemsCache[selectedItemId]) {
+    let selectedItem = shopItemsCache[selectedItemId];
+    if (selectedItem) {
+      embed.setDescription(`**${selectedItem.name}**\n${selectedItem.description}\nPrice: ${selectedItem.price}`);
+    }
+  }
+
+  if (botColor) embed.setColor(botColor);
+
+  let options = Object.keys(shopItemsCache).map(itemId => {
+    let item = shopItemsCache[itemId];
+    return { label: `${item.emoji || ""} ${item.price}: ${item.name}`, value: itemId };
+  });
+
+  // If there are no items in the shop, return early without a select menu
+  if (options.length === 0) {
+    embed.setDescription(`Nothing is currently available in the shop. Check back later!`);
+    return { embeds: [embed], components: [] };
+  }
+
+  let placeholder = "Select an item";
+  if (selectedItemId && shopItemsCache[selectedItemId]) {
+    let selectedItem = shopItemsCache[selectedItemId];
+    placeholder = `${selectedItem.emoji || ""} ${selectedItem.price}: ${selectedItem.name}`;
+  }
+
+  let row = new Discord.MessageActionRow().addComponents(
+    new Discord.MessageSelectMenu()
+      .setCustomId("shop_item_select")
+      .setPlaceholder(placeholder)
+      .addOptions(options)
+  );
+
+  let buttons = new Discord.MessageActionRow().addComponents(
+    new Discord.MessageButton()
+      .setCustomId("shop_purchase_button")
+      .setLabel("Purchase")
+      .setStyle("PRIMARY")
+      .setDisabled(!selectedItemId) // Disable the purchase button if no item is selected
+  );
+
+  //create a dropdown of all the items in the shop, and when an item is selected, show the details for that item, and a button to purchase it
+
+  return { embeds: [embed], components: [row, buttons] };
+}
+
+
+
 let tournamentPointsCurrency = null;
-let tournamentPointsCurrencyEmoji = null;
 
 function canGrantCurrency(member) {
   return member.permissions.has("ADMINISTRATOR")
@@ -90,6 +148,35 @@ function canGrantCurrency(member) {
     || member.roles.cache.has(snowflakes.roles.BotAssistant)
     || member.roles.cache.has(snowflakes.roles.BotMaster);
 }
+
+function weighted_random(items, weights) {
+  var i;
+
+  for (i = 1; i < weights.length; i++)
+    weights[i] += weights[i - 1];
+
+  var random = Math.random() * weights[weights.length - 1];
+
+  for (i = 0; i < weights.length; i++)
+    if (weights[i] > random)
+      break;
+
+  return items[i];
+}
+
+
+const currencyEmoji = [
+  { value: 1, emoji: "<:Quartz_E:909751241658208276>", color: "#E0E0E0" },
+  { value: 5, emoji: "<:Carnelian_E:909751066986414160>", color: "#FF5733" },
+  { value: 10, emoji: "<:Sunstone_E:909750969934417950>", color: "#ffae00" },
+  { value: 25, emoji: "<:Citrine_E:909748066582663180>", color: "#f7f2a6" },
+  { value: 50, emoji: "<:Emerald_E:909750429737435206>", color: "#33FF57" },
+]
+
+const odds_of_catching_currency = 1 / 5000; // 0.05% chance for a currency to appear in a message
+
+const currencyEmoji_precomputedWeights = currencyEmoji.map(c => c.value);
+const currencyEmoji_precomputedmap = currencyEmoji.map(c => c.emoji);
 
 Module.addInteractionCommand({
   name: "economy",
@@ -226,6 +313,13 @@ Module.addInteractionCommand({
         interaction.reply({ embeds: [embed], ephemeral: false });
         break;
       }
+
+      case "shop": {
+        let replyObject = await createShopMessageObject(interaction.guild);
+        replyObject.ephemeral = true;
+        interaction.reply(replyObject);
+        break;
+      }
     }
   }
 }).addInteractionHandler({
@@ -235,21 +329,67 @@ Module.addInteractionCommand({
     replyObject.ephemeral = true;
     interaction.update(replyObject);
   }
-}).addEvent("ready", async () => {
-  // Initialize tournament points currency
-  let currencies = await UtilsDatabase.Economy.getValidCurrencies();
-  tournamentPointsCurrency = currencies.find(c => c.id == "1");
-  tournamentPointsCurrencyEmoji = tournamentPointsCurrency ? tournamentPointsCurrency.emoji : null;
-  console.log(`Tournament Points Currency initialized: ${tournamentPointsCurrency ? tournamentPointsCurrency.name : 'Not found'}`);
+}).addInteractionHandler({
+  customId: "shop_item_select", process: async (interaction) => {
+    let selectedItemId = interaction.values[0];
+    let replyObject = await createShopMessageObject(interaction.guild, selectedItemId);
+    replyObject.ephemeral = true;
+    interaction.update(replyObject);
+    //
+  }
+}).addInteractionHandler({
+  customId: "shop_purchase_button", process: async (interaction) => {
+    //handle purchasing an item from the shop
+    let selectedItemName = interaction.message.components[0].components[0].placeholder;
+    //find the option that matches the selected item name, and get the corresponding item from the shopItemsCache
+    let shopItem = null;
+    interaction.message.components[0].components[0].options.forEach(option => {
+      if (option.label === selectedItemName) {
+        shopItem = shopItemsCache[option.value];
+      }
+    });
+
+    if (!shopItem) {
+      return interaction.reply({ content: `Selected item not found.`, ephemeral: true });
+    }
+    await shopItem.execute(interaction);
+  }
 })
+  .addEvent("ready", async () => {
+    // Initialize tournament points currency
+    let currencies = await UtilsDatabase.Economy.getValidCurrencies();
+    tournamentPointsCurrency = currencies.find(c => c.id == "1");
+    tournamentPointsCurrencyEmoji = tournamentPointsCurrency ? tournamentPointsCurrency.emoji : null;
+    console.log(`Tournament Points Currency initialized: ${tournamentPointsCurrency ? tournamentPointsCurrency.name : 'Not found'}`);
+
+
+    let shopItems = fs.readdirSync("./shop").filter(file => file.endsWith(".js"));
+    for (let itemFile of shopItems) {
+      let item = require(`../shop/${itemFile}`);
+      //make sure that we have an item of the ShopItem class, and that it has the required properties before adding it to the shop
+      if (!(item instanceof ShopItem) || !item.name || !item.description || !item.price || !item.currencyId) {
+        u.errorLog.send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Invalid or missing properties.`)] })
+        continue;
+      }
+      let itemId = itemFile.replace(".js", "");
+      if (shopItemsCache[itemId]) {
+        u.errorLog.send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Duplicate item ID ${itemId} from ${shopItemsCache[itemId].name}.`)] });
+        continue;
+      }
+      shopItemsCache[itemId] = item;
+    }
+
+  })
   // add a rare chance for the emoji of currency 'Tournament Points' to be added to messages in the server.
   .addEvent("messageCreate", async (message) => {
     if (message.author.bot) return;
     let randomNum = Math.random();
-    let member = await message.guild.members.fetch(message.author.id).catch(() => null);
-    if (randomNum < 0.001) { // 0.1% chance
+    if (randomNum < odds_of_catching_currency) { // 0.05% chance
       if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
-      message.react(tournamentPointsCurrency.emoji).catch(() => { });
+
+      //get weighted random emoji from the currencyEmoji array, where the weights are determined by the value of each emoji (higher value emojis are more rare)
+      let emoji = weighted_random(currencyEmoji_precomputedmap, currencyEmoji_precomputedWeights);
+      message.react(emoji).catch(() => { });
     }
   }
   )
@@ -260,7 +400,7 @@ Module.addInteractionCommand({
     if (reaction.emoji.toString() === "👈" && canGrantCurrency(reaction.message.guild.members.cache.get(user.id))) {
       try {
         await reaction.remove();
-        await reaction.message.react(tournamentPointsCurrency.emoji);
+        await reaction.message.react(weighted_random(currencyEmoji_precomputedmap, currencyEmoji_precomputedWeights));
       } catch (error) {
         //ignore error
       }
@@ -269,7 +409,14 @@ Module.addInteractionCommand({
 
 
     //make sure the emoji is the tournament points emoji, and that the user isn't a bot
-    if (reaction.emoji.toString() != tournamentPointsCurrency.emoji) return;
+    if (currencyEmoji.some(c => c.emoji != reaction.emoji.toString())) {
+      return;
+    }
+    //find the corresponding value for the emoji that was reacted with
+    let currencyObj = currencyEmoji.find(c => c.emoji === reaction.emoji.toString());
+    if (!currencyObj) return;
+
+
     let message = reaction.message;
     //try to remove the reaction (entirely, not just from one user), if the bot doesn't have permission to manage messages, just ignore the error and continue
     try {
@@ -280,6 +427,7 @@ Module.addInteractionCommand({
 
     //check if the message already has a recorded user who caught the emoji in the cache, and if it does, don't give currency to anyone
     if (who_caught_the_emoji_cache[message.id]) return;
+    who_caught_the_emoji_cache[message.id] = user.id;
     let guild = message.guild;
     if (!guild) return;
     let member = await guild.members.fetch(user.id).catch(() => null);
@@ -287,13 +435,13 @@ Module.addInteractionCommand({
     let bot_channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
     if (!bot_channel) return;
     //make sure the bot has reacted to the message with the tournament points emoji, if it hasn't, don't give currency to anyone (this is to prevent people from adding the emoji themselves and getting currency)
-    let botReactions = message.reactions.cache.filter(r => r.emoji.toString() === tournamentPointsCurrency.emoji && r.users.cache.has(guild.client.user.id));
+    let botReactions = message.reactions.cache.filter(r => r.emoji.toString() == currencyObj.emoji && r.users.cache.has(guild.client.user.id));
     if (botReactions.size === 0) {
       let modLogs = guild.channels.cache.get(snowflakes.channels.modRequests); // #mod-logs
       if (modLogs) {
         let embed = u.embed()
           .setTitle(`Suspicious Reaction Detected`)
-          .setDescription(`A reaction with the ${tournamentPointsCurrency.emoji} emoji was added to a message that didn't have a bot reaction, by <@${user.id}> in <#${message.channel.id}>. This may indicate an attempt to exploit the tournament points system.`)
+          .setDescription(`A reaction with the ${reaction.emoji.toString()} emoji was added to a message that didn't have a bot reaction, by <@${user.id}> in <#${message.channel.id}>. This may indicate an attempt to exploit the tournament points system.`)
           .addFields(
             { name: "Message Content", value: message.content || "No content", inline: false },
             { name: "Message Author", value: `<@${message.author.id}>`, inline: true },
@@ -307,17 +455,15 @@ Module.addInteractionCommand({
     }
 
     //give the user a tournament point
-    await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, 1, guild.client.user.id, `reaction caught`);
-    who_caught_the_emoji_cache[message.id] = user.id;
+    await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, currencyObj.value, guild.client.user.id, `reaction caught`);
 
     //send a message to the bot channel announcing who caught the emoji
     let botMember = guild.members.cache.get(guild.client.user.id);
-    let botColor = botMember ? botMember.displayHexColor : null;
     let embed = u.embed()
-      .setTitle(`Tournament Point Caught!`)
-      .setDescription(`<@${user.id}> has earned a ${tournamentPointsCurrency.emoji} ${tournamentPointsCurrency.name} in <#${message.channel.id}>!`)
+      .setTitle(`Gemstone Caught!`)
+      .setDescription(`<@${user.id}> has found a ${currencyObj.emoji} in <#${message.channel.id}> worth ${currencyObj.value} point${currencyObj.value !== 1 ? "s" : ""}!`)
       .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-      .setColor(botColor);
+      .setColor(currencyObj.color);
     bot_channel.send({ embeds: [embed] });
   });
 
