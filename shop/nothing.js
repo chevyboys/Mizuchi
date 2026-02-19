@@ -2,7 +2,7 @@ const ShopItem = require("../utils/Class.ShopItem");
 
 module.exports = new ShopItem(
   "Literally Nothing",
-  "This item gives the wonderful satisfaction of purchasing something fun from the shop without the care or responsibility the other shop items provide! Ignore the 'made in Dania sticker floating over in the corner. It's not attached to anything.",
+  "This item gives the wonderful satisfaction of purchasing something fun from the shop without the care or responsibility the other shop items provide! Ignore the 'made in Dania' sticker floating over in the corner. It's not attached to anything.",
   1000, // the cost
   1, // Assuming 1 is the ID for the main currency used in the shop, and 2 is the id for test currency we are using for this item, which doesn't actually do anything yet
   //NOTE: The processPurchaseCallback is meant to handle giving the purchased item to the user, and any other side effects of purchasing the item. In this case, since Kudos doesn't actually do anything yet, we will just reply to the interaction to confirm the purchase.
