@@ -330,36 +330,6 @@ Module
       await getBotStatus(interaction, interaction.options.getBoolean("verbose") || false)
     }
   })
-  //The slash command to say as an NPC, using the webhook function in utils/NPC.js to send the message as a webhook with the specified name and avatar. This is intended to be used for fun and for roleplay purposes, and can be used by anyone with access to the command, but should be used responsibly to avoid abuse.
-  .addCommand({
-    name: "sayas",
-    syntax: "<name> <message> (attach an image to use as the avatar)",
-    aliases: [], // optional
-    category: "Fun",
-    hidden: true,
-    permissions: (msg) => msg.member?.roles.cache.has(snowflakes.roles.BotMaster) || msg.member?.roles.cache.has(snowflakes.roles.BotAssistant) || msg.client.config.AdminIds.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id,
-    process: async (msg, suffix) => {
-      let args = suffix.split(" ");
-      let name = args.shift();
-      let message = args.join(" ");
-      if (!message) return msg.reply("You need to provide a message to say.").then(u.clean);
-      if (msg.deletable && (msg.client.config.AdminIds.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.BotAssistant))) msg.delete();
-      //get the PFP from the first attachment if there is one, otherwise use the default NPC avatar
-      let avatarURL = msg.attachments && msg.attachments.size > 0 ? msg.attachments.first().proxyURL : null;
-      let files = msg.attachments && msg.attachments.size > 0 ? Array.from(msg.attachments.values()).map(v => v.attachment) : null;
-      //remove the first attachment from the files array so it doesn't get sent twice
-      if (files && files.length > 0) files.shift();
-
-
-      await NPCSend(msg.channel, {
-        description: message,
-        color: msg.guild.members.cache.get(msg.client.user.id).displayHexColor,
-        footer: { text: "Message sent by " + msg.author.username + " using avatar ", icon_url: avatarURL || msg.author.displayAvatarURL({ size: 128 }) }
-      }, { files: files }, { name: name, avatar: avatarURL });
-      u.errorHandler(msg.author.username + " in channel " + msg.channel?.name + " said as " + name + ": " + message);
-
-    }
-  })
 
 
 Module.setClockwork(() => {
