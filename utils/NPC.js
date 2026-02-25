@@ -23,3 +23,19 @@ function NPCSend(channel, embedOptions, additionalMessageOptions, webhookOptions
 }
 
 module.exports = NPCSend;
+
+//The example way to use this in a module would be something like this:
+/************
+const NPCSend = require('../utils/NPC.js');
+
+NPCSend(channel, {
+  title: "Hello, I'm an NPC!",
+  description: "I can send messages using webhooks.",
+  color: "#006eff"
+}, {
+  content: "This is an additional message option."
+}, {
+  name: "Custom NPC Name",
+  avatar: "./avatar/customNPC.png"
+});
+************/
