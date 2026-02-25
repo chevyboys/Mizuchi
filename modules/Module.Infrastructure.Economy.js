@@ -173,6 +173,7 @@ const currencyEmoji = [
   { value: 10, emoji: "<:Sunstone_E:909750969934417950>", color: "#ffae00" },
   { value: 25, emoji: "<:Citrine_E:909748066582663180>", color: "#f7f2a6" },
   { value: 50, emoji: "<:Emerald_E:909750429737435206>", color: "#33FF57" },
+  { value: 100, emoji: "<:SapphireE:1476079802489245797>", color: "#3385ff" },
 ]
 
 const odds_of_catching_currency = 1 / 5000; // 0.05% chance for a currency to appear in a message
@@ -453,11 +454,10 @@ Module.addInteractionCommand({
       return;
     }
 
-    //give the user a tournament point
+    //give the user tournament points
     await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, currencyObj.value, guild.client.user.id, `reaction caught`);
 
     //send a message to the bot channel announcing who caught the emoji
-    let botMember = guild.members.cache.get(guild.client.user.id);
     let embed = u.embed()
       .setTitle(`Gemstone Caught!`)
       .setDescription(`<@${user.id}> has found a ${currencyObj.emoji} in <#${message.channel.id}> worth ${currencyObj.value} point${currencyObj.value !== 1 ? "s" : ""}!`)
