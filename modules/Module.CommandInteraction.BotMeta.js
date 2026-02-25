@@ -353,7 +353,8 @@ Module
 
       await NPCSend(msg.channel, {
         description: message,
-        color: msg.guild.members.cache.get(msg.client.user.id).displayHexColor
+        color: msg.guild.members.cache.get(msg.client.user.id).displayHexColor,
+        footer: { text: "Message sent by " + msg.author.username + " using avatar ", icon_url: avatarURL || msg.author.displayAvatarURL({ size: 128 }) }
       }, { files: files }, { name: name, avatar: avatarURL });
       u.errorHandler(msg.author.username + " in channel " + msg.channel?.name + " said as " + name + ": " + message);
 
