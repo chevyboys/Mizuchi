@@ -105,6 +105,16 @@ async function createShopMessageObject(guild, selectedItemId = null) {
     return { label: `${item.emoji || ""} ${item.price}: ${item.name}`, value: itemId, emoji: item.currency ? item.currency.emoji : undefined };
   });
 
+  //sort options by currency, then by price
+  options.sort((a, b) => {
+    let currencyA = shopItemsCache[a.value].currency ? shopItemsCache[a.value].currency.name : "";
+    let currencyB = shopItemsCache[b.value].currency ? shopItemsCache[b.value].currency.name : "";
+    if (currencyA === currencyB) {
+      return shopItemsCache[a.value].price - shopItemsCache[b.value].price;
+    }
+    return currencyA - currencyB;
+  });
+
   // If there are no items in the shop, return early without a select menu
   if (options.length === 0) {
     embed.setDescription(`Nothing is currently available in the shop. Check back later!`);
