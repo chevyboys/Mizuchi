@@ -15,11 +15,11 @@ let defaultOptions = {
  * @param {Object} additionalMessageOptions - Additional options for the message.
  * @returns {Promise} - A promise that resolves when the message is sent.
  */
-function NPCSend(channel, embedOptions, additionalMessageOptions) {
+function NPCSend(channel, embedOptions, additionalMessageOptions, webhookOptions) {
   additionalMessageOptions = additionalMessageOptions || {};
   embedOptions.color = embedOptions.color || defaultOptions.color;
   additionalMessageOptions.embeds = [embedOptions];
-  return webhookSend.webhook(channel, defaultOptions.name, defaultOptions.avatar, additionalMessageOptions);
+  return webhookSend.webhook(channel, webhookOptions?.name || defaultOptions.name, webhookOptions?.avatar || defaultOptions.avatar, additionalMessageOptions);
 }
 
 module.exports = NPCSend;
