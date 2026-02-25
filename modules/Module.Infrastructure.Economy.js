@@ -417,9 +417,22 @@ Module.addInteractionCommand({
       return;
     }
 
+    if (reaction.emoji.toString() === "👈") {
+
+    }
+
 
     //make sure the emoji is the tournament points emoji, and that the user isn't a bot
     if (!currencyEmoji.some(c => c.emoji == reaction.emoji.toString())) {
+      return;
+    } else if (canGrantCurrency(reaction.message.guild.members.cache.get(user.id))) {
+      //replace the reaction with a bot reaction of the same emoji
+      try {
+        await reaction.remove();
+        await reaction.message.react(reaction.emoji);
+      } catch (error) {
+        //ignore error
+      }
       return;
     }
     //find the corresponding value for the emoji that was reacted with
