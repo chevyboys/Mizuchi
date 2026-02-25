@@ -78,7 +78,7 @@ const roleUtilities = {
     return [... new Set(roleInventory.flat(1))];
   },
   addRoleToInventory: async (member, roleId, scheduledRemovalDate = null) => {
-    const roleFilePath = `./roleInventory/${roleId}.json`;
+    const roleFilePath = `${path}/${roleId}.json`;
     if (!fs.existsSync(roleFilePath)) {
       fs.writeFileSync(roleFilePath, JSON.stringify([]));
     }
