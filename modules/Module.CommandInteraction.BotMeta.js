@@ -346,14 +346,16 @@ Module
       if (msg.deletable && (msg.client.config.AdminIds.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id || msg.member.roles.cache.has(snowflakes.roles.BotAssistant))) msg.delete();
       //get the PFP from the first attachment if there is one, otherwise use the default NPC avatar
       let avatarURL = msg.attachments && msg.attachments.size > 0 ? msg.attachments.first().proxyURL : null;
+      let files = msg.attachments && msg.attachments.size > 0 ? Array.from(msg.attachments.values()).map(v => v.attachment) : null;
+      //remove the first attachment from the files array so it doesn't get sent twice
+      if (files && files.length > 0) files.shift();
 
 
       await NPCSend(msg.channel, {
         description: message,
         color: msg.guild.members.cache.get(msg.client.user.id).displayHexColor
-      },
-        { files: files, name: name, avatar: avatarURL });
-
+      }, { files: files }, { name: name, avatar: avatarURL });
+      u.errorHandler(msg.author.username + " in channel " + msg.channel?.name + " said as " + name + ": " + message);
 
     }
   })
