@@ -2,7 +2,10 @@
 
 Mizuchi is built in Node.js for the Climbers Court community. It runs on the [Augur framework](https://github.com/Gaiwecoor/augurbot), utilizing the [Discord.js library](https://discord.js.org/). The name Mizuchi is based on a character from the works of [Andrew Rowe](https://andrewkrowe.wordpress.com/). The code is owned by the climbers court community staff members.
 
-Pull requests from the community are welcome. Speak with Behold on Discord prior to starting to ensure your features fit with the bot.
+## Hiatus notice:
+As of March 3rd 2026, this project is on hiatus and is being maintained only for archival purposes. We'd love to come back to it, when real life permits
+
+Pull requests from the community are welcome. Speak with Ghost on Discord prior to starting to ensure your features fit with the bot.
 
 When submitting a PR, please include the following questions with the appropriate answers:
 * Are any changes to config.json necessary? If so, are they reflected in config-example.json?
