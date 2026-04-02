@@ -12,6 +12,13 @@ function optionsToString(options, spacing = true, depth = 1,) {
     depthString += "--";
   }
   for (let option of options) {
+    if (option.type == "USER" || option.type == "MENTIONABLE") {
+      option.value = `<@${option.value}>`;
+    } else if (option.type == "CHANNEL") {
+      option.value = `<#${option.value}>`;
+    } else if (option.type == "ROLE") {
+      option.value = `<@&${option.value}>`;
+    }
     optionsString += (spacing ? (`\n` + depthString) : "") + `**${option.name}**${option.value ? `: ${option.value}` : ""}${option.options ? " with options:" : ""}`;
     if (option.options?.length > 0) optionsString += optionsToString(option.options, spacing, depth + 1);
   }

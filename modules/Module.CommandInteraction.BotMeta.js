@@ -6,6 +6,8 @@ const axios = require("axios").default;
 const snowflakes = require('../config/snowflakes.json');
 const config = require("../config/config.json");
 let previousDiscordIncident;
+const NPC = require("../utils/NPC.js");
+const NPCSend = require("../utils/NPC.js");
 
 /*function isURL(str) {
   const urlMatch = /<?(https?:\/\/\S+)>?/;
@@ -327,7 +329,8 @@ Module
     process: async (interaction) => {
       await getBotStatus(interaction, interaction.options.getBoolean("verbose") || false)
     }
-  });
+  })
+
 
 Module.setClockwork(() => {
   try {

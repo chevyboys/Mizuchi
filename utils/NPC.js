@@ -15,11 +15,27 @@ let defaultOptions = {
  * @param {Object} additionalMessageOptions - Additional options for the message.
  * @returns {Promise} - A promise that resolves when the message is sent.
  */
-function NPCSend(channel, embedOptions, additionalMessageOptions) {
+function NPCSend(channel, embedOptions, additionalMessageOptions, webhookOptions) {
   additionalMessageOptions = additionalMessageOptions || {};
   embedOptions.color = embedOptions.color || defaultOptions.color;
   additionalMessageOptions.embeds = [embedOptions];
-  return webhookSend.webhook(channel, defaultOptions.name, defaultOptions.avatar, additionalMessageOptions);
+  return webhookSend.webhook(channel, webhookOptions?.name || defaultOptions.name, webhookOptions?.avatar || defaultOptions.avatar, additionalMessageOptions);
 }
 
 module.exports = NPCSend;
+
+//The example way to use this in a module would be something like this:
+/************
+const NPCSend = require('../utils/NPC.js');
+
+NPCSend(channel, {
+  title: "Hello, I'm an NPC!",
+  description: "I can send messages using webhooks.",
+  color: "#006eff"
+}, {
+  content: "This is an additional message option."
+}, {
+  name: "Custom NPC Name",
+  avatar: "./avatar/customNPC.png"
+});
+************/

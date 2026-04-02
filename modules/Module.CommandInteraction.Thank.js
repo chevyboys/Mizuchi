@@ -3,6 +3,8 @@ const Augur = require("augurbot"),
   snowflakes = require('../config/snowflakes.json');
 const Module = new Augur.Module
 const fs = require('fs');
+const UtilsDatabase = require("../utils/Utils.Database");
+
 
 let thankProcess = async (interaction) => {
   let helper = interaction?.options?.get("helper")?.value;
@@ -19,18 +21,21 @@ let thankProcess = async (interaction) => {
   u.addRoles(member, [snowflakes.roles.Helper]);
   interaction.reply({ content: `${member.displayName} has been given the <@&${snowflakes.roles.Helper}> role for ${days} day(s)`, ephemeral: true });
 
+  const numberOfPointsToGrant = 3;
+  let TournamentPointsId = 1;
+  await UtilsDatabase.Economy.newTransaction(member.id, TournamentPointsId, numberOfPointsToGrant, interaction.member.id);
   //notify the mods
   let modCardEmbed = u.embed()
     .setColor(interaction.guild.roles.cache.get(snowflakes.roles.Helper).hexColor)
     .setAuthor({ iconURL: member.displayAvatarURL(), name: member.displayName + " has been given a thank you by " + interaction.member.displayName })
-    .setDescription(`The <@&${snowflakes.roles.Helper}> role was given to ${member.displayName} for ${days} day(s).`)
+    .setDescription(`The <@&${snowflakes.roles.Helper}> role was given to ${member.displayName} for ${days} day(s), and they were given ${numberOfPointsToGrant} ${UtilsDatabase.Economy.getValidCurrencies().find(c => c.id === TournamentPointsId).name}. \n\n`)
     .addField("Reason:", "```" + reason + "```")
   interaction.guild.channels.cache.get(snowflakes.channels.modRequests).send({ embeds: [modCardEmbed] })
 
   let userPmEmbed = u.embed()
     .setColor(interaction.guild.roles.cache.get(snowflakes.roles.Helper).hexColor)
     .setAuthor({ iconURL: interaction.member.displayAvatarURL(), name: interaction.member.displayName + " has sent you a thank you!" })
-    .setDescription(`Thank you for helping out the staff members of ${interaction.guild.name}! Your efforts were noticed by the staff, and the ${interaction.guild.roles.cache.get(snowflakes.roles.Helper).name} role was given to you for ${days} day(s)! \n Thank you so much! You will also recieve a 10% boost to the amount of XP you earn in that time. Keep up the good work!\n\n`)
+    .setDescription(`Thank you for helping out the staff members of ${interaction.guild.name}! Your efforts were noticed by the staff, and the ${interaction.guild.roles.cache.get(snowflakes.roles.Helper).name} role was given to you for ${days} day(s)! \n Thank you so much! You will also recieve a 10% boost to the amount of XP you earn in that time! In addition, you were given ${numberOfPointsToGrant} ${UtilsDatabase.Economy.getValidCurrencies().find(c => c.id === TournamentPointsId).name}!.\n Keep up the good work!\n\n`)
     .addField(interaction.member.displayName + "'s listed reason:", "```" + reason + "```")
 
   try {
