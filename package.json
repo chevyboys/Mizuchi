@@ -26,7 +26,7 @@
     "discord-api-types": "^0.23.1",
     "discord.js": "^13.10.3",
     "fastest-levenshtein": "^1.0.16",
-    "jimp": "^0.22.8",
+    "jimp": "^1.6.1",
     "moment": "^2.29.1",
     "mysql": "^2.18.1",
     "nanoid": "^3.1.25",
