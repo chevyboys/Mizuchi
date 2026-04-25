@@ -441,6 +441,7 @@ Module.addInteractionCommand({
 
 
     let message = reaction.message;
+    if (message.partial) await message.fetch();
     //try to remove the reaction (entirely, not just from one user), if the bot doesn't have permission to manage messages, just ignore the error and continue
     try {
       await reaction.remove();
@@ -458,8 +459,10 @@ Module.addInteractionCommand({
     let bot_channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
     if (!bot_channel) return;
     //make sure the bot has reacted to the message with the tournament points emoji, if it hasn't, don't give currency to anyone (this is to prevent people from adding the emoji themselves and getting currency)
-    let botReactions = message.reactions.cache.filter(r => r.emoji.toString() == currencyObj.emoji && r.users.cache.has(guild.client.user.id));
-    if (botReactions.size === 0) {
+    let botReactions = message.reactions.cache.filter(r =>
+      r.emoji.toString() === currencyObj.emoji && r.me
+    );
+    if (!botReactions.size) {
       let modLogs = guild.channels.cache.get(snowflakes.channels.modRequests); // #mod-logs
       if (modLogs) {
         let embed = u.embed()
