@@ -485,11 +485,11 @@ Module.addCommand({
         reaction.remove().catch(() => { });
         if (!botAlreadyOwnedGem) {
           message.react(reaction.emoji).catch(() => { });
+          return;
         }
       } catch (error) {
         //ignore error
       }
-      return;
     }
     //find the corresponding value for the emoji that was reacted with
     let currencyObj = currencyEmojiByValue[emojiString];
