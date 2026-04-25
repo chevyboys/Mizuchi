@@ -152,6 +152,7 @@ async function createShopMessageObject(guild, selectedItemId = null) {
 let tournamentPointsCurrency = null;
 
 function canGrantCurrency(member) {
+  if (!member) return false;
   return member.permissions.has("ADMINISTRATOR")
     || member.roles.cache.has(snowflakes.roles.Moderator)
     || member.roles.cache.has(snowflakes.roles.Admin)
@@ -186,9 +187,37 @@ const currencyEmoji = [
   { value: 100, emoji: "<:SapphireE:1476079802489245797>", color: "#3385ff" },
 ]
 
-const odds_of_catching_currency = 1 / 5000; // 0.05% chance for a currency to appear in a message
+const defaultDivisor = 5000; // 1 in 5000 chance for a gemstone to spawn in a message, which can be adjusted by the bot owner with the setcurrencyodds command
+let baseOddsDivisor = defaultDivisor;
 
-Module.addInteractionCommand({
+Module.addCommand({
+  name: "currencyodds",
+  aliases: ["currencychance", "gemodds"],
+  category: "Currency",
+  description: "Shows the current base odds divisor used for gemstone spawns.",
+  process: async (msg) => {
+    let chancePercent = ((1 / baseOddsDivisor) * 100).toFixed(4);
+    msg.reply(`Current base odds divisor is \`${baseOddsDivisor}\` (\`${chancePercent}%\` chance per message).`);
+  }
+}).addCommand({
+  name: "setcurrencyodds",
+  aliases: ["setgemodds"],
+  category: "Currency",
+  description: "Sets the base odds divisor used for gemstone spawns.",
+  syntax: "<divisor>",
+  info: "Example: `setcurrencyodds 5000`",
+  permissions: (msg) => canGrantCurrency(msg.member),
+  process: async (msg, suffix) => {
+    let newDivisor = Number.parseInt((suffix || "").trim(), 10);
+    if (isNaN(newDivisor) || newDivisor <= 0) { //reset to default if the input isn't a number
+      newDivisor = defaultDivisor;
+    }
+    baseOddsDivisor = newDivisor;
+    let chancePercent = ((1 / baseOddsDivisor) * 100).toFixed(4);
+    msg.reply(`Updated base odds divisor to \`${baseOddsDivisor}\` (\`${chancePercent}%\` chance per message).`);
+  }
+}).addInteractionCommand({
+
   name: "economy",
   description: "Manage and view currency balances",
   guildId: snowflakes.guilds.PrimaryServer,
@@ -394,7 +423,7 @@ Module.addInteractionCommand({
   .addEvent("messageCreate", async (message) => {
     if (message.author.bot) return;
     let randomNum = Math.random();
-    if (randomNum < odds_of_catching_currency) { // 0.05% chance
+    if (randomNum < (1 / baseOddsDivisor)) {
       if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
 
       //get weighted random emoji from the currencyEmoji array, where the weights are determined by the value of each emoji (higher value emojis are more rare)
