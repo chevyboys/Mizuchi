@@ -484,7 +484,9 @@ Module.addCommand({
       try {
         reaction.remove().catch(() => { });
         if (!botAlreadyOwnedGem) {
-          message.react(reaction.emoji).catch(() => { });
+          message.react(reaction.emoji).then(() => {
+            spawned_gem_emoji_cache[message.id] = emoji;
+          }).catch(() => { });
           return;
         }
       } catch (error) {
