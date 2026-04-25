@@ -446,19 +446,21 @@ Module.addCommand({
       return;
     }
 
-    if (reaction.emoji.toString() === "👈") {
-
-    }
-
+    if (reaction.partial) await reaction.fetch();
+    let message = reaction.message;
+    if (message.partial) await message.fetch();
+    let guild = message.guild;
+    if (!guild) return;
+    let member = await guild.members.fetch(user.id).catch(() => null);
 
     //make sure the emoji is the tournament points emoji, and that the user isn't a bot
     if (!currencyEmoji.some(c => c.emoji == reaction.emoji.toString())) {
       return;
-    } else if (canGrantCurrency(reaction.message.guild.members.cache.get(user.id))) {
+    } else if (canGrantCurrency(member ? member : reaction.message.guild.members.cache.get(user.id))) {
       //replace the reaction with a bot reaction of the same emoji
       try {
         await reaction.remove();
-        await reaction.message.react(reaction.emoji);
+        await message.react(reaction.emoji);
       } catch (error) {
         //ignore error
       }
@@ -468,30 +470,17 @@ Module.addCommand({
     let currencyObj = currencyEmoji.find(c => c.emoji === reaction.emoji.toString());
     if (!currencyObj) return;
 
-
-    let message = reaction.message;
-    if (message.partial) await message.fetch();
-    //try to remove the reaction (entirely, not just from one user), if the bot doesn't have permission to manage messages, just ignore the error and continue
-    try {
-      await reaction.remove();
-    } catch (error) {
-      //ignore error
+    // Validate bot ownership before removing reactions to avoid false suspicious flags.
+    let botHadReaction = reaction.me;
+    if (!botHadReaction) {
+      try {
+        await reaction.users.fetch();
+      } catch (error) {
+        //ignore error
+      }
+      botHadReaction = reaction.users.cache.has(message.client.user.id);
     }
-
-    //check if the message already has a recorded user who caught the emoji in the cache, and if it does, don't give currency to anyone
-    if (who_caught_the_emoji_cache[message.id]) return;
-    who_caught_the_emoji_cache[message.id] = user.id;
-    let guild = message.guild;
-    if (!guild) return;
-    let member = await guild.members.fetch(user.id).catch(() => null);
-    if (!member) return;
-    let bot_channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
-    if (!bot_channel) return;
-    //make sure the bot has reacted to the message with the tournament points emoji, if it hasn't, don't give currency to anyone (this is to prevent people from adding the emoji themselves and getting currency)
-    let botReactions = message.reactions.cache.filter(r =>
-      r.emoji.toString() === currencyObj.emoji && r.me
-    );
-    if (!botReactions.size) {
+    if (!botHadReaction) {
       let modLogs = guild.channels.cache.get(snowflakes.channels.modRequests); // #mod-logs
       if (modLogs) {
         let embed = u.embed()
@@ -508,6 +497,21 @@ Module.addCommand({
       }
       return;
     }
+
+
+    //try to remove the reaction (entirely, not just from one user), if the bot doesn't have permission to manage messages, just ignore the error and continue
+    try {
+      await reaction.remove();
+    } catch (error) {
+      //ignore error
+    }
+
+    //check if the message already has a recorded user who caught the emoji in the cache, and if it does, don't give currency to anyone
+    if (who_caught_the_emoji_cache[message.id]) return;
+    who_caught_the_emoji_cache[message.id] = user.id;
+    if (!member) return;
+    let bot_channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+    if (!bot_channel) return;
 
     //give the user tournament points
     await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, currencyObj.value, guild.client.user.id, `reaction caught`);
