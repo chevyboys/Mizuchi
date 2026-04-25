@@ -477,12 +477,15 @@ Module.addCommand({
     }
 
     let member = guild.members.cache.get(user.id) || await guild.members.fetch(user.id).catch(() => null);
-    // If staff uses a gemstone emoji, convert it into a bot-owned reaction without awarding points.
+    // If staff uses a gemstone emoji, remove their reaction without awarding points.
+    // Only seed a bot reaction when the bot did not already own this gemstone on the message.
     if (canGrantCurrency(member)) {
-      //replace the reaction with a bot reaction of the same emoji
+      let botAlreadyOwnedGem = spawned_gem_emoji_cache[message.id] === emojiString || reaction.me;
       try {
         reaction.remove().catch(() => { });
-        message.react(reaction.emoji).catch(() => { });
+        if (!botAlreadyOwnedGem) {
+          message.react(reaction.emoji).catch(() => { });
+        }
       } catch (error) {
         //ignore error
       }
