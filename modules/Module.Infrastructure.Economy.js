@@ -9,6 +9,8 @@ const Augur = require("augurbot"),
 
 //an object who's keys correspond to message IDs, and values are the user IDs of who caught the emoji in that message, to prevent multiple people from getting currency from reacting to the same message 
 let who_caught_the_emoji_cache = {};
+// Tracks which gemstone emoji the bot spawned on a message so reaction validation can stay local and fast.
+let spawned_gem_emoji_cache = {};
 const shopItemsCache = {};
 
 async function createLeaderboardMessageObject(guild, currency = null) {
@@ -186,6 +188,10 @@ const currencyEmoji = [
   { value: 50, emoji: "<:Emerald_E:909750429737435206>", color: "#33FF57" },
   { value: 100, emoji: "<:SapphireE:1476079802489245797>", color: "#3385ff" },
 ]
+const currencyEmojiByValue = currencyEmoji.reduce((acc, current) => {
+  acc[current.emoji] = current;
+  return acc;
+}, {});
 
 const defaultDivisor = 5000; // 1 in 5000 chance for a gemstone to spawn in a message, which can be adjusted by the bot owner with the setcurrencyodds command
 let baseOddsDivisor = defaultDivisor;
@@ -410,6 +416,12 @@ Module.addCommand({
         u.errorLog.send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Invalid or missing properties.`)] })
         continue;
       }
+
+      //hydrate the currency for the item, so that we can display the correct emoji in the shop, and avoid asynchronous constructor issues in the ShopItem class
+      if (typeof item.hydrateCurrency === "function") {
+        await item.hydrateCurrency();
+      }
+
       let itemId = itemFile.replace(".js", "");
       if (shopItemsCache[itemId]) {
         u.errorLog.send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Duplicate item ID ${itemId} from ${shopItemsCache[itemId].name}.`)] });
@@ -428,50 +440,60 @@ Module.addCommand({
 
       //get weighted random emoji from the currencyEmoji array, where the weights are determined by the value of each emoji (higher value emojis are more rare)
       let emoji = weighted_random(currencyEmoji.map(c => ({ item: c.emoji, weight: 1 / c.value * 50 })));
-      message.react(emoji).catch(() => { });
+      message.react(emoji).then(() => {
+        spawned_gem_emoji_cache[message.id] = emoji;
+      }).catch(() => { });
     }
   }
   )
   //if someone reacts to a message with Tournament Points emoji, give a tournament point to that user if criteria is met
   .addEvent("messageReactionAdd", async (reaction, user) => {
-    //if the user is a botmaster and the emoji is 👈, remove the reaction and replace it with the tournament points emoji
     if (user.bot) return;
-    if (reaction.emoji.toString() === "👈" && canGrantCurrency(reaction.message.guild.members.cache.get(user.id))) {
+    if (reaction.partial) await reaction.fetch();
+    let message = reaction.message;
+    if (message.partial) await message.fetch();
+    let guild = message.guild;
+    if (!guild) return;
+
+    let emojiString = reaction.emoji.toString();
+    let isGemEmoji = !!currencyEmojiByValue[emojiString];
+    // Ignore unrelated reactions as early as possible.
+    if (emojiString !== "👈" && !isGemEmoji) return;
+
+    //if the user is a botmaster and the emoji is 👈, remove the reaction and replace it with a gemstone emoji
+    if (emojiString === "👈") {
+      let member = guild.members.cache.get(user.id) || await guild.members.fetch(user.id).catch(() => null);
+      if (!canGrantCurrency(member)) return;
       try {
-        await reaction.remove();
-        await reaction.message.react(weighted_random(currencyEmoji.map(c => ({ item: c.emoji, weight: 1 / c.value * 50 }))));
+        reaction.remove().catch(() => { });
+        message.react(weighted_random(currencyEmoji.map(c => ({ item: c.emoji, weight: 1 / c.value * 50 })))).then(() => {
+          spawned_gem_emoji_cache[message.id] = emoji;
+        }).catch(() => { });
+
       } catch (error) {
         //ignore error
       }
       return;
     }
 
-    if (reaction.partial) await reaction.fetch();
-    let message = reaction.message;
-    if (message.partial) await message.fetch();
-    let guild = message.guild;
-    if (!guild) return;
-    let member = await guild.members.fetch(user.id).catch(() => null);
-
-    //make sure the emoji is the tournament points emoji, and that the user isn't a bot
-    if (!currencyEmoji.some(c => c.emoji == reaction.emoji.toString())) {
-      return;
-    } else if (canGrantCurrency(member ? member : reaction.message.guild.members.cache.get(user.id))) {
+    let member = guild.members.cache.get(user.id) || await guild.members.fetch(user.id).catch(() => null);
+    // If staff uses a gemstone emoji, convert it into a bot-owned reaction without awarding points.
+    if (canGrantCurrency(member)) {
       //replace the reaction with a bot reaction of the same emoji
       try {
-        await reaction.remove();
-        await message.react(reaction.emoji);
+        reaction.remove().catch(() => { });
+        message.react(reaction.emoji).catch(() => { });
       } catch (error) {
         //ignore error
       }
       return;
     }
     //find the corresponding value for the emoji that was reacted with
-    let currencyObj = currencyEmoji.find(c => c.emoji === reaction.emoji.toString());
+    let currencyObj = currencyEmojiByValue[emojiString];
     if (!currencyObj) return;
 
     // Validate bot ownership before removing reactions to avoid false suspicious flags.
-    let botHadReaction = reaction.me;
+    let botHadReaction = spawned_gem_emoji_cache[message.id] === emojiString || reaction.me;
     if (!botHadReaction) {
       try {
         await reaction.users.fetch();
@@ -500,18 +522,16 @@ Module.addCommand({
 
 
     //try to remove the reaction (entirely, not just from one user), if the bot doesn't have permission to manage messages, just ignore the error and continue
-    try {
-      await reaction.remove();
-    } catch (error) {
-      //ignore error
-    }
+    reaction.remove().catch(() => { });
+
+    if (!member) return;
+    let bot_channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+    if (!bot_channel) return;
 
     //check if the message already has a recorded user who caught the emoji in the cache, and if it does, don't give currency to anyone
     if (who_caught_the_emoji_cache[message.id]) return;
     who_caught_the_emoji_cache[message.id] = user.id;
-    if (!member) return;
-    let bot_channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
-    if (!bot_channel) return;
+    delete spawned_gem_emoji_cache[message.id];
 
     //give the user tournament points
     await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, currencyObj.value, guild.client.user.id, `reaction caught`);

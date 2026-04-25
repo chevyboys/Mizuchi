@@ -27,14 +27,38 @@ class Item {
     this.description = description;
     this.price = price;
     this.currencyId = currencyId;
-    const validCurrencies = econDB.getValidCurrencies().then(currencies => {
-      let currency = currencies.find(c => c.id === currencyId);
-      this.currency = currency;
-    });
+    this.currency = null;
+    this._currencyLoadPromise = null;
     /* A callback function that will be called when a user purchases the item. 
     It should take the following parameters: (interaction)
      and return a promise that resolves when the purchase has been processed.*/
     this.processPurchaseCallback = processPurchaseCallback;
+  }
+
+  async hydrateCurrency(force = false) {
+    if (this.currency && !force) return this.currency;
+
+    if (!this._currencyLoadPromise || force) {
+      this._currencyLoadPromise = econDB.getValidCurrencies()
+        .then(currencies => {
+          this.currency = currencies.find(c => c.id == this.currencyId) || null;
+          return this.currency;
+        })
+        .catch(() => {
+          this.currency = null;
+          return null;
+        })
+        .finally(() => {
+          this._currencyLoadPromise = null;
+        });
+    }
+
+    return await this._currencyLoadPromise;
+  }
+
+  async getCurrency() {
+    if (this.currency) return this.currency;
+    return await this.hydrateCurrency();
   }
 
   async execute(interaction) {
@@ -58,8 +82,9 @@ class Item {
           `Purchase of ${this.name}`
         );
 
-        const currencyName = this.currency ? this.currency.name : "Unknown Currency";
-        const currencyEmoji = this.currency ? this.currency.emoji : "";
+        let currency = await this.getCurrency();
+        const currencyName = currency ? currency.name : "Unknown Currency";
+        const currencyEmoji = currency ? currency.emoji : "";
 
         //send a message in bot-logs channel about the purchase
         let logChannel = await interaction.client.channels.fetch(snowflakes.channels.botSpam);
