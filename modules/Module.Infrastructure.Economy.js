@@ -215,12 +215,14 @@ Module.addCommand({
   permissions: (msg) => canGrantCurrency(msg.member),
   process: async (msg, suffix) => {
     let newDivisor = Number.parseInt((suffix || "").trim(), 10);
-    if (isNaN(newDivisor) || newDivisor <= 0) { //reset to default if the input isn't a number
+    let warnstring = "";
+    if (isNaN(newDivisor) || newDivisor <= 1 || newDivisor > 1000000) { //reset to default if the input isn't a number
       newDivisor = defaultDivisor;
+      warnstring = "Invalid divisor provided. Resetting to default.";
     }
     baseOddsDivisor = newDivisor;
     let chancePercent = ((1 / baseOddsDivisor) * 100).toFixed(4);
-    msg.reply(`Updated base odds divisor to \`${baseOddsDivisor}\` (\`${chancePercent}%\` chance per message).`);
+    msg.reply(`Updated base odds divisor to \`${baseOddsDivisor}\` (\`${chancePercent}%\` chance per message). ${warnstring}`);
   }
 }).addInteractionCommand({
 
