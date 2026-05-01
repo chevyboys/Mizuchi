@@ -437,7 +437,12 @@ Module.addCommand({
   .addEvent("messageCreate", async (message) => {
     if (message.author.bot) return;
     let randomNum = Math.random();
-    if (randomNum < (1 / baseOddsDivisor)) {
+    //determine if the person has a role containing the word 'Carnelian' or 'Quartz' and double the odds for them if they do, otherwise use the base odds divisor
+    let member = message.guild.members.cache.get(message.author.id) || await message.guild.members.fetch(message.author.id).catch(() => null);
+    let isNewMember = member ? member.roles.cache.some(r => r.name.toLowerCase().includes("carnelian") || r.name.toLowerCase().includes("quartz")) : false;
+    let effectiveOddsDivisor = isNewMember ? baseOddsDivisor / 2 : baseOddsDivisor;
+
+    if (randomNum < (1 / effectiveOddsDivisor)) {
       if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
 
       //get weighted random emoji from the currencyEmoji array, where the weights are determined by the value of each emoji (higher value emojis are more rare)
