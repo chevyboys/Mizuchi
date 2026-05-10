@@ -539,12 +539,12 @@ const DataBaseActions = {
 
         await con.execute(sql, [snowflake, username]);
 
-        const sql = `
+        const sql2 = `
           INSERT INTO \`user_guild\` (\`user_id\`, \`guild_id\`)
           VALUES (?, ?) 
           ON DUPLICATE KEY UPDATE user_id = values(user_id), guild_id = values(guild_id)`;
 
-        await con.execute(sql, [snowflake, guildsnowflake]);
+        await con.execute(sql2, [snowflake, guildsnowflake]);
 
         // 4. Role and Table Synchronization
         for (const data of discoveredGuilds) {
