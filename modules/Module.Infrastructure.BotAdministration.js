@@ -159,47 +159,36 @@ const Module = new Augur.Module()
         let successCount = 0;
         let errorCount = 0;
 
-        //reply with the progress, and update it as we go through the members. This is to give some feedback on how long it will take, since it can be a while for large servers.
+        // Reply with progress, updating as we go to give feedback on duration
         const progressMessage = await msg.reply(`Syncing database: 0/${members.size} members synced. Errors: 0`);
-        let lastUpdateTime = Date.now();
-
         let numberOfMembersProcessed = 0;
 
+        // 2. The Mass Sync Loop
         for (const [id, m] of members) {
-          //console.log(`Syncing user ${id} (${m.user.tag})...`);
-          const now = Date.now();
           if (numberOfMembersProcessed % 100 === 0) {
             await progressMessage.edit(`Syncing database: ${successCount}/${members.size} members synced. Errors: ${errorCount}`);
-            //sleep for half a second to avoid hitting rate limits and to give the bot a chance to breathe
+            // Sleep for half a second to avoid hitting rate limits and to give the bot a chance to breathe
             await new Promise(resolve => setTimeout(resolve, 500));
-            lastUpdateTime = now;
           }
+
           try {
-            // Extract the user's current roles (ignoring Discord's managed integration roles)
-            const userRoles = m.roles.cache.filter(r => !r.managed).map(r => r.id);
-
-            // Use our bulletproof 'update' (Upsert) function to save everything in one step!
-            let dbUser = await db.User.update({
-              snowflake: id,
-              username: m.user.username,
-              cakeyear: m.joinedAt ? m.joinedAt.getFullYear() : new Date().getFullYear(),
-              roles: { [msg.guild.id]: userRoles }
-            }, msg.guild.id);
-
+            await db.User.sync_roles(m);
             successCount++;
           } catch (err) {
             console.error(`Failed to sync user ${id} (${m.user.tag}):`, err);
             errorCount++;
           }
+
           numberOfMembersProcessed++;
         }
+
         console.log(`Database sync complete! Synced ${successCount} members. Errors: ${errorCount}`);
 
-        // 4. Cleanup and final reporting
+        // 3. Cleanup and final reporting
         await msg.reactions.removeAll().catch(() => { }); // Clear the hourglass
         await msg.react("🎚"); // Add the original success reaction
 
-        // Optional: Send a temporary status report
+        // Send a temporary status report
         const reply = await msg.reply(`Database sync complete! Synced **${successCount}** members. (Errors: ${errorCount})`);
         u.clean(reply, 10000);
         u.clean(msg, 10000);

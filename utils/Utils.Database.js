@@ -616,6 +616,31 @@ const DataBaseActions = {
       // If the array has anything in it, they have a sensitive role!
       return rows.length > 0;
     },
+    /**
+     * Strictly syncs a user's roles to the database without touching profile data.
+     * @param {Discord.GuildMember} member 
+     */
+    sync_roles: async (member) => {
+      if (!member || !member.id || !member.guild) {
+        throw new Error("A valid Discord GuildMember object is required.");
+      }
+
+      const guildSnowflake = member.guild.id;
+      const userSnowflake = member.id;
+      const roleSnowflakes = member.roles.cache.filter(r => !r.managed).map(r => r.id);
+
+      // 1. Fetch the Internal User ID. 
+      // We use private update here just to securely grab/ensure the internal ID without altering profile data.
+      const internalUserId = await privateDataBaseActions.User.update({
+        snowflake: userSnowflake,
+        // We intentionally leave out username/cakeyear so they aren't overwritten
+      }, guildSnowflake);
+
+      // 2. Pass the internal ID and roles directly to the private role sync engine
+      await privateDataBaseActions.User.syncRoles(internalUserId, guildSnowflake, roleSnowflakes);
+
+      return true;
+    },
   },
   Guild: {
     /*
