@@ -1,4 +1,4 @@
-const mysql = require("mysql2-promise"); // Updated to mysql2
+const mysql = require("mysql2/promise"); // Updated to mysql2
 const Discord = require("discord.js");
 const snowflakes = require("../config/snowflakes.json");
 const config = require("../config/config.json");
@@ -898,6 +898,18 @@ const DataBaseActions = {
     client = Module.client;
 
     if (!hasBeenInitialized) {
+      //initialize the database connection
+      mysql.configure({
+        host: config.mySQL.host,
+        user: config.mySQL.user,
+        password: config.mySQL.password,
+        database: config.mySQL.database,
+        port: config.mySQL.port,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
+      });
+
       try {
         // Ping the database to verify the single connection is alive and ready
         await con.ping();
