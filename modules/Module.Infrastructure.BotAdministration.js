@@ -163,15 +163,16 @@ const Module = new Augur.Module()
         const progressMessage = await msg.reply(`Syncing database: 0/${members.size} members synced. Errors: 0`);
         let lastUpdateTime = Date.now();
 
+        let numberOfMembersProcessed = 0;
 
         for (const [id, m] of members) {
           console.log(`Syncing user ${id} (${m.user.tag})...`);
           const now = Date.now();
-          if (now - lastUpdateTime > 5000) { // Update progress every 5 seconds
+          if (numberOfMembersProcessed % 5 === 0) {
             await progressMessage.edit(`Syncing database: ${successCount}/${members.size} members synced. Errors: ${errorCount}`);
-            lastUpdateTime = now;
             //sleep for half a second to avoid hitting rate limits and to give the bot a chance to breathe
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            lastUpdateTime = now;
           }
           try {
             let dbUser = await db.User.new(id, msg.guild.id);
@@ -185,6 +186,7 @@ const Module = new Augur.Module()
             console.error(`Failed to sync user ${id} (${m.user.tag}):`, err);
             errorCount++;
           }
+          numberOfMembersProcessed++;
         }
         console.log(`Database sync complete! Synced ${successCount} members. Errors: ${errorCount}`);
 
