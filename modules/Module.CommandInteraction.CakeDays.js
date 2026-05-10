@@ -364,7 +364,7 @@ Module
         let userCakeString;
         if (!userCake) {
           userCakeString = "You haven't told me when your nameday is yet. To set it, use '/nameday date'"
-        } else userCakeString = "Your nameday is " + userCake.cakeday + "! to reset it, use '/nameday date'"
+        } else userCakeString = "Your nameday is " + userCake.cakeday + (userCake.cakeyear ? " " + userCake.cakeyear : "") + "! to reset it, use '/nameday date'"
 
         let embed = u.embed()
           .setTitle("Upcoming Name Days:")
