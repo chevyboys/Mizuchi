@@ -43,10 +43,6 @@ async function testcakeOrJoinDays(guild) {
         let cakeOrJoinDayDate = peep.cakeday;
         // fallback to join date if invalid
 
-        // Fix legacy "Sept" bug for the blast
-        if (cakeOrJoinDayDate) {
-          cakeOrJoinDayDate = cakeOrJoinDayDate.replace("Sept", "Sep");
-        }
         if (!cakeOrJoinDayDate || cakeOrJoinDayDate.length < 3) {
           try {
             const member = await guild.members.fetch(peep.snowflake);
@@ -219,8 +215,7 @@ async function testcakeOrJoinDays(guild) {
 function getNextNameDay(cakedayStr) {
   if (!cakedayStr || cakedayStr.length < 3 || cakedayStr === "opt-out") return null;
 
-  // Fix legacy "Sept" bug so it parses correctly in JS Dates
-  let safeDateStr = cakedayStr.replace("Sept", "Sep");
+  let safeDateStr = cakedayStr;
 
   let curYear = moment().year();
   let nameDay = moment(new Date(`${safeDateStr} ${curYear}`));
@@ -279,7 +274,7 @@ Module
             interaction.reply({ content: "I couldn't understand that date. Please use Month Day format (e.g. Apr 1 or 4/1).", ephemeral: true });
             return;
           } else {
-            let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
             cakeOrJoinDayDate = months[bd.getMonth()] + " " + bd.getDate();
             let cakeOrJoinDayUpdateTarget = interaction.member.id
             if (target && (interaction.member.roles.cache.has(snowflakes.roles.Admin) || interaction.member.roles.cache.has(snowflakes.roles.BotMaster) || interaction.member.roles.cache.has(snowflakes.roles.Moderator) || interaction.member.roles.cache.has(snowflakes.roles.CommunityGuide))) {
@@ -401,7 +396,7 @@ Module
       targetBd = targetBd.cakeday
       if (targetBd.indexOf("opt-out" > -1)) {
         let joinedAt = interaction.member.joinedAt;
-        let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
         let cakeOrJoinDayDate = months[joinedAt.getMonth()] + " " + joinedAt.getDate();
         await db.User.updateCakeDay(interaction.member.id, cakeOrJoinDayDate, interaction.guild.id);
         return interaction.reply({ content: "Opt-in successful, your name day has been set to your server join date", ephemeral: true });
