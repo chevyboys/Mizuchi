@@ -18,17 +18,17 @@ function getAuthors() {
 }
 
 /**
- * A collection of userIds (keys) with the value of a date object of when they can ask again
+ * A collection of user snowflakes (keys) with the value of a date object of when they can ask again
  */
 let askedRecently = new Collection();
 let blockedUsers = new Collection();
 
-function addBlockedUser(userId) {
-  blockedUsers.set(userId, Date.now());
+function addBlockedUser(snowflake) {
+  blockedUsers.set(snowflake, Date.now());
   setTimeout(() => {
-    blockedUsers.delete(userId);
+    blockedUsers.delete(snowflake);
   }, 48 * 60 * 60 * 1000);
-  //write to the file in ../data/blockedUsers.json. formatted as [[userid, value], userid, value]
+  //write to the file in ../data/blockedUsers.json. formatted as [[snowflake, value], snowflake, value]
   let blockedUsersArray = Array.from(blockedUsers);
 
   fs.writeFileSync("./data/blockedUsers.json", JSON.stringify(blockedUsersArray));

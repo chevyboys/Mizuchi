@@ -1,228 +1,341 @@
-const mysql = require("mysql")
+const mysql = require("mysql2/promise"); // Updated to mysql2
 const Discord = require("discord.js");
 const snowflakes = require("../config/snowflakes.json");
-const config = require("../config/config.json")
+const config = require("../config/config.json");
+
 let hasBeenInitialized = false;
-// Ensure charset is set in the connection string
-let connectionString = config.mySQL;
-if (typeof connectionString === 'string') {
-  if (connectionString.includes('?')) {
-    connectionString += '&charset=utf8mb4';
-  } else {
-    connectionString += '?charset=utf8mb4';
-  }
-}
-const snowflake_util = Discord.SnowflakeUtil;
-const con = mysql.createConnection(connectionString);
-const Augur = require("augurbot");
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-const days = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"]
 let client;
-const DISCORD_EPOCH = Date.parse("01 Jan 2015 00:00:00 GMT");
+let con; // This will hold our promise-based connection
 
+const DISCORD_EPOCH = 1420070400000; // Constant for Snowflake validation
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
-function cleanString(str) {
-  return str.replace(/[\W_]+/g, " ");;
-}
-
-
-function assertIsSnowflake(snowflake) {
-  let timestamp = new Date(Discord.SnowflakeUtil.timestampFrom(snowflake))
-  if (!/^\d+$/.test(snowflake) || timestamp <= DISCORD_EPOCH || timestamp > Date.now()) {
-    return false
-  } else return true;
-}
 /** 
- * @param {string} string the string to check if it is in fact a cake day
-*/
-function assertIsCakeDay(string) {
-  if (string == "opt-out") return true;
-  if (string.length == 6 || string.length == 5 || string.length == 7) {
-    let parts = string.split(" ");
-    if (parts.length == 2 && months.includes(parts[0].replace(" ", "")) && days.includes(parts[1].replace(" ", ""))) {
-      return true
-    }
-  }
-  throw (string + ":" + JSON.stringify(string) + " is not a valid CakeDay")
-}
-function parseUserID(user) {
-  let userID = user.id || user.userID?.user?.id || user.userID?.userId || user.userID || user.Id || user;
-  if (!assertIsSnowflake(userID)) {
-    throw new Error("INVALID DISCORD ID at Database.parseUserID: " + JSON.stringify(user));
-  }
-  else return userID;
+ * Utility to clean strings for DB safety/readability 
+ */
+function cleanString(str) {
+  return str ? str.replace(/[\W_]+/g, " ").trim() : "";
 }
 
+/** 
+ * Validates if a string is a valid Discord Snowflake 
+ */
+function assertIsSnowflake(snowflake) {
+  if (!snowflake || typeof snowflake !== 'string' || !/^\d+$/.test(snowflake)) return false;
+  try {
+    const timestamp = Number((BigInt(snowflake) >> 22n) + BigInt(DISCORD_EPOCH));
+    return timestamp > DISCORD_EPOCH && timestamp <= Date.now();
+  } catch {
+    return false;
+  }
+}
+
+/** 
+ * Validates Cake Day format (e.g., "Jan 01" or "opt-out")
+ */
+function assertIsCakeDay(string) {
+  if (string === "opt-out") return true;
+  if (!string || typeof string !== 'string') return false;
+
+  const parts = string.split(" ");
+  if (parts.length === 2 && months.includes(parts[0]) && days.includes(parts[1])) {
+    return true;
+  }
+  return false;
+}
+
+/** 
+ * Resolves various object types into a raw Snowflake string
+ */
+function parsesnowflake(user) {
+  const snowflake = user?.id || user?.snowflake?.user?.id || user?.snowflake?.snowflake || user?.snowflake || user?.Id || user;
+  if (!assertIsSnowflake(snowflake)) {
+    throw new Error(`INVALID DISCORD ID: ${JSON.stringify(user)}`);
+  }
+  return snowflake;
+}
+
+/** 
+ * Normalizes role data from the legacy JSON field or provided objects
+ */
 function normalizeRolesByGuild(rolesData) {
   let parsedRoles = rolesData;
-  if (typeof parsedRoles === "string" || parsedRoles instanceof String) {
-    try {
-      parsedRoles = JSON.parse(parsedRoles);
-    } catch {
-      parsedRoles = [];
-    }
+  if (typeof parsedRoles === "string") {
+    try { parsedRoles = JSON.parse(parsedRoles); } catch { parsedRoles = []; }
   }
 
+  // Legacy support: If it's just an array, assign to Primary Server
   if (Array.isArray(parsedRoles)) {
     return {
       [snowflakes.guilds.PrimaryServer]: parsedRoles.filter(assertIsSnowflake)
     };
   }
 
-  if (!parsedRoles || typeof parsedRoles !== "object") {
-    return {};
-  }
+  if (!parsedRoles || typeof parsedRoles !== "object") return {};
 
   let normalized = {};
-  for (const guildID of Object.keys(parsedRoles)) {
+  for (const [guildID, guildRoles] of Object.entries(parsedRoles)) {
     if (!assertIsSnowflake(guildID)) continue;
-    let guildRoles = parsedRoles[guildID];
-    if (!Array.isArray(guildRoles)) guildRoles = [];
-    normalized[guildID] = guildRoles.filter(assertIsSnowflake);
+    normalized[guildID] = Array.isArray(guildRoles) ? guildRoles.filter(assertIsSnowflake) : [];
   }
-
   return normalized;
 }
 
-
 /**
- * An object representing the user object in the database
- * @member {Discord.Snowflake} userID the user or member id of the person to store
- * @member {string} username //a cleaned version of the username. Stored only for convenience, should not be referenced.
- * @member {string} cakeDay // A cakeDay string e.g. Jan 01
- * @member {number} currentXP = 0] // Does nothing currently. Will be ignored
- * @member {number} totalXP = 0] // Does nothing currently. Will be ignored
- * @member {Discord.Role.Id[]} roles // An array of the roles the discord member has
+ * Data Model for User interactions
+ * @member {Discord.Snowflake} snowflake the id of the user to store
+ * @member {string} username the username of the user to store, stored for ease of use in the database and testing, should not be referenced in code
+ * @member {string} cakeday the MM-DD formatted day to celebrate this person, or "opt-out" if they have chosen to opt out of cake day celebrations
+ * @member {string} cakeyear the year the user joined to get seniority, stored as a string to allow null values and avoid timezone issues
+ * @member {Object} roles an object representing the user's roles across different guilds
  */
 class DBUserObject {
-  /*
-    +-----------+--------------+------+-----+---------+-------+
-    | Field     | Type         | Null | Key | Default | Extra |
-    +-----------+--------------+------+-----+---------+-------+
-    | userID    | varchar(256) | YES  | UNI | NULL    |       |
-    | username  | varchar(40)  | YES  | MUL | NULL    |       |
-    | cakeDay   | varchar(20)  | NO   |     | NULL    |       |
-    | currentXP | bigint(20)   | NO   |     | 0       |       |
-    | totalXP   | bigint(20)   | NO   |     | 0       |       |
-    | roles     | longtext     | NO   |     | NULL    |       |
-    +-----------+--------------+------+-----+---------+-------+
-    */
-  userID = "";
-  username = "";
-  cakeDay = "";
-  currentXP = 0;
-  totalXP = 0;
-  roles = {};
-
-  /**
-   * Creates a DBUserObject
-   * @param {Object} constructionObj the basic construction object
-   * @param {Discord.Snowflake} constructionObj.userID the user or member id of the person to store
-   * @param {string} constructionObj.username //a cleaned version of the username. Stored only for convenience, should not be referenced.
-   * @param {string} constructionObj.cakeDay // A cakeDay string e.g. Jan 01
-   * @param {number} [constructionObj.currentXP = 0] // Does nothing currently. Will be ignored
-   * @param {number} [constructionObj.totalXP = 0] // Does nothing currently. Will be ignored
-   * @param {Object} constructionObj.roles // An object keyed to the discord guild ids, with the value being an array of the roles the discord member has in that guild
-   * */
-
   constructor(constructionObj) {
-    this.userID = parseUserID(constructionObj.userID);
-    this.username = cleanString(constructionObj.username);
-    this.cakeDay = assertIsCakeDay(constructionObj.cakeDay) ? constructionObj.cakeDay : null;
-    this.currentXP = 0;
-    this.totalXP = 0;
-    this.roles = normalizeRolesByGuild(constructionObj.roles)
+    if (constructionObj instanceof DBUserObject) return constructionObj;
+
+    this.id = constructionObj.id || null;
+    this.snowflake = parsesnowflake(constructionObj.snowflake);
+    this.username = cleanString(constructionObj.username) || "Unknown User";
+
+    // Validate Cake Day, default to "opt-out" if invalid/missing
+    this.cakeday = assertIsCakeDay(constructionObj.cakeday) ? constructionObj.cakeday : "opt-out";
+    this.cakeyear = parseInt(constructionObj.cakeyear) || new Date().getFullYear();
+
+    // This maintains legacy roles while we migrate to the relational tables
+    this.roles = normalizeRolesByGuild(constructionObj.roles);
   }
+
   /**
-   * Gets this user from the database
-   * @returns {DBUserObject} the database user object for the user, if it exists 
+   * Refreshes user data from DB
    */
-  get = async () => { return await DataBaseActions.User.get(this.userID); }
-  /**
-   * sets cakeday for a user to a specific date
-   * @param {string} cakeDay 
-   * @returns {Object} the result of the database update
-   */
-  updateCakeDay = async (cakeDay) => { return await DataBaseActions.User.updateCakeDay(this.userID, cakeDay) };
-  /**
-   * Updates the roles array for a guild member
-   * @returns {Object} the result of the database update
-   */
-  updateRoles = async () => {
-    let guild = await client.guilds.fetch(snowflakes.guilds.PrimaryServer)
-    let member = await guild.members.fetch()
-    return await DataBaseActions.User.updateRoles(member);
+  async get(guildsnowflake) {
+    return await DataBaseActions.User.get(this.snowflake, guildsnowflake);
+  }
+
+  async updateCakeDay(cakeday, guildsnowflake) {
+    if (!assertIsCakeDay(cakeday)) throw new Error("Invalid Cake Day format");
+    return await privateDataBaseActions.User.update({ snowflake: this.snowflake, cakeday }, guildsnowflake);
+  }
+
+  async updateCakeYear(cakeyear, guildsnowflake) {
+    const year = parseInt(cakeyear);
+    if (isNaN(year)) throw new Error("Invalid Cake Year");
+    return await privateDataBaseActions.User.update({ snowflake: this.snowflake, cakeyear: year }, guildsnowflake);
+  }
+
+  async updateRoles(guildsnowflake) {
+    const guild = await client.guilds.fetch(guildsnowflake);
+    const member = await guild.members.fetch(this.snowflake);
+    return privateDataBaseActions.User.update({ snowflake: this.snowflake, roles: member.roles.cache.map(r => r.id) }, guildsnowflake);
+  }
+}
+
+/**
+ * An object representing the guild object in the database
+ * @member {Discord.Snowflake} snowflake the id of the guild to store
+ * @member {string} friendly_name a human friendly name for the guild, stored for ease of use in the database and testing, should not be referenced in code
+ * @member {boolean} isTestGuild whether this guild is a test guild or not.
+ * @member {DBGuildRoleObject[]} roles an array of the guild roles in this guild. This will be referenced by the user_guild_role table for restoring roles; It is not perfect;
+ */
+/**
+ * Data Model for Guilds
+ * @member {Discord.Snowflake} snowflake the id of the guild to store
+ * @member {string} friendly_name a human friendly name for the guild, stored for ease of use in the database and testing, should not be referenced in code
+ * @member {boolean} isTestGuild whether this guild is a test guild or not.
+ * @member {DBGuildRoleObject[]} roles an array of the guild roles in this guild. This will be referenced by the user_guild_role table for restoring roles; It is not perfect;
+ */
+class DBGuildObject {
+  constructor(constructionObj) {
+    if (constructionObj instanceof DBGuildObject) return constructionObj;
+
+    this.id = constructionObj.id || null;
+    this.snowflake = parsesnowflake(constructionObj.snowflake);
+    this.friendly_name = cleanString(constructionObj.friendly_name);
+    this.isTestGuild = !!constructionObj.isTestGuild;
+    this.roles = Array.isArray(constructionObj.roles)
+      ? constructionObj.roles.map(role => new DBGuildRoleObject(role))
+      : [];
+  }
+}
+/**
+ * Data Model for Roles
+ * @member {Discord.Snowflake} snowflake the id of the role to store
+ * @member {string} friendly_name a human friendly name for the role, stored for ease of use in the database and testing, should not be referenced in code
+ * @member {boolean} has_redacted_info whether the role has redacted information
+ * @member {boolean} is_update_role whether the role is an update role
+ */
+class DBGuildRoleObject {
+  constructor(constructionObj) {
+    if (constructionObj instanceof DBGuildRoleObject) return constructionObj;
+
+    this.id = constructionObj.id || null;
+    this.snowflake = parsesnowflake(constructionObj.snowflake);
+    this.friendly_name = cleanString(constructionObj.friendly_name);
+    this.isTestGuild = !!constructionObj.isTestGuild;
+    // Roles are now purely an array of DBGuildRoleObjects
+    this.roles = Array.isArray(constructionObj.roles)
+      ? constructionObj.roles.map(role => new DBGuildRoleObject(role))
+      : [];
   }
 }
 
 let privateDataBaseActions = {
   User: {
-    UserObject: DBUserObject,
     /**
              * Update will find a user and update their records, or if the user doesn't exist, it will create them, then update them
-             * @param {Object} userDataBaseObject - An object containing member variables named each column you wish to change for the user, with the values equalling the new value.
-             * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userDataBaseObject.userID - The ID of the user to find, or an object that has an ID;
-             * @param {string} [userDataBaseObject.cakeDay] - the MM-DD formatted day to celebrate this person
-             * @param {number} [userDataBaseObject.currentXP] - the XP the user has in the current season
-             * @param {number} [userDataBaseObject.totalXP] - the XP the user has in total
+             * @param {Object} userData - An object containing member variables named each column you wish to change for the user, with the values equalling the new value.
+             * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userData.snowflake - The ID of the user to find, or an object that has an ID;
+             * @param {string} [userData.cakeday] - the MM-DD formatted day to celebrate this person
+             * @param {string} [userData.cakeyear] - the year the user joined to get seniority
+             * @param {Object.<string, DBGuildRoleObject[]>|DBGuildRoleObject[]} [userData.roles] - an object representing the user's roles across different guilds, with guild snowflakes as keys and arrays of role snowflakes as values. If this is included, it will overwrite all existing role data for this user in the database, so be sure to include all roles you wish to keep in this object. If you only want to update specific guilds, you can set other guilds to their existing values from the database.
              */
-    update: async (userDataBaseObject) => {
-      let userID = parseUserID(userDataBaseObject);
-      let user = await DataBaseActions.User.get(userID)
+    update: async (userData, guildSnowflake) => {
+      const snowflake = parsesnowflake(userData);
+
+      // 1. Ensure user exists and get current DB state
+      let user = await DataBaseActions.User.get(snowflake, guildSnowflake);
       if (!user) {
-        user = await DataBaseActions.User.new(userID);
+        user = await DataBaseActions.User.new(snowflake, guildSnowflake);
       }
-      user.roles = normalizeRolesByGuild(user.roles);
-      //only set properties that we already have in the database as a column. If not specified, leave it the same.
-      let query = `UPDATE users SET `
-      for (const property in user) {
-        if (property != "userID" && typeof user[property] != "function" && !(user[property] instanceof Function) && Object.prototype.toString.call(user[property]) != '[object Function]') {
-          user[property] = userDataBaseObject[property] ?? user[property];
-          if (property === "roles") {
-            user[property] = normalizeRolesByGuild(user[property]);
-            query = query + ` ${property} = ${con.escape(JSON.stringify(user[property]))},`
-          } else if (typeof user[property] === 'string' || user[property] instanceof String) {
-            query = query + ` ${property} = ${con.escape(user[property])},`
-          } else {
-            query = query + ` ${property} = ${con.escape(user[property])},`
-          }
 
+      await con.beginTransaction();
+
+      // 2. Prepare metadata updates (Cake Day, Year, Username)
+      const cakeday = userData.cakeday ?? user.cakeday;
+      const cakeyear = userData.cakeyear ?? user.cakeyear;
+      const username = userData.username ? cleanString(userData.username) : user.username;
+
+      try {
+        // 3. Execute the core user update
+        const updateSql = `
+        UPDATE users 
+        SET username = ? 
+        WHERE snowflake = ?`;
+        await con.execute(updateSql, [username, snowflake]);
+
+
+        //this will always create a user_guild entry if one doesn't exist, so we can safely update it without worrying about it not existing
+        const userGuildUpdateSql = `
+          UPDATE user_guild ug
+          JOIN users u ON ug.user_id = u.id
+          JOIN guild g ON ug.guild_id = g.id
+          SET ug.cakeday = ?, ug.cakeyear = ?
+          WHERE u.snowflake = ? AND g.snowflake = ?`;
+
+        await con.execute(userGuildUpdateSql, [cakeday, cakeyear, snowflake, guildSnowflake]);
+
+        // 4. Handle Role Synchronization if roles are provided
+        if (userData.roles) {
+          // Handle both legacy array format and the new normalized object format
+          const roleList = Array.isArray(userData.roles)
+            ? userData.roles
+            : (userData.roles[guildSnowflake] || []);
+
+          await privateDataBaseActions.User.syncRoles(user.id, guildSnowflake, roleList);
         }
+
+        await con.commit();
+        // Return the updated object
+        return await DataBaseActions.User.get(snowflake, guildSnowflake);
+      } catch (error) {
+        await con.rollback();
+        console.error(`Failed to update user ${snowflake}. Changes rolled back.`, error);
+        throw error;
       }
-
-      query = query.slice(0, -1) + ` WHERE userID=${con.escape(userID)}`;
-      return new Promise((fulfill, reject) => {
-        con.query(query, function (error, result) {
-          if (error) reject(error);
-          else fulfill(user);
-        });
-
-      })
-
     },
+
+    /**
+     * Synchronizes the many-to-many relationship for roles.
+     * @param {number} internalUserId - The 'id' (double/auto_increment) from the users table.
+     * @param {string} guildSnowflake - The Discord snowflake for the guild.
+     * @param {string[]} roleSnowflakes - Array of role snowflakes the user should have.
+     * @returns {Promise<void>} Resolves when the roles have been synchronized.
+     */
+    syncRoles: async (internalUserId, guildSnowflake, roleSnowflakes) => {
+      // 1. Get internal Guild ID
+      const [[dbGuild]] = await DataBaseActions.Guild.get(guildSnowflake);
+      if (!dbGuild) throw new Error(`Guild ${guildSnowflake} not found in database.`);
+
+      // 2. Clear existing roles for this user in this specific guild
+      // We join on guild_role to ensure we don't accidentally delete roles from other servers
+      const deleteSql = `
+        DELETE ugr FROM user_guild_role ugr
+        INNER JOIN guild_role gr ON ugr.guild_role_id = gr.id
+        WHERE ugr.user_id = ? AND gr.guild_id = ?`;
+
+      await con.execute(deleteSql, [internalUserId, dbGuild.id]);
+
+      // 3. Process new roles
+      for (const rSnowflake of roleSnowflakes) {
+        if (!assertIsSnowflake(rSnowflake)) continue;
+
+        // Ensure the role exists in the guild_role table first
+        // We use INSERT IGNORE so we don't crash if the role is already there
+        await con.execute(`
+          INSERT INTO guild_role (guild_id, snowflake, friendly_name) 
+          VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE snowflake = snowflake, friendly_name = VALUES(friendly_name)`,
+          [dbGuild.id, rSnowflake, `Role ${rSnowflake}`]
+        );
+
+        // Link the user to the role via the relational table
+        await con.execute(`
+          INSERT INTO user_guild_role (user_id, guild_role_id)
+          SELECT ?, id FROM guild_role WHERE snowflake = ? AND guild_id = ? ON DUPLICATE KEY UPDATE user_id = user_id`,
+          [internalUserId, rSnowflake, dbGuild.id]
+        );
+      }
+    }
+  },
+  Guild: {
+    /**
+     * 
+     * @param {Discord.snowflake} snowflakeResolvable 
+     * @param {string} newName 
+     * @returns {Promise<boolean>} Returns true if the update was successful
+     */
+    update_name: async (snowflakeResolvable, newName) => {
+      const snowflake = parsesnowflake(snowflakeResolvable);
+      await con.execute('UPDATE guild SET friendly_name = ? WHERE snowflake = ?', [newName, snowflake]);
+      return true;
+    }
   }
 }
 
 /**
  * An object representing the total amount of a specific currency a user has in the database
- * @member {Discord.Snowflake} userID the user or member id of the person to store
+ * @member {Discord.Snowflake} snowflake the user or member id of the person to store
  * @member {DBCurrencyTotalObject[]} currencies an array of objects representing the total amount of each currency the user has in the database
  */
 class DBUserCurrencyTotalObject {
-  userID = "";
+  snowflake = "";
   currencies = [];
   /**
    * 
-   * @param {Discord.Snowflake} userID 
+   * @param {Discord.Snowflake} snowflake 
    * @param {DBCurrencyTotalObject[]} currencies 
    */
-  constructor(userID, currencies) {
-    this.userID = userID;
+  constructor(snowflake, currencies) {
+    this.snowflake = snowflake;
     this.currencies = currencies;
   }
 }
 
+/**
+ * An object representing a currency in the database, with its total amount for a user
+ * @member {number} id the internal database ID of the currency
+ * @member {string} name the name of the currency
+ * @member {string} emoji the emoji representing the currency
+ * @member {number} total the total amount of the currency the user has in the database
+ */
 class DBCurrencyTotalObject {
+  /**
+   * 
+   * @param {number} id 
+   * @param {string} name 
+   * @param {string} emoji 
+   * @param {number} total 
+   */
   constructor(id, name, emoji, total) {
     this.id = id;
     this.name = name;
@@ -231,7 +344,19 @@ class DBCurrencyTotalObject {
   }
 }
 
+/**
+ * An object representing a currency in the database
+ * @member {number} id the internal database ID of the currency
+ * @member {string} name the name of the currency
+ * @member {string} emoji the emoji representing the currency
+ */
 class DBCurrencyObject {
+  /**
+   * 
+   * @param {number} id 
+   * @param {string} name 
+   * @param {string} emoji 
+   */
   constructor(id, name, emoji) {
     this.id = id;
     this.name = name;
@@ -244,8 +369,8 @@ class DBCurrencyObject {
 let ValidCurrenciesCache = [];
 
 class LeaderboardEntryObject {
-  constructor(userID, username, total, currencyName, currencyEmoji) {
-    this.userID = userID;
+  constructor(snowflake, username, total, currencyName, currencyEmoji) {
+    this.snowflake = snowflake;
     this.username = username;
     this.total = total;
     this.currencyName = currencyName;
@@ -253,163 +378,408 @@ class LeaderboardEntryObject {
   }
 }
 
-
-
-let DataBaseActions = {
-  //classes, for easier use in other files
+const DataBaseActions = {
+  // classes, for easier use in other files
   DBCurrencyObject,
   DBCurrencyTotalObject,
   DBUserCurrencyTotalObject,
   DBUserObject,
   LeaderboardEntryObject,
+  DBGuildObject,
+  DBGuildRoleObject,
   User: {
     /** gets all the info a database has about a user, and returns it as a DBUserObject
-     * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userIdResolvable - The ID of the user to find, or an object that has an ID;
-     * @returns {DBUserObject} the database user object for the user, if it exists 
-    */
-    get: async (userIdResolvable) => {
-      await userIdResolvable;
-      let userID = await parseUserID(userIdResolvable);
+     * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} snowflakeResolvable
+     * @returns {Promise<DBUserObject|null>}
+     */
+    get: async (snowflakeResolvable, guild_snowflake) => {
+      const snowflake = await parsesnowflake(snowflakeResolvable);
+      const userSql = `
+        SELECT users.id as id, users.snowflake as snowflake, users.username as username, 
+               user_guild.cakeday as cakeday, user_guild.cakeyear as cakeyear 
+        FROM users 
+        LEFT JOIN user_guild ON users.id = user_guild.user_id 
+        LEFT JOIN guild ON user_guild.guild_id = guild.id 
+        WHERE users.snowflake = ? AND guild.snowflake = ?`;
 
-      return new Promise((fulfill, reject) => {
-        con.query("SELECT * FROM users WHERE userID=" + con.escape(userID), function (error, result) {
-          if (!result || result == undefined) {
-            reject("No user with that ID was found")
-          } else {
-            let user = JSON.parse(JSON.stringify(result))[0];
-            if (!user || user == undefined) fulfill(null);
-            else {
-              user.roles = normalizeRolesByGuild(user.roles)
-              if (error) reject(error);
-              else fulfill(new DBUserObject(user));
-            }
-          }
+      const [userRows] = await con.execute(userSql, [snowflake, guild_snowflake]);
 
-        });
-      });
+      if (!userRows || userRows.length === 0) return null;
+      let user = userRows[0];
+      const roleSql = `
+        SELECT guild_role.snowflake as snowflake 
+        FROM user_guild_role 
+        LEFT JOIN users on user_guild_role.user_id = users.id 
+        LEFT JOIN guild_role on user_guild_role.guild_role_id = guild_role.id 
+        LEFT JOIN guild on guild_role.guild_id = guild.id 
+        WHERE users.snowflake = ? AND guild.snowflake = ?`;
+
+      const [roleRows] = await con.execute(roleSql, [snowflake, guild_snowflake]);
+
+      user.roles = roleRows.map(role => new DBGuildRoleObject(role).snowflake);
+      user.roles = normalizeRolesByGuild(user.roles);
+
+      return new DBUserObject(user);
     },
     /**
      * gets the currency information for a user from the database
-     * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} userIdResolvable 
+     * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} snowflakeResolvable 
      * @returns {DBUserCurrencyTotalObject} the database user currency object for the user, if it exists 
      */
-    getBalance: async (userIdResolvable) => {
-      await userIdResolvable;
-      let userID = await parseUserID(userIdResolvable);
+    getBalance: async (snowflakeResolvable) => {
+      const snowflake = await parsesnowflake(snowflakeResolvable);
 
-      return new Promise((fulfill, reject) => {
-        let query = "SELECT currency.name as name, currency.emoji as emoji, currency.id as id, SUM(amount) as total FROM users" +
-          " LEFT JOIN transaction ON users.userID = transaction.userid" +
-          " LEFT JOIN currency ON currency.id = transaction.currencyid" +
-          " WHERE users.userID=" + con.escape(userID) + " AND currency.active GROUP BY currency.id ORDER BY currency.id";
-        con.query(query, function (error, result) {
-          if (!result || result == undefined) {
-            reject("No transactions for userID " + userID + " were found. Trying SQL:" + query);
-          } else {
-            let userCurrencyArray = [];
-            let resultArray = JSON.parse(JSON.stringify(result));
-            resultArray.forEach(element => {
-              //each element should be an entry object with the name of the currency, the id of the currency, and the total amount of that currency the user has
-              userCurrencyArray.push(new DBCurrencyTotalObject(element.id, element.name, element.emoji, element.total));
-            });
-            if (error) reject(error);
-            else fulfill(new DBUserCurrencyTotalObject(userID, userCurrencyArray));
-          }
+      const query = `
+        SELECT currency.name as name, currency.emoji as emoji, currency.id as id, SUM(amount) as total 
+        FROM users 
+        LEFT JOIN transaction ON users.snowflake = transaction.snowflake 
+        LEFT JOIN currency ON currency.id = transaction.currencyid 
+        WHERE users.snowflake = ? AND currency.active 
+        GROUP BY currency.id 
+        ORDER BY currency.id`;
 
-        });
-      });
+      const [rows] = await con.execute(query, [snowflake]);
+
+      if (!rows || rows.length === 0) {
+        throw new Error(`No transactions for snowflake ${snowflake} were found.`);
+      }
+
+      const userCurrencyArray = rows.map(row =>
+        new DBCurrencyTotalObject(row.id, row.name, row.emoji, row.total)
+      );
+
+      return new DBUserCurrencyTotalObject(snowflake, userCurrencyArray);
     },
 
     /** gets all the info a database has about all users, and returns it as a DataBaseUser object array
      * @returns {DBUserObject[]} the database user objects if they exist
     */
-    getAll: () => {
-      let query = `SELECT * FROM users`
-      return new Promise((fulfill, reject) => {
-        con.query(query, function (error, result) {
-          if (error) reject(error);
-          else {
-            let arrayOfUsers = JSON.parse(JSON.stringify(result));
-            let returnableArray = arrayOfUsers.map(user => new DBUserObject(user));
-            fulfill(returnableArray);
-          }
-        });
-      });
+    getAll: async (guild_snowflake) => {
+      const query = `
+        SELECT users.snowflake 
+        FROM users 
+        LEFT JOIN user_guild ON users.id = user_guild.user_id 
+        LEFT JOIN guild ON user_guild.guild_id = guild.id 
+        WHERE guild.snowflake = ?`;
+
+      const [rows] = await con.execute(query, [guild_snowflake]);
+
+      // Fetch full user objects concurrently
+      const promises = rows.map(row => DataBaseActions.User.get(row.snowflake, guild_snowflake));
+      return await Promise.all(promises);
     },
-    /** gets all the info a database has about all users who have at least one non-everyone role, and returns it as a DataBaseUser object array
+    /** gets all the info a database has about all users who have at least one non-managed role, and returns it as a DataBaseUser object array
      * @returns {DBUserObject[]} the database user objects if they exist
     */
-    getMost: () => {
-      let query = "SELECT * FROM `users` WHERE LENGTH(`roles`) > 25"
-      return new Promise((fulfill, reject) => {
-        con.query(query, function (error, result) {
-          if (error) reject(error);
-          else {
-            let arrayOfUsers = JSON.parse(JSON.stringify(result));
-            let returnableArray = arrayOfUsers.map(user => new DBUserObject(user));
-            fulfill(returnableArray);
-          }
-        });
-      });
+    getMost: async (guild_snowflake) => {
+      const query = `
+        SELECT users.snowflake 
+        FROM users 
+        LEFT JOIN user_guild ON users.id = user_guild.user_id 
+        LEFT JOIN guild ON user_guild.guild_id = guild.id 
+        LEFT JOIN user_guild_role ON user_guild_role.user_guild_id = user_guild.id 
+        LEFT JOIN guild_role ON user_guild_role.guild_role_id = guild_role.id 
+        WHERE guild.snowflake = ? AND count(guild_role.id) > 1 
+        GROUP BY users.snowflake`;
+
+      const [rows] = await con.execute(query, [guild_snowflake]);
+
+      const promises = rows.map(row => DataBaseActions.User.get(row.snowflake, guild_snowflake));
+      return await Promise.all(promises);
     },
     /**
-     * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake|DBUserObject.userID|DBUserObject)} userID - The ID of the user to find, or an object that has an ID;
+     * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake|DBUserObject.snowflake|DBUserObject)} snowflake - The ID of the user to find, or an object that has an ID;
      */
-    new: async (userID) => {
-      userID = parseUserID(userID);
-      let exists = await DataBaseActions.User.get(userID)
+    new: async (snowflakeResolvable, guildsnowflake) => {
+      const snowflake = parsesnowflake(snowflakeResolvable);
+
+      // 1. Double check existence to prevent Duplicate Entry errors
+      const exists = await DataBaseActions.User.get(snowflake, guildsnowflake);
       if (exists != null) return exists;
-      else {
-        return new Promise((fulfill, reject) => {
-          let cakeDay = "opt-out";
-          let username = cleanString(client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).displayName);
-          let all_guilds = client.guilds.cache.filter(g => g.members.cache.has(userID));
-          let roles = [];
-          all_guilds.forEach(guild => {
-            let member = guild.members.cache.get(userID);
-            roles.push(...member.roles.cache.filter(r => !r.managed).map(r => r.id));
-          });
 
-          let newMember = {
-            userID: userID,
-            username: username,
-            cakeDay: assertIsCakeDay(cakeDay) ? cakeDay : null,
-            currentXP: 0,
-            totalXP: 0,
-            roles: roles
-          }
+      try {
+        // 2. Resolve Username Failover
+        // Check primary server first
+        const primaryGuild = client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+        const primaryMember = primaryGuild?.members.cache.get(snowflake);
+        let username = primaryMember ? cleanString(primaryMember.displayName) : null;
 
-          let sql = `INSERT INTO \`users\` (\`userID\`, \`username\`, \`cakeDay\`, \`currentXP\`, \`totalXP\`, \`roles\`) VALUES (${con.escape(newMember.userID)}, ${con.escape(newMember.username)}, ${con.escape(newMember.cakeDay)}, ${con.escape(newMember.currentXP)}, ${con.escape(newMember.totalXP)}, ${con.escape(JSON.stringify(newMember.roles))})`;
-          con.query(sql, function (error, result) {
-            if (error) reject(error);
-            else fulfill(newMember);
-          });
+        const allGuilds = await client.guilds.fetch();
+        const cakeday = "opt-out";
+        const cakeyear = new Date().getFullYear().toString();
+        const discoveredGuilds = [];
 
-        })
-      };
-    },
-    /**
-     * Updates a guild member's roles listed in the database
-     * @param {Discord.guildMember} guildMember 
-     *  @returns {Object} the result of the database update 
-     */
-    updateRoles: async (guildMember) => {
-      if (await assertIsSnowflake(guildMember.id)) {
-        let existingUser = await DataBaseActions.User.get(guildMember.id);
-        let rolesByGuild = normalizeRolesByGuild(existingUser?.roles);
-        rolesByGuild[guildMember.guild.id] = guildMember.roles.cache.map(r => isSnowflakeString(r.id) ? r.id : null).filter(Boolean);
-        return await privateDataBaseActions.User.update({ id: guildMember.id, roles: rolesByGuild })
+        // Search all guilds for a username and collect role data
+        await Promise.all(allGuilds.map(async (partialGuild) => {
+          try {
+            const guild = await partialGuild.fetch();
+            const member = await guild.members.fetch(snowflake);
+
+            if (member) {
+              if (!username) username = cleanString(member.displayName);
+
+              // Store the roles per guild to pass to the update function later
+              discoveredGuilds.push({
+                guildId: guild.id,
+                roles: member.roles.cache.filter(r => !r.managed).map(r => r.id)
+              });
+            }
+          } catch (err) { /* User not in this guild */ }
+        }));
+
+        // Final fallback for usernames
+        if (!username) username = "Unknown User";
+
+        // 3. The seed Insert
+        // We create the user record FIRST so privateDataBaseActions.User.update finds them
+        const sql = `
+          INSERT INTO \`users\` (\`snowflake\`, \`username\`) 
+          VALUES (?, ?) 
+          ON DUPLICATE KEY UPDATE snowflake = values(snowflake), username = values(username)`;
+
+        await con.execute(sql, [snowflake, username]);
+
+        // 4. Role and Table Synchronization
+        for (const data of discoveredGuilds) {
+          await privateDataBaseActions.User.update({
+            snowflake: snowflake,
+            cakeday: cakeday,
+            cakeyear: cakeyear,
+            roles: { [data.guildId]: data.roles }
+          }, data.guildId);
+        }
+
+        // 5. Final Return
+        return await DataBaseActions.User.get(snowflake, guildsnowflake);
+
+      } catch (criticalError) {
+        console.error("Critical error creating new user:", criticalError);
+        throw criticalError;
       }
     },
+
+    updateCakeDay: async (snowflakeResolvable, cakeday, guildsnowflake) => {
+      if (!assertIsCakeDay(cakeday)) throw new Error("Invalid Cake Day format");
+      const snowflake = parsesnowflake(snowflakeResolvable);
+      return await privateDataBaseActions.User.update({ snowflake, cakeday }, guildsnowflake);
+    },
+
     /**
-     * Updates a guild member's cakeday listed in the database
-     * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake|DBUserObject.userID|DBUserObject)} userIdResolvable the user id or an object containing it in a resolvable form
-     * @param {string} cakeDay the cakeday string
-     * @returns 
+     * Checks if a user possesses any roles in a specific guild flagged with sensitive data.
+     * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} snowflakeResolvable 
+     * @param {string} guild_snowflake 
+     * @returns {Promise<boolean>} True if the user has redacted info roles, otherwise false.
      */
-    updateCakeDay: async (userIdResolvable, cakeDay) => {
-      let userID = parseUserID(userIdResolvable) || null;
-      return await privateDataBaseActions.User.update({ id: userID, cakeDay: assertIsCakeDay(cakeDay) ? cakeDay : null })
+    hasSensitiveRoles: async (snowflakeResolvable, guild_snowflake) => {
+      const snowflake = await parsesnowflake(snowflakeResolvable);
+
+      // We use SELECT 1 and LIMIT 1 for maximum performance. 
+      // It stops searching the millisecond it finds a single match.
+      const sql = `
+        SELECT 1 
+        FROM user_guild_role ugr
+        INNER JOIN users u ON ugr.user_id = u.id
+        INNER JOIN guild_role gr ON ugr.guild_role_id = gr.id
+        INNER JOIN guild g ON gr.guild_id = g.id
+        WHERE u.snowflake = ? 
+          AND g.snowflake = ? 
+          AND gr.has_redacted_info = 1 
+        LIMIT 1`;
+
+      const [rows] = await con.execute(sql, [snowflake, guild_snowflake]);
+
+      // If the array has anything in it, they have a sensitive role!
+      return rows.length > 0;
+    },
+  },
+  Guild: {
+    /*
+    +---------------+--------------+------+-----+---------+----------------+
+    | Field         | Type         | Null | Key | Default | Extra          |
+    +---------------+--------------+------+-----+---------+----------------+
+    | id            | double       | NO   | PRI | NULL    | auto_increment |
+    | snowflake     | varchar(100) | NO   | UNI | NULL    |                |
+    | isTestGuild   | tinyint(1)   | NO   |     | 0       |                |
+    | friendly_name | varchar(100) | NO   | UNI | NULL    |                |
+    +---------------+--------------+------+-----+---------+----------------+
+    */
+    get: async (snowflakeResolvable) => {
+      const snowflake = await parsesnowflake(snowflakeResolvable);
+
+      const [guildRows] = await con.execute("SELECT * FROM guild WHERE snowflake = ?", [snowflake]);
+
+      if (!guildRows || guildRows.length === 0) {
+        // We need to create a new guild object in the database
+        try {
+          const discordGuild = await client.guilds.fetch(snowflake);
+          const newGuild = await DataBaseActions.Guild.new(
+            new DBGuildObject({ snowflake: snowflake, friendly_name: discordGuild.name, isTestGuild: false })
+          );
+          return newGuild;
+        } catch (error) {
+          throw new Error(`No guild with ID ${snowflake} was found in Discord or DB. Error: ${error}`);
+        }
+      }
+
+      let guild = guildRows[0];
+
+      // Get the roles
+      const roleSql = `
+        SELECT guild_role.* 
+        FROM guild_role 
+        LEFT JOIN guild on guild_role.guild_id = guild.id 
+        WHERE guild.snowflake = ?`;
+
+      const [roleRows] = await con.execute(roleSql, [snowflake]);
+      guild.roles = roleRows.map(role => new DBGuildRoleObject(role));
+
+      return new DBGuildObject(guild);
+    },
+
+    /**
+        * Gets all guilds in the database with their associated roles.
+        */
+    getAll: async () => {
+      const [guildRows] = await con.execute("SELECT * FROM guild");
+
+      // Use Promise.all to fetch roles for all guilds concurrently
+      const promises = guildRows.map(async (guild) => {
+        const roleSql = `
+          SELECT guild_role.* 
+          FROM guild_role 
+          LEFT JOIN guild on guild_role.guild_id = guild.id 
+          WHERE guild.snowflake = ?`;
+
+        const [roleRows] = await con.execute(roleSql, [guild.snowflake]);
+
+        guild.roles = roleRows.map(role => new DBGuildRoleObject(role));
+        return new DBGuildObject(guild);
+      });
+
+      return await Promise.all(promises);
+    },
+
+    /**
+     * Creates a new guild in the database if it doesn't already exist.
+     * @param {DBGuildObject} dbGuildObject the basic construction object for the guild
+     */
+    new: async (dbGuildObject) => {
+      if (!dbGuildObject || !dbGuildObject.snowflake || !dbGuildObject.friendly_name || typeof dbGuildObject.isTestGuild !== 'boolean') {
+        throw new Error("Invalid dbGuildObject");
+      }
+
+      const snowflake = await parsesnowflake(dbGuildObject.snowflake);
+
+      const exists = await DataBaseActions.Guild.get(snowflake);
+      if (exists != null) return exists;
+
+      // Insert Guild
+      const sql = "INSERT INTO `guild` (`snowflake`, `friendly_name`, `isTestGuild`) VALUES (?, ?, ?)";
+      await con.execute(sql, [snowflake, dbGuildObject.friendly_name ?? '', dbGuildObject.isTestGuild ? 1 : 0]);
+
+      // Add roles if they exist
+      if (dbGuildObject.roles && Array.isArray(dbGuildObject.roles)) {
+        const roleSql = `
+          INSERT INTO \`guild_role\` (\`guild_id\`, \`snowflake\`, \`friendly_name\`, \`has_redacted_info\`, \`is_update_role\`) 
+          VALUES ((SELECT id FROM guild WHERE snowflake = ?), ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE
+          friendly_name = VALUES(friendly_name),
+          has_redacted_info = VALUES(has_redacted_info),
+          is_update_role = VALUES(is_update_role)`;
+
+        // Sequential insert to avoid flooding the connection pool
+        for (const role of dbGuildObject.roles) {
+          try {
+            await con.execute(roleSql, [
+              snowflake,
+              role.snowflake,
+              role.friendly_name ?? '',
+              role.has_redacted_info ? 1 : 0,
+              role.is_update_role ? 1 : 0
+            ]);
+          } catch (error) {
+            console.error(`Error adding role ${role.friendly_name} to guild ${dbGuildObject.friendly_name}:`, error);
+          }
+        }
+      }
+
+      return { snowflake, friendly_name: dbGuildObject.friendly_name ?? '', isTestGuild: dbGuildObject.isTestGuild ? 1 : 0 };
+    },
+
+    update_isTestGuild: async (snowflakeResolvable, isTestGuild) => {
+      const snowflake = parsesnowflake(snowflakeResolvable);
+      const [result] = await con.execute("UPDATE guild SET isTestGuild = ? WHERE snowflake = ?", [isTestGuild, snowflake]);
+      return result;
+    },
+
+    update_friendly_name: async (snowflakeResolvable, newFriendlyName) => {
+      const snowflake = parsesnowflake(snowflakeResolvable);
+      const [result] = await con.execute("UPDATE guild SET friendly_name = ? WHERE snowflake = ?", [newFriendlyName, snowflake]);
+      return result;
+    },
+
+    update_roles: async (snowflakeResolvable, roles) => {
+      const snowflake = parsesnowflake(snowflakeResolvable);
+
+      const guild = await DataBaseActions.Guild.get(snowflake);
+      if (!guild) throw new Error("Guild not found");
+
+      // Get internal database ID for the guild
+      const [guildIdResult] = await con.execute("SELECT id FROM guild WHERE snowflake = ?", [snowflake]);
+      if (guildIdResult.length === 0) throw new Error("Guild ID could not be resolved in the database.");
+
+      const internalGuildId = guildIdResult[0].id;
+
+      // Process roles
+      for (const role of roles) {
+        const existingRole = guild.roles.find(r => r.snowflake === role.snowflake);
+
+        if (existingRole) {
+          // Check if properties have changed
+          if (existingRole.friendly_name !== role.friendly_name ||
+            existingRole.has_redacted_info !== role.has_redacted_info ||
+            existingRole.is_update_role !== role.is_update_role) {
+
+            const updateSql = `
+              UPDATE guild_role 
+              SET friendly_name = ?, has_redacted_info = ?, is_update_role = ? 
+              WHERE snowflake = ? AND guild_id = ?`;
+
+            try {
+              await con.execute(updateSql, [
+                role.friendly_name,
+                role.has_redacted_info,
+                role.is_update_role,
+                role.snowflake,
+                internalGuildId
+              ]);
+            } catch (error) {
+              console.error(`Error updating role ${role.friendly_name} in guild ${guild.friendly_name}:`, error);
+            }
+          }
+        } else {
+          // Add the new role
+          const insertSql = `
+            INSERT INTO \`guild_role\` (\`guild_id\`, \`snowflake\`, \`friendly_name\`, \`has_redacted_info\`, \`is_update_role\`) 
+            VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE
+            friendly_name = VALUES(friendly_name),
+            has_redacted_info = VALUES(has_redacted_info),
+            is_update_role = VALUES(is_update_role)`;
+
+          try {
+            await con.execute(insertSql, [
+              internalGuildId,
+              role.snowflake,
+              role.friendly_name,
+              role.has_redacted_info,
+              role.is_update_role
+            ]);
+          } catch (error) {
+            console.error(`Error adding role ${role.friendly_name} to guild ${guild.friendly_name}:`, error);
+          }
+        }
+      }
+      return true;
     }
   },
   Economy: {
@@ -417,55 +787,66 @@ let DataBaseActions = {
       * @returns {DBCurrencyObject[]} the valid currency objects if they exist
     */
     getValidCurrencies: async () => {
-      if (ValidCurrenciesCache.length == 0) {
-        con.query("SELECT * FROM currency WHERE active;", function (error, result) {
-          if (error) console.log("Error loading currency cache: " + error);
-          else {
-            let arrayOfCurrencies = JSON.parse(JSON.stringify(result));
-            arrayOfCurrencies.forEach(currency => {
-              ValidCurrenciesCache.push(new DBCurrencyObject(currency.id, currency.name, currency.emoji));
-            });
-            console.log("Currency cache loaded with " + arrayOfCurrencies.length + " currencies.")
-          }
-        });
+      if (ValidCurrenciesCache.length === 0) {
+        try {
+          const [rows] = await con.execute("SELECT * FROM currency WHERE active = 1");
 
+          ValidCurrenciesCache = rows.map(currency =>
+            new DBCurrencyObject(currency.id, currency.name, currency.emoji)
+          );
+
+          console.log(`Currency cache loaded with ${ValidCurrenciesCache.length} currencies.`);
+        } catch (error) {
+          console.error("Error loading currency cache:", error);
+          throw error;
+        }
       }
       return ValidCurrenciesCache;
     },
     /**
      * Creates a new transaction in the database
-     * @param {Discord.User|Discord.GuildMember|Discord.Snowflake|DBUserObject.userID|DBUserObject} userIdResolvable 
+     * @param {Discord.User|Discord.GuildMember|Discord.Snowflake|DBUserObject.snowflake|DBUserObject} snowflakeResolvable 
      * @param {number} currencyId 
      * @param {number} amount 
-     * @param {Discord.User|Discord.GuildMember|Discord.Snowflake|DBUserObject.userID|DBUserObject} initiatedByUserIdResolvable 
+     * @param {Discord.User|Discord.GuildMember|Discord.Snowflake|DBUserObject.snowflake|DBUserObject} initiatedBysnowflakeResolvable 
      * @param {string} reason the reason for the transaction, could also be considered the category. E.g. "gift", "purchase", "prize", etc. Should be a simple string that can be used to easily identify the transaction in the future, and group it with similar transactions.
      * @returns 
      */
-    newTransaction: async (userIdResolvable, currencyId, amount, initiatedByUserIdResolvable, reason) => {
-      await userIdResolvable;
-      let userID = await parseUserID(userIdResolvable);
-      let initatedbyuserid = await parseUserID(initiatedByUserIdResolvable);
-      let currency = ValidCurrenciesCache.find(c => c.id == currencyId);
-      if (!currency) throw new Error("Invalid currency ID");
-      return new Promise((fulfill, reject) => {
-        let sql = `INSERT INTO \`transaction\` (\`userID\`, \`currencyID\`, \`amount\`, \`initatedbyuserid\`, \`reason\`) VALUES (${con.escape(userID)}, ${con.escape(currencyId)}, ${con.escape(amount)}, ${con.escape(initatedbyuserid)}, ${con.escape(reason)})`;
-        con.query(sql, function (error, result) {
-          if (error) reject(error);
-          else fulfill(result);
-        });
-      })
-    },
+    newTransaction: async (snowflakeResolvable, currencyId, amount, initiatedBysnowflakeResolvable, reason) => {
+      const snowflake = await parsesnowflake(snowflakeResolvable);
+      const initatedbysnowflake = await parsesnowflake(initiatedBysnowflakeResolvable);
 
-    getTransactionHistory: async (userIdResolvable) => {
-      await userIdResolvable;
-      let userID = await parseUserID(userIdResolvable);
-      return new Promise((fulfill, reject) => {
-        let sql = `SELECT transaction.*, currency.name as currencyName, currency.emoji as currencyEmoji FROM transaction LEFT JOIN currency ON transaction.currencyid = currency.id WHERE transaction.userid=${con.escape(userID)} ORDER BY transaction.id DESC`;
-        con.query(sql, function (error, result) {
-          if (error) reject(error);
-          else fulfill(result);
-        });
-      })
+      const currency = ValidCurrenciesCache.find(c => c.id == currencyId);
+      if (!currency) throw new Error("Invalid currency ID");
+
+      const sql = `
+        INSERT INTO \`transaction\` (\`userid\`, \`currencyID\`, \`amount\`, \`initatedbyuserid\`, \`reason\`)
+        VALUES (?, ?, ?, ?, ?)`;
+
+      const [result] = await con.execute(sql, [
+        snowflake,
+        currencyId,
+        amount,
+        initatedbysnowflake,
+        reason
+      ]);
+
+      return result;
+    },
+    /**
+     * Gets the transaction history for a specific user
+     */
+    getTransactionHistory: async (snowflakeResolvable) => {
+      const snowflake = await parsesnowflake(snowflakeResolvable);
+      const sql = `
+        SELECT transaction.*, currency.name as currencyName, currency.emoji as currencyEmoji 
+        FROM transaction 
+        LEFT JOIN currency ON transaction.currencyid = currency.id 
+        WHERE transaction.userid = ?
+        ORDER BY transaction.id DESC`;
+
+      const [rows] = await con.execute(sql, [snowflake]);
+      return rows;
     },
     /** gets the leaderboard for a specific currency, sorted by total amount of that currency each user has, limited to a specified number of users
       * @param {number} currencyId the ID of the currency to get the leaderboard for
@@ -473,39 +854,108 @@ let DataBaseActions = {
        * @returns {LeaderboardEntryObject[]} an array of user currency total objects representing the leaderboard for that currency, sorted by total amount of that currency each user has
     */
 
+    /** 
+     * Gets the leaderboard for a specific currency, sorted by total amount
+     * @param {number} currencyId the ID of the currency to get the leaderboard for
+     * @param {number} [limit=10] the number of users to return in the leaderboard
+     * @returns {Promise<LeaderboardEntryObject[]>} an array of user currency total objects
+     */
     getLeaderboard: async (currencyId, limit = 10) => {
-      let currency = ValidCurrenciesCache[ValidCurrenciesCache.findIndex(c => c.id == currencyId)];
+      const currency = ValidCurrenciesCache.find(c => c.id == currencyId);
       if (!currency) throw new Error("Invalid currency ID");
-      return new Promise((fulfill, reject) => {
-        let sql = `SELECT users.userID, users.username, SUM(transaction.amount) as total, currency.name as currencyName, currency.emoji as currencyEmoji FROM users LEFT JOIN transaction ON users.userID = transaction.userid LEFT JOIN currency ON transaction.currencyid = currency.id WHERE transaction.currencyid=${con.escape(currencyId)} AND currency.active GROUP BY users.userID ORDER BY total DESC LIMIT ${con.escape(limit)}`;
-        con.query(sql, function (error, result) {
-          if (error) reject(error);
-          else fulfill(new Array(...result).map(entry => new LeaderboardEntryObject(entry.userID, entry.username, entry.total, entry.currencyName, entry.currencyEmoji)));
-        });
-      })
-    }
 
+      const sql = `
+        SELECT users.snowflake, users.username, SUM(transaction.amount) as total, 
+               currency.name as currencyName, currency.emoji as currencyEmoji 
+        FROM users 
+        LEFT JOIN transaction ON users.snowflake = transaction.userid
+        LEFT JOIN currency ON transaction.currencyid = currency.id 
+        WHERE transaction.currencyid = ? AND currency.active = 1 
+        GROUP BY users.snowflake 
+        ORDER BY total DESC 
+        LIMIT ?`;
+
+      // parseInt is important here because passing a string to a ? for a LIMIT clause throws a syntax error in some MySQL versions
+      const [rows] = await con.execute(sql, [currencyId, parseInt(limit)]);
+
+      return rows.map(entry =>
+        new LeaderboardEntryObject(
+          entry.snowflake,
+          entry.username,
+          entry.total,
+          entry.currencyName,
+          entry.currencyEmoji
+        )
+      );
+    }
   },
   /**
-   * Initiates the database connection
+   * Initiates the database connection and synchronizes caches
    * @param {Object} Module
    * @param {Discord.Client} Module.client the only required member of a module object in order to initialize the database
-   * @returns 
    */
-  init: (Module) => {
+  init: async (Module) => {
     client = Module.client;
-    if (!hasBeenInitialized) {
-      con.connect(function (err) {
-        if (err && !err.toString().indexOf("Cannot enqueue Handshake after already enqueuing a Handshake") > -1) throw err;
-        console.log("Connected to DataBase!");
-      })
-      hasBeenInitialized = true;
-    }
-    // initialize the currency cache
-    DataBaseActions.Economy.getValidCurrencies();
-    return con;
-  }
 
+    if (!hasBeenInitialized) {
+      try {
+        // Ping the database to verify the single connection is alive and ready
+        await con.ping();
+        console.log("Connected to DataBase!");
+        hasBeenInitialized = true;
+      } catch (err) {
+        console.error("Failed to establish Database connection:", err);
+        throw err; // Halt initialization if the DB is unreachable
+      }
+    }
+
+    try {
+      // 1. Initialize the currency cache
+      await DataBaseActions.Economy.getValidCurrencies();
+
+      // 2. Synchronize Guilds
+      const dbGuilds = await DataBaseActions.Guild.getAll();
+
+      // Use a for...of loop so we can await each insertion sequentially.
+      const guilds = await client.guilds.fetch();
+      for (const guild of guilds.values()) {
+
+        // If the guild from Discord is not found in our Database cache
+        if (!dbGuilds.find(g => g.snowflake === guild.id)) {
+
+          // Get all non-managed roles in the guild
+          const roles = await guild.roles.fetch();
+          for (const role of roles.values()) {
+            if (!role.managed) {
+              roles.push(new DBGuildRoleObject({
+                snowflake: role.id,
+                friendly_name: role.name,
+                has_redacted_info: false,
+                is_update_role: false
+              }));
+            }
+          }
+
+          const newGuild = new DBGuildObject({
+            snowflake: guild.id,
+            friendly_name: guild.name,
+            isTestGuild: false,
+            roles: roles
+          });
+
+          // Insert into the database
+          try {
+            await DataBaseActions.Guild.new(newGuild);
+            console.log(`Added guild ${guild.name} to the database.`);
+          } catch (err) {
+            console.error(`Error adding guild ${guild.name} to the database:`, err);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error loading caches or synchronizing guilds:", err);
+    }
+  }
 }
 
-module.exports = DataBaseActions
+module.exports = DataBaseActions;

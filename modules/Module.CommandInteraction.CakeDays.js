@@ -36,14 +36,14 @@ async function testcakeOrJoinDays(guild) {
       ":cake: "
     ];
 
-    let cakeOrJoinDayPeeps = (await db.User.getMost()).filter(user => user.cakeDay != null && user.cakeDay != "opt-out");
+    let cakeOrJoinDayPeeps = (await db.User.getMost(guild)).filter(user => user.cakeday != null && user.cakeday != "opt-out");
     let people_with_a_cakeday = (await Promise.all(
       cakeOrJoinDayPeeps.map(async (peep) => {
-        let cakeOrJoinDayDate = peep.cakeDay;
+        let cakeOrJoinDayDate = peep.cakeday;
         // fallback to join date if invalid
         if (!cakeOrJoinDayDate || cakeOrJoinDayDate.length < 3) {
           try {
-            const member = await guild.members.fetch(peep.userID);
+            const member = await guild.members.fetch(peep.snowflake);
             cakeOrJoinDayDate = member.joinedAt;
           } catch {
             return null; // skip if member not found
@@ -64,11 +64,14 @@ async function testcakeOrJoinDays(guild) {
 
     for (const person of people_with_a_cakeday) {
       try {
-        let member = await guild.members.fetch(person.userID);
+        let member = await guild.members.fetch(person.snowflake);
         if (!member) continue;
         let joinedAt = moment(member.joinedAt);
-        //If they joined in the last three days, skip them
-        if (curDate.diff(joinedAt, 'days') < 3) continue;
+        if (person.cakeyear) {
+          joinedAt.year(person.cakeyear);
+        }
+        //If they joined in the last few days, skip them
+        if (curDate.diff(joinedAt, 'days') < 6) continue;
         //check if they have the role already, meaning we've already celebrated them
         //if (member.roles.cache.has(snowflakes.roles.CakeDay)) continue;
         //set curdate to three days in the future to check years in guild correctly
@@ -118,7 +121,7 @@ async function testcakeOrJoinDays(guild) {
         inline: false
       };
       for (const person of people) {
-        embedField.value += `${(person.member.displayName)} - ${person.userData.cakeDay}\n`;
+        embedField.value += `${(person.member.displayName)} - ${person.userData.cakeday}\n`;
         //Give them the role
         try {
           await person.member.roles.add(snowflakes.roles.CakeDay, "Thrice-fold Name Day Celebration");
@@ -238,7 +241,7 @@ Module
         } else if (target && target != interaction.member) {
           return interaction.reply({ content: "You don't have permission to do that", ephemeral: true });
         }
-        await db.User.updateCakeDay(cakeOrJoinDayUpdateTarget, "opt-out");
+        await db.User.updateCakeDay(cakeOrJoinDayUpdateTarget, "opt-out", interaction.guild.id);
         return interaction.reply({ content: "opt-out successful", ephemeral: true });
       }
       else if (cakeOrJoinDayDate) {
@@ -256,7 +259,7 @@ Module
             } else if (target && target != interaction.member) {
               return interaction.reply({ content: "You don't have permission to do that", ephemeral: true });
             }
-            await db.User.updateCakeDay(cakeOrJoinDayUpdateTarget, cakeOrJoinDayDate);
+            await db.User.updateCakeDay(cakeOrJoinDayUpdateTarget, cakeOrJoinDayDate, interaction.guild.id);
             return interaction.reply({ content: "🎂 Thrice fold nameday set to " + cakeOrJoinDayDate + " 🎂", ephemeral: true });
           }
         } catch (e) {
@@ -265,9 +268,9 @@ Module
           throw e;
         }
       } else if (target && !cakeOrJoinDayDate) {
-        let targetBd = await db.User.get(target.id)
-        if (!targetBd) targetBd = await db.User.new(target.id);
-        targetBd = targetBd.cakeDay
+        let targetBd = await db.User.get(target.id, interaction.guild.id)
+        if (!targetBd) targetBd = await db.User.new(target.id, interaction.guild.id);
+        targetBd = targetBd.cakeday
         let targetName = (await interaction.guild.members.fetch(target.id)).displayName
 
         if (targetBd.indexOf("opt") > -1) {
@@ -275,26 +278,26 @@ Module
         }
         else return interaction.reply({ content: `${targetName}'s name day is ${targetBd}`, ephemeral: true })
       } else {
-        let userCake = await db.User.get(interaction.member.id)
-        if (userCake.cakeDay.indexOf("opt") > -1) {
+        let userCake = await db.User.get(interaction.member.id, interaction.guild.id)
+        if (userCake.cakeday.indexOf("opt") > -1) {
           userCake = null;
         }
         await interaction.deferReply({ ephemeral: true });
 
         //get people with cakeOrJoinDays in the next 7 days
         //filter to only those with a cakeOrJoinDay set, not opted out, not the user themselves, and with a date in the future within 7 days
-        //return new Date(`${ userDbObj.cakeDay } ${ now.getFullYear() }`) > now;
-        let cakeOrJoinDayPeeps = (await db.User.getMost()).filter(user => user.cakeDay != null
-          && user.cakeDay != "opt-out"
-          && user.userID != interaction.member.id
-          && moment(new Date(`${user.cakeDay} ${moment().year()}`)).isAfter(moment())
-          && moment(new Date(`${user.cakeDay} ${moment().year()}`)).diff(moment(), 'days') <= 7
+        //return new Date(`${ userDbObj.cakeday } ${ now.getFullYear() }`) > now;
+        let cakeOrJoinDayPeeps = (await db.User.getMost(interaction.guild.id)).filter(user => user.cakeday != null
+          && user.cakeday != "opt-out"
+          && user.snowflake != interaction.member.id
+          && moment(new Date(`${user.cakeday} ${moment().year()}`)).isAfter(moment())
+          && moment(new Date(`${user.cakeday} ${moment().year()}`)).diff(moment(), 'days') <= 7
         );
 
         //sort by nearest date in the future
         cakeOrJoinDayPeeps.sort((a, b) => {
-          let aDate = new Date(`${a.cakeDay} ${moment().year()}`);
-          let bDate = new Date(`${b.cakeDay} ${moment().year()}`);
+          let aDate = new Date(`${a.cakeday} ${moment().year()}`);
+          let bDate = new Date(`${b.cakeday} ${moment().year()}`);
           return aDate - bDate;
         });
         //limit to 10 results
@@ -302,15 +305,15 @@ Module
 
         for (const peep of cakeOrJoinDayPeeps) {
           //use the join date if cakeOrJoinDay is invalid
-          if (peep.cakeDay.length < 3) {
-            peep.cakeDay = (await interaction.guild.members.fetch(peep.userID)).joinedAt;
+          if (peep.cakeday.length < 3) {
+            peep.cakeday = (await interaction.guild.members.fetch(peep.snowflake)).joinedAt;
           }
           try {
-            let member = await interaction.guild.members.fetch(peep.userID);
+            let member = await interaction.guild.members.fetch(peep.snowflake);
             peep.displayName = member.displayName;
           } catch (error) {
             //member not found, remove from list
-            cakeOrJoinDayPeeps = cakeOrJoinDayPeeps.filter(p => p.userID != peep.userID);
+            cakeOrJoinDayPeeps = cakeOrJoinDayPeeps.filter(p => p.snowflake != peep.snowflake);
             continue;
           }
         }
@@ -321,7 +324,7 @@ Module
         for (const uData of cakeOrJoinDayPeeps) {
           try {
             //just use the raw date string from the database
-            upcomingCakeUsers += `**${(uData.displayName)}** - ${uData.cakeDay}\n`;
+            upcomingCakeUsers += `**${(uData.displayName)}** - ${uData.cakeday}\n`;
           } catch {
             continue;
           }
@@ -333,7 +336,7 @@ Module
         let userCakeString;
         if (!userCake) {
           userCakeString = "You haven't told me when your nameday is yet. To set it, use '/nameday date'"
-        } else userCakeString = "Your nameday is " + userCake.cakeDay + "! to reset it, use '/nameday date'"
+        } else userCakeString = "Your nameday is " + userCake.cakeday + "! to reset it, use '/nameday date'"
 
         let embed = u.embed()
           .setTitle("Upcoming Name Days:")
@@ -347,36 +350,36 @@ Module
   }).addInteractionHandler({
     customId: "cakedayopt-out",
     process: async (interaction) => {
-      let targetBd = await db.User.get(interaction.member.id)
-      if (!targetBd) targetBd = await db.User.new(interaction.member.id);
-      targetBd = targetBd.cakeDay
+      let targetBd = await db.User.get(interaction.member.id, interaction.guild.id)
+      if (!targetBd) targetBd = await db.User.new(interaction.member.id, interaction.guild.id);
+      targetBd = targetBd.cakeday
       if (!targetBd.indexOf("opt-out" > -1)) {
         return interaction.reply({ content: "You have to be opted in to opt out", ephemeral: true });
       } else {
-        await db.User.updateCakeDay(interaction.member.id, "opt-out");
+        await db.User.updateCakeDay(interaction.member.id, "opt-out", interaction.guild.id);
         return interaction.reply({ content: "Opt-out successful", ephemeral: true });
       }
     }
   }).addInteractionHandler({
     customId: "cakedayopt-in",
     process: async (interaction) => {
-      let targetBd = await db.User.get(interaction.member.id)
-      if (!targetBd) targetBd = await db.User.new(interaction.member.id);
-      targetBd = targetBd.cakeDay
+      let targetBd = await db.User.get(interaction.member.id, interaction.guild.id)
+      if (!targetBd) targetBd = await db.User.new(interaction.member.id, interaction.guild.id);
+      targetBd = targetBd.cakeday
       if (targetBd.indexOf("opt-out" > -1)) {
         let joinedAt = (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(interaction.member.id).joinedAt
         let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
         let cakeOrJoinDayDate = months[joinedAt.getMonth()] + " " + joinedAt.getDate();
-        await db.User.updateCakeDay(interaction.member.id, cakeOrJoinDayDate);
+        await db.User.updateCakeDay(interaction.member.id, cakeOrJoinDayDate, interaction.guild.id);
         return interaction.reply({ content: "Opt-in successful, your name day has been set to your server join date", ephemeral: true });
       } else return interaction.reply({ content: "You have already opted-in to namedays, your current nameday is " + targetBd, ephemeral: true });
     }
   }).addInteractionHandler({
     customId: "cakedayinfo",
     process: async (interaction) => {
-      let targetBd = await db.User.get(interaction.member.id)
-      if (!targetBd) targetBd = await db.User.new(target.id);
-      targetBd = targetBd.cakeDay
+      let targetBd = await db.User.get(interaction.member.id, interaction.guild.id)
+      if (!targetBd) targetBd = await db.User.new(interaction.member.id, interaction.guild.id);
+      targetBd = targetBd.cakeday
       return interaction.reply({ content: "Thrice-fold Name Days are a once a year three day celebration of you joining the server. To set your thrice-fold name day or opt out, use /nameday. Those who opt-in get a special color and bonus xp for 72 hours on the day they select. \n\nTo ensure privacy, this feature was developed by members of this server to be absolutely sure your nameday won't be used for anything but celebrating you, on this server. \n\nYour nameday is currently set to " + targetBd, ephemeral: true });
     }
   });

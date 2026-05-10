@@ -128,16 +128,63 @@ const Module = new Augur.Module()
     name: "dbgetall",
     category: "Bot Admin",
     hidden: true,
-    description: "This command loops through all members in the guild and attempts to add them to the database",
+    description: "This command loops through all members in the guild and syncs them to the new database",
     parseParams: true,
     process: async (msg) => {
+      try {
+        // 1. Give visual feedback that a long process has started
+        await msg.react("⏳");
 
-      msg.guild.members.cache.map(m => db.User.new(m.id));
-      msg.react("🎚");
-      u.clean(msg, 10000);
+        await db.Guild.get(msg.guild.id); // Ensure the guild is in the database
 
+        const rolesToSync = [];
+        for (const role of msg.guild.roles.cache.values()) {
+          if (!role.managed) {
+            rolesToSync.push(new db.DBGuildRoleObject({
+              snowflake: role.id,
+              friendly_name: role.name,
+              has_redacted_info: false,
+              is_update_role: false
+            }));
+          }
+        }
+        await db.Guild.update_roles(msg.guild.id, rolesToSync);
+
+        const members = await msg.guild.members.fetch();
+
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (const [id, m] of members) {
+          try {
+            let dbUser = await db.User.new(id, msg.guild.id);
+
+            // Update their Cake Year to their actual join date
+            if (m.joinedAt && dbUser) {
+              await dbUser.updateCakeYear(m.joinedAt.getFullYear(), msg.guild.id);
+            }
+            successCount++;
+          } catch (err) {
+            console.error(`Failed to sync user ${id} (${m.user.tag}):`, err);
+            errorCount++;
+          }
+        }
+
+        // 4. Cleanup and final reporting
+        await msg.reactions.removeAll().catch(() => { }); // Clear the hourglass
+        await msg.react("🎚"); // Add the original success reaction
+
+        // Optional: Send a temporary status report
+        const reply = await msg.reply(`Database sync complete! Synced **${successCount}** members. (Errors: ${errorCount})`);
+        u.clean(reply, 10000);
+        u.clean(msg, 10000);
+
+      } catch (globalError) {
+        console.error("Critical error in dbgetall command:", globalError);
+        msg.reply("A critical error occurred while syncing the database. Check the console.");
+      }
     },
-    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id) || msg.member.roles.cache.has(snowflakes.roles.BotAssistant)
+    permissions: (msg) => Module.config.AdminIds.includes(msg.author.id) || msg.member.roles.cache.has(snowflakes.roles.BotMaster)
   })
 
   .addEvent("ready", () => {
@@ -146,15 +193,17 @@ const Module = new Augur.Module()
     u.setClient(Module.client);
   }).addEvent("guildMemberUpdate", async (oldMember, newMember) => {
     if (newMember.guild.id == snowflakes.guilds.PrimaryServer) {
+      let dbUser = await db.User.get(newMember.id, newMember.guild.id);
+      if (!dbUser) dbUser = await db.User.new(newMember.id, newMember.guild.id);
       if (newMember.roles.cache.size > oldMember.roles.cache.size) {
         // Role added
         try {
-          await db.User.updateRoles(newMember);
+          await dbUser.updateRoles(newMember.guild.id);
         } catch (error) { u.errorHandler(error, "Update Roles on Role Add"); }
       } else if (newMember.roles.cache.size < oldMember.roles.cache.size) {
         // Role removed
         try {
-          await db.User.updateRoles(newMember);
+          await dbUser.updateRoles(newMember.guild.id);
         } catch (error) { u.errorHandler(error, "Update Roles on Role Remove"); }
       }
     }
@@ -180,7 +229,7 @@ const Module = new Augur.Module()
       return setInterval(async () => {
         //SQL will time out if we don't send a keep alive. In order to do this, we will get the bot from the database, and have it overwrite its own entry with identical data
         let myself = await db.User.get(Module.client.user.id);
-        await db.User.updateCakeDay(myself.userID, myself.cakeDay);
+        await db.User.updateCakeDay(myself.snowflake, myself.cakeDay);
       }, hours * secondsInAnHour * 1000);
     } catch (error) { u.errorHandler(error, "Blog Clockwork"); }
   })

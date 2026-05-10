@@ -94,7 +94,7 @@ const Module = new Augur.Module()
 
       //set up common variables we will need in a bit
       let guild = member.guild;
-      let user = await db.User.get(member.id);
+      let user = await db.User.get(member.id, member.guild.id);
       let introductions = guild.channels.cache.get(snowflakes.channels.introductions); // #introductions
       let modLogs = guild.channels.cache.get(snowflakes.channels.modRequests); // #mod-logs
 
@@ -137,7 +137,7 @@ const Module = new Augur.Module()
         welcomeString = `${welcome.Greeting} ${welcome.Prompt}\n\n${welcome.Directions}`.replaceAll("  ", " ");
         embed.setTitle(member.displayName + " has joined the server.");
 
-        db.User.new(member);
+        db.User.new(member.id, member.guild.id);
       }
 
       if (!member.user.bot) {

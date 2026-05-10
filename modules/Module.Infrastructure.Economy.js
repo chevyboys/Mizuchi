@@ -59,7 +59,7 @@ async function createLeaderboardMessageObject(guild, currency = null) {
         let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
         let description = `Top ${leaderboard.length} users with the most ${currencyDisplay}`;
         for (let entry of leaderboard) {
-          let guildMember = await guild.members.fetch(entry.userID).catch(() => null);
+          let guildMember = await guild.members.fetch(entry.snowflake).catch(() => null);
           let username = guildMember ? guildMember.displayName : entry.username;
           description += `\n**${username}**: ${entry.total}`;
         }
