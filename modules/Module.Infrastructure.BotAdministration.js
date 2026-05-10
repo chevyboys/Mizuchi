@@ -153,7 +153,7 @@ const Module = new Augur.Module()
 
         await db.Guild.update_roles(msg.guild.id, rolesToSync);
 
-        const members = await msg.guild.members.fetch({ time: 120000 });
+        const members = msg.guild.members.cache;
         msg.react("2️⃣");
 
         let successCount = 0;
