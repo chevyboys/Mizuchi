@@ -539,12 +539,28 @@ const DataBaseActions = {
 
         await con.execute(sql, [snowflake, username]);
 
-        const sql2 = `
-          INSERT INTO \`user_guild\` (\`user_id\`, \`guild_id\`)
-          VALUES (?, ?) 
-          ON DUPLICATE KEY UPDATE user_id = values(user_id), guild_id = values(guild_id)`;
+        const [guildRows] = await con.execute(
+          "SELECT id FROM guild WHERE snowflake = ?",
+          [guildSnowflake] // The Discord ID
+        );
+        if (guildRows.length === 0) throw new Error(`Guild ${guildSnowflake} not found in DB!`);
+        const internalGuildId = guildRows[0].id;
 
-        await con.execute(sql2, [snowflake, guildsnowflake]);
+        // 2. Translate the Discord User Snowflake into the Internal User ID
+        const [userRows] = await con.execute(
+          "SELECT id FROM users WHERE snowflake = ?",
+          [snowflake] // The Discord ID
+        );
+        if (userRows.length === 0) throw new Error(`User ${snowflake} not found in DB!`);
+        const internalUserId = userRows[0].id;
+
+        // 3. NOW it is safe to insert into user_guild using the internal IDs!
+        await con.execute(`
+                INSERT INTO user_guild (user_id, guild_id) 
+                VALUES (?, ?) 
+                ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), guild_id = VALUES(guild_id)
+            `
+          , [internalUserId, internalGuildId]);
 
         // 4. Role and Table Synchronization
         for (const data of discoveredGuilds) {
