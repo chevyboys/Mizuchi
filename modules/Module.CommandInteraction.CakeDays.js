@@ -400,7 +400,7 @@ Module
       if (!targetBd) targetBd = await db.User.new(interaction.member.id, interaction.guild.id);
       targetBd = targetBd.cakeday
       if (targetBd.indexOf("opt-out" > -1)) {
-        let joinedAt = (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.cache.get(interaction.member.id).joinedAt
+        let joinedAt = interaction.member.joinedAt;
         let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         let cakeOrJoinDayDate = months[joinedAt.getMonth()] + " " + joinedAt.getDate();
         await db.User.updateCakeDay(interaction.member.id, cakeOrJoinDayDate, interaction.guild.id);
