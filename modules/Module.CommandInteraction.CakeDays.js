@@ -317,8 +317,8 @@ Module
 
           let diffDays = nextNameDay.diff(moment().startOf('day'), 'days');
 
-          // Include today (0) up to 7 days from now
-          return diffDays >= 0 && diffDays <= 7;
+          // Include two days from now (2) up to 7 days from now
+          return diffDays >= 2 && diffDays <= 7;
         }
         );
 
