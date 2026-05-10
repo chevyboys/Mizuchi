@@ -148,14 +148,27 @@ const Module = new Augur.Module()
             }));
           }
         }
+
+        msg.react("1️⃣");
+
         await db.Guild.update_roles(msg.guild.id, rolesToSync);
 
-        const members = await msg.guild.members.fetch();
+        const members = await msg.guild.members.fetch({ time: 120000 });
+        msg.react("2️⃣");
 
         let successCount = 0;
         let errorCount = 0;
 
+        //reply with the progress, and update it as we go through the members. This is to give some feedback on how long it will take, since it can be a while for large servers.
+        const progressMessage = await msg.reply(`Syncing database: 0/${members.size} members synced. Errors: 0`);
+        let lastUpdateTime = Date.now();
+
         for (const [id, m] of members) {
+          const now = Date.now();
+          if (now - lastUpdateTime > 5000) { // Update progress every 5 seconds
+            await progressMessage.edit(`Syncing database: ${successCount}/${members.size} members synced. Errors: ${errorCount}`);
+            lastUpdateTime = now;
+          }
           try {
             let dbUser = await db.User.new(id, msg.guild.id);
 
