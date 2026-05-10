@@ -153,7 +153,7 @@ const Module = new Augur.Module()
 
         await db.Guild.update_roles(msg.guild.id, rolesToSync);
 
-        const members = msg.guild.members.cache;
+        const members = await msg.guild.members.fetch();
         msg.react("2️⃣");
 
         let successCount = 0;
@@ -175,12 +175,17 @@ const Module = new Augur.Module()
             lastUpdateTime = now;
           }
           try {
-            let dbUser = await db.User.new(id, msg.guild.id);
+            // Extract the user's current roles (ignoring Discord's managed integration roles)
+            const userRoles = m.roles.cache.filter(r => !r.managed).map(r => r.id);
 
-            // Update their Cake Year to their actual join date
-            if (m.joinedAt && dbUser) {
-              await dbUser.updateCakeYear(m.joinedAt.getFullYear(), msg.guild.id);
-            }
+            // Use our bulletproof 'update' (Upsert) function to save everything in one step!
+            let dbUser = await db.User.update({
+              snowflake: id,
+              username: m.user.username,
+              cakeyear: m.joinedAt ? m.joinedAt.getFullYear() : new Date().getFullYear(),
+              roles: { [msg.guild.id]: userRoles }
+            }, msg.guild.id);
+
             successCount++;
           } catch (err) {
             console.error(`Failed to sync user ${id} (${m.user.tag}):`, err);
