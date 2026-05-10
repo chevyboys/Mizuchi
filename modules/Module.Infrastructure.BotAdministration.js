@@ -166,7 +166,7 @@ const Module = new Augur.Module()
         let numberOfMembersProcessed = 0;
 
         for (const [id, m] of members) {
-          console.log(`Syncing user ${id} (${m.user.tag})...`);
+          //console.log(`Syncing user ${id} (${m.user.tag})...`);
           const now = Date.now();
           if (numberOfMembersProcessed % 100 === 0) {
             await progressMessage.edit(`Syncing database: ${successCount}/${members.size} members synced. Errors: ${errorCount}`);
