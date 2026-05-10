@@ -629,16 +629,14 @@ const DataBaseActions = {
       const userSnowflake = member.id;
       const roleSnowflakes = member.roles.cache.filter(r => !r.managed).map(r => r.id);
 
-      // 1. Fetch the Internal User ID. 
-      // We use private update here just to securely grab/ensure the internal ID without altering profile data.
-      const internalUserId = await privateDataBaseActions.User.update({
+      // 1. Fetch/Upsert the User. 
+      // This returns a full DBUserObject
+      const dbUser = await privateDataBaseActions.User.update({
         snowflake: userSnowflake,
-        // We intentionally leave out username/cakeyear so they aren't overwritten
       }, guildSnowflake);
 
-      // 2. Pass the internal ID and roles directly to the private role sync engine
-      await privateDataBaseActions.User.syncRoles(internalUserId, guildSnowflake, roleSnowflakes);
-
+      // 2. Pass ONLY the internal integer ID (.id) to the private role sync engine
+      await privateDataBaseActions.User.syncRoles(dbUser.id, guildSnowflake, roleSnowflakes);
       return true;
     },
   },
