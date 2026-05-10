@@ -899,15 +899,12 @@ const DataBaseActions = {
 
     if (!hasBeenInitialized) {
       //initialize the database connection
-      mysql.configure({
+      con = await mysql.createConnection({
         host: config.mySQL.host,
         user: config.mySQL.user,
         password: config.mySQL.password,
         database: config.mySQL.database,
-        port: config.mySQL.port,
-        waitForConnections: true,
-        connectionLimit: 10,
-        queueLimit: 0
+        port: config.mySQL.port
       });
 
       try {
