@@ -23,7 +23,7 @@ let thankProcess = async (interaction) => {
 
   const numberOfPointsToGrant = 3;
   let TournamentPointsId = 1;
-  await UtilsDatabase.Economy.newTransaction(member.id, TournamentPointsId, numberOfPointsToGrant, interaction.member.id);
+  await UtilsDatabase.Economy.newTransaction(member.id, TournamentPointsId, numberOfPointsToGrant, interaction.member.id, 'Thank');
   //notify the mods
   let modCardEmbed = u.embed()
     .setColor(interaction.guild.roles.cache.get(snowflakes.roles.Helper).hexColor)
