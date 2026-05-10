@@ -1,4 +1,4 @@
-const mysql = require("mysql2/promise"); // Updated to mysql2
+const mysql = require("mysql2-promise"); // Updated to mysql2
 const Discord = require("discord.js");
 const snowflakes = require("../config/snowflakes.json");
 const config = require("../config/config.json");
