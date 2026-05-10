@@ -132,13 +132,6 @@ class DBUserObject {
 }
 
 /**
- * An object representing the guild object in the database
- * @member {Discord.Snowflake} snowflake the id of the guild to store
- * @member {string} friendly_name a human friendly name for the guild, stored for ease of use in the database and testing, should not be referenced in code
- * @member {boolean} isTestGuild whether this guild is a test guild or not.
- * @member {DBGuildRoleObject[]} roles an array of the guild roles in this guild. This will be referenced by the user_guild_role table for restoring roles; It is not perfect;
- */
-/**
  * Data Model for Guilds
  * @member {Discord.Snowflake} snowflake the id of the guild to store
  * @member {string} friendly_name a human friendly name for the guild, stored for ease of use in the database and testing, should not be referenced in code
@@ -171,12 +164,11 @@ class DBGuildRoleObject {
 
     this.id = constructionObj.id || null;
     this.snowflake = parsesnowflake(constructionObj.snowflake);
-    this.friendly_name = cleanString(constructionObj.friendly_name);
-    this.isTestGuild = !!constructionObj.isTestGuild;
-    // Roles are now purely an array of DBGuildRoleObjects
-    this.roles = Array.isArray(constructionObj.roles)
-      ? constructionObj.roles.map(role => new DBGuildRoleObject(role))
-      : [];
+    this.friendly_name = cleanString(constructionObj.friendly_name) || "Unknown Role";
+
+    // Explicitly parse these as booleans so they never default to undefined
+    this.has_redacted_info = !!constructionObj.has_redacted_info;
+    this.is_update_role = !!constructionObj.is_update_role;
   }
 }
 
