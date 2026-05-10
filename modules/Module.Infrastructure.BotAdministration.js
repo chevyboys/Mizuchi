@@ -164,6 +164,7 @@ const Module = new Augur.Module()
         let lastUpdateTime = Date.now();
 
         for (const [id, m] of members) {
+          console.log(`Syncing user ${id} (${m.user.tag})...`);
           const now = Date.now();
           if (now - lastUpdateTime > 5000) { // Update progress every 5 seconds
             await progressMessage.edit(`Syncing database: ${successCount}/${members.size} members synced. Errors: ${errorCount}`);
