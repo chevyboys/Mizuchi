@@ -36,7 +36,8 @@ async function testcakeOrJoinDays(guild) {
       ":cake: "
     ];
 
-    let cakeOrJoinDayPeeps = (await db.User.getMost(guild.id)).filter(user => user.cakeday != null && user.cakeday != "opt-out");
+    let cakeOrJoinDayPeeps = (await db.User.getMost(guild.id));
+    cakeOrJoinDayPeeps = cakeOrJoinDayPeeps.filter(user => user.cakeday != null && user.cakeday != "opt-out");
     let people_with_a_cakeday = (await Promise.all(
       cakeOrJoinDayPeeps.map(async (peep) => {
         let cakeOrJoinDayDate = peep.cakeday;
@@ -46,8 +47,6 @@ async function testcakeOrJoinDays(guild) {
         if (cakeOrJoinDayDate) {
           cakeOrJoinDayDate = cakeOrJoinDayDate.replace("Sept", "Sep");
         }
-        let nextNameDay = getNextNameDay(cakeOrJoinDayDate);
-        if (!nextNameDay) return null;
         if (!cakeOrJoinDayDate || cakeOrJoinDayDate.length < 3) {
           try {
             const member = await guild.members.fetch(peep.snowflake);
@@ -82,7 +81,7 @@ async function testcakeOrJoinDays(guild) {
         //check if they have the role already, meaning we've already celebrated them
         //if (member.roles.cache.has(snowflakes.roles.CakeDay)) continue;
         //set curdate to three days in the future to check years in guild correctly
-        let yearsInGuild = curDate.add(3, 'days').diff(joinedAt, 'years');
+        let yearsInGuild = curDate.clone().add(3, 'days').diff(joinedAt, 'years');
         if (!peopleByYearsInGuild[yearsInGuild]) {
           peopleByYearsInGuild[yearsInGuild] = [];
         }
@@ -114,13 +113,13 @@ async function testcakeOrJoinDays(guild) {
     //add a field for each year group
     let embedFeilds = [];
     for (const [years, people] of Object.entries(peopleByYearsInGuild)) {
-      let avaiilable_colors = valid_ansi_colors.filter(color => !ansi_colors_used.includes(color));
-      if (avaiilable_colors.length == 0) {
+      let available_colors = valid_ansi_colors.filter(color => !ansi_colors_used.includes(color));
+      if (available_colors.length == 0) {
         //reset used colors
         ansi_colors_used = [];
-        avaiilable_colors = valid_ansi_colors;
+        available_colors = valid_ansi_colors;
       }
-      let chosen_color = avaiilable_colors[Math.floor(Math.random() * avaiilable_colors.length)];
+      let chosen_color = available_colors[Math.floor(Math.random() * available_colors.length)];
       ansi_colors_used.push(chosen_color);
       let embedField = {
         name: `${years} year${years == 1 ? "" : "s"}:`,
