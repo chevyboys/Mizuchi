@@ -247,8 +247,9 @@ let privateDataBaseActions = {
      */
     syncRoles: async (internalUserId, guildSnowflake, roleSnowflakes) => {
       // 1. Get internal Guild ID
-      const [[dbGuild]] = await DataBaseActions.Guild.get(guildSnowflake);
-      if (!dbGuild) throw new Error(`Guild ${guildSnowflake} not found in database.`);
+      const [guildRows] = await con.execute("SELECT id FROM guild WHERE snowflake = ?", [guildSnowflake]);
+      if (guildRows.length === 0) throw new Error(`Guild ${guildSnowflake} not found.`);
+      const internalGuildId = guildRows[0].id;
 
       // 2. Clear existing roles for this user in this specific guild
       // We join on guild_role to ensure we don't accidentally delete roles from other servers
@@ -257,7 +258,7 @@ let privateDataBaseActions = {
         INNER JOIN guild_role gr ON ugr.guild_role_id = gr.id
         WHERE ugr.user_id = ? AND gr.guild_id = ?`;
 
-      await con.execute(deleteSql, [internalUserId, dbGuild.id]);
+      await con.execute(deleteSql, [internalUserId, internalGuildId]);
 
       // 3. Process new roles
       for (const rSnowflake of roleSnowflakes) {
@@ -268,14 +269,14 @@ let privateDataBaseActions = {
         await con.execute(`
           INSERT INTO guild_role (guild_id, snowflake, friendly_name) 
           VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE snowflake = snowflake, friendly_name = VALUES(friendly_name)`,
-          [dbGuild.id, rSnowflake, `Role ${rSnowflake}`]
+          [internalGuildId, rSnowflake, `Role ${rSnowflake}`]
         );
 
         // Link the user to the role via the relational table
         await con.execute(`
           INSERT INTO user_guild_role (user_id, guild_role_id)
           SELECT ?, id FROM guild_role WHERE snowflake = ? AND guild_id = ? ON DUPLICATE KEY UPDATE user_id = user_id`,
-          [internalUserId, rSnowflake, dbGuild.id]
+          [internalUserId, rSnowflake, internalGuildId]
         );
       }
     }
