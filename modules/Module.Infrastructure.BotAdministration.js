@@ -171,7 +171,7 @@ const Module = new Augur.Module()
           if (numberOfMembersProcessed % 5 === 0) {
             await progressMessage.edit(`Syncing database: ${successCount}/${members.size} members synced. Errors: ${errorCount}`);
             //sleep for half a second to avoid hitting rate limits and to give the bot a chance to breathe
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 500));
             lastUpdateTime = now;
           }
           try {
