@@ -109,22 +109,22 @@ const Module = new Augur.Module()
       let welcomeString;
 
       if (user) { // Member is returning
-
-        let toAdd = user.roles.filter(role => (
+        let storedGuildRoles = user.roles?.[guild.id] || [];
+        //give other bots time to add roles if they are going to do so.
+        await delay(3000);
+        let toAdd = storedGuildRoles.filter(role => (
           guild.roles.cache.has(role) &&
           !guild.roles.cache.get(role).managed &&
           //put any roles we *don't* want to prompt for here
           ![snowflakes.guilds.PrimaryServer].includes(role) &&
           !member.roles.cache.has(role)
         ));
-        if (user.roles.length > 0)
+        if (toAdd.length > 0)
           try {
             u.addRoles(member, toAdd);
           } catch (err) {
             u.log(err);
           }
-        //give other bots time to add roles if they are going to do so.
-        await delay(3000);
         let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
         if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
 

@@ -1,6 +1,6 @@
 const mysql = require("mysql")
 const Discord = require("discord.js");
-const snowflakes = require("../config/snowflakes.json")
+const snowflakes = require("../config/snowflakes.json");
 const config = require("../config/config.json")
 let hasBeenInitialized = false;
 // Ensure charset is set in the connection string
@@ -12,21 +12,23 @@ if (typeof connectionString === 'string') {
     connectionString += '?charset=utf8mb4';
   }
 }
+const snowflake_util = Discord.SnowflakeUtil;
 const con = mysql.createConnection(connectionString);
 const Augur = require("augurbot");
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 const days = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"]
 let client;
+const DISCORD_EPOCH = Date.parse("01 Jan 2015 00:00:00 GMT");
 
 
 function cleanString(str) {
   return str.replace(/[\W_]+/g, " ");;
 }
-async function assertIsSnowflake(snowflake) {
-  await snowflake;
-  let discordEpoch = Date.parse("01 Jan 2015 00:00:00 GMT");
+
+
+function assertIsSnowflake(snowflake) {
   let timestamp = new Date(Discord.SnowflakeUtil.timestampFrom(snowflake))
-  if (!/^\d+$/.test(snowflake) || timestamp <= discordEpoch || timestamp > Date.now()) {
+  if (!/^\d+$/.test(snowflake) || timestamp <= DISCORD_EPOCH || timestamp > Date.now()) {
     return false
   } else return true;
 }
@@ -46,9 +48,40 @@ function assertIsCakeDay(string) {
 function parseUserID(user) {
   let userID = user.id || user.userID?.user?.id || user.userID?.userId || user.userID || user.Id || user;
   if (!assertIsSnowflake(userID)) {
-    reject("INVALID DISCORD ID at Database.parseUserID: " + JSON.stringify(user));
+    throw new Error("INVALID DISCORD ID at Database.parseUserID: " + JSON.stringify(user));
   }
   else return userID;
+}
+
+function normalizeRolesByGuild(rolesData) {
+  let parsedRoles = rolesData;
+  if (typeof parsedRoles === "string" || parsedRoles instanceof String) {
+    try {
+      parsedRoles = JSON.parse(parsedRoles);
+    } catch {
+      parsedRoles = [];
+    }
+  }
+
+  if (Array.isArray(parsedRoles)) {
+    return {
+      [snowflakes.guilds.PrimaryServer]: parsedRoles.filter(assertIsSnowflake)
+    };
+  }
+
+  if (!parsedRoles || typeof parsedRoles !== "object") {
+    return {};
+  }
+
+  let normalized = {};
+  for (const guildID of Object.keys(parsedRoles)) {
+    if (!assertIsSnowflake(guildID)) continue;
+    let guildRoles = parsedRoles[guildID];
+    if (!Array.isArray(guildRoles)) guildRoles = [];
+    normalized[guildID] = guildRoles.filter(assertIsSnowflake);
+  }
+
+  return normalized;
 }
 
 
@@ -62,12 +95,24 @@ function parseUserID(user) {
  * @member {Discord.Role.Id[]} roles // An array of the roles the discord member has
  */
 class DBUserObject {
+  /*
+    +-----------+--------------+------+-----+---------+-------+
+    | Field     | Type         | Null | Key | Default | Extra |
+    +-----------+--------------+------+-----+---------+-------+
+    | userID    | varchar(256) | YES  | UNI | NULL    |       |
+    | username  | varchar(40)  | YES  | MUL | NULL    |       |
+    | cakeDay   | varchar(20)  | NO   |     | NULL    |       |
+    | currentXP | bigint(20)   | NO   |     | 0       |       |
+    | totalXP   | bigint(20)   | NO   |     | 0       |       |
+    | roles     | longtext     | NO   |     | NULL    |       |
+    +-----------+--------------+------+-----+---------+-------+
+    */
   userID = "";
   username = "";
   cakeDay = "";
   currentXP = 0;
   totalXP = 0;
-  roles = [];
+  roles = {};
 
   /**
    * Creates a DBUserObject
@@ -77,8 +122,8 @@ class DBUserObject {
    * @param {string} constructionObj.cakeDay // A cakeDay string e.g. Jan 01
    * @param {number} [constructionObj.currentXP = 0] // Does nothing currently. Will be ignored
    * @param {number} [constructionObj.totalXP = 0] // Does nothing currently. Will be ignored
-   * @param {Discord.Role.Id[]} constructionObj.roles // An array of the roles the discord member has
-   */
+   * @param {Object} constructionObj.roles // An object keyed to the discord guild ids, with the value being an array of the roles the discord member has in that guild
+   * */
 
   constructor(constructionObj) {
     this.userID = parseUserID(constructionObj.userID);
@@ -86,12 +131,7 @@ class DBUserObject {
     this.cakeDay = assertIsCakeDay(constructionObj.cakeDay) ? constructionObj.cakeDay : null;
     this.currentXP = 0;
     this.totalXP = 0;
-    let parsedRoles;
-    if (typeof constructionObj.roles === 'string' || constructionObj.roles instanceof String) {
-      parsedRoles = JSON.parse(constructionObj.roles)
-    }
-    else parsedRoles = constructionObj.roles
-    this.roles = parsedRoles.map(r => r.id ? (assertIsSnowflake(r.id) ? r.id : null) : (assertIsSnowflake(r) ? r : null));
+    this.roles = normalizeRolesByGuild(constructionObj.roles)
   }
   /**
    * Gets this user from the database
@@ -132,15 +172,16 @@ let privateDataBaseActions = {
       if (!user) {
         user = await DataBaseActions.User.new(userID);
       }
-      if (user.roles && Array.isArray(user.roles)) {
-        user.roles = JSON.stringify(user.roles)
-      }
+      user.roles = normalizeRolesByGuild(user.roles);
       //only set properties that we already have in the database as a column. If not specified, leave it the same.
       let query = `UPDATE users SET `
       for (const property in user) {
         if (property != "userID" && typeof user[property] != "function" && !(user[property] instanceof Function) && Object.prototype.toString.call(user[property]) != '[object Function]') {
-          user[property] = userDataBaseObject[property] || user[property];
-          if (typeof user[property] === 'string' || user[property] instanceof String) {
+          user[property] = userDataBaseObject[property] ?? user[property];
+          if (property === "roles") {
+            user[property] = normalizeRolesByGuild(user[property]);
+            query = query + ` ${property} = ${con.escape(JSON.stringify(user[property]))},`
+          } else if (typeof user[property] === 'string' || user[property] instanceof String) {
             query = query + ` ${property} = ${con.escape(user[property])},`
           } else {
             query = query + ` ${property} = ${con.escape(user[property])},`
@@ -238,7 +279,7 @@ let DataBaseActions = {
             let user = JSON.parse(JSON.stringify(result))[0];
             if (!user || user == undefined) fulfill(null);
             else {
-              user.roles = JSON.parse(user.roles)
+              user.roles = normalizeRolesByGuild(user.roles)
               if (error) reject(error);
               else fulfill(new DBUserObject(user));
             }
@@ -322,8 +363,12 @@ let DataBaseActions = {
         return new Promise((fulfill, reject) => {
           let cakeDay = "opt-out";
           let username = cleanString(client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).displayName);
-          let roles = client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(userID).roles.cache.map(r => assertIsSnowflake(r.id) ? r.id : null);
-          //cakeDay = months[cakeDay.getMonth()] + " " + cakeDay.getDate();
+          let all_guilds = client.guilds.cache.filter(g => g.members.cache.has(userID));
+          let roles = [];
+          all_guilds.forEach(guild => {
+            let member = guild.members.cache.get(userID);
+            roles.push(...member.roles.cache.filter(r => !r.managed).map(r => r.id));
+          });
 
           let newMember = {
             userID: userID,
@@ -349,8 +394,11 @@ let DataBaseActions = {
      *  @returns {Object} the result of the database update 
      */
     updateRoles: async (guildMember) => {
-      if (assertIsSnowflake(guildMember.id)) {
-        return await privateDataBaseActions.User.update({ id: guildMember.id, roles: JSON.stringify(guildMember.roles.cache.map(r => assertIsSnowflake(r.id) ? r.id : null)) })
+      if (await assertIsSnowflake(guildMember.id)) {
+        let existingUser = await DataBaseActions.User.get(guildMember.id);
+        let rolesByGuild = normalizeRolesByGuild(existingUser?.roles);
+        rolesByGuild[guildMember.guild.id] = guildMember.roles.cache.map(r => isSnowflakeString(r.id) ? r.id : null).filter(Boolean);
+        return await privateDataBaseActions.User.update({ id: guildMember.id, roles: rolesByGuild })
       }
     },
     /**
@@ -360,7 +408,7 @@ let DataBaseActions = {
      * @returns 
      */
     updateCakeDay: async (userIdResolvable, cakeDay) => {
-      userID = parseUserID(userIdResolvable) || null;
+      let userID = parseUserID(userIdResolvable) || null;
       return await privateDataBaseActions.User.update({ id: userID, cakeDay: assertIsCakeDay(cakeDay) ? cakeDay : null })
     }
   },
