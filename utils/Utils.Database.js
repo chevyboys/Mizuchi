@@ -848,6 +848,8 @@ const DataBaseActions = {
         INSERT INTO \`transaction\` (\`userid\`, \`currencyID\`, \`amount\`, \`initatedbyuserid\`, \`reason\`)
         VALUES (?, ?, ?, ?, ?)`;
 
+      console.log(`Creating transaction: User ${snowflake}, Currency ID ${currencyId}, Amount ${amount}, Initiated By ${initatedbysnowflake}, Reason: ${reason}`);
+
       const [result] = await con.execute(sql, [
         snowflake,
         currencyId,
