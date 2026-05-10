@@ -183,6 +183,7 @@ const Module = new Augur.Module()
             errorCount++;
           }
         }
+        console.log(`Database sync complete! Synced ${successCount} members. Errors: ${errorCount}`);
 
         // 4. Cleanup and final reporting
         await msg.reactions.removeAll().catch(() => { }); // Clear the hourglass
