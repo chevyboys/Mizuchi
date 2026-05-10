@@ -541,9 +541,9 @@ const DataBaseActions = {
 
         const [guildRows] = await con.execute(
           "SELECT id FROM guild WHERE snowflake = ?",
-          [guildSnowflake] // The Discord ID
+          [guildsnowflake] // The Discord ID
         );
-        if (guildRows.length === 0) throw new Error(`Guild ${guildSnowflake} not found in DB!`);
+        if (guildRows.length === 0) throw new Error(`Guild ${guildsnowflake} not found in DB!`);
         const internalGuildId = guildRows[0].id;
 
         // 2. Translate the Discord User Snowflake into the Internal User ID
