@@ -301,7 +301,7 @@ Module
       msg.channel.send({ content: suffix, embeds: msg.embeds, files: files, reply: { messageReference: msg.reference?.messageId || null } });
       u.errorHandler(msg.author.username + " in channel " + msg.channel?.name + " said: " + suffix);
     },
-    permissions: (msg) => msg.member?.roles.cache.has(snowflakes.roles.BotMaster) || msg.member?.roles.cache.has(snowflakes.roles.BotAssistant) || msg.client.config.AdminIds.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id
+    permissions: (msg) => msg.member?.roles.cache.has(snowflakes.roles.BotMaster) || msg.member?.roles.cache.has(snowflakes.roles.BotAssistant) || msg.member?.roles.cache.has(snowflakes.roles.Moderator) || msg.client.config.AdminIds.includes(msg.author.id) || msg.client.config.ownerId == msg.author.id
   })
   .addCommand({
     name: "pulse",
