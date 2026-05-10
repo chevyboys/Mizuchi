@@ -469,12 +469,13 @@ const DataBaseActions = {
       const query = `
         SELECT users.snowflake 
         FROM users 
-        LEFT JOIN user_guild ON users.id = user_guild.user_id 
-        LEFT JOIN guild ON user_guild.guild_id = guild.id 
-        LEFT JOIN user_guild_role ON user_guild_role.user_guild_id = user_guild.id 
-        LEFT JOIN guild_role ON user_guild_role.guild_role_id = guild_role.id 
-        WHERE guild.snowflake = ? AND count(guild_role.id) > 1 
-        GROUP BY users.snowflake`;
+        INNER JOIN user_guild ON users.id = user_guild.user_id 
+        INNER JOIN guild ON user_guild.guild_id = guild.id 
+        LEFT JOIN user_guild_role ON user_guild_role.user_id = users.id 
+        LEFT JOIN guild_role ON user_guild_role.guild_role_id = guild_role.id AND guild_role.guild_id = guild.id
+        WHERE guild.snowflake = ? 
+        GROUP BY users.snowflake 
+        HAVING COUNT(guild_role.id) > 1`;
 
       const [rows] = await con.execute(query, [guild_snowflake]);
 
