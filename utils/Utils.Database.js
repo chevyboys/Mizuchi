@@ -191,7 +191,8 @@ let privateDataBaseActions = {
         user = await DataBaseActions.User.new(snowflake, guildSnowflake);
       }
 
-      await con.beginTransaction();
+      const dbConnection = await con.getConnection();
+      await dbConnection.beginTransaction();
 
       // 2. Prepare metadata updates (Cake Day, Year, Username)
       const cakeday = userData.cakeday ?? user.cakeday;
@@ -204,7 +205,7 @@ let privateDataBaseActions = {
         UPDATE users 
         SET username = ? 
         WHERE snowflake = ?`;
-        await con.execute(updateSql, [username, snowflake]);
+        await dbConnection.execute(updateSql, [username, snowflake]);
 
 
         //this will always create a user_guild entry if one doesn't exist, so we can safely update it without worrying about it not existing
@@ -215,7 +216,7 @@ let privateDataBaseActions = {
           SET ug.cakeday = ?, ug.cakeyear = ?
           WHERE u.snowflake = ? AND g.snowflake = ?`;
 
-        await con.execute(userGuildUpdateSql, [cakeday, cakeyear, snowflake, guildSnowflake]);
+        await dbConnection.execute(userGuildUpdateSql, [cakeday, cakeyear, snowflake, guildSnowflake]);
 
         // 4. Handle Role Synchronization if roles are provided
         if (userData.roles) {
@@ -227,11 +228,11 @@ let privateDataBaseActions = {
           await privateDataBaseActions.User.syncRoles(user.id, guildSnowflake, roleList);
         }
 
-        await con.commit();
+        await dbConnection.commit();
         // Return the updated object
         return await DataBaseActions.User.get(snowflake, guildSnowflake);
       } catch (error) {
-        await con.rollback();
+        await dbConnection.rollback();
         console.error(`Failed to update user ${snowflake}. Changes rolled back.`, error);
         throw error;
       }

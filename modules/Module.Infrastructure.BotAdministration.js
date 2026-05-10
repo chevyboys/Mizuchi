@@ -163,6 +163,7 @@ const Module = new Augur.Module()
         const progressMessage = await msg.reply(`Syncing database: 0/${members.size} members synced. Errors: 0`);
         let lastUpdateTime = Date.now();
 
+
         for (const [id, m] of members) {
           console.log(`Syncing user ${id} (${m.user.tag})...`);
           const now = Date.now();
