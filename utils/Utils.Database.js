@@ -506,7 +506,14 @@ const DataBaseActions = {
         await Promise.all(allGuilds.map(async (partialGuild) => {
           try {
             const guild = await partialGuild.fetch();
-            const member = await guild.members.fetch(snowflake);
+
+            // 1. Try checking the cache FIRST (Zero API hits, instant)
+            let member = guild.members.cache.get(snowflake);
+
+            // 2. Only if they aren't in cache, fetch them (safely catching errors)
+            if (!member) {
+              member = await guild.members.fetch(snowflake).catch(() => null);
+            }
 
             if (member) {
               if (!username) username = cleanString(member.displayName);

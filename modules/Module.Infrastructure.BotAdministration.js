@@ -170,6 +170,8 @@ const Module = new Augur.Module()
           if (now - lastUpdateTime > 5000) { // Update progress every 5 seconds
             await progressMessage.edit(`Syncing database: ${successCount}/${members.size} members synced. Errors: ${errorCount}`);
             lastUpdateTime = now;
+            //sleep for half a second to avoid hitting rate limits and to give the bot a chance to breathe
+            await new Promise(resolve => setTimeout(resolve, 500));
           }
           try {
             let dbUser = await db.User.new(id, msg.guild.id);
