@@ -426,7 +426,7 @@ const DataBaseActions = {
       const query = `
         SELECT currency.name as name, currency.emoji as emoji, currency.id as id, SUM(amount) as total 
         FROM users 
-        LEFT JOIN transaction ON users.snowflake = transaction.snowflake 
+        LEFT JOIN transaction ON users.snowflake = transaction.userid 
         LEFT JOIN currency ON currency.id = transaction.currencyid 
         WHERE users.snowflake = ? AND currency.active 
         GROUP BY currency.id 
