@@ -4,7 +4,6 @@ const fs = require('fs');
 const u = require('../utils/Utils.Generic');
 const Jimp = require("jimp");
 const supportedFormats = ["png", "jpg", "jpeg", "bmp", "tiff", "gif"];
-const snowflakes = require('../config/snowflakes.json');
 const { closest } = require("fastest-levenshtein");
 const ColorThief = require('colorthief');
 const https = require('https'); // or 'https' for https:// URLs
@@ -323,7 +322,7 @@ const sword = async (interaction) => {
 
 const Command = {
   name: "pride",
-  guildId: snowflakes.guilds.PrimaryServer,
+
   process: async (interaction) => {
     //call the handlers for the border sub command, the hug sub command, and the rune sub command
     let member = interaction.member;

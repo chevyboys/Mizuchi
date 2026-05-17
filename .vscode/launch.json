@@ -21,6 +21,24 @@
       "port": 9229,
       "localRoot": "${workspaceFolder}",
       "remoteRoot": "/opt/mizuchi"
-    }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Register Commands",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/register_commands.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Anathema Bot",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/bot_anathema.js"
+    },
   ]
 }

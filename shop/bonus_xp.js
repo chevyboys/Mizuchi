@@ -1,5 +1,4 @@
-const u = require("../utils/Utils.Generic"),
-  snowflakes = require('../config/snowflakes.json');
+const u = require("../utils/Utils.Generic");
 const fs = require('fs');
 const ShopItem = require("../utils/Class.ShopItem");
 
@@ -21,8 +20,8 @@ module.exports = new ShopItem(
       removeRoleTime: d.valueOf()
     }
     fs.writeFileSync(`./data/helpers/${member.id}.json`, JSON.stringify(data, null, 4));
-    u.addRoles(member, [snowflakes.roles.Helper]);
-    await interaction.reply({ content: `You have given yourself the bonus XP <@&${snowflakes.roles.Helper}> role for ${days} day(s)`, ephemeral: true });
+    u.addRoles(member, [interaction.guild.client.config.snowflakes.roles.Helper]);
+    await interaction.reply({ content: `You have given yourself the bonus XP <@&${interaction.guild.client.config.snowflakes.roles.Helper}> role for ${days} day(s)`, ephemeral: true });
     return Promise.resolve({ success: true });
   }
 );

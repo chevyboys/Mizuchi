@@ -1,15 +1,15 @@
-const snowflakes = require("../config/snowflakes.json");
-const config = require("../config/config.json");
-const u = require("../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
+const config = Module.config;
+const u = require("../utils/Utils.Generic");
+
 const moment = require("moment");
 let odds = 60;
 const holidays = [
   {
     name: 'Halloween',
     description: "*T'was the night of all hallows eve when our brave adventurers gathered together in the climbers court. But as they sat down to dine together, they heard a dark laughter from hundreds of throats. It seems the mana construct makers had delved too deep, and released the spirits hidden in a dark chamber deep inside the code. A dark fate awaited the brave adventurers if they failed to trap each of the spirits.*",
-    emoji: snowflakes.emoji.specter
+    emoji: "👻"
 
   }
 ]
@@ -43,7 +43,7 @@ class Participant {
 
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
   let message = reaction.message;
-  let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+  let channel = message.guild.channels.cache.get(Module.config.snowflakes.channels.botSpam);
   if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
 
     const member = message.guild.members.cache.get(user.id);
@@ -55,9 +55,9 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         // incase this is changed later instead of if statments
         switch (userCount.count) {
           case 5:
-            u.addRoles(member, snowflakes.roles.Holiday);
+            u.addRoles(member, Module.config.snowflakes.roles.Holiday);
             channel.send({
-              content: `<@${user.id}> has found a bunch of snowflakes and has become an <@&${snowflakes.roles.Holiday}> until the next reset (at cakeday announcement time)`,
+              content: `<@${user.id}> has found a bunch of snowflakes and has become an <@&${Module.config.snowflakes.roles.Holiday}> until the next reset (at cakeday announcement time)`,
               allowedMentions: { parse: ["users"] }
             });
             break;
@@ -85,20 +85,20 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
-    (msg.member.roles.cache.has(snowflakes.roles.Holiday) ? (Math.floor(Math.random() * odds / 2) > odds / 2 - 2) : (Math.floor(Math.random() * odds) > odds - 2))
+    (msg.member.roles.cache.has(Module.config.snowflakes.roles.Holiday) ? (Math.floor(Math.random() * odds / 2) > odds / 2 - 2) : (Math.floor(Math.random() * odds) > odds - 2))
   ) {
     msg.react(holidays[0].emoji)
   }
 }).setClockwork(() => {
   try {
     return setInterval(() => {
-      let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
+      let guild = Module.client.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer)
       const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
       const modifierToConvertToBotTime = 7;
       odds = odds > 20 ? odds - 10 : odds;
       if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
-        guild.roles.cache.get(snowflakes.roles.Holiday).members.each((m) =>
-          u.addRoles(m, snowflakes.roles.Holiday, true)
+        guild.roles.cache.get(Module.config.snowflakes.roles.Holiday).members.each((m) =>
+          u.addRoles(m, Module.config.snowflakes.roles.Holiday, true)
         )
       }
 

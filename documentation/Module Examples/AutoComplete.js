@@ -1,7 +1,7 @@
 const Module = new (require("augurbot")).Module;
 const Command = {
   name: "autocomplete",
-  guildId: snowflakes.guilds.PrimaryServer,
+
   process: async (interaction) => {
 
     //this is where you should handle the full command.

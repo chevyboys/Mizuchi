@@ -1,6 +1,5 @@
 const db = require("./Utils.Database");
 const econDB = db.Economy;
-const snowflakes = require('../config/snowflakes.json');
 const u = require("./Utils.Generic");
 /**
  * A class representing an item that can be purchased in the shop.
@@ -87,7 +86,7 @@ class Item {
         const currencyEmoji = currency ? currency.emoji : "";
 
         //send a message in bot-logs channel about the purchase
-        let logChannel = await interaction.client.channels.fetch(snowflakes.channels.botSpam);
+        let logChannel = await interaction.client.channels.fetch(interaction.guild.config.snowflakes.channels.botSpam);
         let embed = u.embed().setTitle(`${interaction.user.tag} purchased ${this.name}`)
           .setDescription(`**Item:** ${this.name}\n**Price:** ${this.price} ${currencyEmoji} ${currencyName}\n**User:** <@${interaction.user.id}>\n They have ${userBalance.total - this.price} ${currencyEmoji} ${currencyName} remaining after this purchase.`)
           .setTimestamp();

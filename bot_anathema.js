@@ -1,10 +1,11 @@
 const { AugurClient } = require("augurbot"),
-  tavareconfig = require("./config/config_tavare.json"),
+  anathemaConfig = require("./config/config_anathema.json"),
   fs = require("fs"),
   u = require("./utils/Utils.Generic");
-tavareconfig.snowflakes = require("./config/snowflakes.json");
+anathemaConfig.snowflakes = require("./config/snowflakes_anathema.json");
 
-const tavare_options = {
+
+const anathema_options = {
   clientOptions: {
     allowedMentions: {
       parsed: ["roles", "users"],
@@ -12,14 +13,15 @@ const tavare_options = {
     },
     partials: ["CHANNEL", "MESSAGE", "REACTION"]
   },
-  commands: ["./modules_common", "./modules_tavare"],
+  commands: [
+    "./modules_anathema",
+    "./modules_common"
+  ],
   errorHandler: u.errorHandler,
   parse: u.parse
 };
 
-let tavareClient = new AugurClient(tavareconfig, tavare_options).setMaxListeners(80);
-
-
+let anathemaClient = new AugurClient(anathemaConfig, anathema_options).setMaxListeners(80);
 
 function fixCacheRaceCondition(botClient, moduleFolders) {
   botClient.once("ready", async () => {
@@ -54,16 +56,11 @@ function fixCacheRaceCondition(botClient, moduleFolders) {
 }
 
 
-
-fixCacheRaceCondition(tavareClient, tavare_options.commands);
-u.get_log_webhook(tavareClient, tavareconfig.identifier).send({ embeds: [u.embed().setColor("BLUE").setDescription("Initialization complete")] });
-tavareClient.login();
-
 function reloadClient(e) {
-  tavareClient.destroy();
-  tavareClient = new AugurClient(tavareconfig, tavare_options).setMaxListeners(80);
-  fixCacheRaceCondition(tavareClient, tavare_options.commands);
-  tavareClient.login();
+  anathemaClient.destroy();
+  anathemaClient = new AugurClient(anathemaConfig, anathema_options).setMaxListeners(80);
+  fixCacheRaceCondition(anathemaClient, anathema_options.commands);
+  anathemaClient.login();
   e.name = "Attempted to rebuild client because of " + e.name;
   e.message = "Action Taken! \nAttempted to rebuild client because of:\n\n " + e.message;
   u.errorHandler(e, "Handled Rejection");
@@ -73,10 +70,16 @@ function reloadClient(e) {
 
 
 
+fixCacheRaceCondition(anathemaClient, anathema_options.commands);
+u.get_log_webhook(anathemaClient, anathemaConfig.identifier).send({ embeds: [u.embed().setColor("BLUE").setDescription("Initialization complete")] });
+anathemaClient.login();
+
+
+
 
 // Helper function to figure out which bot caused the global error
 function determineBotFromError(error) {
-  return "tavare";
+  return "anathema";
 }
 
 
@@ -111,7 +114,7 @@ process.on("unhandledRejection", (error, p) => p.catch((e) => {
   if (culpritBot) {
     u.errorHandler(e, "Unhandled Rejection", culpritBot);
   } else {
-    u.errorHandler(e, "Unhandled Rejection", "tavare");
+    u.errorHandler(e, "Unhandled Rejection", "anathema");
   }
 }));
 
@@ -121,8 +124,8 @@ process.on("uncaughtException", (error) => {
   if (culpritBot) {
     u.errorHandler(error, "Uncaught Exception", culpritBot);
   } else {
-    u.errorHandler(error, "Uncaught Exception", "tavare");
+    u.errorHandler(error, "Uncaught Exception", "anathema");
   }
 });
 
-module.exports = { tavareClient };
+module.exports = { anathemaClient };

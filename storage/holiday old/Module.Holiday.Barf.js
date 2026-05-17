@@ -1,20 +1,19 @@
-const snowflakes = require("../../config/snowflakes.json");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
-const RoleClient = require("../../utils/Utils.RolesLogin.js");
+const create_roles_client = require("../../utils/Utils.RolesLogin.js");
+const RoleClient = create_roles_client(Module.config);
 const NPCSend = require("../../modules/Barf/NPC.js");
-let roleGuild = RoleClient.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+let roleGuild = RoleClient.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer);
 let eventRunning = false;
 let shouldUpdateColor = false;
-let config = require("../../config/config.json");
 
 const u = require("../../utils/Utils.Generic.js")
 
 const colors = ["#C00000", "#FF3334", "#FF0000", "#FF6F77", "#FFBBC1", "#e4adff", "#e0c2ff", "#FF8896", "#FC245C", "#FC8CB4", "#820123", "#960228"]
 async function updateColor() {
   if (!eventRunning || !shouldUpdateColor) return;
-  const holiday0 = await roleGuild.roles.fetch(snowflakes.roles.Holiday[0]);
-  const holiday1 = await roleGuild.roles.fetch(snowflakes.roles.Holiday[1]);
+  const holiday0 = await roleGuild.roles.fetch(Module.config.snowflakes.roles.Holiday[0]);
+  const holiday1 = await roleGuild.roles.fetch(Module.config.snowflakes.roles.Holiday[1]);
   try {
     let item0 = colors[Math.floor(Math.random() * colors.length)];
     let item1 = colors[Math.floor(Math.random() * colors.length)];
@@ -30,24 +29,24 @@ async function updateColor() {
 Module.addEvent("messageCreate", async (msg) => {
 
   if (!roleGuild) {
-    roleGuild = await RoleClient.guilds.fetch(snowflakes.guilds.PrimaryServer);
+    roleGuild = await RoleClient.guilds.fetch(Module.config.snowflakes.guilds.PrimaryServer);
   }
-  if (!msg.author.bot && eventRunning && msg.content?.toLowerCase().replaceAll(' ', "").indexOf('begone') > -1 && (msg.author?.id == ("431220192128008192") || config.AdminIds.indexOf(msg.author.id) > -1)) {
+  if (!msg.author.bot && eventRunning && msg.content?.toLowerCase().replaceAll(' ', "").indexOf('begone') > -1 && (msg.author?.id == ("431220192128008192") || Module.config.AdminIds.indexOf(msg.author.id) > -1)) {
     eventRunning = false;
     return;
   } else if (!msg.author.bot && eventRunning && msg.content?.toLowerCase().replaceAll(' ', "").indexOf('invokemypower') > -1) {
     updateColor();
     msg.react("♥️");
   }
-  else if (!msg.author.bot && !eventRunning && msg.content?.toLowerCase().replaceAll(' ', "").indexOf('bymypower,bydivinepower') > -1 && (msg.author?.id == ("431220192128008192") || config.AdminIds.indexOf(msg.author.id) > -1)) {
-    const holiday0 = await roleGuild.roles.fetch(snowflakes.roles.Holiday[0]);
-    const holiday1 = await roleGuild.roles.fetch(snowflakes.roles.Holiday[1]);
-    const general = msg.guild.channels.cache.get(snowflakes.channels.general) || await msg.guild.channels.fetch(snowflakes.channels.general);
+  else if (!msg.author.bot && !eventRunning && msg.content?.toLowerCase().replaceAll(' ', "").indexOf('bymypower,bydivinepower') > -1 && (msg.author?.id == ("431220192128008192") || Module.config.AdminIds.indexOf(msg.author.id) > -1)) {
+    const holiday0 = await roleGuild.roles.fetch(Module.config.snowflakes.roles.Holiday[0]);
+    const holiday1 = await roleGuild.roles.fetch(Module.config.snowflakes.roles.Holiday[1]);
+    const general = msg.guild.channels.cache.get(Module.config.snowflakes.channels.general) || await msg.guild.channels.fetch(Module.config.snowflakes.channels.general);
     await NPCSend(general, { description: "Go forth, and steal dungeon floors.", color: "#FF0000", title: "Be A Real Friend Week Special Event" });
     await general.send("It's a very special day of the year. A time for celebrating and cherishing the love and freindships around us. Radiance is happy to announce, our Be A Real Friend Week Celebrations have begun! Enjoy your holiday bonus XP.");
     eventRunning = true;
     shouldUpdateColor = true;
-    msg.react("👌");
+    msg.react("✅");
     await holiday0.setName("Kester Day");
     await holiday0.setColor(colors[Math.floor(Math.random() * colors.length)]);
     await holiday1.setName("Kester Day");
@@ -67,17 +66,17 @@ Module.addEvent("messageCreate", async (msg) => {
     updateColor();
 
   }
-  else if (!eventRunning || msg.author.bot || !msg.member || msg.member.roles?.cache.has(snowflakes.roles.Holiday[0]) || msg.member.roles?.cache.has(snowflakes.roles.Holiday[1])) return;
+  else if (!eventRunning || msg.author.bot || !msg.member || msg.member.roles?.cache.has(Module.config.snowflakes.roles.Holiday[0]) || msg.member.roles?.cache.has(Module.config.snowflakes.roles.Holiday[1])) return;
   else {
     let member = await roleGuild.members.fetch(msg.member.id);
 
     try {
       //add a random Holiday role to the user
-      let role = roleGuild.roles.cache.get(snowflakes.roles.Holiday[Math.floor(Math.random() * snowflakes.roles.Holiday.length)]);
+      let role = roleGuild.roles.cache.get(Module.config.snowflakes.roles.Holiday[Math.floor(Math.random() * Module.config.snowflakes.roles.Holiday.length)]);
       member.roles.add(role);
       console.log("Added holiday role to " + msg.member.displayName)
     } catch (error) {
-      const modRequests = msg.guild.channels.cache.get(snowflakes.channels.modRequests);
+      const modRequests = msg.guild.channels.cache.get(Module.config.snowflakes.channels.modRequests);
       modRequests.send("I couldn't add the <@&" + role + " role to " + msg.member.displayName)
       throw error;
     }

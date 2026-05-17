@@ -1,5 +1,3 @@
-const snowflakes = require("../../config/snowflakes.json");
-const config = require("../../config/config.json");
 const u = require("../../utils/Utils.Generic");
 const Augur = require("augurbot");
 const Module = new Augur.Module;
@@ -56,10 +54,10 @@ class Participant {
 
 Module.addEvent("messageReactionAdd", async (reaction, user) => {
   let message = reaction.message;
-  //reaction.message.guild.channels.cache.get(snowflakes.channels.secret).send(JSON.stringify(reaction.emoji));
-  let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+  //reaction.message.guild.channels.cache.get(Module.config.snowflakes.channels.secret).send(JSON.stringify(reaction.emoji));
+  let channel = message.guild.channels.cache.get(Module.config.snowflakes.channels.botSpam);
   if ((reaction.emoji.name == "BotIcon") && !user.bot && reaction.users.cache.has(message.client.user.id)) {
-    reaction.message.guild.channels.cache.get(snowflakes.channels.secret).send(JSON.stringify(reaction.emoji));
+    reaction.message.guild.channels.cache.get(Module.config.snowflakes.channels.secret).send(JSON.stringify(reaction.emoji));
     const member = message.guild.members.cache.get(user.id);
     try {
       const index = cache.findIndex(element => user == element.user);
@@ -73,7 +71,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         // incase this is changed later instead of if statments
         switch (userCount.count) {
           case 5:
-            u.addRoles(member, snowflakes.roles.Holiday[0]);
+            u.addRoles(member, Module.config.snowflakes.roles.Holiday[0]);
             member.send({
               content: `If you are reading this, you have found the first secret. Do not speak of this thing. Keep it secret. Keep it safe. The hunt continues...`,
               allowedMentions: { parse: ["users"] }
@@ -106,7 +104,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 
     } catch (error) { u.errorHandler(error, "Secret reaction error"); }
   }
-  else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id)) {
+  else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && Module.config.AdminIds.includes(user.id)) {
     reaction.remove()
     await reaction.message.react(holidays[0].emoji);
   } else if ((reaction.emoji.toString().toLowerCase().indexOf(holidays[0].emoji2) > -1) && !user.bot && reaction.users.cache.has(message.client.user.id)) {
@@ -124,7 +122,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
         // incase this is changed later instead of if statments
         switch (userCount.count2) {
           case 5:
-            u.addRoles(member, snowflakes.roles.Holiday[0]);
+            u.addRoles(member, Module.config.snowflakes.roles.Holiday[0]);
             member.send({
               content: `The creature has been spotted. Be wary. The hunt continues...`,
               allowedMentions: { parse: ["users"] }
@@ -176,7 +174,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     !msg.webhookId &&
     !msg.author.bot &&
     (flurriedChannels.includes(msg.channel.id) ||
-      (msg.member.roles.cache.has(snowflakes.roles.Holiday[0]) ? (Math.floor(Math.random() * odds / 2) > odds / 2 - 2) : (Math.floor(Math.random() * odds) > odds - 2)))
+      (msg.member.roles.cache.has(Module.config.snowflakes.roles.Holiday[0]) ? (Math.floor(Math.random() * odds / 2) > odds / 2 - 2) : (Math.floor(Math.random() * odds) > odds - 2)))
   ) {
     msg.react(holidays[0].emoji)
   } else if (
@@ -184,15 +182,15 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
     msg.author &&
     !msg.webhookId &&
     !msg.author.bot &&
-    (msg.member.roles.cache.has(snowflakes.roles.Holiday[0]) ? (Math.floor(Math.random() * odds * 2 / 2) > odds * 2 / 2 - 2) : (Math.floor(Math.random() * odds * 2) > odds * 2 - 2))
+    (msg.member.roles.cache.has(Module.config.snowflakes.roles.Holiday[0]) ? (Math.floor(Math.random() * odds * 2 / 2) > odds * 2 / 2 - 2) : (Math.floor(Math.random() * odds * 2) > odds * 2 - 2))
   ) {
     msg.react(holidays[0].emoji2);
   }
   else {
-    if ((config.AdminIds.includes(msg.author.id) || msg.member?.roles.cache.has(snowflakes.roles.BotMaster)) && msg.content.indexOf("🔮") > -1 && !started) {
+    if ((Module.config.AdminIds.includes(msg.author.id) || msg.member?.roles.cache.has(Module.config.snowflakes.roles.BotMaster)) && msg.content.indexOf("🔮") > -1 && !started) {
       started = true;
       msg.delete();
-      let holidayRole = await msg.guild.roles.fetch(snowflakes.roles.Holiday[0])
+      let holidayRole = await msg.guild.roles.fetch(Module.config.snowflakes.roles.Holiday[0])
       holidayRole.setName("Found")
       holidayRole.setColor(holidays[0].color)
       msg.channel.send({
@@ -206,13 +204,13 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
 }).setClockwork(() => {
   try {
     return setInterval(() => {
-      let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
+      let guild = Module.client.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer)
       const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
       const modifierToConvertToBotTime = 7;
       // odds = odds < 1000 ? odds + 50 : odds;
       if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
-        guild.roles.cache.get(snowflakes.roles.Holiday[0]).members.each((m) =>
-          u.addRoles(m, snowflakes.roles.Holiday[0], true)
+        guild.roles.cache.get(Module.config.snowflakes.roles.Holiday[0]).members.each((m) =>
+          u.addRoles(m, Module.config.snowflakes.roles.Holiday[0], true)
         )
       }
 
@@ -222,7 +220,7 @@ Module.addEvent("messageReactionAdd", async (reaction, user) => {
   } catch (e) { u.errorHandler(e, "Secret Clockwork Error"); }
 }).addEvent("ready", () => {
   if (holidays[0].emoji == "") {
-    holidays[0].emoji = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).emojis.cache.find(emoji => emoji.name === "BotIcon")
+    holidays[0].emoji = Module.client.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer).emojis.cache.find(emoji => emoji.name === "BotIcon")
   }
 }).addCommand({
   name: "flurry", process: async (msg) => {

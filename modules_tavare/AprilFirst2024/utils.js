@@ -1,91 +1,77 @@
-const Augur = require("augurbot");
-const { Guild } = require("discord.js");
 const colors = [
   {
-    name: "Raspberry",
-    color: "#961547",
+    name: "Sword Sword",
+    color: "#949494",
     award_threshold: 50
   },
-
   {
-    name: "Orange",
-    color: "#e07f35",
+    name: "Cool Sword",
+    color: "#c4ccff",
     award_threshold: 100
   },
-
   {
-    name: "Gold",
-    color: "#fffe7b",
+    name: "Tavare Sword",
+    color: "#ffc17e",
     award_threshold: 150
   },
-
   {
-    name: "Green",
-    color: "#a7ff76",
+    name: "Sword of Crazy",
+    color: "#f000f0",
     award_threshold: 200
   },
   {
-    name: "Eucalyptus Green",
-    color: "#28eaa2",
-    award_threshold: 250
+    name: "GodBeast Amythest",
+    color: "#e0c2ff",
+    award_threshold: 256
   },
   {
-    name: "Mint",
-    color: "#b9ffea",
+    name: "Goddess Tears",
+    color: "#B5CDFF",
     award_threshold: 300
   },
   {
-    name: "frost",
-    color: "#b9ebff",
-    award_threshold: 350
-  },
-  {
-    name: "Deep Purple",
-    color: "#310c38",
-    award_threshold: 400
-  },
-  {
-    name: "Tavare Winter Blue",
-    color: "#66a3d8",
-    award_threshold: 450
-  },
-  {
-    name: "Goddess Blue",
-    color: "#9CA9FF",
+    name: "Tyrant's Shadow",
+    color: "#141414",
     award_threshold: 500
   },
   {
-    name: "Bingus Blurple",
-    color: "#c4ccff",
-    award_threshold: 550
+    name: "Spooky Sword Sword",
+    color: "#949494",
+    award_threshold: 600
   },
   {
-    name: "Bot Master Amythest",
-    color: "#e0c2ff",
-    award_threshold: 1000
+    name: "Spooky Spook",
+    color: "#ffffff",
+    award_threshold: 700
   },
   {
-    name: "Infinite Blue",
-    color: "#B5CDFF",
-    award_threshold: 750
+    name: "Actually Just Green",
+    color: "#00ff55",
+    award_threshold: 800
   },
   {
-    name: "Licorice",
-    color: "#141414",
-    award_threshold: 2000
-  }
+    name: "Might be orange",
+    color: "#ffaa00",
+    award_threshold: 900
+  },
+  {
+    name: "Spooky rowo color",
+    color: "#992237",
+    award_threshold: 999
+  },
+
 ]
 
 const roles = [
   {
-    name: "Seeker of Pristine Water",
+    name: "Ghost Buster",
     hoist: true,
-    icon: "./avatar/blueStar.png"
+    icon: "./avatar/TavareChaos.png"
   },
   {
-    name: "Celebrant",
+    name: "Corrupted by Power",
     hoist: true,
-    icon: "./avatar/PristineWaters.png" //TODO: CHANGE THIS
+    icon: "./avatar/TavareChaosGrey.png"
   }
 ]
 
@@ -117,31 +103,41 @@ let event = {
   roles: roles,
   emoji: [
     //several sweets emojis
-    "🍬",
-    "🍭",
-    "🍫",
-    "🍩",
-    "🍪",
-    "🍨",
-    "🍦",
-    "🍰",
-    "🧁",
-    "🥧",
-    "🍮",
-    "🍯",
-    "🍡",
-    "🍓",
-    "🥠",
-    "🍧",
-    "🍨",
-    "🎂",
-    "☕",
-    "🍵",
-    "🥛",
-    "🍒"
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "👻",
+    "🧛‍♂️",
+    "🧛‍♀️",
+    "🎃",
+    "💀",
+    "☠"
+
 
   ],
-  odds: 8,
+  odds: 30, //Percent out of 100
   /**
  * 
  * @param {Guild} guild 
@@ -150,13 +146,13 @@ let event = {
     let promises = [];
     console.log("Generating roles");
     for (const color of colors) {
-      let role = guild.roles.cache.find(r => r.name.toLowerCase() == `pristine ${color.name.toLowerCase()}`);
+      let role = guild.roles.cache.find(r => r.name.toLowerCase() == `spooky ${color.name.toLowerCase()}`);
 
       if (!role) {
         role = await guild.roles.create({
-          name: `Pristine ${color.name}`,
+          name: `Spooky ${color.name}`,
           color: color.color,
-          reason: "Pristine Waters Event",
+          reason: "Spooky Event",
           position: guild.roles.cache.get(guild.client.config.snowflakes.roles.Holiday[0]).position - 1
         });
         console.log("Created " + role.name + " role");
@@ -174,7 +170,7 @@ let event = {
         roles[holidayRoles.indexOf(role)].icon = undefined;
       }
       promises.push(guild.roles.edit(role, roles[holidayRoles.indexOf(role)]).then(discordRole => {
-        roles[guild.client.config.snowflakes.roles.Holiday.indexOf(role)].role = discordRole;
+        roles[guild.client.snowflakes.roles.Holiday.indexOf(role)].role = discordRole;
         console.log("Updated " + discordRole.name + " role");
       }
       ));
@@ -191,7 +187,7 @@ let event = {
     console.log("Cleaning roles");
 
     for (const color of colors) {
-      const role = guild.roles.cache.find(r => r.name.toLowerCase() == `pristine ${color.name.toLowerCase()}`);
+      const role = guild.roles.cache.find(r => r.name.toLowerCase() == `spooky ${color.name.toLowerCase()}`);
       if (role) {
         promises.push(role.delete());
         console.log("Deleted " + role.name + " role");

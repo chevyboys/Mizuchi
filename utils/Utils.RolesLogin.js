@@ -1,16 +1,35 @@
-const { Client, Intents } = require('discord.js'),
-  config = require("../config/config.json");
+const { Intents } = require('discord.js');
+const { AugurClient } = require("augurbot");
 
-let token = config.auxToken;
+function createClient(config) {
+  let token = config.auxToken;
 
-// Create a new client instance
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+  const client = new AugurClient(config, {
+    clientOptions: {
+      allowedMentions: {
+        parsed: ["roles", "users"],
+        repliedUser: true
+      },
+      partials: ["CHANNEL", "MESSAGE", "REACTION"]
+    },
+    errorHandler: (e) => {
+      console.error("Error in RolesLogin Client:", e);
+    }
+  }).setMaxListeners(80);
 
-// When the client is ready, run this code (only once)
-client.once('Mysterious Bot Entity is now online', () => {
-  console.log('Ready!');
-});
+  client.login(token).catch((e) => {
+    console.error("Failed to login RolesLogin Client:", e);
+  });
 
-// Login to Discord with your client's token
-client.login(token);
-module.exports = client;
+
+
+  // When the client is ready, run this code (only once)
+  client.once('Mysterious Bot Entity is now online', () => {
+    console.log('Ready!');
+  });
+
+  // Login to Discord with your client's token
+  client.login(token);
+  return client;
+}
+module.exports = createClient;

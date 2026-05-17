@@ -1,7 +1,6 @@
 const u = require("./Utils.Generic"),
   { MessageActionRow, MessageButton } = require("discord.js");
 const Discord = require("discord.js");
-const snowflakes = require('../config/snowflakes.json');
 
 let activeRequests = [];
 
@@ -21,7 +20,7 @@ let modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiPa
   Module.reactionHandlers.push({ emoji: modRequestFunctionEmojiParam, approvedCallback: approvedCallback, overrideCallback: overrideCallback })
   /*async function handleReaction(reaction, user, reactionHandler){
       message = reaction.message;
-      if (message.guild?.id != snowflakes.guilds.PrimaryServer || user.bot) return;
+      if (message.guild?.id != Module.config.snowflakes.guilds.PrimaryServer || user.bot) return;
       if ((reaction.emoji.name == modRequestFunctionEmoji)) {
         // Pin Request
         try {
@@ -56,11 +55,11 @@ let modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiPa
     return await u.modRequestEmbed(modRequestFunctionName, message, interaction, user, modRequestFunctionEmoji)
   }
 
-  async function modRequestCard(message, interaction, user) {
+  async function modRequestCard(Module, message, interaction, user) {
     try {
       let embed = await modRequestEmbed(message, interaction, user)
-      let content = `<@&${snowflakes.roles.Moderator}>`;
-      let card = await message.client.channels.cache.get(snowflakes.channels.modRequests).send({ content: content, embeds: [embed], components: (modRequestActions), allowedMentions: { roles: [snowflakes.roles.Moderator] } });
+      let content = `<@&${Module.config.snowflakes.roles.Moderator}>`;
+      let card = await message.client.channels.cache.get(Module.config.snowflakes.channels.modRequests).send({ content: content, embeds: [embed], components: (modRequestActions), allowedMentions: { roles: [Module.config.snowflakes.roles.Moderator] } });
       return card;
     } catch (error) { u.errorHandler(error, `${modRequestFunctionName} Card Reaction`); }
   }
@@ -124,7 +123,7 @@ let modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiPa
   Module
     .addInteractionCommand({
       name: `${modRequestFunctionName}`,
-      guildId: snowflakes.guilds.PrimaryServer,
+
       process: async (interaction) => {
         try {
           await interaction.deferReply?.({ ephemeral: true });
@@ -145,7 +144,7 @@ let modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiPa
                   interaction.editReply({ content: `I have completed the mod action on the message for you`, ephemeral: true });
                 } else {
                   interaction.editReply({ content: `${modRequestFunctionName} request sent.`, ephemeral: true });
-                  let card = await modRequestCard(message, interaction);
+                  let card = await modRequestCard(Module, message, interaction);
                   activeRequests.push({ targetMessage: message.id, targetChannel: message.channel.id, card: card.id, requstedBy: user.id, originalInteraction: interaction });
                 }
               } catch (e) { u.errorHandler(e, "modRequest Request Processing"); }

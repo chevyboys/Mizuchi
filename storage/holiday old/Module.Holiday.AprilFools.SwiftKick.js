@@ -1,6 +1,5 @@
 const Augur = require("augurbot");
 const Module = new Augur.Module();
-const snowflakes = require('../../config/snowflakes.json');
 const u = require('../../utils/Utils.Generic.js');
 const fs = require('fs');
 const webhookSend = require('../../utils/Webhook.js');
@@ -19,7 +18,7 @@ function NPCSend(channel, embedOptions, additionalMessageOptions) {
   let client = Module.client;
   additionalMessageOptions = additionalMessageOptions || {};
   embedOptions.color = //The bot's current color;
-    client.guilds.cache.get(snowflakes.guilds.PrimaryServer)?.members?.cache.get(client.user.id)?.displayColor || "#000000";
+    client.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer)?.members?.cache.get(client.user.id)?.displayColor || "#000000";
   additionalMessageOptions.embeds = [embedOptions];
   return webhookSend.webhook(channel, "Guardian against Chaos", "./avatar/base.png", additionalMessageOptions);
 }
@@ -52,15 +51,15 @@ if (!fs.existsSync('./data/holiday/cache.json')) {
 
 //if active.json is true, set active to true
 let immuneRoles = [
-  snowflakes.roles.BotMaster,
-  snowflakes.roles.Admin,
-  snowflakes.roles.Moderator,
-  snowflakes.roles.LARPer,
-  snowflakes.roles.WorldMaker,
-  snowflakes.roles.BotAssistant,
-  snowflakes.roles.CommunityGuide,
-  snowflakes.roles.CakeDay,
-  snowflakes.roles.Helper
+  Module.config.snowflakes.roles.BotMaster,
+  Module.config.snowflakes.roles.Admin,
+  Module.config.snowflakes.roles.Moderator,
+  Module.config.snowflakes.roles.LARPer,
+  Module.config.snowflakes.roles.WorldMaker,
+  Module.config.snowflakes.roles.BotAssistant,
+  Module.config.snowflakes.roles.CommunityGuide,
+  Module.config.snowflakes.roles.CakeDay,
+  Module.config.snowflakes.roles.Helper
 ]
 
 
@@ -85,7 +84,7 @@ const roles = [
 ]
 
 
-let botCommandsChannel = snowflakes.channels.botSpam;
+let botCommandsChannel = Module.config.snowflakes.channels.botSpam;
 
 const timeout_minutes = 5;
 
@@ -96,13 +95,13 @@ async function eventProcess(interaction) {
   if (interaction.options.getSubcommand() == "gremlin") {
     //give the user the gremlin role
     let member = await interaction.guild.members.fetch(interaction.member.id);
-    if (!member.roles.cache.has(snowflakes.roles.Holiday[1])) {
-      let gremlinRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[1]);
+    if (!member.roles.cache.has(Module.config.snowflakes.roles.Holiday[1])) {
+      let gremlinRole = interaction.guild.roles.cache.get(Module.config.snowflakes.roles.Holiday[1]);
       await interaction.member.roles.add(gremlinRole);
       botCommandsChannelObject.send({ content: `${interaction.member.displayName} has become a gremlin!` });
       return await interaction.reply({ content: `You are now a gremlin! Use this subcommand again to return to normal.`, ephemeral: true });
     } else {
-      let gremlinRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[1]);
+      let gremlinRole = interaction.guild.roles.cache.get(Module.config.snowflakes.roles.Holiday[1]);
       await interaction.member.roles.remove(gremlinRole);
       botCommandsChannelObject.send({ content: `${interaction.member.displayName} is no longer a gremlin!` });
       return await interaction.reply({ content: `You are no longer a gremlin!`, ephemeral: true });
@@ -114,7 +113,7 @@ async function eventProcess(interaction) {
       return;
     }
     //check if the target user has the gremlin role
-    if (!interaction.options.getMember("target").roles.cache.has(snowflakes.roles.Holiday[1])) {
+    if (!interaction.options.getMember("target").roles.cache.has(Module.config.snowflakes.roles.Holiday[1])) {
       interaction.reply({ content: "That user is not a gremlin!", ephemeral: true });
       return;
     }
@@ -123,7 +122,7 @@ async function eventProcess(interaction) {
       return;
     }
     //make sure the user is not already a prisoner
-    if (interaction.options.getMember("target").roles.cache.has(snowflakes.roles.Holiday[0])) {
+    if (interaction.options.getMember("target").roles.cache.has(Module.config.snowflakes.roles.Holiday[0])) {
       interaction.reply({ content: "That user is already a prisoner!", ephemeral: true });
       return;
     }
@@ -133,8 +132,8 @@ async function eventProcess(interaction) {
     botCommandsChannelObject.send({ content: `${interaction.member.displayName} has captured ${interaction.options.getMember("target").displayName} for the next five minutes!`, allowedMentions: { users: [interaction.options.getMember("target").id] } });
     //send the user to the prison channel by first removing all the roles they have that we have permission to and that are not the gremlin role, then adding the prisoner role
     let target = interaction.options.getMember("target");
-    let prisonerRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[0]);
-    let gremlinRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[1]);
+    let prisonerRole = interaction.guild.roles.cache.get(Module.config.snowflakes.roles.Holiday[0]);
+    let gremlinRole = interaction.guild.roles.cache.get(Module.config.snowflakes.roles.Holiday[1]);
     let promises = [];
     if (!holiday_role_map[target.id]) {
       console.log("Creating new role map for " + target.displayName);
@@ -166,8 +165,8 @@ async function eventProcess(interaction) {
       //set timeout to restore roles
       setTimeout(() => {
         let target = interaction.options.getMember("target");
-        let prisonerRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[0]);
-        let gremlinRole = interaction.guild.roles.cache.get(snowflakes.roles.Holiday[1]);
+        let prisonerRole = interaction.guild.roles.cache.get(Module.config.snowflakes.roles.Holiday[0]);
+        let gremlinRole = interaction.guild.roles.cache.get(Module.config.snowflakes.roles.Holiday[1]);
         let promises = [];
         //remove the prisoner role
         promises.push(target.roles.remove(prisonerRole));
@@ -200,14 +199,14 @@ let event = {
     console.log("Generating roles");
 
     //update the bonus xp roles we already have
-    //sort snowflakes.roles.Holiday by position
-    let holidayRoles = snowflakes.roles.Holiday.sort((a, b) => guild.roles.cache.get(a).position - guild.roles.cache.get(b).position);
+    //sort Module.config.snowflakes.roles.Holiday by position
+    let holidayRoles = Module.config.snowflakes.roles.Holiday.sort((a, b) => guild.roles.cache.get(a).position - guild.roles.cache.get(b).position);
     for (const role of holidayRoles) {
       if (guild.premiumTier != "TIER_2" && guild.premiumTier != "TIER_3") {
         roles[holidayRoles.indexOf(role)].icon = undefined;
       }
       promises.push(guild.roles.edit(role, roles[holidayRoles.indexOf(role)]).then(discordRole => {
-        roles[snowflakes.roles.Holiday.indexOf(role)].role = discordRole;
+        roles[Module.config.snowflakes.roles.Holiday.indexOf(role)].role = discordRole;
         console.log("Updated " + discordRole.name + " role");
       }
       ));
@@ -225,14 +224,14 @@ let event = {
 
     promises.push(guild.members.fetch().then(m => {
       let promisesRoles = [];
-      for (const role of snowflakes.roles.Holiday) {
+      for (const role of Module.config.snowflakes.roles.Holiday) {
         promisesRoles.push(guild.roles.fetch(role).then(
           /**
           * @param {Role} r
           */
           r =>
             r.edit({
-              name: "Holiday Role " + snowflakes.roles.Holiday.indexOf(role) + 1,
+              name: "Holiday Role " + Module.config.snowflakes.roles.Holiday.indexOf(role) + 1,
               color: "#000000",
               hoist: false,
               icon: null
@@ -268,7 +267,7 @@ let event = {
 
 async function registerCommands() {
   console.log("Registering event commands");
-  const guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+  const guild = Module.client.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer);
   const commands = guild.commands;
   const registeredCommand = await commands.create(
     new SlashCommandBuilder()
@@ -322,8 +321,8 @@ async function begin(msg) {
     description: `It was a quite night, on the 31st of march, but many knew it was coming. The day of fools, the day of pranks, the day of jokes, the day of Chaos. But this year, things were different, for the lovers of order and freedom had a new ally against the gremlins of chaos, to trap them until the day was done. (Use /event gremlin to get the gremlin role and the bonus XP it brings, but beware, anyone may use the /event capture command to trap you in a channel for 5 minutes!)`,
   }),
     {
-      content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.MetaUpdates}>, <@&${snowflakes.roles.Updates.HolidayUpdates}>`,
-      allowedMentions: { roles: [snowflakes.roles.Updates.AllUpdates, snowflakes.roles.Updates.MetaUpdates, snowflakes.roles.Updates.HolidayUpdates] }
+      content: `<@&${Module.config.snowflakes.roles.Updates.AllUpdates}>, <@&${Module.config.snowflakes.roles.Updates.MetaUpdates}>, <@&${Module.config.snowflakes.roles.Updates.HolidayUpdates}>`,
+      allowedMentions: { roles: [Module.config.snowflakes.roles.Updates.AllUpdates, Module.config.snowflakes.roles.Updates.MetaUpdates, Module.config.snowflakes.roles.Updates.HolidayUpdates] }
     }
   );
 
@@ -331,21 +330,21 @@ async function begin(msg) {
 
 Module.addCommand({
   name: "begin",
-  guild: snowflakes.guilds.PrimaryServer,
-  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+  guild: Module.config.snowflakes.guilds.PrimaryServer,
+  permissions: (msg) => msg.member.roles.cache.has(Module.config.snowflakes.roles.BotMaster),
   process: async (msg) => {
     await begin(msg);
     await msg.react("✔");
   }
 }).addCommand({
   name: "clean",
-  guild: snowflakes.guilds.PrimaryServer,
-  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+  guild: Module.config.snowflakes.guilds.PrimaryServer,
+  permissions: (msg) => msg.member.roles.cache.has(Module.config.snowflakes.roles.BotMaster),
   process: async (msg) => {
     await event.cleanRoles(msg.guild);
     await event.cleanHolidayBotIcon(msg.client);
     //remove any special permissions any channels have for the prisoner role
-    let prisonerRole = msg.guild.roles.cache.get(snowflakes.roles.Holiday[0]);
+    let prisonerRole = msg.guild.roles.cache.get(Module.config.snowflakes.roles.Holiday[0]);
     msg.guild.channels.cache.forEach(c => {
       if (c.permissionsFor(msg.guild.me).has("MANAGE_ROLES")) {
         c.permissionOverwrites.delete(prisonerRole).then(() => {
@@ -364,7 +363,7 @@ Module.addCommand({
 }).addCommand({
   //add a command to show all the roles that have send messages permission guild wide or in a specific channel
   name: "showroles",
-  guild: snowflakes.guilds.PrimaryServer,
+  guild: Module.config.snowflakes.guilds.PrimaryServer,
   process: async (msg) => {
     let roles = msg.guild.roles.cache.filter(r => r.permissions.has("SEND_MESSAGES"));
     let roleString = "";
@@ -401,7 +400,7 @@ Module.addCommand({
         let time = Date.now();
         if (time - imprisoned_time > timeout_minutes * 60000) {
           //restore the roles
-          let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+          let guild = Module.client.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer);
           let member = guild.members.cache.get(member_id);
           let promisesRoles = [];
           member_roles.forEach(r => {
@@ -411,10 +410,10 @@ Module.addCommand({
           });
           promises.push(Promise.all(promisesRoles).then(() => {
             //remove the prisoner role
-            let prisonerRole = guild.roles.cache.get(snowflakes.roles.Holiday[0]);
+            let prisonerRole = guild.roles.cache.get(Module.config.snowflakes.roles.Holiday[0]);
             member.roles.remove(prisonerRole);
             //add the gremlin role
-            let gremlinRole = guild.roles.cache.get(snowflakes.roles.Holiday[1]);
+            let gremlinRole = guild.roles.cache.get(Module.config.snowflakes.roles.Holiday[1]);
             member.roles.add(gremlinRole);
             //remove the role from the cache
             holiday_role_map[member_id] = null;
@@ -435,12 +434,12 @@ Module.addCommand({
 //add an explicit allow for the prisoner role to send messages in the prison channel
 Module.addCommand({
   name: "prisonbuild",
-  guild: snowflakes.guilds.PrimaryServer,
-  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+  guild: Module.config.snowflakes.guilds.PrimaryServer,
+  permissions: (msg) => msg.member.roles.cache.has(Module.config.snowflakes.roles.BotMaster),
   process: async (msg) => {
     let guild = msg.guild;
     let promises = [];
-    let prisonerRole = guild.roles.cache.get(snowflakes.roles.Holiday[0]);
+    let prisonerRole = guild.roles.cache.get(Module.config.snowflakes.roles.Holiday[0]);
     let prisonChannel = guild.channels.cache.get(event.channel);
     guild.channels.cache.forEach(c => {
       if (c.permissionsFor(guild.me).has("MANAGE_ROLES")) {

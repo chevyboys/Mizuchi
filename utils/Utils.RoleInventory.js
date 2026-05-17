@@ -1,6 +1,5 @@
 const getGoogleSheetAsJSON = require("./Utils.GetGoogleSheetsAsJson")
 const fs = require("fs");
-const snowflakes = require("../config/snowflakes.json");
 
 //Check to see if the data folder has the inventory folder
 //if not, create it
@@ -10,13 +9,13 @@ if (!fs.existsSync(path)) {
 }
 
 const roleUtilities = {
-  getColorsProvidedByRole: async (roleid, sheetRoleArray) => {
-    const roles = sheetRoleArray || await getGoogleSheetAsJSON(snowflakes.sheets.roles);
+  getColorsProvidedByRole: async (module, roleid, sheetRoleArray) => {
+    const roles = sheetRoleArray || await getGoogleSheetAsJSON(module.config.snowflakes.sheets.roles);
     let roleColorsProvided = [];
     let role = roles.find(r => r.id == roleid && r.colorInventory != "");
     if (!role) return null;
     if (role.roleToInheritFrom) {
-      roleColorsProvided.push(...await roleUtilities.getColorsProvidedByRole(role.roleToInheritFrom))
+      roleColorsProvided.push(...await roleUtilities.getColorsProvidedByRole(module, role.roleToInheritFrom))
     }
 
     if (role.colorInventory) {
@@ -28,10 +27,10 @@ const roleUtilities = {
     }
     return roleColorsProvided;
   },
-  getMemberColorInventory: async (member) => {
-    const roles = await getGoogleSheetAsJSON(snowflakes.sheets.roles);
+  getMemberColorInventory: async (module, member) => {
+    const roles = await getGoogleSheetAsJSON(module.config.snowflakes.sheets.roles);
     let memberRoles = member.roles.cache.filter(r => roles.filter(sheetRole => sheetRole.colorInventory).map(sr => sr.id).includes(r.id));
-    let roleInventory = (await (await Promise.all(memberRoles.map((r) => roleUtilities.getColorsProvidedByRole(r.id, roles))))).flat();
+    let roleInventory = (await (await Promise.all(memberRoles.map((r) => roleUtilities.getColorsProvidedByRole(module, r.id, roles))))).flat();
     //check the role inventory folder to see if the user has any roles in their inventory that are not currently provided by their discord roles, and if so, add those to the roleInventory array as well. This will ensure that users have access to any roles they have purchased from the shop, even if those roles are not currently provided by any of their discord roles for whatever reason (e.g. a temporary role that has expired but hasn't been removed from their inventory yet).
     const inventoryFiles = fs.readdirSync(path).filter(fileName => fileName.endsWith('.json'));
     for (const fileName of inventoryFiles) {
@@ -54,13 +53,13 @@ const roleUtilities = {
 
     return [... new Set(roleInventory.flat(1))];
   },
-  getSecondaryRolesProvidedByRole: async (roleid, sheetRoleArray) => {
-    const roles = sheetRoleArray || await getGoogleSheetAsJSON(snowflakes.sheets.roles);
+  getSecondaryRolesProvidedByRole: async (module, roleid, sheetRoleArray) => {
+    const roles = sheetRoleArray || await getGoogleSheetAsJSON(module.config.snowflakes.sheets.roles);
     let rolesProvided = [];
     let role = roles.find(r => r.id == roleid && r.generalInventory != "");
     if (!role) return null;
     if (role.roleToInheritFrom) {
-      rolesProvided.push(... await roleUtilities.getColorsProvidedByRole(role.roleToInheritFrom))
+      rolesProvided.push(... await roleUtilities.getColorsProvidedByRole(module, role.roleToInheritFrom))
     }
     if (role.generalInventory) {
       if (typeof role.generalInventory === 'string') {
@@ -71,10 +70,10 @@ const roleUtilities = {
     }
     return rolesProvided;
   },
-  getSecondaryInventory: async (member) => {
-    const roles = await getGoogleSheetAsJSON(snowflakes.sheets.roles)
+  getSecondaryInventory: async (module, member) => {
+    const roles = await getGoogleSheetAsJSON(module.config.snowflakes.sheets.roles)
     let memberRoles = member.roles.cache.filter(r => roles.filter(sheetRole => sheetRole.generalInventory).map(sr => sr.id).includes(r.id));
-    let roleInventory = (await (await Promise.all(memberRoles.map((r) => roleUtilities.getSecondaryRolesProvidedByRole(r.id, roles))))).flat();
+    let roleInventory = (await (await Promise.all(memberRoles.map((r) => roleUtilities.getSecondaryRolesProvidedByRole(module, r.id, roles))))).flat();
     return [... new Set(roleInventory.flat(1))];
   },
   addRoleToInventory: async (member, roleId, scheduledRemovalDate = null) => {

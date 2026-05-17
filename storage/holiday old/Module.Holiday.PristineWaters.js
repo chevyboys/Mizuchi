@@ -1,9 +1,8 @@
 //Initalization, imports, etc
 const { MessageReaction, User, CommandInteraction, Message, MessageSelectMenu, MessageActionRow, } = require('discord.js');
-const snowflakes = require('../../config/snowflakes.json')
 const Module = new (require("augurbot")).Module;
 const fs = require('fs');
-const config = require('../../config/config.json');
+const config = Module.config;
 const u = require('../../utils/Utils.Generic');
 const event = require("../../modules/PristineWaters/utils");
 const odds = event.odds;
@@ -59,7 +58,7 @@ function extendedFlurry(channel, minutes, hidden = false) {
   }, minutes * 60 * 1000);
 }
 
-function blizzard(channel, extendedMinutes = 0, hidden = false) {
+function blizzard(Module, channel, extendedMinutes = 0, hidden = false) {
   //triggers a flurry in every channel where all the following are true:
   // - The channel is not the event channel (if it is the event channel trigger the eventChannelFulrry function)
   // - The channel is not a DM
@@ -82,7 +81,7 @@ function blizzard(channel, extendedMinutes = 0, hidden = false) {
       //make sure the bot user can manage messages (not the everyone role)
       element.permissionsFor(channel.guild.me).has("MANAGE_MESSAGES") &&
       !element.isThread() &&
-      element.id != snowflakes.channels.botSpam
+      element.id != Module.config.snowflakes.channels.botSpam
     );
   }).then((channels) => {
     //for each channel, trigger a flurry
@@ -141,7 +140,7 @@ class Participants {
       "Insufficient Vespene Gas!",
     ]
 
-    if (client.guilds.cache.get(snowflakes.guilds.PrimaryServer).members.cache.get(reciever).bot) return "While we appreciate the consideration from one so illustrious, the server elementals have no need for this.";
+    if (client.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer).members.cache.get(reciever).bot) return "While we appreciate the consideration from one so illustrious, the server elementals have no need for this.";
     let giverIndex = this.cache.findIndex(element => giver == element.user);
     let recieverIndex = this.cache.findIndex(element => reciever == element.user);
     if (giverIndex == -1) {
@@ -186,7 +185,7 @@ function getRandomEmoji() {
   return event.emoji[Math.floor(Math.random() * event.emoji.length)];
 }
 
-async function begin(msg) {
+async function begin(Module, msg) {
   await event.setHolidayBotIcon(msg.client);
   await event.generateRoles(msg.guild);
   setActive(true);
@@ -203,8 +202,8 @@ async function begin(msg) {
   },
   ),
     {
-      content: `<@&${snowflakes.roles.Updates.AllUpdates}>, <@&${snowflakes.roles.Updates.MetaUpdates}>, <@&${snowflakes.roles.Updates.HolidayUpdates}>`,
-      allowedMentions: { roles: [snowflakes.roles.Updates.AllUpdates, snowflakes.roles.Updates.MetaUpdates, snowflakes.roles.Updates.HolidayUpdates] }
+      content: `<@&${Module.config.snowflakes.roles.Updates.AllUpdates}>, <@&${Module.config.snowflakes.roles.Updates.MetaUpdates}>, <@&${Module.config.snowflakes.roles.Updates.HolidayUpdates}>`,
+      allowedMentions: { roles: [Module.config.snowflakes.roles.Updates.AllUpdates, Module.config.snowflakes.roles.Updates.MetaUpdates, Module.config.snowflakes.roles.Updates.HolidayUpdates] }
     });
 }
 
@@ -233,7 +232,7 @@ Module.addEvent("messageReactionAdd",
   async (reaction, user) => {
     if (!active) return;
     let message = reaction.message;
-    let channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+    let channel = message.guild.channels.cache.get(Module.config.snowflakes.channels.botSpam);
     let member = await message.guild.members.fetch(user.id);
     if (event.emoji.indexOf(reaction.emoji.toString().toLowerCase()) > -1 && !user.bot && reaction.users.cache.has(message.client.user.id) && message.channel.permissionsFor(message.client.user).has("MANAGE_MESSAGES")) {
       let status;
@@ -291,7 +290,14 @@ Module.addEvent("messageReactionAdd",
         await removeReaction(reaction)
       } catch (error) { u.errorHandler(error, "Holiday reaction error"); }
     }
-    else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1 && config.AdminIds.includes(user.id) || member.roles.cache.hasAny([snowflakes.roles.Admin, snowflakes.roles.Helper, snowflakes.roles.Moderator, snowflakes.roles.CommunityGuide, snowflakes.roles.BotMaster, snowflakes.roles.WorldMaker])) {
+    else if (reaction.emoji.toString().toLowerCase().indexOf("🔮") > -1
+      && Module.config.AdminIds.includes(user.id)
+      || member.roles.cache.hasAny([Module.config.snowflakes.roles.Admin,
+      Module.config.snowflakes.roles.Helper,
+      Module.config.snowflakes.roles.Moderator,
+      Module.config.snowflakes.roles.CommunityGuide,
+      Module.config.snowflakes.roles.BotMaster,
+      Module.config.snowflakes.roles.WorldMaker])) {
       reaction.remove()
       await reaction.message.react(getRandomEmoji());
     } else if (reaction.emoji.toString().toLowerCase().indexOf("🎁") > -1) {
@@ -361,7 +367,7 @@ Module.addEvent("messageReactionAdd",
         !msg.webhookId &&
         !msg.author.bot &&
         msg.type == "DEFAULT" &&
-        (msg.member.roles.cache.has(snowflakes.roles.Holiday[1]) ? (Math.random() * 100 < odds) : (Math.random() * 100 < odds + 5))
+        (msg.member.roles.cache.has(Module.config.snowflakes.roles.Holiday[1]) ? (Math.random() * 100 < odds) : (Math.random() * 100 < odds + 5))
       ) {
         msg.react(getRandomEmoji());
       }
@@ -369,14 +375,14 @@ Module.addEvent("messageReactionAdd",
       if (!active) return;
       try {
         return setInterval(async () => {
-          let guild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)
+          let guild = Module.client.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer)
           const TargetUSTime = 5; //5 AM is the target MST time. The Devs are MST based, so this was the easiest to remember
           const modifierToConvertToBotTime = 7;
           if (moment().hours() == TargetUSTime + modifierToConvertToBotTime) {
 
             participants.cache.forEach(async (element) => {
               element.dailyReset();
-              await (await (Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)).members.fetch(element.user)).roles.remove(snowflakes.roles.Holiday);
+              await (await (Module.client.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer)).members.fetch(element.user)).roles.remove(Module.config.snowflakes.roles.Holiday);
             });
           }
           participants.write();
@@ -391,16 +397,16 @@ Module.addEvent("messageReactionAdd",
 
 Module.addCommand({ //TODO: REMOVE THIS
   name: "begin",
-  guild: snowflakes.guilds.PrimaryServer,
-  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+  guild: Module.config.snowflakes.guilds.PrimaryServer,
+  permissions: (msg) => msg.member.roles.cache.has(Module.config.snowflakes.roles.BotMaster),
   process: async (msg) => {
-    await begin(msg);
+    await begin(Module, msg);
     await msg.react("✔");
   }
 }).addCommand({ //TODO: REMOVE THIS
   name: "clean",
-  guild: snowflakes.guilds.PrimaryServer,
-  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+  guild: Module.config.snowflakes.guilds.PrimaryServer,
+  permissions: (msg) => msg.member.roles.cache.has(Module.config.snowflakes.roles.BotMaster),
   process: async (msg) => {
     await event.cleanRoles(msg.guild);
     await event.cleanHolidayBotIcon(msg.client);
@@ -411,8 +417,8 @@ Module.addCommand({ //TODO: REMOVE THIS
   }
 }).addCommand({
   name: "write",
-  guild: snowflakes.guilds.PrimaryServer,
-  permissions: (msg) => msg.member.roles.cache.has(snowflakes.roles.BotMaster),
+  guild: Module.config.snowflakes.guilds.PrimaryServer,
+  permissions: (msg) => msg.member.roles.cache.has(Module.config.snowflakes.roles.BotMaster),
   process: async (msg) => {
     participants.write(msg.guild).then(() => {
       msg.channel.send("Cache written");
@@ -558,7 +564,7 @@ async function handlePristineAvatarOverlaySelectionMenus(interaction) {
 
 Module.addInteractionCommand({
   name: "festival",
-  guildId: snowflakes.guilds.PrimaryServer,
+
   /**
    * 
    * @param {CommandInteraction} interaction 
@@ -904,7 +910,7 @@ Module.setClockwork(() => {
       else if (moment().format("MM") == "12") {
         Module.client.user.setAvatar(event.avatar || ('./avatar/' + ("winter.png")))
       } else if (moment().format("MM/DD") == "01/02") {
-        Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer).channels.cache.get(snowflakes.channels.modRequests).send("Please have a bot master update the hanukkah start date in the code (modules/Module.Holiday.PristineWaters.js)");
+        Module.client.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer).channels.cache.get(Module.config.snowflakes.channels.modRequests).send("Please have a bot master update the hanukkah start date in the code (modules/Module.Holiday.PristineWaters.js)");
       }
 
     }, 3 * 60 * 60 * 1000);

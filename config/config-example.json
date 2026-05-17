@@ -38,10 +38,13 @@
     "host": "",
     "user": "",
     "password": "",
-    "database": ""
+    "database": "",
+    "port": ""
   },
+  "snowflakes": {},
   "ownerId": "",
   "token": "",
   "auxToken": "",
-  "staffApplicationLink": ""
+  "staffApplicationLink": "",
+  "identifier": ""
 }

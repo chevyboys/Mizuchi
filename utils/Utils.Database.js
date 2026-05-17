@@ -1,11 +1,15 @@
 const mysql = require("mysql2/promise"); // Updated to mysql2
 const Discord = require("discord.js");
-const snowflakes = require("../config/snowflakes.json");
-const config = require("../config/config.json");
+const { errorHandler } = require("./Utils.Error");
 
 let hasBeenInitialized = false;
-let client;
+/**
+ * This file is responsible for all interactions with the database, and contains utility functions for parsing and validating data related to the database. It also contains the data models for the database, such as the DBUserObject, which represents a user in the database and contains methods for updating that user's information in the database. The DataBaseActions object contains methods for interacting with the database, such as getting a user or updating a user's information. The database connection is established using mysql2/promise, and all queries are executed using prepared statements to prevent SQL injection.
+ */
+let client; // this will hold our AugurClient instance, which we need for some of the utility functions. We have to declare it here to avoid circular dependencies, but the init function will set it to the actual client instance when it's called from bot.js
 let con; // This will hold our promise-based connection
+let pool; // This will hold our connection pool
+//TODO: Switch to the connection pool for all queries
 
 const DISCORD_EPOCH = 1420070400000; // Constant for Snowflake validation
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
@@ -65,10 +69,10 @@ function normalizeRolesByGuild(rolesData) {
     try { parsedRoles = JSON.parse(parsedRoles); } catch { parsedRoles = []; }
   }
 
-  // Legacy support: If it's just an array, assign to Primary Server
+  // Legacy support: If it's just an array, treat it as roles for the primary guild
   if (Array.isArray(parsedRoles)) {
-    return {
-      [snowflakes.guilds.PrimaryServer]: parsedRoles.filter(assertIsSnowflake)
+    parsedRoles = {
+      [client.config.snowflakes.guilds.PrimaryServer]: parsedRoles
     };
   }
 
@@ -495,7 +499,7 @@ const DataBaseActions = {
       try {
         // 2. Resolve Username Failover
         // Check primary server first
-        const primaryGuild = client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+        const primaryGuild = client.guilds.cache.get(client.config.snowflakes.guilds.PrimaryServer);
         const primaryMember = primaryGuild?.members.cache.get(snowflake);
         let username = primaryMember ? cleanString(primaryMember.displayName) : null;
 
@@ -949,22 +953,33 @@ const DataBaseActions = {
 
     if (!hasBeenInitialized) {
       //initialize the database connection
-      con = await mysql.createConnection({
-        host: config.mySQL.host,
-        user: config.mySQL.user,
-        password: config.mySQL.password,
-        database: config.mySQL.database,
-        port: config.mySQL.port
+      let pool = await mysql.createPool({
+        host: Module.client.config.mySQL.host,
+        user: Module.client.config.mySQL.user,
+        password: Module.client.config.mySQL.password,
+        database: Module.client.config.mySQL.database,
+        port: Module.client.config.mySQL.port,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+        idleTimeout: 60000, // 60 seconds
+        enableKeepAlive: true,
+        keepAliveInitialDelay: 30000 // 30 seconds
       });
 
       try {
-        // Ping the database to verify the single connection is alive and ready
+        // Ping the database to verify the connection pool is alive and ready
+        con = await pool.getConnection();
         await con.ping();
+        con.release();
+        pool.on('error', (err) => {
+          errorHandler(err, "Database connection error");
+        });
         console.log("Connected to DataBase!");
         hasBeenInitialized = true;
       } catch (err) {
-        console.error("Failed to establish Database connection:", err);
-        throw err; // Halt initialization if the DB is unreachable
+        errorHandler(err, "Error establishing database connection. Please check your database configuration and ensure the database server is running.");
+        throw err; // Rethrow to prevent the bot from starting without a database connection
       }
     }
 

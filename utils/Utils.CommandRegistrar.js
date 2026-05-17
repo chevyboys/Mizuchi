@@ -1,12 +1,10 @@
 const Discord = require("discord.js"),
-  config = require("../config/config.json"),
-  snowflakes = require("../config/snowflakes.json"),
   { Routes } = require('discord-api-types/v9'),
   u = require("../utils/Utils.Generic"),
   fs = require('fs'),
   { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandStringOption } = require('@discordjs/builders'),
   { REST, DiscordAPIError } = require('@discordjs/rest');
-const client = require("./Utils.RolesLogin");
+
 
 function IsJsonString(str) {
   try {
@@ -17,12 +15,9 @@ function IsJsonString(str) {
   return true;
 }
 
-let hasRegisteredCommandsThisRun = false;
-client.hasRegisteredCommandsThisRun = false;
-
 const registrar = {
   getCommandId: async (Module, commandName) => {
-    let guild = await Module.client.guilds.fetch(snowflakes.guilds.PrimaryServer);
+    let guild = await Module.client.guilds.fetch(Module.config.snowflakes.guilds.PrimaryServer);
     guild.commands.cache.find((k, v) => v.name == commandName)
 
   },
@@ -57,9 +52,9 @@ const registrar = {
     let registeredCommands = []
     for (const command of parsedCommandArray) {
       command.toJSON()
-      registeredCommands.push(await rest.post(Routes.applicationGuildCommands(Module.client.user.id, snowflakes.guilds.PrimaryServer), { body: command }));
+      registeredCommands.push(await rest.post(Routes.applicationGuildCommands(Module.client.user.id, Module.config.snowflakes.guilds.PrimaryServer), { body: command }));
     }
-    client.hasRegisteredCommandsThisRun = true;
+    Module.client.hasRegisteredCommandsThisRun = true;
     return registeredCommands;
   },
   /**
@@ -69,10 +64,10 @@ const registrar = {
    * @param {Discord.Snowflake[]} [allowedRoles = []] the roles to still allow. Leave blank to disallow all
    */
   restrictGuildCommand: async (Module, command, allowedRoles = []) => {
-    command = await Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer)?.commands.fetch(command.id);
+    command = await Module.client.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer)?.commands.fetch(command.id);
     permissions = [
       {
-        id: snowflakes.guilds.PrimaryServer,
+        id: Module.config.snowflakes.guilds.PrimaryServer,
         type: 'ROLE',
         permission: false,
       }
