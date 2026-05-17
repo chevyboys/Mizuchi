@@ -52,49 +52,66 @@ function processFaqButton(interaction) {
   interaction.reply({ embeds: [embed], ephemeral: true })
 }
 
-async function updateFaqMessage(faqFile, faqFileName, Module) {
-  faqFileName = faqFileName.replace(".json", "");
-  let faqGuild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-  let faqChannel = await faqGuild.channels.fetch(snowflakes.channels.faq);
-  let faqMsg = await faqChannel.messages.fetch(faqFile.messageId);
-  //  let embed = u.embed({ color: 0xF0004C, author: faqMsg.member })
-  //  .setTitle(`FAQ: ${faqFileName}`)
-  // .setColor(faqMsg.member.displayHexColor)
-  //.setTimestamp()
-  //.setAuthor(faqMsg.member.displayName, faqMsg.member.user.displayAvatarURL())
-  //.setDescription("Click any of the question buttons below to see the answer to the question.");
+async function loadFaqs(client) {
+  if (!client) {
+    return console.error("Failed to load FAQs: client is missing!");
+  }
 
-  let components = await dynamicallyCreateButtons(faqFile);
-  faqMsg.edit({ content: `**__FAQ: ${faqFileName}__**`, embeds: [], components: components });
+  const testFolder = './faq/';
+  const fs = require('fs');
+
+  // Read the directory synchronously to avoid async context loss
+  const files = fs.readdirSync(testFolder);
+
+  for (const file of files) {
+    if (file.toLowerCase().indexOf("-example") > -1) continue;
+
+    let faqFile = JSON.parse(fs.readFileSync(`./faq/${file}`, 'utf8'));
+
+    if (faqFile.messageId == "") {
+      let faqGuild = client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+      let faqChannel = await faqGuild.channels.fetch(snowflakes.channels.faq);
+      let newFaqMsg = await faqChannel.send({ embeds: [u.embed().setDescription("🔃 Generating FAQ. Please wait")] });
+      faqFile.messageId = newFaqMsg.id;
+      fs.writeFileSync(`./faq/${file}`, JSON.stringify(faqFile, null, 4));
+    }
+    // Pass the client variable down to the next function
+    await updateFaqMessage(faqFile, file, client);
+  }
 }
 
+// 2. Accept 'client' explicitly here too
+async function updateFaqMessage(faqFile, faqFileName, client) {
+  faqFileName = faqFileName.replace(".json", "");
+
+  // Use the explicit client parameter instead of Module.client
+  let faqGuild = client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
+  let faqChannel = await faqGuild.channels.fetch(snowflakes.channels.faq);
+  let faqMsg = await faqChannel.messages.fetch(faqFile.messageId);
+
+  let components = await dynamicallyCreateButtons(faqFile);
+  await faqMsg.edit({ content: `**__FAQ: ${faqFileName}__**`, embeds: [], components: components });
+}
 
 Module
   .setInit(async (data) => {
     if (data) questions = data;
-    const testFolder = './faq/';
-    const fs = require('fs');
 
-    fs.readdir(testFolder, async (err, files) => {
-      if (typeof files != typeof []) files = [files];
-      for (const file of files) {
-        let faqFile = require(`../faq/${file}`);
-        if (file.toLowerCase().indexOf("-example") > -1) continue
-        else {
-          if (faqFile.messageId == "") {
-            let faqGuild = Module.client.guilds.cache.get(snowflakes.guilds.PrimaryServer);
-            let faqChannel = await faqGuild.channels.fetch(snowflakes.channels.faq);
-            let newFaqMsg = await faqChannel.send({ embeds: [(u.embed().setDescription("🔃 Generating FAQ. Please wait"))] });
-            faqFile.messageId = newFaqMsg.id;
-            fs.writeFileSync(`./faq/${file}`, JSON.stringify(faqFile, 1, 4));
-          }
-          await updateFaqMessage(faqFile, file, Module);
-        }
+    // For hot-reloads: wait exactly 1 second to guarantee Augurbot 
+    // has finished attaching the client to the Module instance.
+    setTimeout(() => {
+      if (Module.client && Module.client.readyAt) {
+        loadFaqs(Module.client);
       }
-    });
+    }, 1000);
+  })
+  .setUnload(() => { return questions; })
 
-  }
-  ).setUnload(() => { return questions; })
+  // In discord.js v13, the 'ready' event passes the raw client instance 
+  // straight into the function parameters. We use it directly!
+  .addEvent("ready", (client) => {
+    loadFaqs(client || Module.client);
+  })
   .addInteractionHandler({ customId: `faq0`, process: processFaqButton })
   .addInteractionHandler({ customId: `faq1`, process: processFaqButton })
   .addInteractionHandler({ customId: `faq2`, process: processFaqButton })
