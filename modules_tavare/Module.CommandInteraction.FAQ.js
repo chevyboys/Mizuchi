@@ -70,7 +70,8 @@ async function updateFaqMessage(faqFile, faqFileName, Module) {
 
 
 Module
-  .addEvent("ready", async () => {
+  .setInit(async (data) => {
+    if (data) questions = data;
     const testFolder = './faq/';
     const fs = require('fs');
 
@@ -87,14 +88,11 @@ Module
             faqFile.messageId = newFaqMsg.id;
             fs.writeFileSync(`./faq/${file}`, JSON.stringify(faqFile, 1, 4));
           }
-          await updateFaqMessage(faqFile, file, Module)
+          await updateFaqMessage(faqFile, file, Module);
         }
       }
     });
 
-  })
-  .setInit((data) => {
-    if (data) questions = data;
   }
   ).setUnload(() => { return questions; })
   .addInteractionHandler({ customId: `faq0`, process: processFaqButton })
