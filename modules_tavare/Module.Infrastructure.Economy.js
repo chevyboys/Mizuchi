@@ -461,6 +461,11 @@ Module.addCommand({
     if (message.partial) await message.fetch();
     let guild = message.guild;
     if (!guild) return;
+    let member = guild.members.cache.get(user.id) || await guild.members.fetch(user.id);
+    if (!member) {
+      await message.react("❌");
+      return;
+    }
 
     let emojiString = reaction.emoji.toString();
     let isGemEmoji = !!currencyEmojiByValue[emojiString];
@@ -469,7 +474,6 @@ Module.addCommand({
 
     //if the user is a botmaster and the emoji is 👈, remove the reaction and replace it with a gemstone emoji
     if (emojiString === "👈") {
-      let member = guild.members.cache.get(user.id) || await guild.members.fetch(user.id).catch(() => null);
       if (!canGrantCurrency(member)) return;
       try {
         reaction.remove().catch(() => { });
@@ -483,7 +487,6 @@ Module.addCommand({
       return;
     }
 
-    let member = guild.members.cache.get(user.id) || await guild.members.fetch(user.id).catch(() => null);
     // If staff uses a gemstone emoji, remove their reaction without awarding points.
     // Only seed a bot reaction when the bot did not already own this gemstone on the message.
     if (canGrantCurrency(member)) {
