@@ -34,9 +34,6 @@ async function pinMsgOverride(inputObject) {
 }
 
 
-modRequest(Module, "Pin", Module.config.snowflakes.emoji.messageContextMenu.pin, pinMsgApprove, pinMsgOverride);
-
-
-
+modRequest(Module, "Pin", () => Module.config.snowflakes.emoji.messageContextMenu.pin, pinMsgApprove, pinMsgOverride);
 
 module.exports = Module;
