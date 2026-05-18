@@ -3,13 +3,19 @@ const Augur = require("augurbot"),
 const Module = new Augur.Module();
 const fs = require('fs');
 const UtilsDatabase = require("../utils/Utils.Database");
+const { GuildMember } = require("discord.js");
 
 
 let thankProcess = async (interaction) => {
   let helper = interaction?.options?.get("helper")?.value;
   let days = interaction?.options?.get("days")?.value || 1;
   let reason = interaction?.options?.get("reason")?.value;
-  let member = await interaction.guild.members.fetch(helper)
+  let member = null;
+  if (helper instanceof GuildMember) {
+    member = helper;
+  } else {
+    member = await interaction.guild.members.fetch(helper);
+  }
   let d = new Date();
   d.setDate(d.getDate() + days)
   let data = {
