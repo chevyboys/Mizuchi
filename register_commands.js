@@ -16,6 +16,16 @@ mainClient.config = tavareConfig; // Inject config for Utils.Database.js
 mainClient.once('ready', async () => {
   console.log(`[Main Bot] Logged in as ${mainClient.user.tag}`);
 
+  for (const [guildId, guild] of mainClient.guilds.cache) {
+    try {
+      // Overwrite that specific guild's commands with an empty array
+      await guild.commands.set([]);
+      console.log(`✅ Cleared commands for: ${guild.name}`);
+    } catch (error) {
+      console.error(`❌ Failed to clear commands for ${guild.name}:`, error);
+    }
+  }
+
   try {
     console.log("Connecting to the database and syncing guilds...");
     await UtilsDatabase.init({ client: mainClient });
