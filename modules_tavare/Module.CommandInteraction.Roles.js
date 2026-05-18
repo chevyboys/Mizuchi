@@ -62,8 +62,7 @@ Module.addInteractionCommand({
       if (interaction.values[0].toLowerCase().indexOf("random") > -1) color = await interaction.guild.roles.cache.get(`${memberColors[Math.floor(Math.random() * memberColors.length)]}`);
       else color = await interaction.guild.roles.cache.get(`${interaction.values[0]}`);
       console.log(color.id);
-      const rolesClient = create_rolesClient(Module.config);
-      let member = await (await rolesClient.guilds.fetch(interaction.guild.id)).members.fetch(interaction.member);
+      let member = interaction.member;
       await member.roles.remove(memberColors);
       await member.roles.add(color)
       await interaction.editReply({ content: "You have successfully selected a role", ephemeral: true })
