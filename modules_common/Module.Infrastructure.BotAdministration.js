@@ -123,15 +123,16 @@ Module
     parseParams: true,
     process: (msg) => {
       u.clean(msg);
-      const fs = require("fs");
-      let files = fs.readdirSync('./modules/').filter(file => file.endsWith(".js"));
+      const fs = require("fs"); Module.client.augurOptions?.commands?.forEach(directory => {
+        let files = fs.readdirSync(directory).filter(file => file.endsWith(".js"));
 
-      for (const file of files) {
-        try {
-          msg.client.moduleHandler.reload('./modules/' + file);
-        } catch (error) { msg.client.errorHandler(error, msg); }
-      }
-      msg.react("✅").catch(u.noop);
+        for (const file of files) {
+          try {
+            msg.client.moduleHandler.reload(directory + '/' + file);
+          } catch (error) { msg.client.errorHandler(error, msg); }
+        }
+        msg.react("✅").catch(u.noop);
+      });
     },
     permissions: (msg) => Module.config.AdminIds.includes(msg.author.id) ||
       msg.member?.roles.cache.has(Module.config.snowflakes.roles.BotMaster) ||
