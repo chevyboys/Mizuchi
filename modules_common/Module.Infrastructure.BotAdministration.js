@@ -121,18 +121,43 @@ Module
     description: "This command reloads one or more modules. Good for loading in small fixes.",
     info: "Use the command without a suffix to reload all Module files.\n\nUse the command with the module name (including the `.js`) to reload a specific file.",
     parseParams: true,
-    process: (msg) => {
+    process: (msg, suffix) => {
       u.clean(msg);
-      const fs = require("fs"); Module.client.augurOptions?.commands?.forEach(directory => {
-        let files = fs.readdirSync(directory).filter(file => file.endsWith(".js"));
+      const fs = require("fs");
+      let reloaded = [];
 
-        for (const file of files) {
-          try {
-            msg.client.moduleHandler.reload(directory + '/' + file);
-          } catch (error) { msg.client.errorHandler(error, msg); }
+      // 1. If the user provided a suffix (e.g., "Economy KesterBomb"), split it into an array
+      const requestedFiles = suffix ? suffix.toLowerCase().split(" ") : null;
+
+      Module.client.augurOptions?.commands?.forEach(directory => {
+        // Safety check: ensure the directory actually exists on the disk
+        if (fs.existsSync(directory)) {
+          let files = fs.readdirSync(directory).filter(file => file.endsWith(".js"));
+
+          for (const file of files) {
+            // 2. If NO suffix was provided, reload everything.
+            //    If a suffix WAS provided, only reload if the filename contains the requested text.
+            if (!requestedFiles || requestedFiles.some(req => file.toLowerCase().includes(req))) {
+              try {
+                // Safely combine the directory and file path
+                const fullPath = directory.endsWith('/') ? directory + file : directory + '/' + file;
+                msg.client.moduleHandler.reload(fullPath);
+                reloaded.push(fullPath);
+              } catch (error) {
+                msg.client.errorHandler(error, msg);
+              }
+            }
+          }
         }
-        msg.react("✅").catch(u.noop);
       });
+
+      // 3. React exactly once at the end if we successfully reloaded anything
+      if (reloaded.length > 0) {
+        msg.reply(`Reloaded the following files:\n${reloaded.join("\n")}`).then(u.clean);
+        msg.react("✅").catch(u.noop);
+      } else {
+        msg.reply("I couldn't find any modules matching that name in my directories.").then(u.clean);
+      }
     },
     permissions: (msg) => Module.config.AdminIds.includes(msg.author.id) ||
       msg.member?.roles.cache.has(Module.config.snowflakes.roles.BotMaster) ||
@@ -244,6 +269,8 @@ Module
     try {
       if (!reload) {
         u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("BLUE").setDescription("Login successful. Intializing, please wait.")] });
+      } else {
+        u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("BLUE").setDescription("Module reload successful.")] });
       }
     } catch (e) {
       u.errorHandler(e, "Error in botAdmin.setInit.");
@@ -262,6 +289,6 @@ Module
   //    //}, hours * secondsInAnHour * 1000);
   //  } catch (error) { u.errorHandler(error, "Blog Clockwork"); }
   //})
-  .setUnload(() => true);
+  .setUnload(() => { u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("BLUE").setDescription("Module reload starting.")] }); return true; });
 
 module.exports = Module;
