@@ -102,7 +102,8 @@ mainClient.once('ready', async () => {
         .addSubcommand(sub => sub.setName("override").setDescription("Replaces the welcome message").addStringOption(o => o.setName("text").setDescription("The text to adjust welcome messages with").setRequired(true)))
         .addSubcommand(sub => sub.setName("append").setDescription("Adds text to the end of welcome messages").addStringOption(o => o.setName("text").setDescription("The text to adjust welcome messages with").setRequired(true)))
         .addSubcommand(sub => sub.setName("prepend").setDescription("Adds text to the end of welcome messages").addStringOption(o => o.setName("text").setDescription("The text to adjust welcome messages with").setRequired(true)))
-        .addSubcommand(sub => sub.setName("reset").setDescription("Resets welcome messages to be the default"))
+        .addSubcommand(sub => sub.setName("reset").setDescription("Resets welcome messages to be the default")),
+      new SlashCommandBuilder().setName("role_permissions").setDescription("Get the unique permissions of a role in each channel").addRoleOption(o => o.setName("role").setDescription("The role to check").setRequired(true))
     ].map(command => command.toJSON());
 
     // Add Raw JSON Economy Command
