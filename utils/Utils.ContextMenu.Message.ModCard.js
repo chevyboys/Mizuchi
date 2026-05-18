@@ -169,16 +169,24 @@ let modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiPa
     })
     .addInteractionHandler({ customId: `${modRequestFunctionName}Approve`, process: processCardAction })
     .addInteractionHandler({ customId: `${modRequestFunctionName}Reject`, process: processCardAction })
-  /*.addEvent("messageReactionAdd", async (reaction, user) => {
-    if(Module.reactionHandlers.filter(r => {
-      return r.emoji == reaction.emoji.name
-    }).length > 0) {
-      let reactionHandler = Module.reactionHandlers.find(r => {
+    /*.addEvent("messageReactionAdd", async (reaction, user) => {
+      if(Module.reactionHandlers.filter(r => {
         return r.emoji == reaction.emoji.name
-      })
-      handleReaction(reaction, user, reactionHandler)
-    }
-  });*/
+      }).length > 0) {
+        let reactionHandler = Module.reactionHandlers.find(r => {
+          return r.emoji == reaction.emoji.name
+        })
+        handleReaction(reaction, user, reactionHandler)
+      }
+    });*/
+    .setInit(data => {
+      if (data) {
+        activeRequests = data.activeRequests || [];
+      }
+    })
+    .setUnload(() => {
+      return { activeRequests: activeRequests };
+    });
 }
 
 module.exports = modRequest;
