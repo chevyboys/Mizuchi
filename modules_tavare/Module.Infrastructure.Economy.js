@@ -11,6 +11,8 @@ let who_caught_the_emoji_cache = {};
 // Tracks which gemstone emoji the bot spawned on a message so reaction validation can stay local and fast.
 let spawned_gem_emoji_cache = {};
 const shopItemsCache = {};
+let currency_caches_for_unload = {};
+
 
 async function createLeaderboardMessageObject(guild, currency = null) {
   let botMember = guild.members.cache.get(guild.client.user.id);
@@ -401,38 +403,7 @@ Module.addCommand({
     await shopItem.execute(interaction);
   }
 })
-  .addEvent("ready", async () => {
-    // Initialize tournament points currency
-    u.wait(5000); // Wait for 5 seconds to ensure the database is ready
-    let currencies = await UtilsDatabase.Economy.getValidCurrencies();
-    tournamentPointsCurrency = currencies.find(c => c.id == "1");
-    tournamentPointsCurrencyEmoji = tournamentPointsCurrency ? tournamentPointsCurrency.emoji : null;
-    console.log(`Tournament Points Currency initialized: ${tournamentPointsCurrency ? tournamentPointsCurrency.name : 'Not found'}`);
 
-
-    let shopItems = fs.readdirSync("./shop").filter(file => file.endsWith(".js"));
-    for (let itemFile of shopItems) {
-      let item = require(`../shop/${itemFile}`);
-      //make sure that we have an item of the ShopItem class, and that it has the required properties before adding it to the shop
-      if (!(item instanceof ShopItem) || !item.name || !item.description || !item.price || !item.currencyId) {
-        u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Invalid or missing properties.`)] })
-        continue;
-      }
-
-      //hydrate the currency for the item, so that we can display the correct emoji in the shop, and avoid asynchronous constructor issues in the ShopItem class
-      if (typeof item.hydrateCurrency === "function") {
-        await item.hydrateCurrency();
-      }
-
-      let itemId = itemFile.replace(".js", "");
-      if (shopItemsCache[itemId]) {
-        u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Duplicate item ID ${itemId} from ${shopItemsCache[itemId].name}.`)] });
-        continue;
-      }
-      shopItemsCache[itemId] = item;
-    }
-
-  })
   // add a rare chance for the emoji of currency 'Tournament Points' to be added to messages in the server.
   .addEvent("messageCreate", async (message) => {
     if (message.author.bot) return;
@@ -566,6 +537,50 @@ Module.addCommand({
       .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
       .setColor(currencyObj.color);
     bot_channel.send({ embeds: [embed] });
+  }).setInit(async (data) => {
+    // Initialize tournament points currency
+    let currencies = data && data.currencies ? data.currencies : await UtilsDatabase.Economy.getValidCurrencies();
+    currency_caches_for_unload.currencies = currencies; // Cache currencies for unload
+    if (data) {
+      who_caught_the_emoji_cache = data.who_caught_the_emoji_cache || {};
+      spawned_gem_emoji_cache = data.spawned_gem_emoji_cache || {};
+    }
+    tournamentPointsCurrency = currencies.find(c => c.id == "1");
+    tournamentPointsCurrencyEmoji = tournamentPointsCurrency ? tournamentPointsCurrency.emoji : null;
+    console.log(`Tournament Points Currency initialized: ${tournamentPointsCurrency ? tournamentPointsCurrency.name : 'Not found'}`);
+
+
+    let shopItems = fs.readdirSync("./shop").filter(file => file.endsWith(".js"));
+    for (let itemFile of shopItems) {
+      let item = require(`../shop/${itemFile}`);
+      //make sure that we have an item of the ShopItem class, and that it has the required properties before adding it to the shop
+      if (!(item instanceof ShopItem) || !item.name || !item.description || !item.price || !item.currencyId) {
+        u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Invalid or missing properties.`)] })
+        continue;
+      }
+
+      //hydrate the currency for the item, so that we can display the correct emoji in the shop, and avoid asynchronous constructor issues in the ShopItem class
+      if (typeof item.hydrateCurrency === "function") {
+        await item.hydrateCurrency();
+      }
+
+      let itemId = itemFile.replace(".js", "");
+      if (shopItemsCache[itemId]) {
+        u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Duplicate item ID ${itemId} from ${shopItemsCache[itemId].name}.`)] });
+        continue;
+      }
+      shopItemsCache[itemId] = item;
+    }
+
+
+
+
+
+  }).setUnload(async () => {
+    // Cache currencies for unload
+    currency_caches_for_unload.who_caught_the_emoji_cache = who_caught_the_emoji_cache;
+    currency_caches_for_unload.spawned_gem_emoji_cache = spawned_gem_emoji_cache;
+    return currency_caches_for_unload;
   });
 
 module.exports = Module;
