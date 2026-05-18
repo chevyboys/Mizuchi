@@ -403,6 +403,7 @@ Module.addCommand({
 })
   .addEvent("ready", async () => {
     // Initialize tournament points currency
+    u.wait(5000); // Wait for 5 seconds to ensure the database is ready
     let currencies = await UtilsDatabase.Economy.getValidCurrencies();
     tournamentPointsCurrency = currencies.find(c => c.id == "1");
     tournamentPointsCurrencyEmoji = tournamentPointsCurrency ? tournamentPointsCurrency.emoji : null;
@@ -547,7 +548,7 @@ Module.addCommand({
     who_caught_the_emoji_cache[message.id] = user.id;
     delete spawned_gem_emoji_cache[message.id];
 
-    console.log(`User ${user.tag} caught a ${emojiString} for currency id ${tournamentPointsCurrency.id} emoji in message ${message.id} and received ${currencyObj.value} points.`);
+    console.log(`User ${user.tag} caught a ${emojiString} for currency id ${tournamentPointsCurrency?.id} emoji in message ${message.id} and received ${currencyObj.value} points.`);
     console.log(tournamentPointsCurrency);
 
     //give the user tournament points
