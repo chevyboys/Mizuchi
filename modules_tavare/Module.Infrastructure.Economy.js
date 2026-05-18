@@ -2,7 +2,6 @@ const Augur = require("augurbot"),
   Discord = require("discord.js"),
   Module = new Augur.Module(),
   u = require("../utils/Utils.Generic"),
-  snowflakes = Module.config.snowflakes,
   fs = require("fs"),
   ShopItem = require("../utils/Class.ShopItem"),
   UtilsDatabase = require("../utils/Utils.Database");
@@ -518,7 +517,7 @@ Module.addCommand({
       botHadReaction = reaction.users.cache.has(message.client.user.id);
     }
     if (!botHadReaction) {
-      let modLogs = guild.channels.cache.get(snowflakes.channels.modRequests); // #mod-logs
+      let modLogs = guild.channels.cache.get(Module.config.snowflakes.channels.modRequests); // #mod-logs
       if (modLogs) {
         let embed = u.embed()
           .setTitle(`Suspicious Reaction Detected`)
@@ -540,7 +539,7 @@ Module.addCommand({
     reaction.remove().catch(() => { });
 
     if (!member) return;
-    let bot_channel = message.guild.channels.cache.get(snowflakes.channels.botSpam);
+    let bot_channel = message.guild.channels.cache.get(Module.config.snowflakes.channels.botSpam);
     if (!bot_channel) return;
 
     //check if the message already has a recorded user who caught the emoji in the cache, and if it does, don't give currency to anyone
