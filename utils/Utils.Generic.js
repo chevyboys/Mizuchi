@@ -6,7 +6,6 @@ const Discord = require("discord.js"),
   embedUtil = require('../utils/Utils.Embed'),
   embed = embedUtil.embed;
 const { distance, closest } = require('fastest-levenshtein');
-const create_roles_client = require("./Utils.RolesLogin");
 const { parseInteraction } = require("./Utils.ParseInteraction.js");
 
 let _client = null;
@@ -16,89 +15,6 @@ const utils = {
   },
   getClient: () => {
     return _client;
-  },
-  setRoles: async (member, roles) => {
-    const rolesClient = create_roles_client(member.client.config);
-    const guild = await rolesClient.guilds.fetch(rolesClient.config.snowflakes.guilds.PrimaryServer);
-    const rolesClientMember = await guild.members.fetch(member.id ? member.id : member);
-    try {
-      await rolesClientMember.roles.set(roles);
-    } catch (error) {
-      let stack = error.stack ? error.stack : error.toString()
-      if (stack.indexOf("DiscordAPIError: Missing Permissions") > -1) {
-        let embed = utils.embed({
-          color: rolesClient.config.color,
-          title: `I couldn't set a role for ${member.displayName} `,
-          author: {
-            name: member.displayName,
-            icon_url: member.displayAvatarURL(),
-          },
-          description: `I don't have permission to sey the ${roles.map(r => `<@&${r}>`).join} roles for <@${member.id}>. Please set that for them on my behalf.`,
-          timestamp: new Date().toISOString(),
-          footer: {
-            text: `Role set Permission Denied`,
-          },
-
-        }
-        )
-        guild.channels.cache.get(rolesClient.config.snowflakes.channels.modRequests).send({ content: `<@&${rolesClient.config.snowflakes.roles.Moderator}>`, embeds: [embed], allowedMentions: { roles: [rolesClient.config.snowflakes.roles.Moderator] } });
-      }
-      else errorHandler(error);
-    }
-
-
-  },
-  addRoles: async (member, roles, takeRoleInsteadOfGive = false) => {
-    try {
-      const rolesClient = create_roles_client(member.client.config);
-      const guild = await rolesClient.guilds.fetch(rolesClient.config.snowflakes.guilds.PrimaryServer);
-      const rolesClientMember = await guild.members.fetch(member.id ? member.id : member);
-      const channel = await guild.channels.fetch(rolesClient.config.snowflakes.channels.general);
-      let rolesArray;
-      if (!Array.isArray(roles)) {
-        rolesArray = [roles];
-      } else rolesArray = roles;
-      if (channel.permissionsFor(rolesClient.config.snowflakes.users.roleBot)?.toArray().includes("MANAGE_ROLES")) {
-        try {
-          if (takeRoleInsteadOfGive) {
-            await rolesClientMember.roles.remove(rolesArray);
-          }
-          else await rolesClientMember.roles.add(rolesArray);
-        } catch (error) {
-          let stack = error.stack ? error.stack : error.toString()
-          if (stack.indexOf("DiscordAPIError: Missing Permissions") > -1) {
-            let embed = utils.embed({
-              color: rolesClient.config.color,
-              title: `I couldn't ${takeRoleInsteadOfGive ? 'remove' : 'grant'} a role ${takeRoleInsteadOfGive ? 'from' : 'to '} ${member.displayName} `,
-              author: {
-                name: member.displayName,
-                icon_url: member.displayAvatarURL(),
-              },
-              description: `I don't have permission to ${takeRoleInsteadOfGive ? 'remove' : 'grant'} the <@&${rolesArray[0]}> role ${takeRoleInsteadOfGive ? 'from' : 'to '} <@${member.id}>. Please ${takeRoleInsteadOfGive ? 'remove' : 'grant'} that to them on my behalf.`,
-              timestamp: new Date().toISOString(),
-              footer: {
-                text: `Role ${takeRoleInsteadOfGive ? 'Remove' : 'Grant'} Permission Denied`,
-              },
-
-            }
-            )
-            guild.channels.cache.get(rolesClient.config.snowflakes.channels.modRequests).send({ content: `<@&${rolesClient.config.snowflakes.roles.Moderator}>`, embeds: [embed], allowedMentions: { roles: [rolesClient.config.snowflakes.roles.Moderator] } });
-          }
-          else errorHandler(error);
-        }
-
-      } else {
-
-        let embed = await utils.modRequestEmbed("Role Request", { member: rolesClientMember, guild: rolesClientMember.guild, createdAt: Date.now(), cleanContent: " Dummy Text" }, { member: rolesClientMember }, rolesClient)
-        if (roles.length < 1) {
-          return;
-        }
-        embed.setDescription(`${member.displayName} needs to ${takeRoleInsteadOfGive ? "have the following role(s) removed" : "be given the following role(s)"}:\n>>> <@&${roles.join(">\n<@&")}>`);
-        await rolesClientMember.guild.channels.cache.get(rolesClient.config.snowflakes.channels.modRequests).send({ embeds: [embed] });
-      }
-    } catch (error) {
-      errorHandler(error);
-    }
   },
   clean: errorUtil.clean,
   /**

@@ -40,7 +40,7 @@ let thankProcess = async (Module, interaction, bypassWait) => {
     removeRoleTime: d.valueOf()
   }
   fs.writeFileSync(`./data/holiday/${member.id}.json`, JSON.stringify(data, null, 4));
-  u.addRoles(member, [Module.config.snowflakes.roles.Holiday[0]]);
+  member.roles.add(Module.config.snowflakes.roles.Holiday[0]);
   interaction.reply({ content: `${member.displayName} has been given the <@&${Module.config.snowflakes.roles.Holiday[0]}> role for 1 hour`, ephemeral: true });
 
   //notify bot commands
@@ -182,7 +182,7 @@ let endTurkey = async (Module) => {
   let oldThanks = rawData.filter(thank => thank.removeRoleTime < now)
   for (const oldThank of oldThanks) {
     let member = await guild.members.fetch(oldThank.member);
-    await u.addRoles(member, [Module.config.snowflakes.roles.Holiday[0]], true);
+    await member.roles.remove(Module.config.snowflakes.roles.Holiday[0]);
     fs.unlinkSync(`./data/holiday/${member.id}.json`);
   }
 }

@@ -121,7 +121,7 @@ Module
         ));
         if (toAdd.length > 0)
           try {
-            u.addRoles(member, toAdd);
+            await member.roles.add(toAdd, "Restoring roles for returning member");
           } catch (err) {
             u.log(err);
           }
