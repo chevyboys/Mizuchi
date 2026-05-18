@@ -7,17 +7,10 @@ const { GuildMember } = require("discord.js");
 
 
 let thankProcess = async (interaction) => {
-  let helper = interaction?.options?.get("helper")?.value;
+  let member = interaction.options.getMember("helper");
   let days = interaction?.options?.get("days")?.value || 1;
   let reason = interaction?.options?.get("reason")?.value;
   let member = null;
-  if (helper instanceof GuildMember) {
-    member = helper;
-  } else {
-    //just get the numbers from within helper.string in case it gets double encapsulated in <@&> or something
-    helper = helper.replace(/[^0-9]+/g, "");
-    member = await interaction.guild.members.fetch(helper);
-  }
   let d = new Date();
   d.setDate(d.getDate() + days)
   let data = {
