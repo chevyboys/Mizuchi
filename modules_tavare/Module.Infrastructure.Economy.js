@@ -153,13 +153,13 @@ async function createShopMessageObject(guild, selectedItemId = null) {
 
 let tournamentPointsCurrency = null;
 
-function canGrantCurrency(member) {
-  if (!member) return false;
+function canGrantCurrency(Module, member) {
+  if (!member || !member.roles || !member.permissions) return false;
   return member.permissions.has("ADMINISTRATOR")
-    || member.roles.cache.has(snowflakes.roles.Moderator)
-    || member.roles.cache.has(snowflakes.roles.Admin)
-    || member.roles.cache.has(snowflakes.roles.BotAssistant)
-    || member.roles.cache.has(snowflakes.roles.BotMaster);
+    || member.roles.cache.has(Module.config.snowflakes.roles.Moderator)
+    || member.roles.cache.has(Module.config.snowflakes.roles.Admin)
+    || member.roles.cache.has(Module.config.snowflakes.roles.BotAssistant)
+    || member.roles.cache.has(Module.config.snowflakes.roles.BotMaster);
 }
 
 function weighted_random(options) {
@@ -212,7 +212,7 @@ Module.addCommand({
   description: "Sets the base odds divisor used for gemstone spawns.",
   syntax: "<divisor>",
   info: "Example: `setcurrencyodds 5000`",
-  permissions: (msg) => canGrantCurrency(msg.member),
+  permissions: (msg) => canGrantCurrency(Module, msg.member),
   process: async (msg, suffix) => {
     let newDivisor = Number.parseInt((suffix || "").trim(), 10);
     let warnstring = "";
@@ -321,7 +321,7 @@ Module.addCommand({
       }
 
       case "grant": {
-        if (!canGrantCurrency(interaction.member)) {
+        if (!canGrantCurrency(Module, interaction.member)) {
           return interaction.reply({ content: `You don't have permission to use this command.`, ephemeral: true });
         }
         let targetUser = interaction.options.getUser("user");
@@ -474,7 +474,7 @@ Module.addCommand({
 
     //if the user is a botmaster and the emoji is 👈, remove the reaction and replace it with a gemstone emoji
     if (emojiString === "👈") {
-      if (!canGrantCurrency(member)) return;
+      if (!canGrantCurrency(Module, member)) return;
       try {
         reaction.remove().catch(() => { });
         message.react(weighted_random(currencyEmoji.map(c => ({ item: c.emoji, weight: 1 / c.value * 50 })))).then(() => {
@@ -489,7 +489,7 @@ Module.addCommand({
 
     // If staff uses a gemstone emoji, remove their reaction without awarding points.
     // Only seed a bot reaction when the bot did not already own this gemstone on the message.
-    if (canGrantCurrency(member)) {
+    if (canGrantCurrency(Module, member)) {
       let botAlreadyOwnedGem = spawned_gem_emoji_cache[message.id] === emojiString || reaction.me;
       try {
         reaction.remove().catch(() => { });
