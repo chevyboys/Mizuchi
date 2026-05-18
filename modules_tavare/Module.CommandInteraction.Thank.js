@@ -61,7 +61,7 @@ let endThank = async () => {
   let oldThanks = rawData.filter(thank => thank.removeRoleTime < now)
   for (const oldThank of oldThanks) {
     let member = await guild.members.fetch(oldThank.member);
-    await u.addRoles(member, [Module.config.snowflakes.roles.Helper], true);
+    await member.roles.remove(Module.config.snowflakes.roles.Helper);
     fs.unlinkSync(`./data/helpers/${member.id}.json`);
   }
 }
