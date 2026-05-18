@@ -548,7 +548,12 @@ Module.addCommand({
     delete spawned_gem_emoji_cache[message.id];
 
     //give the user tournament points
-    await UtilsDatabase.Economy.newTransaction(user.id, tournamentPointsCurrency.id, currencyObj.value, guild.client.user.id, `reaction caught`);
+    await UtilsDatabase.Economy.newTransaction(
+      user.id,
+      tournamentPointsCurrency.id,
+      currencyObj.value,
+      Module.client.user.id,
+      `reaction caught`);
 
     //send a message to the bot channel announcing who caught the emoji
     let embed = u.embed()
