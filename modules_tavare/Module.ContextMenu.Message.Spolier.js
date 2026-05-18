@@ -34,7 +34,7 @@ async function spoilerMsg(inputObject) {
   //u.clean(msg, 0);
 }
 
-Module.setInit(async () => {
-  modRequest(Module, "Spoiler", Module.config.snowflakes.emoji.messageContextMenu.spoiler, spoilerMsg, spoilerMsg);
-});
+
+modRequest(Module, "Spoiler", Module.config.snowflakes.emoji.messageContextMenu.spoiler, spoilerMsg, spoilerMsg);
+
 module.exports = Module;

@@ -76,8 +76,16 @@ let modRequest = (Module, modRequestFunctionNameParam, modRequestFunctionEmojiPa
         card = interaction.message,
         embed = u.embed(card.embeds[0]);
       let activeRequest = activeRequests.filter(ar => ar.card == card.id)[0];
-      let requestingUser = await interaction.guild.members.cache.get(activeRequest.requstedBy);
-      const target = await (await interaction.guild.channels.cache.get(activeRequest.targetChannel)).messages.cache.get(activeRequest.targetMessage);
+
+      // 1. Guard against bot restarts or expired requests
+      if (!activeRequest) {
+        return interaction.reply({ content: "This request has expired or the bot was restarted.", ephemeral: true });
+      }
+
+      // 2. Safely FETCH instead of relying on synchronous cache
+      let requestingUser = await interaction.guild.members.fetch(activeRequest.requstedBy).catch(() => null);
+      let targetChannel = await interaction.guild.channels.fetch(activeRequest.targetChannel).catch(() => null);
+      const target = targetChannel ? await targetChannel.messages.fetch(activeRequest.targetMessage).catch(() => null) : null;
 
       if (interaction.customId == `${modRequestFunctionName}Approve`) {
         // Approve modRequest

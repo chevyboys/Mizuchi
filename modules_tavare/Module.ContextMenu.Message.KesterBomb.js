@@ -67,8 +67,6 @@ async function kesterBomb(inputObject) {
 
 }
 
-Module.setInit(async () => {
-  modRequest(Module, "Kester Bomb", Module.config.snowflakes.emoji.messageContextMenu.kesterBomb, kesterBomb, kesterBomb);
-});
+modRequest(Module, "Kester Bomb", Module.config.snowflakes.emoji.messageContextMenu.kesterBomb, kesterBomb, kesterBomb);
 
 module.exports = Module;
