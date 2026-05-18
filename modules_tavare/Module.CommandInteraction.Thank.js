@@ -14,6 +14,8 @@ let thankProcess = async (interaction) => {
   if (helper instanceof GuildMember) {
     member = helper;
   } else {
+    //just get the numbers from within helper.string in case it gets double encapsulated in <@&> or something
+    helper = helper.replace(/[^0-9]+/g, "");
     member = await interaction.guild.members.fetch(helper);
   }
   let d = new Date();
