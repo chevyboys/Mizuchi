@@ -10,7 +10,6 @@ let thankProcess = async (interaction) => {
   let member = interaction.options.getMember("helper");
   let days = interaction?.options?.get("days")?.value || 1;
   let reason = interaction?.options?.get("reason")?.value;
-  let member = null;
   let d = new Date();
   d.setDate(d.getDate() + days)
   let data = {
