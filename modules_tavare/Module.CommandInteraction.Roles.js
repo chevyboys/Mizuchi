@@ -2,8 +2,6 @@ const Module = new (require("augurbot")).Module;
 const roleUtilities = require("../utils/Utils.RoleInventory.js");
 const u = require("../utils/Utils.Generic.js");
 const { MessageActionRow, MessageSelectMenu } = require("discord.js");
-const create_rolesClient = require("../utils/Utils.RolesLogin.js");
-
 
 
 
