@@ -17,7 +17,7 @@ let thankProcess = async (interaction) => {
     removeRoleTime: d.valueOf()
   }
   fs.writeFileSync(`./data/helpers/${member.id}.json`, JSON.stringify(data, null, 4));
-  u.addRoles(member, [Module.config.snowflakes.roles.Helper]);
+  member.roles.add(Module.config.snowflakes.roles.Helper);
   interaction.reply({ content: `${member.displayName} has been given the <@&${Module.config.snowflakes.roles.Helper}> role for ${days} day(s)`, ephemeral: true });
 
   const numberOfPointsToGrant = 3;
