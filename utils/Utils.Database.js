@@ -7,7 +7,6 @@ let hasBeenInitialized = false;
  * This file is responsible for all interactions with the database, and contains utility functions for parsing and validating data related to the database. It also contains the data models for the database, such as the DBUserObject, which represents a user in the database and contains methods for updating that user's information in the database. The DataBaseActions object contains methods for interacting with the database, such as getting a user or updating a user's information. The database connection is established using mysql2/promise, and all queries are executed using prepared statements to prevent SQL injection.
  */
 let client; // this will hold our AugurClient instance, which we need for some of the utility functions. We have to declare it here to avoid circular dependencies, but the init function will set it to the actual client instance when it's called from bot.js
-let con; // This will hold our promise-based connection
 let pool; // This will hold our connection pool
 //TODO: Switch to the connection pool for all queries
 
@@ -195,7 +194,7 @@ let privateDataBaseActions = {
         user = await DataBaseActions.User.new(snowflake, guildSnowflake);
       }
 
-
+      let con = await pool.getConnection();
       await con.beginTransaction();
 
       // 2. Prepare metadata updates (Cake Day, Year, Username)
@@ -229,7 +228,7 @@ let privateDataBaseActions = {
             ? userData.roles
             : (userData.roles[guildSnowflake] || []);
 
-          await privateDataBaseActions.User.syncRoles(user.id, guildSnowflake, roleList);
+          await privateDataBaseActions.User.syncRoles(user.id, guildSnowflake, roleList, con);
         }
 
         await con.commit();
@@ -239,6 +238,8 @@ let privateDataBaseActions = {
         await con.rollback();
         console.error(`Failed to update user ${snowflake}. Changes rolled back.`, error);
         throw error;
+      } finally {
+        con.release();
       }
     },
 
@@ -249,39 +250,43 @@ let privateDataBaseActions = {
      * @param {string[]} roleSnowflakes - Array of role snowflakes the user should have.
      * @returns {Promise<void>} Resolves when the roles have been synchronized.
      */
-    syncRoles: async (internalUserId, guildSnowflake, roleSnowflakes) => {
-      // 1. Get internal Guild ID
-      const [guildRows] = await con.execute("SELECT id FROM guild WHERE snowflake = ?", [guildSnowflake]);
-      if (guildRows.length === 0) throw new Error(`Guild ${guildSnowflake} not found.`);
-      const internalGuildId = guildRows[0].id;
+    syncRoles: async (internalUserId, guildSnowflake, roleSnowflakes, connection = pool) => {
+      try {
+        // 1. Get internal Guild ID
+        const [guildRows] = await connection.execute("SELECT id FROM guild WHERE snowflake = ?", [guildSnowflake]);
+        if (guildRows.length === 0) throw new Error(`Guild ${guildSnowflake} not found.`);
+        const internalGuildId = guildRows[0].id;
 
-      // 2. Clear existing roles for this user in this specific guild
-      // We join on guild_role to ensure we don't accidentally delete roles from other servers
-      const deleteSql = `
+        // 2. Clear existing roles for this user in this specific guild
+        // We join on guild_role to ensure we don't accidentally delete roles from other servers
+        const deleteSql = `
         DELETE ugr FROM user_guild_role ugr
         INNER JOIN guild_role gr ON ugr.guild_role_id = gr.id
         WHERE ugr.user_id = ? AND gr.guild_id = ?`;
 
-      await con.execute(deleteSql, [internalUserId, internalGuildId]);
+        await connection.execute(deleteSql, [internalUserId, internalGuildId]);
 
-      // 3. Process new roles
-      for (const rSnowflake of roleSnowflakes) {
-        if (!assertIsSnowflake(rSnowflake)) continue;
+        // 3. Process new roles
+        for (const rSnowflake of roleSnowflakes) {
+          if (!assertIsSnowflake(rSnowflake)) continue;
 
-        // Ensure the role exists in the guild_role table first
-        // We use INSERT IGNORE so we don't crash if the role is already there
-        await con.execute(`
+          // Ensure the role exists in the guild_role table first
+          // We use INSERT IGNORE so we don't crash if the role is already there
+          await connection.execute(`
           INSERT INTO guild_role (guild_id, snowflake, friendly_name) 
           VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE snowflake = snowflake, friendly_name = VALUES(friendly_name)`,
-          [internalGuildId, rSnowflake, `Role ${rSnowflake}`]
-        );
+            [internalGuildId, rSnowflake, `Role ${rSnowflake}`]
+          );
 
-        // Link the user to the role via the relational table
-        await con.execute(`
+          // Link the user to the role via the relational table
+          await connection.execute(`
           INSERT INTO user_guild_role (user_id, guild_role_id)
           SELECT ?, id FROM guild_role WHERE snowflake = ? AND guild_id = ? ON DUPLICATE KEY UPDATE user_id = user_id`,
-          [internalUserId, rSnowflake, internalGuildId]
-        );
+            [internalUserId, rSnowflake, internalGuildId]
+          );
+        }
+      } catch (error) {
+        throw error;
       }
     }
   },
@@ -294,7 +299,7 @@ let privateDataBaseActions = {
      */
     update_name: async (snowflakeResolvable, newName) => {
       const snowflake = parsesnowflake(snowflakeResolvable);
-      await con.execute('UPDATE guild SET friendly_name = ? WHERE snowflake = ?', [newName, snowflake]);
+      await pool.execute('UPDATE guild SET friendly_name = ? WHERE snowflake = ?', [newName, snowflake]);
       return true;
     }
   }
@@ -400,7 +405,7 @@ const DataBaseActions = {
         LEFT JOIN guild ON user_guild.guild_id = guild.id 
         WHERE users.snowflake = ? AND guild.snowflake = ?`;
 
-      const [userRows] = await con.execute(userSql, [snowflake, guild_snowflake]);
+      const [userRows] = await pool.execute(userSql, [snowflake, guild_snowflake]);
 
       if (!userRows || userRows.length === 0) return null;
       let user = userRows[0];
@@ -412,7 +417,7 @@ const DataBaseActions = {
         LEFT JOIN guild on guild_role.guild_id = guild.id 
         WHERE users.snowflake = ? AND guild.snowflake = ?`;
 
-      const [roleRows] = await con.execute(roleSql, [snowflake, guild_snowflake]);
+      const [roleRows] = await pool.execute(roleSql, [snowflake, guild_snowflake]);
 
       user.roles = roleRows.map(role => new DBGuildRoleObject(role).snowflake);
       user.roles = normalizeRolesByGuild(user.roles);
@@ -436,7 +441,7 @@ const DataBaseActions = {
         GROUP BY currency.id 
         ORDER BY currency.id`;
 
-      const [rows] = await con.execute(query, [snowflake]);
+      const [rows] = await pool.execute(query, [snowflake]);
 
       if (!rows || rows.length === 0) {
         throw new Error(`No transactions for snowflake ${snowflake} were found.`);
@@ -460,7 +465,7 @@ const DataBaseActions = {
         LEFT JOIN guild ON user_guild.guild_id = guild.id 
         WHERE guild.snowflake = ?`;
 
-      const [rows] = await con.execute(query, [guild_snowflake]);
+      const [rows] = await pool.execute(query, [guild_snowflake]);
 
       // Fetch full user objects concurrently
       const promises = rows.map(row => DataBaseActions.User.get(row.snowflake, guild_snowflake));
@@ -481,7 +486,7 @@ const DataBaseActions = {
         GROUP BY users.snowflake 
         HAVING COUNT(guild_role.id) > 1`;
 
-      const [rows] = await con.execute(query, [guild_snowflake]);
+      const [rows] = await pool.execute(query, [guild_snowflake]);
 
       const promises = rows.map(row => DataBaseActions.User.get(row.snowflake, guild_snowflake));
       return await Promise.all(promises);
@@ -543,9 +548,9 @@ const DataBaseActions = {
           VALUES (?, ?) 
           ON DUPLICATE KEY UPDATE snowflake = values(snowflake), username = values(username)`;
 
-        await con.execute(sql, [snowflake, username]);
+        await pool.execute(sql, [snowflake, username]);
 
-        const [guildRows] = await con.execute(
+        const [guildRows] = await pool.execute(
           "SELECT id FROM guild WHERE snowflake = ?",
           [guildsnowflake] // The Discord ID
         );
@@ -553,7 +558,7 @@ const DataBaseActions = {
         const internalGuildId = guildRows[0].id;
 
         // 2. Translate the Discord User Snowflake into the Internal User ID
-        const [userRows] = await con.execute(
+        const [userRows] = await pool.execute(
           "SELECT id FROM users WHERE snowflake = ?",
           [snowflake] // The Discord ID
         );
@@ -561,7 +566,7 @@ const DataBaseActions = {
         const internalUserId = userRows[0].id;
 
         // 3. NOW it is safe to insert into user_guild using the internal IDs!
-        await con.execute(`
+        await pool.execute(`
                 INSERT INTO user_guild (user_id, guild_id) 
                 VALUES (?, ?) 
                 ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), guild_id = VALUES(guild_id)
@@ -615,7 +620,7 @@ const DataBaseActions = {
           AND gr.has_redacted_info = 1 
         LIMIT 1`;
 
-      const [rows] = await con.execute(sql, [snowflake, guild_snowflake]);
+      const [rows] = await pool.execute(sql, [snowflake, guild_snowflake]);
 
       // If the array has anything in it, they have a sensitive role!
       return rows.length > 0;
@@ -658,7 +663,7 @@ const DataBaseActions = {
     get: async (snowflakeResolvable) => {
       const snowflake = await parsesnowflake(snowflakeResolvable);
 
-      const [guildRows] = await con.execute("SELECT * FROM guild WHERE snowflake = ?", [snowflake]);
+      const [guildRows] = await pool.execute("SELECT * FROM guild WHERE snowflake = ?", [snowflake]);
 
       if (!guildRows || guildRows.length === 0) {
         // We need to create a new guild object in the database
@@ -682,7 +687,7 @@ const DataBaseActions = {
         LEFT JOIN guild on guild_role.guild_id = guild.id 
         WHERE guild.snowflake = ?`;
 
-      const [roleRows] = await con.execute(roleSql, [snowflake]);
+      const [roleRows] = await pool.execute(roleSql, [snowflake]);
       guild.roles = roleRows.map(role => new DBGuildRoleObject(role));
 
       return new DBGuildObject(guild);
@@ -692,7 +697,7 @@ const DataBaseActions = {
         * Gets all guilds in the database with their associated roles.
         */
     getAll: async () => {
-      const [guildRows] = await con.execute("SELECT * FROM guild");
+      const [guildRows] = await pool.execute("SELECT * FROM guild");
 
       // Use Promise.all to fetch roles for all guilds concurrently
       const promises = guildRows.map(async (guild) => {
@@ -702,7 +707,7 @@ const DataBaseActions = {
           LEFT JOIN guild on guild_role.guild_id = guild.id 
           WHERE guild.snowflake = ?`;
 
-        const [roleRows] = await con.execute(roleSql, [guild.snowflake]);
+        const [roleRows] = await pool.execute(roleSql, [guild.snowflake]);
 
         guild.roles = roleRows.map(role => new DBGuildRoleObject(role));
         return new DBGuildObject(guild);
@@ -727,7 +732,7 @@ const DataBaseActions = {
 
       // Insert Guild
       const sql = "INSERT INTO `guild` (`snowflake`, `friendly_name`, `isTestGuild`) VALUES (?, ?, ?)";
-      await con.execute(sql, [snowflake, dbGuildObject.friendly_name ?? '', dbGuildObject.isTestGuild ? 1 : 0]);
+      await pool.execute(sql, [snowflake, dbGuildObject.friendly_name ?? '', dbGuildObject.isTestGuild ? 1 : 0]);
 
       // Add roles if they exist
       if (dbGuildObject.roles && Array.isArray(dbGuildObject.roles)) {
@@ -742,7 +747,7 @@ const DataBaseActions = {
         // Sequential insert to avoid flooding the connection pool
         for (const role of dbGuildObject.roles) {
           try {
-            await con.execute(roleSql, [
+            await pool.execute(roleSql, [
               snowflake,
               role.snowflake,
               role.friendly_name ?? '',
@@ -760,13 +765,13 @@ const DataBaseActions = {
 
     update_isTestGuild: async (snowflakeResolvable, isTestGuild) => {
       const snowflake = parsesnowflake(snowflakeResolvable);
-      const [result] = await con.execute("UPDATE guild SET isTestGuild = ? WHERE snowflake = ?", [isTestGuild, snowflake]);
+      const [result] = await pool.execute("UPDATE guild SET isTestGuild = ? WHERE snowflake = ?", [isTestGuild, snowflake]);
       return result;
     },
 
     update_friendly_name: async (snowflakeResolvable, newFriendlyName) => {
       const snowflake = parsesnowflake(snowflakeResolvable);
-      const [result] = await con.execute("UPDATE guild SET friendly_name = ? WHERE snowflake = ?", [newFriendlyName, snowflake]);
+      const [result] = await pool.execute("UPDATE guild SET friendly_name = ? WHERE snowflake = ?", [newFriendlyName, snowflake]);
       return result;
     },
 
@@ -777,7 +782,7 @@ const DataBaseActions = {
       if (!guild) throw new Error("Guild not found");
 
       // Get internal database ID for the guild
-      const [guildIdResult] = await con.execute("SELECT id FROM guild WHERE snowflake = ?", [snowflake]);
+      const [guildIdResult] = await pool.execute("SELECT id FROM guild WHERE snowflake = ?", [snowflake]);
       if (guildIdResult.length === 0) throw new Error("Guild ID could not be resolved in the database.");
 
       const internalGuildId = guildIdResult[0].id;
@@ -798,7 +803,7 @@ const DataBaseActions = {
               WHERE snowflake = ? AND guild_id = ?`;
 
             try {
-              await con.execute(updateSql, [
+              await pool.execute(updateSql, [
                 role.friendly_name,
                 role.has_redacted_info,
                 role.is_update_role,
@@ -819,7 +824,7 @@ const DataBaseActions = {
             is_update_role = VALUES(is_update_role)`;
 
           try {
-            await con.execute(insertSql, [
+            await pool.execute(insertSql, [
               internalGuildId,
               role.snowflake,
               role.friendly_name,
@@ -841,7 +846,7 @@ const DataBaseActions = {
     getValidCurrencies: async () => {
       if (ValidCurrenciesCache.length === 0) {
         try {
-          const [rows] = await con.execute("SELECT * FROM currency WHERE active = 1");
+          const [rows] = await pool.execute("SELECT * FROM currency WHERE active = 1");
 
           ValidCurrenciesCache = rows.map(currency =>
             new DBCurrencyObject(currency.id, currency.name, currency.emoji)
@@ -877,7 +882,7 @@ const DataBaseActions = {
 
       console.log(`Creating transaction: User ${snowflake}, Currency ID ${currencyId}, Amount ${amount}, Initiated By ${initatedbysnowflake}, Reason: ${reason}`);
 
-      const [result] = await con.execute(sql, [
+      const [result] = await pool.execute(sql, [
         snowflake,
         currencyId,
         amount,
@@ -899,7 +904,7 @@ const DataBaseActions = {
         WHERE transaction.userid = ?
         ORDER BY transaction.id DESC`;
 
-      const [rows] = await con.execute(sql, [snowflake]);
+      const [rows] = await pool.execute(sql, [snowflake]);
       return rows;
     },
     /** gets the leaderboard for a specific currency, sorted by total amount of that currency each user has, limited to a specified number of users
@@ -930,7 +935,7 @@ const DataBaseActions = {
         LIMIT ?`;
 
       // parseInt is important here because passing a string to a ? for a LIMIT clause throws a syntax error in some MySQL versions
-      const [rows] = await con.execute(sql, [currencyId, parseInt(limit)]);
+      const [rows] = await pool.execute(sql, [currencyId, parseInt(limit)]);
 
       return rows.map(entry =>
         new LeaderboardEntryObject(
@@ -953,7 +958,7 @@ const DataBaseActions = {
 
     if (!hasBeenInitialized) {
       //initialize the database connection
-      let pool = await mysql.createPool({
+      pool = mysql.createPool({
         host: Module.client.config.mySQL.host,
         user: Module.client.config.mySQL.user,
         password: Module.client.config.mySQL.password,
@@ -969,7 +974,7 @@ const DataBaseActions = {
 
       try {
         // Ping the database to verify the connection pool is alive and ready
-        con = await pool.getConnection();
+        let con = await pool.getConnection();
         await con.ping();
         con.release();
         pool.on('error', (err) => {
