@@ -90,6 +90,29 @@ function checkForExistingAnswer(questionText) {
   return Questions.readOnlyCollection().find(q => q.questionText == questionText)
 }
 
+async function maybeNotifyAuthorQueueThreshold(interaction, authorName, queueSize) {
+  if (!authorName || authorName === "any") return;
+
+  const author = authors.find(a => a.name === authorName);
+  if (!author) return;
+
+  const threshold = Number(author.answer_queue_notification_threshold) || 0;
+  if (threshold < 1 || queueSize !== threshold) return;
+
+  const answerChannel = interaction.guild.channels.cache.get(author.answer_channel_snowflake);
+  if (!answerChannel) return;
+
+  //direct message the author if possible.
+  try {
+    const member = await interaction.guild.members.fetch(author.user.snowflake);
+    if (member) {
+      await member.send(`Heads up: Your question queue has reached ${queueSize} questions.`);
+    }
+  } catch (error) {
+    console.error(`Failed to notify author ${author.name}:`, error);
+  }
+}
+
 /**
  * Gets all questions currently in the queue
  * @param {string} author_name the name of the author. If missing, or "any", it will get all questions in queues
@@ -499,6 +522,12 @@ async function ask(interaction, bypassWait) {
     //finish building the question object
     questionData.messageId = msg.id;
     new Questions.Question(questionData, true);
+
+    await maybeNotifyAuthorQueueThreshold(
+      interaction,
+      interaction.options.get("answerer").value,
+      numberOfQuestions
+    );
 
     // Adds the user to the set so that they can't ask for a few hours
     if (!bypassWait && !canModerateQuestions(interaction)) {
