@@ -32,11 +32,14 @@ mainClient.once('ready', async () => {
 
     console.log("Fetching dynamic data from DB and Sheets...");
     let rollData = await gs(tavareConfig.snowflakes.sheets.rolls, true);
-    let authors = await gs(tavareConfig.snowflakes.sheets.authors);
+    let authors = await UtilsDatabase.Author.getAll();
 
     let currencies = await UtilsDatabase.Economy.getValidCurrencies();
     let currencyChoices = currencies.slice(0, 25).map(c => ({ name: c.name, value: String(c.id) }));
-    let authorChoices = authors.concat([{ Name: "any" }]).map(a => ({ name: a.Name, value: a.Name }));
+    let authorChoices = authors.filter(a => a.active)
+      .slice(0, 24)
+      .map(a => ({ name: a.name, value: String(a.name) }));
+
 
     // ==========================================
     // Build Dynamic Roll Command
@@ -63,6 +66,7 @@ mainClient.once('ready', async () => {
       new SlashCommandBuilder().setName("tone").setDescription("View a list of tone tags"),
       new SlashCommandBuilder().setName("repo").setDescription("View my code!"),
       new SlashCommandBuilder().setName("links").setDescription("Handy links to things around the fandom"),
+      new SlashCommandBuilder().setName("author-info").setDescription("Get information about an author").addStringOption(o => o.setName("author").setDescription("The author to get info on").setRequired(true).addChoices(...authorChoices)),
       new SlashCommandBuilder().setName("pulse").setDescription("Get the bot's and discord's pulse")
         .addBooleanOption(o => o.setName("verbose").setDescription("set to true if you want lots of extra info").setRequired(false)),
       rollCommand,
@@ -78,6 +82,7 @@ mainClient.once('ready', async () => {
     // ==========================================
     // 2. BUILD TAVARE COMMANDS
     // ==========================================
+    authorChoices.concat([{ name: "any", value: "any" }]);
     let tavareCommands = [
       new SlashCommandBuilder().setName("character-info").setDescription('Get character descriptions').addStringOption(o => o.setName('character').setDescription('The character you are looking for').setRequired(true)),
       new SlashCommandBuilder().setName('question').setDescription('Interact with our Questions Queue')

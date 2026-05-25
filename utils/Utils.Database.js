@@ -1,6 +1,7 @@
 const mysql = require("mysql2/promise"); // Updated to mysql2
 const Discord = require("discord.js");
 const { errorHandler } = require("./Utils.Error");
+const get = require("./Utils.GetGoogleSheetsAsJson");
 
 let hasBeenInitialized = false;
 /**
@@ -51,10 +52,10 @@ function assertIsCakeDay(string) {
 /** 
  * Resolves various object types into a raw Snowflake string
  */
-function parsesnowflake(user) {
-  const snowflake = user?.id || user?.snowflake?.user?.id || user?.snowflake?.snowflake || user?.snowflake || user?.Id || user;
+function parsesnowflake(snowflakeResolvable) {
+  const snowflake = snowflakeResolvable?.id || snowflakeResolvable?.snowflake?.user?.id || snowflakeResolvable?.snowflake?.snowflake || snowflakeResolvable?.snowflake || snowflakeResolvable?.Id || snowflakeResolvable;
   if (!assertIsSnowflake(snowflake)) {
-    throw new Error(`INVALID DISCORD ID: ${JSON.stringify(user)}`);
+    throw new Error(`INVALID DISCORD SNOWFLAKE: ${JSON.stringify(snowflakeResolvable)}`);
   }
   return snowflake;
 }
@@ -94,43 +95,92 @@ function normalizeRolesByGuild(rolesData) {
  * @member {Object} roles an object representing the user's roles across different guilds
  */
 class DBUserObject {
+  #id = null;
+  #snowflake = "";
+  #username = "";
+  #cakeday = "opt-out";
+  #cakeyear = new Date().getFullYear().toString();
+  #roles = {}; // { guildSnowflake: [roleSnowflake, roleSnowflake] }
+
+
   constructor(constructionObj) {
     if (constructionObj instanceof DBUserObject) return constructionObj;
 
-    this.id = constructionObj.id || null;
-    this.snowflake = parsesnowflake(constructionObj.snowflake);
-    this.username = cleanString(constructionObj.username) || "Unknown User";
+    this.#id = constructionObj.id || null;
+    this.#snowflake = parsesnowflake(constructionObj.snowflake);
+    this.#username = cleanString(constructionObj.username) || "Unknown User";
 
     // Validate Cake Day, default to "opt-out" if invalid/missing
-    this.cakeday = assertIsCakeDay(constructionObj.cakeday) ? constructionObj.cakeday : "opt-out";
-    this.cakeyear = parseInt(constructionObj.cakeyear) || new Date().getFullYear();
+    this.#cakeday = assertIsCakeDay(constructionObj.cakeday) ? constructionObj.cakeday : "opt-out";
+    this.#cakeyear = parseInt(constructionObj.cakeyear) || new Date().getFullYear();
 
     // This maintains legacy roles while we migrate to the relational tables
-    this.roles = normalizeRolesByGuild(constructionObj.roles);
+    this.#roles = normalizeRolesByGuild(constructionObj.roles);
   }
+
+  /**
+   * Getters and setters
+   */
+  get id() {
+    return this.#id;
+  }
+
+  get snowflake() {
+    return this.#snowflake;
+  }
+
+  get username() {
+    return this.#username;
+  }
+
+  get cakeday() {
+    return this.#cakeday;
+  }
+
+  get cakeyear() {
+    return this.#cakeyear;
+  }
+
+  get roles() {
+    return this.#roles;
+  }
+
+
 
   /**
    * Refreshes user data from DB
    */
   async get(guildsnowflake) {
-    return await DataBaseActions.User.get(this.snowflake, guildsnowflake);
+    let user = await DataBaseActions.User.get(this.#snowflake, guildsnowflake);
+    if (!user) throw new Error(`User with snowflake ${this.#snowflake} not found in DB for guild ${guildsnowflake}`);
+    this.#username = user.username;
+    this.#cakeday = user.cakeday;
+    this.#cakeyear = user.cakeyear;
+    this.#roles = user.roles;
+    return user ? user : this; // Return the fresh DB object, or the current object if not found in DB
   }
 
   async updateCakeDay(cakeday, guildsnowflake) {
     if (!assertIsCakeDay(cakeday)) throw new Error("Invalid Cake Day format");
-    return await privateDataBaseActions.User.update({ snowflake: this.snowflake, cakeday }, guildsnowflake);
+    let user = await privateDataBaseActions.User.update({ snowflake: this.#snowflake, cakeday }, guildsnowflake);
+    this.#cakeday = user.cakeday;
+    return this;
   }
 
   async updateCakeYear(cakeyear, guildsnowflake) {
     const year = parseInt(cakeyear);
     if (isNaN(year)) throw new Error("Invalid Cake Year");
-    return await privateDataBaseActions.User.update({ snowflake: this.snowflake, cakeyear: year }, guildsnowflake);
+    let user = await privateDataBaseActions.User.update({ snowflake: this.#snowflake, cakeyear: year }, guildsnowflake);
+    this.#cakeyear = user.cakeyear;
+    return this;
   }
 
   async updateRoles(guildsnowflake) {
     const guild = await client.guilds.fetch(guildsnowflake);
-    const member = await guild.members.fetch(this.snowflake);
-    return privateDataBaseActions.User.update({ snowflake: this.snowflake, roles: member.roles.cache.map(r => r.id) }, guildsnowflake);
+    const member = await guild.members.fetch(this.#snowflake);
+    let user = await privateDataBaseActions.User.update({ snowflake: this.#snowflake, roles: member.roles.cache.map(r => r.id) }, guildsnowflake);
+    this.#roles = user.roles;
+    return this;
   }
 }
 
@@ -142,16 +192,43 @@ class DBUserObject {
  * @member {DBGuildRoleObject[]} roles an array of the guild roles in this guild. This will be referenced by the user_guild_role table for restoring roles; It is not perfect;
  */
 class DBGuildObject {
+  #id = null;
+  #snowflake = "";
+  #friendly_name = "";
+  #isTestGuild = false;
+  #roles = [];
+
   constructor(constructionObj) {
     if (constructionObj instanceof DBGuildObject) return constructionObj;
 
-    this.id = constructionObj.id || null;
-    this.snowflake = parsesnowflake(constructionObj.snowflake);
-    this.friendly_name = cleanString(constructionObj.friendly_name);
-    this.isTestGuild = !!constructionObj.isTestGuild;
-    this.roles = Array.isArray(constructionObj.roles)
+    this.#id = constructionObj.id || null;
+    this.#snowflake = parsesnowflake(constructionObj.snowflake);
+    this.#friendly_name = cleanString(constructionObj.friendly_name);
+    this.#isTestGuild = !!constructionObj.isTestGuild;
+    this.#roles = Array.isArray(constructionObj.roles)
       ? constructionObj.roles.map(role => new DBGuildRoleObject(role))
       : [];
+  }
+
+  // Getters and setters
+  get id() {
+    return this.#id;
+  }
+
+  get snowflake() {
+    return this.#snowflake;
+  }
+
+  get friendly_name() {
+    return this.#friendly_name;
+  }
+
+  get isTestGuild() {
+    return this.#isTestGuild;
+  }
+
+  get roles() {
+    return this.#roles;
   }
 }
 /**
@@ -162,16 +239,41 @@ class DBGuildObject {
  * @member {boolean} is_update_role whether the role is an update role
  */
 class DBGuildRoleObject {
+  #id = null;
+  #snowflake = "";
+  #friendly_name = "";
+  #has_redacted_info = false;
+  #is_update_role = false;
   constructor(constructionObj) {
     if (constructionObj instanceof DBGuildRoleObject) return constructionObj;
 
-    this.id = constructionObj.id || null;
-    this.snowflake = parsesnowflake(constructionObj.snowflake);
-    this.friendly_name = cleanString(constructionObj.friendly_name) || "Unknown Role";
+    this.#id = constructionObj.id || null;
+    this.#snowflake = parsesnowflake(constructionObj.snowflake);
+    this.#friendly_name = cleanString(constructionObj.friendly_name) || "Unknown Role";
 
     // Explicitly parse these as booleans so they never default to undefined
-    this.has_redacted_info = !!constructionObj.has_redacted_info;
-    this.is_update_role = !!constructionObj.is_update_role;
+    this.#has_redacted_info = !!constructionObj.has_redacted_info;
+    this.#is_update_role = !!constructionObj.is_update_role;
+  }
+
+  get id() {
+    return this.#id;
+  }
+
+  get snowflake() {
+    return this.#snowflake;
+  }
+
+  get friendly_name() {
+    return this.#friendly_name;
+  }
+
+  get has_redacted_info() {
+    return this.#has_redacted_info;
+  }
+
+  get is_update_role() {
+    return this.#is_update_role;
   }
 }
 
@@ -288,6 +390,12 @@ let privateDataBaseActions = {
       } catch (error) {
         throw error;
       }
+    },
+
+    get_by_internal_id: async (internalId) => {
+      const [rows] = await pool.execute("SELECT * FROM users WHERE id = ?", [internalId]);
+      if (rows.length === 0) return null;
+      return new DBUserObject(rows[0]);
     }
   },
   Guild: {
@@ -301,6 +409,12 @@ let privateDataBaseActions = {
       const snowflake = parsesnowflake(snowflakeResolvable);
       await pool.execute('UPDATE guild SET friendly_name = ? WHERE snowflake = ?', [newName, snowflake]);
       return true;
+    },
+
+    get_by_internal_id: async (internalId) => {
+      const [rows] = await pool.execute("SELECT * FROM guild WHERE id = ?", [internalId]);
+      if (rows.length === 0) return null;
+      return new DBGuildObject(rows[0]);
     }
   }
 }
@@ -381,6 +495,398 @@ class LeaderboardEntryObject {
   }
 }
 
+
+// Author objects and link
+/**
+ * CREATE TABLE `author` (
+  `id` double NOT NULL AUTO_INCREMENT,
+  `user_id` double NOT NULL,
+  `name` varchar(256) DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `blog_enabled` tinyint(1) DEFAULT NULL,
+  `rss_url` varchar(256) DEFAULT NULL,
+  `blog_post_webhook` varchar(256) DEFAULT NULL,
+  `answer_channel_guild_id` double DEFAULT NULL,
+  `answer_channel_snowflake` varchar(256) DEFAULT NULL,
+  `answer_queue_notification_threshold` mediumint(8) unsigned DEFAULT NULL,
+  `hex_color` varchar(9) DEFAULT '#1ed4c1',
+  `image_url` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `author_user` (`user_id`),
+  UNIQUE KEY `author_unique` (`name`),
+  KEY `author_guild_FK` (`answer_channel_guild_id`),
+  CONSTRAINT `author_guild_FK` FOREIGN KEY (`answer_channel_guild_id`) REFERENCES `guild` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `author_users_FK` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='A table containing data on all the Authors for project Mizuchi'
+ */
+
+/**
+ * CREATE TABLE `author_link` (
+  `id` double NOT NULL AUTO_INCREMENT,
+  `author_id` double NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `url` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `author_link_author_id_IDX` (`author_id`) USING BTREE,
+  CONSTRAINT `author_link_author_FK` FOREIGN KEY (`author_id`) REFERENCES `author` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Links to display for the author links commands'
+ */
+
+/**
+ * An object representing an author in the database
+ * @member {number} id the internal database ID of the author
+ * @member {number} user_id the internal database ID of the user associated with this author
+ * @member {DBUserObject} user the DBUserObject representing the user associated with this author, which we can use to get the user's information without having to query the database again, since we already have the user's ID stored in this.user_id, and we can use that to get the rest of the user's information from the database when we initialize this Author object, and then we can just reference this.user whenever we need to access the user's information for this author, which will be more efficient than querying the database for the user's information every time we need it.
+ * @member {string} name the name of the author
+ * @member {boolean} active whether this author is active or not. If an author is not active, then they won't be displayed in any commands or have any of their information displayed anywhere, and their blog won't be posted anywhere even if it's enabled. This is useful for authors who may want to take a break from posting or want to be temporarily removed from the bot for any reason without having to delete all of their information from the database and potentially lose it, since we can just set them to inactive and then set them back to active when they're ready to be displayed again.
+ * @member {boolean} blog_available 
+ * @member {string} rss_url the rss url of the author's blog, which will be used to fetch their blog posts and post them to the appropriate channels if their blog is enabled and they are active. This will only be displayed in commands and anywhere else if the blog is enabled, since it's only relevant if the blog is enabled.
+ * @member {string} blog_post_webhook the webhook url to post the author's blog posts to when we fetch them from their rss feed, which will be used to post their blog posts to the appropriate channels if their blog is enabled and they are active. This will only be displayed in commands and anywhere else if the blog is enabled, since it's only relevant if the blog is enabled.
+ * @member {number} answer_channel_guild_id the internal database ID of the guild that the author's answer channel is in, which will be used to get the snowflake of that guild and then get the channel object for that channel when we need to post answers to that channel or display information about that channel. This will only be displayed in commands and anywhere else if the author is active, since it's only relevant if the author is active.
+ * @member {DBGuildObject} answer_channel_guild the DBGuildObject representing the guild that the author's answer channel is in, which will be used to get the snowflake of that guild and then get the channel object for that channel when we need to post answers to that channel or display information about that channel. This will only be displayed in commands and anywhere else if the author is active, since it's only relevant if the author is active.
+ * @member {string} answer_channel_snowflake the snowflake of the channel that the author's answer channel is in, which will be used to post answers to that channel or display information about that channel when we need to. This will only be displayed in commands and anywhere else if the author is active and the answer channel guild is set, since it's only relevant if the author is active and the answer channel guild is set.
+ * @member {number} answer_queue_notification_threshold the threshold for how many answers can be in the queue before we start notifying about it in the answer channel, which will be used to determine when to start posting notifications about how many answers are in the queue in the answer channel. This will only be displayed in commands and anywhere else if the author is active, since it's only relevant if the author is active.
+ * @member {string} hex_color the hex color to use for this author when displaying their information in commands or anywhere else, which will be used to make their information look nicer and more personalized when we display it. This will only be displayed in commands and anywhere else if the author is active, since it's only relevant if the author is active.
+ * @member {string} image_url the url of the image to use for this author when displaying their information in commands or anywhere else, which will be used to make their information look nicer and more personalized when we display it. This will only be displayed in commands and anywhere else if the author is active, since it's only relevant if the author is active.
+ * @member {AuthorLink[]} links an array of AuthorLink objects representing the links associated with this author, which can be used for the author links command. This will only be displayed in commands and anywhere else if the author is active, since it's only relevant if the author is active.
+ */
+class Author {
+  #id = null;
+  #user_id = null;
+  #user = null; // this will be a DBUserObject representing the user associated with this author, which we can use to get the user's information without having to query the database again, since we already have the user's ID stored in this.#user_id, and we can use that to get the rest of the user's information from the database when we initialize this Author object, and then we can just reference this.#user whenever we need to access the user's information for this author, which will be more efficient than querying the database for the user's information every time we need it.
+  #name = "";
+  #active = true;
+  #blog_enabled = false;
+  #rss_url = null;
+  #blog_post_webhook = null;
+  #answer_channel_guild_id = null;
+  #answer_channel_guild = null; // this will be a DBGuildObject representing the guild that the author's answer channel is in, which we can use to get the snowflake of that guild and then get the channel object for that channel when we need to post answers to that channel or display information about that channel. This will only be set if the author is active, since it's only relevant if the author is active.  
+  #answer_channel_snowflake = null;
+  #answer_queue_notification_threshold = null;
+  #hex_color = "#1ed4c1";
+  #image_url = null;
+  #links = []; //this will be an array of AuthorLinks representing the links associated with this.#author, which can be used for the author links command
+
+  constructor(id, user_resolvable, name, active, blog_enabled, rss_url, blog_post_webhook, answer_channel_guild_resolvable, answer_channel_snowflake, answer_queue_notification_threshold, hex_color, image_url) {
+    this.#id = id;
+    if (user_resolvable instanceof DBUserObject) {
+      this.#user_id = user_resolvable.id;
+    }
+    else {
+      this.#user_id = user_resolvable;
+    }
+    this.#name = name;
+    this.#active = active;
+    this.#blog_enabled = blog_enabled;
+    this.#rss_url = rss_url;
+    this.#blog_post_webhook = blog_post_webhook;
+    if (answer_channel_guild_resolvable instanceof DBGuildObject) {
+      this.#answer_channel_guild_id = answer_channel_guild_resolvable.id;
+    }
+    else {
+      this.#answer_channel_guild_id = answer_channel_guild_resolvable;
+    }
+    this.#answer_channel_snowflake = answer_channel_snowflake;
+    this.#answer_queue_notification_threshold = answer_queue_notification_threshold;
+    this.#hex_color = hex_color;
+    this.#image_url = image_url;
+  }
+
+  // Getters and setters, but for this.#object we will actually pull from the database and set to the database
+  get id() {
+    return this.#id;
+  }
+  get user() {
+    if (!this.#user) {
+      throw new Error("User not loaded for this author. Please call the get() method to load the user from the database before accessing this property.");
+    }
+    return this.#user;
+  }
+  get name() {
+    return this.#name;
+  }
+  get active() {
+    return this.#active;
+  }
+  get blog_available() {
+    return this.#active && this.#blog_enabled && this.#rss_url && this.#blog_post_webhook; // the blog is only truly available if the author is active and the blog is enabled and the rss url and blog post webhook are set, since those are both required for the blog to function, so we can use this.getter to check if the blog is available instead of having to check all of those things separately every time we want to check if the blog is available.
+  }
+  get rss_url() {
+    if (!this.#active || !this.#blog_enabled) return null; // if the author isn't active or the blog isn't enabled, then there shouldn't be an rss url. this.#is just a safety check to avoid having to check for active and blog_enabled every time we check for rss_url, since rss_url is only relevant if the author is active and the blog is enabled.
+    return this.#rss_url;
+  }
+  get blog_post_webhook() {
+    if (!this.#active || !this.#blog_enabled) return null; // if the author isn't active or the blog isn't enabled, then there shouldn't be a blog post webhook. this.#is just a safety check to avoid having to check for active and blog_enabled every time we check for blog_post_webhook, since blog_post_webhook is only relevant if the author is active and the blog is enabled.
+    return this.#blog_post_webhook;
+  }
+  get answer_channel_guild() {
+    if (!this.#active) return null; // if the author isn't active, then there shouldn't be an answer channel guild. this.#is just a safety check to avoid having to check for active every time we check for answer_channel_guild, since answer_channel_guild is only relevant if the author is active.
+    if (!this.#answer_channel_guild) {
+      throw new Error("Answer channel guild not loaded for this author. Please call the get() method to load the answer channel guild from the database before accessing this property.");
+    }
+    return this.#answer_channel_guild;
+  }
+  get answer_channel_snowflake() {
+    if (!this.#active || !this.#answer_channel_guild) return null; // if the author isn't active or the answer channel guild isn't set, then there shouldn't be an answer channel snowflake. this.#is just a safety check to avoid having to check for active and answer_channel_guild every time we check for answer_channel_snowflake, since answer_channel_snowflake is only relevant if the author is active and the answer channel guild is set.
+    return this.#answer_channel_snowflake;
+  }
+  get answer_queue_notification_threshold() {
+    if (!this.#active || !this.#answer_channel_guild || !this.#answer_channel_snowflake) return 0; // if the author isn't active or the answer channel guild isn't set or the answer channel snowflake isn't set, then there shouldn't be an answer queue notification threshold. this.#is just a safety check to avoid having to check for active and answer_channel_guild and answer_channel_snowflake every time we check for answer_queue_notification_threshold, since answer_queue_notification_threshold is only relevant if the author is active and the answer channel guild and snowflake are set.
+    return this.#answer_queue_notification_threshold;
+  }
+  get hex_color() {
+    if (!this.#active) return "#dfdfdf";
+    return this.#hex_color;
+  }
+  get image_url() {
+    return this.#image_url;
+  }
+  get links() {
+    return this.#links;
+  }
+
+  async create() {
+    // this.#ill create a new author in the database, and set the ID of this.#object to the new ID from the database. 
+    // It will throw an error if the user associated with this.#author already has an author, 
+    // or if the name of this.#author is already taken, 
+    // as those are both unique fields in the database. 
+    const result = await pool.execute(`
+      INSERT INTO author (user_id, name, active, blog_enabled, rss_url, blog_post_webhook, answer_channel_guild_id, answer_channel_snowflake, answer_queue_notification_threshold, hex_color, image_url) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [this.#user.id, this.#name, this.#active ? 1 : 0, this.#blog_enabled ? 1 : 0, this.#rss_url, this.#blog_post_webhook, this.#answer_channel_guild ? this.#answer_channel_guild.id : null, this.#answer_channel_snowflake, this.#answer_queue_notification_threshold, this.#hex_color, this.#image_url]
+    );
+    this.#id = result[0].insertId;
+    return this;
+  }
+
+  static async get(author_id_or_user_resolvable) {
+    // this will get an author from the database based on the provided author ID or user resolvable,
+    // and return a new Author representing that author. It will throw an error if the author is not found in the database.
+    let author_id;
+    if (typeof author_id_or_user_resolvable === "number") {
+      author_id = author_id_or_user_resolvable;
+    } else if (author_id_or_user_resolvable instanceof DBUserObject) {
+      const [rows] = await pool.execute("SELECT * FROM author WHERE user_id = ?", [author_id_or_user_resolvable.id]);
+      if (rows.length === 0) throw new Error(`Author with user ID ${author_id_or_user_resolvable.id} not found in the database.`);
+      author_id = rows[0].id;
+    } else {
+      const user_snowflake = parsesnowflake(author_id_or_user_resolvable);
+      const [rows] = await pool.execute("SELECT author.* FROM author LEFT JOIN users ON author.user_id = users.id WHERE users.snowflake = ?", [user_snowflake]);
+      if (rows.length === 0) throw new Error(`Author with user snowflake ${user_snowflake} not found in the database.`);
+      author_id = rows[0].id;
+    }
+
+    const author = new Author(author_id);
+    await author.get(); // populate the rest of the data from the database
+    return author;
+  }
+
+  static async getAll() {
+    // this will get all authors from the database, and return an array of Authors representing those authors.
+    const [rows] = await pool.execute("SELECT * FROM author");
+    const authors = [];
+    for (const row of rows) {
+      const author = new Author(row.id);
+      await author.get(); // populate the rest of the data from the database for each author
+      authors.push(author);
+    }
+    return authors;
+  }
+
+  async get() {
+    // this will get the latest data for this.#author from the database, and update this.#object with that data. It will throw an error if the author is not found in the database.
+    if (!this.#id) throw new Error("Author must have an ID to be retrieved from the database.");
+    const [rows] = await pool.execute("SELECT * FROM author WHERE id = ?", [this.#id]);
+    if (rows.length === 0) throw new Error(`Author with ID ${this.#id} not found in the database.`);
+    const data = rows[0];
+    this.#name = data.name;
+    this.#active = !!data.active;
+    this.#blog_enabled = !!data.blog_enabled;
+    this.#rss_url = data.rss_url;
+    this.#blog_post_webhook = data.blog_post_webhook;
+    this.#answer_channel_snowflake = data.answer_channel_snowflake;
+    this.#answer_queue_notification_threshold = data.answer_queue_notification_threshold;
+    this.#hex_color = data.hex_color;
+    this.#image_url = data.image_url;
+    if (data.user_id) {
+      this.#user = await privateDataBaseActions.User.get_by_internal_id(data.user_id);
+      this.#user_id = data.user_id;
+    } else {
+      this.#user = null;
+      this.#user_id = null;
+    }
+    if (data.answer_channel_guild_id) {
+      this.#answer_channel_guild = await privateDataBaseActions.Guild.get_by_internal_id(data.answer_channel_guild_id);
+    } else {
+      this.#answer_channel_guild = null;
+    }
+    // get all the links for this author from the database and set this.#links to an array of AuthorLinks representing those links
+    const [linkRows] = await pool.execute("SELECT * FROM author_link WHERE author_id = ?", [this.#id]);
+    this.#links = linkRows.map(linkData => new AuthorLink(linkData.id, this.#id, linkData.name, linkData.url));
+
+
+    return this;
+  }
+
+  async setName(name) {
+    // this.#will set the name of this.#author in the database, and update this.#object with the new name. It will throw an error if the name is already taken by another author, as the name field is unique in the database, or if the author is not found in the database.
+    if (!this.#id) throw new Error("Author must have an ID to be updated in the database.");
+    await pool.execute("UPDATE author SET name = ? WHERE id = ?", [name, this.#id]);
+    this.#name = name;
+    return this;
+  }
+
+  async setActive(active) {
+    // this.#will set the active status of this.#author in the database, and update this.#object with the new status. If the author is being deactivated, it will also disable their blog and clear their answer channel info, as those are only relevant for active authors. It will throw an error if the author is not found in the database.
+    if (!this.#id) throw new Error("Author must have an ID to be updated in the database.");
+    await pool.execute("UPDATE author SET active = ? WHERE id = ?", [active ? 1 : 0, this.#id]);
+    this.#active = active;
+    if (!active) {
+      this.#blog_enabled = false;
+      this.#rss_url = null;
+      this.#blog_post_webhook = null;
+      this.#answer_channel_snowflake = null;
+      this.#answer_queue_notification_threshold = 0;
+    } else {
+      await this.get(); // Refresh data from DB to ensure consistency, especially if reactivating an author
+    }
+    return this;
+  }
+
+  async setBlogEnabled(blog_enabled) {
+    if (!this.#id) throw new Error("Author must have an ID to be updated in the database.");
+    if (blog_enabled && !this.#active) {
+      throw new Error("Cannot enable blog for an inactive author. Please activate the author before enabling the blog.");
+    }
+    await pool.execute("UPDATE author SET blog_enabled = ? WHERE id = ?", [blog_enabled ? 1 : 0, this.#id]);
+    this.#blog_enabled = blog_enabled;
+    if (!blog_enabled) {
+      this.#rss_url = null;
+      this.#blog_post_webhook = null;
+    } else {
+      await this.get(); // Refresh data from DB to ensure consistency, especially if enabling the blog which may have specific settings
+    }
+    return this;
+  }
+
+  async setRssUrl(rss_url) {
+    if (!this.#id) throw new Error("Author must have an ID to be updated in the database.");
+    if (!this.#active || !this.#blog_enabled) {
+      throw new Error("Cannot set RSS URL for an author whose blog is not enabled or who is inactive. Please ensure the author is active and the blog is enabled before setting the RSS URL.");
+    }
+    await pool.execute("UPDATE author SET rss_url = ? WHERE id = ?", [rss_url, this.#id]);
+    this.#rss_url = rss_url;
+    return this;
+  }
+
+  async setBlogPostWebhook(blog_post_webhook) {
+    if (!this.#id) throw new Error("Author must have an ID to be updated in the database.");
+    if (!this.#active || !this.#blog_enabled) {
+      throw new Error("Cannot set blog post webhook for an author whose blog is not enabled or who is inactive. Please ensure the author is active and the blog is enabled before setting the blog post webhook.");
+    }
+    await pool.execute("UPDATE author SET blog_post_webhook = ? WHERE id = ?", [blog_post_webhook, this.#id]);
+    this.#blog_post_webhook = blog_post_webhook;
+    return this;
+  }
+
+  async setAnswerChannel(guildResolvable, channelSnowflake) {
+    if (!this.#id) throw new Error("Author must have an ID to be updated in the database.");
+    if (!this.#active) {
+      throw new Error("Cannot set answer channel for an inactive author. Please activate the author before setting the answer channel.");
+    }
+    const guildSnowflake = parsesnowflake(guildResolvable);
+    await pool.execute("UPDATE author SET answer_channel_guild_id = ?, answer_channel_snowflake = ? WHERE id = ?", [guildSnowflake, channelSnowflake, this.#id]);
+    this.#answer_channel_guild = await privateDataBaseActions.Guild.get_by_internal_id(guildSnowflake);
+    this.#answer_channel_snowflake = channelSnowflake;
+    return this;
+  }
+
+  async setAnswerQueueNotificationThreshold(threshold) {
+    if (!this.#id) throw new Error("Author must have an ID to be updated in the database.");
+    if (!this.#active || !this.#answer_channel_guild || !this.#answer_channel_snowflake) {
+      throw new Error("Cannot set answer queue notification threshold for an author who is inactive or does not have an answer channel set. Please ensure the author is active and has an answer channel set before setting the notification threshold.");
+    }
+    await pool.execute("UPDATE author SET answer_queue_notification_threshold = ? WHERE id = ?", [threshold, this.#id]);
+    this.#answer_queue_notification_threshold = threshold;
+    return this;
+  }
+
+  async setHexColor(hex_color) {
+    if (!this.#id) throw new Error("Author must have an ID to be updated in the database.");
+    if (!this.#active) {
+      throw new Error("Cannot set hex color for an inactive author. Please activate the author before setting the hex color.");
+    }
+    await pool.execute("UPDATE author SET hex_color = ? WHERE id = ?", [hex_color, this.#id]);
+    this.#hex_color = hex_color;
+    return this;
+  }
+
+  async setImageUrl(image_url) {
+    if (!this.#id) throw new Error("Author must have an ID to be updated in the database.");
+    if (!this.#active) {
+      throw new Error("Cannot set image URL for an inactive author. Please activate the author before setting the image URL.");
+    }
+    await pool.execute("UPDATE author SET image_url = ? WHERE id = ?", [image_url, this.#id]);
+    this.#image_url = image_url;
+    return this;
+  }
+
+  async addLink(name, url) {
+    if (!this.#id) throw new Error("Author must have an ID to add a link to the database.");
+    const link = new AuthorLink(null, this.#id, name, url);
+    await link.create();
+    this.#links.push(link);
+    return link;
+  }
+
+}
+
+class AuthorLink {
+  #id = null
+  #author_id = null;
+  #name = "";
+  #url = "";
+
+  constructor(id, author_id, name, url) {
+    this.#id = id;
+    this.#author_id = author_id;
+    this.#name = name;
+    this.#url = url;
+  }
+
+  get id() {
+    return this.#id;
+  }
+
+  get author_id() {
+    return this.#author_id;
+  }
+
+  get name() {
+    return this.#name;
+  }
+
+  get url() {
+    return this.#url;
+  }
+
+
+  async delete() {
+    if (!this.#id) throw new Error("Author link must have an ID to be deleted from the database.");
+    await pool.execute("DELETE FROM author_link WHERE id = ?", [this.#id]);
+    this.#id = null;
+    return true;
+  }
+
+  async create() {
+    if (!this.#author_id) throw new Error("Author link must have an author ID to be created in the database.");
+    const result = await pool.execute("INSERT INTO author_link (author_id, name, url) VALUES (?, ?, ?)", [this.#author_id, this.#name, this.#url]);
+    this.#id = result[0].insertId;
+    return this;
+  }
+
+}
+
 const DataBaseActions = {
   // classes, for easier use in other files
   DBCurrencyObject,
@@ -390,6 +896,7 @@ const DataBaseActions = {
   LeaderboardEntryObject,
   DBGuildObject,
   DBGuildRoleObject,
+  Author,
   User: {
     /** gets all the info a database has about a user, and returns it as a DBUserObject
      * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} snowflakeResolvable

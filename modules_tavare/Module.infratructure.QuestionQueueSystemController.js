@@ -4,16 +4,19 @@ const Module = new Augur.Module();
 const { MessageButton, MessageActionRow, Modal, TextInputComponent, MessageSelectMenu } = require('discord.js');
 const { Collection } = require("../utils/Utils.Generic");
 const Questions = new (require("./QuestionQueue/Question"))
-const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
+const db = require("../utils/Utils.Database");
 const debug = true;
 const fs = require("fs");
 
-let authors;
+/**
+ * @type {Author[]}
+ */
+let authors = [];
 /**
  * Sets the file authors variable to be the current authors. Should only be called on init
  */
-function getAuthors() {
-  gs(Module.config.snowflakes.sheets.authors).then((r) => authors = r);
+async function getAuthors() {
+  authors = await db.Author.getAll();
 }
 
 /**
@@ -89,20 +92,20 @@ function checkForExistingAnswer(questionText) {
 
 /**
  * Gets all questions currently in the queue
- * @param {string} author the name of the author exactly as presented in the Authors google sheet. If missing, or "any", it will get all questions in queues
+ * @param {string} author_name the name of the author. If missing, or "any", it will get all questions in queues
  * @param {boolean} includeWaitingToBeAnswered set to true to include questions that have been moved to the answering channel, but have not yet been answered.
  * @returns {Collection} a collection of all questions in the Queue. Note that this is READ ONLY. Edits will not be updated in the message or files.
  */
-let currentQueue = (author, includeWaitingToBeAnswered) =>
+let currentQueue = (author_name, includeWaitingToBeAnswered) =>
   Questions.readOnlyCollection().filter(
     (v) => v.status == Questions.Status.Queued && (
       includeWaitingToBeAnswered
       || !v.flags.includes(Questions.Flags.unansweredButTransfered)
     ) && (
-        author == "any"
-          || !author ?
+        author_name == "any"
+          || !author_name ?
           true :
-          (v.requestedAnswerers.includes(author) || v.requestedAnswerers.includes("any"))
+          (v.requestedAnswerers.includes(author_name) || v.requestedAnswerers.includes("any"))
       )
   )
 /**
@@ -149,11 +152,11 @@ function getTargetQuestionChecks(interaction, targetId, permissionsOverride, che
 function newAnswererSelectComponent() {
   let SelectMenuOptions = [];
   //buildSelectMenu
-  for (const author of authors) {
+  for (const author of authors.filter(a => a.answer_channel_snowflake)) {
     SelectMenuOptions.push({
-      label: author.Name,
-      description: author.Name,
-      value: author.Name,
+      label: author.name,
+      description: author.name,
+      value: String(author.name),
     })
   }
   SelectMenuOptions.push({
@@ -389,16 +392,21 @@ async function editQuestion(interaction, targetId) {
  * @returns {MessageEmbed} the embed for the question queue
  */
 function questionQueueEmbed(interaction, questionTextOverride) {
-  let authorName = interaction.options?.get("answerer")?.value ? interaction.options?.get("answerer")?.value : interaction.values ? interaction.values[0] : Questions.readOnlyCollection().get(interaction.message?.id)?.requestedAnswerers[0];
-  let authorData = authors.find(a => a.Name.trim() == authorName);
+  let author_name = interaction.options?.get("answerer")?.value ? interaction.options?.get("answerer")?.value : interaction.values ? interaction.values[0] : Questions.readOnlyCollection().get(interaction.message?.id)?.requestedAnswerers[0];
+  let authorData = authors.find(a => a.name == author_name);
+  if (!authorData && author_name != "any") {
+    u.errorHandler(`Could not find author data for author name '${author_name}' while generating question queue embed.`)
+    return u.embed().setTitle("Error").setDescription(`I could not find author data for author name '${author_name}' while generating question queue embed.`).setColor(0xFF0000);
+  }
+
   let embed = u.embed()
     .setAuthor({ name: interaction.member.displayName, iconURL: interaction.member.displayAvatarURL() })
     .setDescription(interaction.options ? interaction.options.get("question").value : questionTextOverride)
     .setFooter({
-      text: `Asked to: ${authorName} | ${currentQueue(authorName).size} questions remaining in Queue`,
-      iconURL: authorData ? authorData.imageUrl : null
+      text: `Asked to: ${authorData?.name || author_name} | ${currentQueue(author_name).size} questions remaining in Queue`,
+      iconURL: authorData?.image_url || null
     })
-    .setColor(authorData?.hexColor || interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000");
+    .setColor(authorData?.hex_color || (interaction.guild ? interaction.guild.members.cache.get(interaction.client.user.id).displayHexColor : "000000"));
   return embed;
 }
 
@@ -455,11 +463,17 @@ async function ask(interaction, bypassWait) {
     if (askedBefore) {
       let askerName = (await interaction.guild.members.fetch(askedBefore.askerId))?.displayName
       if (askedBefore.status == Questions.Status.Answered) {
-        let author = authors.find((a) => a.discordId == askedBefore.requestedAnswerers[0])
+        let author = authors.find((a) => a.name == askedBefore.requestedAnswerers[0]);
+        if (!author) {
+          u.errorHandler(`Could not find author data for author name '${askedBefore.requestedAnswerers[0]}' while processing asked before question. This should never happen, as questions should not be able to be asked with an author that doesn't exist. Question text: ${askedBefore.questionText}`)
+          return interaction.reply({
+            content: "It seems that question has already been asked before by " + (askerName ? askerName : "an unknown user") + ", but the answer could not be retrieved.", embeds: [], ephemeral: true
+          })
+        }
 
         return interaction.reply({
           content: "It seems that question has already been asked before by " + (askerName ? askerName : "an unknown user") + ", here is the answer:",
-          embeds: [(await (await interaction.guild.channels.fetch(author.answerChannelId)).messages.fetch(askedBefore.messageId)).embeds[1]],
+          embeds: [(await (await interaction.guild.channels.fetch(author.answer_channel_snowflake)).messages.fetch(askedBefore.messageId)).embeds[1]],
           ephemeral: true
         })
       } else {
@@ -546,22 +560,20 @@ async function processRecycleButton(interaction) {
 async function processTransfer(interaction, forceRequestedAnswerer) {
 
   let numberOfQuestions = 5;
-  let author = authors.find((a) => a.discordId == interaction.member.id || a.Name == forceRequestedAnswerer)
+  let author = authors.find((a) => a.user.snowflake == interaction.member.id || a.name == forceRequestedAnswerer)
   if (!author) {
-    if (!(debug && interaction.member.roles.cache.has(Module.config.snowflakes.roles.BotMaster)))
-      return interaction.reply({ content: "I'm sorry, but only Authors can do that", ephemeral: true })
-    else //things to do when debugging
-    {
-      author = authors.find((a) => a.Name == "Andrew Rowe")
-      author.id = interaction.member.id
-      author.answerChannelId = Module.config.snowflakes.channels.transfer
+    if (!(debug && interaction.member.roles.cache.has(Module.config.snowflakes.roles.BotMaster))) {
+      return interaction.reply({ content: "I'm sorry, but only Authors can do that", ephemeral: true });
+    } else {
+      author = authors[0];
     }
   }
+
   // Sort
-  let sorted = currentQueue(author?.Name).sort((a, b) => (a.voterIds.length < b.voterIds.length) ? 1 : -1);
+  let sorted = currentQueue(author?.name).sort((a, b) => (a.voterIds.length < b.voterIds.length) ? 1 : -1);
 
   // Check
-  if (sorted.length == 0) {
+  if (sorted.size == 0) {
     interaction.reply({ content: `There are no questions to answer! Check back later.` });
     return;
   }
@@ -585,7 +597,7 @@ async function processTransfer(interaction, forceRequestedAnswerer) {
 
 
       // --- send the message to the answer channel ----
-      let message = await (interaction.guild.channels.cache.get(author?.answerChannelId)).send({
+      let message = await (interaction.guild.channels.cache.get(author?.answer_channel_snowflake)).send({
         content: "<@" + (asker.id || asker) + ">",
         embeds: [
           u.embed()
@@ -596,7 +608,7 @@ async function processTransfer(interaction, forceRequestedAnswerer) {
               }
             )
             .setDescription(sorted.at(i).questionText)
-            .setFooter({ text: "Votes: " + sorted.at(i).voterIds.length + " | " + `${currentQueue(forceRequestedAnswerer || authors.find((a) => a.discordId == interaction.member.id)?.Name || "any").size - 1} questions remaining in queue.` })
+            .setFooter({ text: "Votes: " + sorted.at(i).voterIds.length + " | " + `${currentQueue(author.name).size - 1} questions remaining in queue.` })
             .setColor(sorted.at(i).asker?.displayHexColor || "#03cafc")
         ],
         components: transferAnswerComponents(i),
@@ -684,7 +696,7 @@ async function processRAFOButton(interaction) {
       answerText: answer,
       flags: flags,
       status: Questions.Status.Answered,
-      requestedAnswerers: [authors.find((a) => a.discordId == interaction.member.id)].Name
+      requestedAnswerers: [authors.find((a) => a.user.snowflake == interaction.member.id).name]
     })
 
   }
@@ -711,12 +723,12 @@ async function processStats(interaction) {
     let authorName = (interaction.options.get("answerer").value || "any");
     statEmbed.addFields([{ name: "Total questions for " + (authorName == "any" ? "any author" : authorName), value: "`" + sorted.size + "`" }]);
     // Check
-    if (sorted.length == 0) {
+    if (sorted.size == 0) {
       statEmbed.addFields([{ name: "Top Questions:", value: "`There are no questions in the Queue`" }])
       interaction.reply({ embeds: [statEmbed] });
       return
     }
-    if (page > Math.ceil(sorted.length / numberOfQuestions)) page = Math.ceil(sorted.length / numberOfQuestions);
+    if (page > Math.ceil(sorted.size / numberOfQuestions)) page = Math.ceil(sorted.size / numberOfQuestions);
     for (let i = page * numberOfQuestions - numberOfQuestions; i < page * numberOfQuestions; i++) {
       if (sorted.at(i)) {
         statEmbed.addFields([{ name: "Top Question " + (i + 1) + ":" + "( " + sorted.at(i).voterIds.length + " votes)", value: sorted.at(i).questionText.substring(0, 1000) }]);
@@ -897,7 +909,7 @@ Module
       if (canAnswerQuestions(interaction)) {
         let answer = interaction.components[0].components[0].value;
         let embeds = interaction.message.embeds;
-        embeds[0].setColor(authors.find(a => a.discordId == interaction.member.id)?.hexColor || interaction.member.displayHexColor)
+        embeds[0].setColor(authors.find(a => a.user.snowflake == interaction.member.id)?.hex_color || interaction.member.displayHexColor)
         embeds.push(worldmakerReplyEmbed(interaction).setDescription(answer))
         interaction.update({ embeds: embeds, components: answeredQuestionsComponentsBuilder() })
         let question = Questions.readOnlyCollection().get(interaction.message.id);
@@ -906,18 +918,18 @@ Module
           answerText: answer,
           flags: flags,
           status: Questions.Status.Answered,
-          requestedAnswerers: [authors.find((a) => a.discordId == interaction.member.id)].Name
+          requestedAnswerers: [authors.find((a) => a.user.snowflake == interaction.member.id).name]
         })
 
       }
-      else interaction.reply({ content: "Unfortunetly, you don't have permission to do that", ephemeral: true });
+      else interaction.reply({ content: "Unfortunately, you don't have permission to do that", ephemeral: true });
     }
 
   }).addInteractionHandler({
     customId: "voteCheck",
     process: async (interaction) => {
       // Already voted?
-      let question = currentQueue().get(interaction.message.id);
+      let question = currentQueue('any').get(interaction.message.id);
       if (question.voterIds.includes(interaction.user.id)) {
         interaction.reply({ content: "You have already voted for that question", ephemeral: true })
       } else {
@@ -939,7 +951,7 @@ Module
     customId: "unvoteQuestion",
     process: async (interaction) => {
 
-      let question = currentQueue().get(interaction.message.id);
+      let question = currentQueue('any').get(interaction.message.id);
 
       if (question.voterIds.includes(interaction.user.id)) {
         question.update({ voterIds: question.voterIds.filter((id) => (id != interaction.user.id && id)) });
@@ -983,7 +995,7 @@ Module
       question.update({
         requestedAnswerers: newRequestedAnswerers,
       });
-      if (interaction.channel != Module.config.snowflakes.channels.ask) restoreToQueue(interaction, interaction.message.id, true);
+      if (interaction.channel.id != Module.config.snowflakes.channels.ask) restoreToQueue(interaction, interaction.message.id, true);
       else interaction.deferUpdate();
     }
   }).addInteractionHandler({ customId: `transferquestionbutton`, process: processTransfer })
