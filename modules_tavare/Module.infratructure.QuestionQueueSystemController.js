@@ -106,9 +106,11 @@ async function maybeNotifyAuthorQueueThreshold(interaction, authorName, queueSiz
   try {
     const member = await interaction.guild.members.fetch(author.user.snowflake);
     if (member) {
+      u.log(`Notifying author ${author.name} about queue threshold of ${queueSize} questions.`);
       await member.send(`Heads up: Your question queue has reached ${queueSize} questions.`);
     }
   } catch (error) {
+    u.log(`Could not send DM to author ${author.name} about queue threshold:`, error);
     console.error(`Failed to notify author ${author.name}:`, error);
   }
 }
