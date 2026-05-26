@@ -226,6 +226,9 @@ class DBGuildObject {
   get isTestGuild() {
     return this.#isTestGuild;
   }
+  /**
+   * @return {DBGuildRoleObject[]}
+   */
 
   get roles() {
     return this.#roles;
@@ -237,6 +240,21 @@ class DBGuildObject {
  * @member {string} friendly_name a human friendly name for the role, stored for ease of use in the database and testing, should not be referenced in code
  * @member {boolean} has_redacted_info whether the role has redacted information
  * @member {boolean} is_update_role whether the role is an update role
+ * CREATE TABLE `guild_role` (
+  `id` double NOT NULL AUTO_INCREMENT,
+  `guild_id` double NOT NULL,
+  `snowflake` varchar(100) NOT NULL,
+  `has_redacted_info` tinyint(1) NOT NULL DEFAULT 0,
+  `is_update_role` tinyint(1) NOT NULL DEFAULT 0,
+  `friendly_name` varchar(100) NOT NULL,
+  `slave_role_id` double DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `guild_role_unique` (`snowflake`),
+  KEY `guild_role_guild_FK` (`guild_id`),
+  KEY `guild_role_guild_role_FK` (`slave_role_id`),
+  CONSTRAINT `guild_role_guild_FK` FOREIGN KEY (`guild_id`) REFERENCES `guild` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `guild_role_guild_role_FK` FOREIGN KEY (`slave_role_id`) REFERENCES `guild_role` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=22153 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
  */
 class DBGuildRoleObject {
   #id = null;
@@ -244,6 +262,7 @@ class DBGuildRoleObject {
   #friendly_name = "";
   #has_redacted_info = false;
   #is_update_role = false;
+  #slave_role_id = null; // the internal database id of a role that should have it's members updated to match the members of this role.
   constructor(constructionObj) {
     if (constructionObj instanceof DBGuildRoleObject) return constructionObj;
 
@@ -254,6 +273,7 @@ class DBGuildRoleObject {
     // Explicitly parse these as booleans so they never default to undefined
     this.#has_redacted_info = !!constructionObj.has_redacted_info;
     this.#is_update_role = !!constructionObj.is_update_role;
+    this.#slave_role_id = constructionObj.slave_role_id;
   }
 
   get id() {
@@ -275,6 +295,68 @@ class DBGuildRoleObject {
   get is_update_role() {
     return this.#is_update_role;
   }
+
+  /**
+   * 
+   * @returns {Discord.Snowflake[]}
+   */
+
+  async get_master_role_members() {
+    //get roles that have this role as their slave role from the guild_role table
+    const [rows] = await pool.execute(`SELECT id FROM guild_role WHERE slave_role_id = ?`, [this.#id]);
+    let members = [];
+    //convert rows to a comma delimited string for use in the next query
+    const roleIds = rows.map(row => row.id).join(',');
+    if (!roleIds) return members;
+    const [memberRows] = await pool.execute(`SELECT u.snowflake FROM user_guild_role ugr LEFT JOIN users u ON ugr.user_id = u.id WHERE ugr.guild_role_id IN (${roleIds})`);
+    members = memberRows.map(row => row.snowflake);
+    return members;
+  }
+
+  async add_master_role(snowflake) {
+    //find the master role to make sure it exists and get its id
+    const [masterRoleRows] = await pool.execute(`SELECT id FROM guild_role WHERE snowflake = ?`, [snowflake]);
+    if (masterRoleRows.length === 0) {
+      throw new Error(`Master role with snowflake ${snowflake} not found`);
+    }
+    const masterRoleId = masterRoleRows[0].id;
+    // Update the master role to have a reference to this role as its slave role
+    await pool.execute(`UPDATE guild_role SET slave_role_id = ? WHERE id = ?`, [this.#id, masterRoleId]);
+    return true;
+  }
+
+  async remove_master_role(snowflake) {
+    //find the master role to make sure it exists and get its id
+    const [masterRoleRows] = await pool.execute(`SELECT id FROM guild_role WHERE snowflake = ?`, [snowflake]);
+    if (masterRoleRows.length === 0) {
+      throw new Error(`Master role with snowflake ${snowflake} not found`);
+    }
+    const masterRoleId = masterRoleRows[0].id;
+    // Update the master role to remove the reference to this role as its slave role
+    await pool.execute(`UPDATE guild_role SET slave_role_id = NULL WHERE id = ?`, [masterRoleId]);
+    return true;
+  }
+
+
+  /**
+   * 
+   * @param {number} guildId 
+   * @returns {Promise<{slave: DBGuildRoleObject, master: DBGuildRoleObject}[]>}
+   */
+
+  static async get_all_slave_roles_for_guild(guildId) {
+    const [rows] = await pool.execute(
+      {
+        nestedTables: true,
+        sql: `SELECT slave.*, master.* FROM guild_role master LEFT JOIN guild_role slave ON slave.id = master.slave_role_id WHERE slave.guild_id = ?`,
+      },
+      [guildId]);
+    return rows.map(row => ({
+      slave: new DBGuildRoleObject(row.slave),
+      master: new DBGuildRoleObject(row.master)
+    }));
+  }
+
 }
 
 let privateDataBaseActions = {
@@ -1201,8 +1283,9 @@ const DataBaseActions = {
     },
 
     /**
-        * Gets all guilds in the database with their associated roles.
-        */
+      * Gets all guilds in the database with their associated roles.
+      * @returns {Promise<DBGuildObject[]>} An array of guild objects with their roles.
+      */
     getAll: async () => {
       const [guildRows] = await pool.execute("SELECT * FROM guild");
 
