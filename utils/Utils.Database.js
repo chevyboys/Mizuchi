@@ -372,7 +372,9 @@ class DBGuildRoleObject {
           this_roles_member.master = master_guild_role;
         }
       });
-      roles.push(this_roles_member);
+      if (this_roles_member.slave && this_roles_member.master) {
+        roles.push(this_roles_member);
+      }
     }
 
     return roles;

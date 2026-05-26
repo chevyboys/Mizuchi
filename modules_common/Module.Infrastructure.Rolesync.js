@@ -15,6 +15,7 @@ async function syncRoles() {
     await guild.members.fetch().catch(() => { });
 
     for (const db_roles of syncRoles) {
+      if (!db_roles.slave || !db_roles.master) continue;
       let membersToSync = await db_roles.slave.get_master_role_members();
 
       let guildRole = await guild.roles.fetch(db_roles.slave.snowflake);
