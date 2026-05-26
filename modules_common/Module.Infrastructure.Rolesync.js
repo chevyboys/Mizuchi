@@ -30,22 +30,28 @@ async function syncRoles() {
       for (const memberId of membersWithRole) {
         if (!membersToSync.includes(memberId)) {
           let member = guild.members.cache.get(memberId) || await guild.members.fetch(memberId).catch(() => null);
-          if (!member) continue;
 
-          await member.roles.remove(db_roles.slave.snowflake).catch(err => {
-            utils.log(`Failed to remove role ${db_roles.slave.snowflake} from member ${memberId} in guild ${guildId}: ${err}`);
-          });
+          // Check if the member actually has the role before calling the API
+          if (member && member.roles.cache.has(db_roles.slave.snowflake)) {
+            await member.roles.remove(db_roles.slave.snowflake).catch(err => {
+              utils.log(`Failed to remove role: ${err}`);
+            });
+          }
         }
       }
 
-      // add the role to new members
+      //Add role ONLY IF they don't have it
       for (const memberId of membersToSync) {
-        let member = guild.members.cache.get(memberId) || await guild.members.fetch(memberId).catch(() => null);
-        if (!member) continue;
+        if (!membersWithRole.includes(memberId)) {
+          let member = guild.members.cache.get(memberId) || await guild.members.fetch(memberId).catch(() => null);
 
-        await member.roles.add(db_roles.slave.snowflake).catch(err => {
-          utils.log(`Failed to add role ${db_roles.slave.snowflake} to member ${memberId} in guild ${guildId}: ${err}`);
-        });
+          // Check if the member is missing the role before calling the API
+          if (member && !member.roles.cache.has(db_roles.slave.snowflake)) {
+            await member.roles.add(db_roles.slave.snowflake).catch(err => {
+              utils.log(`Failed to add role: ${err}`);
+            });
+          }
+        }
       }
     }
   }
