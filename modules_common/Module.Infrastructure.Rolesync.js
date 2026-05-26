@@ -49,7 +49,7 @@ async function update_sync_role_members() {
   let membersSynced = [];
   Module.client.guilds.cache.forEach(async guild => {
     const guildId = guild.id;
-    const dbGuild = db.Guild.get(guildId);
+    const dbGuild = await db.Guild.get(guildId);
     if (!dbGuild) return; // if we don't have a database entry for this guild, skip it.
     console.log(dbGuild);
     dbGuild.roles.forEach(async dbRole => {
