@@ -39,7 +39,6 @@ async function syncRoles() {
 
       // add the role to new members
       for (const memberId of membersToSync) {
-        // 🔴 FIX: Check cache first, if missing, reach out to Discord's API directly
         let member = guild.members.cache.get(memberId) || await guild.members.fetch(memberId).catch(() => null);
         if (!member) continue;
 

@@ -596,7 +596,13 @@ async function processTransfer(interaction, forceRequestedAnswerer) {
     if (!(debug && interaction.member.roles.cache.has(Module.config.snowflakes.roles.BotMaster))) {
       return interaction.reply({ content: "I'm sorry, but only Authors can do that", ephemeral: true });
     } else {
-      author = authors[0];
+      //check to see if we are in the answer channel of an author, and if so, set the author to that author for the purposes of this command
+      let authorMatch = authors.find(a => a.answer_channel_snowflake == interaction.channel.id);
+      if (authorMatch) {
+        author = authorMatch;
+      } else {
+        return interaction.reply({ content: "I'm sorry, but only Authors can do that", ephemeral: true });
+      }
     }
   }
 

@@ -354,16 +354,17 @@ class DBGuildRoleObject {
         sql: `SELECT slave.id as slave_id, master.id as master_id, slave.guild_id as slave_guild_id, master.guild_id as master_guild_id FROM guild_role master LEFT JOIN guild_role slave ON slave.id = master.slave_role_id WHERE slave.guild_id = ?`,
       },
       [guildId]);
-    console.log(rows);
+
     let roles = [];
-    rows.forEach(async (row) => {
+    for (const row of rows) {
       let this_roles_member = {
         slave: null,
         master: null,
       }
       let slaveGuild = await privateDataBaseActions.Guild.get_by_internal_id(row.slave_guild_id);
       let masterGuild = await privateDataBaseActions.Guild.get_by_internal_id(row.master_guild_id);
-      if (!slaveGuild || !masterGuild) return; // if either guild isn't found, skip this row
+      if (!slaveGuild || !masterGuild) continue;
+
       slaveGuild.roles.forEach(slave_guild_role => {
         if (slave_guild_role.id === row.slave_id) {
           this_roles_member.slave = slave_guild_role;
@@ -375,7 +376,8 @@ class DBGuildRoleObject {
         }
       });
       roles.push(this_roles_member);
-    });
+    }
+
     return roles;
   }
 
@@ -439,13 +441,14 @@ let privateDataBaseActions = {
 
         await con.commit();
         // Return the updated object
-        return await DataBaseActions.User.get(snowflake, guildSnowflake);
+
       } catch (error) {
         await con.rollback();
         console.error(`Failed to update user ${snowflake}. Changes rolled back.`, error);
         throw error;
       } finally {
         con.release();
+        return await DataBaseActions.User.get(snowflake, guildSnowflake);
       }
     },
 
