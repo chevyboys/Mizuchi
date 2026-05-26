@@ -517,8 +517,7 @@ let privateDataBaseActions = {
 
     get_by_internal_id: async (internalId) => {
       const [rows] = await pool.execute("SELECT * FROM guild WHERE id = ?", [internalId]);
-      if (rows.length === 0) return null;
-      return new DBGuildObject(rows[0]);
+      return DataBaseActions.Guild.get(rows[0].snowflake);
     }
   }
 }
