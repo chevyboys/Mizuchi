@@ -24,7 +24,7 @@ async function syncRoles() {
       let membersWithRole = guildRole.members.map(member => member.id);
 
       // remove any members from membersToSync that already have the role
-      membersToSync = membersToSync.filter(memberId => !membersWithRole.includes(memberId));
+      //membersToSync = membersToSync.filter(memberId => !membersWithRole.includes(memberId));
 
       // remove the role from any members that shouldn't have it
       for (const memberId of membersWithRole) {
