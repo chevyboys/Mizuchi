@@ -114,6 +114,7 @@ Module.addCommand({
       return;
     }
 
+    msg.react("⏳");
 
     let dbGuilds = await db.Guild.getAll();
     //verify that both roles exist in the database
