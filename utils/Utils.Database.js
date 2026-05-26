@@ -349,10 +349,7 @@ class DBGuildRoleObject {
 
   static async get_all_slave_roles_for_guild(guildId) {
     const [rows] = await pool.execute(
-      {
-        nestedTables: true,
-        sql: `SELECT slave.id as slave_id, master.id as master_id, slave.guild_id as slave_guild_id, master.guild_id as master_guild_id FROM guild_role master LEFT JOIN guild_role slave ON slave.id = master.slave_role_id WHERE slave.guild_id = ?`,
-      },
+      `SELECT slave.id as slave_id, master.id as master_id, slave.guild_id as slave_guild_id, master.guild_id as master_guild_id FROM guild_role master LEFT JOIN guild_role slave ON slave.id = master.slave_role_id WHERE slave.guild_id = ?`,
       [guildId]);
 
     let roles = [];
