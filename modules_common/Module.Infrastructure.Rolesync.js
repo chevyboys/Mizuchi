@@ -46,11 +46,11 @@ function syncRoles() {
 }
 
 async function update_sync_role_members() {
+  let membersSynced = [];
   Module.client.guilds.cache.forEach(async guild => {
     const guildId = guild.id;
     const dbGuild = db.Guild.get(guildId);
     if (!dbGuild) return; // if we don't have a database entry for this guild, skip it.
-    let membersSynced = [];
     dbGuild.roles.forEach(async dbRole => {
       if (dbRole.slave_role_id) {
         let guildRole = await guild.roles.fetch(dbRole.snowflake);
