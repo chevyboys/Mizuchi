@@ -352,7 +352,7 @@ class DBGuildRoleObject {
       [guildId]);
     console.log(rows);
     let roles = [];
-    rows.forEach(row => {
+    rows.forEach(async (row) => {
       let this_roles_member = {
         slave: null,
         master: null,
