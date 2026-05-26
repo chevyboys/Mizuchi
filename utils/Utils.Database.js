@@ -265,7 +265,6 @@ class DBGuildRoleObject {
   #slave_role_id = null; // the internal database id of a role that should have it's members updated to match the members of this role.
   constructor(constructionObj) {
     if (constructionObj instanceof DBGuildRoleObject) return constructionObj;
-
     this.#id = constructionObj.id || null;
     this.#snowflake = parsesnowflake(constructionObj.snowflake);
     this.#friendly_name = cleanString(constructionObj.friendly_name) || "Unknown Role";
@@ -351,6 +350,7 @@ class DBGuildRoleObject {
         sql: `SELECT slave.*, master.* FROM guild_role master LEFT JOIN guild_role slave ON slave.id = master.slave_role_id WHERE slave.guild_id = ?`,
       },
       [guildId]);
+    console.log(rows);
     return rows.map(row => ({
       slave: new DBGuildRoleObject(row.slave),
       master: new DBGuildRoleObject(row.master)
