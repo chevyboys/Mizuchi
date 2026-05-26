@@ -295,6 +295,10 @@ class DBGuildRoleObject {
     return this.#is_update_role;
   }
 
+  get slave_role_id() {
+    return this.#slave_role_id;
+  }
+
   /**
    * 
    * @returns {Discord.Snowflake[]}

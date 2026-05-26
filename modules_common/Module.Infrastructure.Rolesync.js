@@ -4,66 +4,68 @@ const db = require("../utils/Utils.Database.js");
 const { DBGuildRoleObject } = require("../utils/Utils.Database.js");
 const utils = require("../utils/Utils.Generic.js");
 
-function syncRoles() {
-  //For every guild we are currently in, check if that guild has any slave roles that need to be updated, and if so, update them.
-  Module.client.guilds.cache.forEach(async guild => {
-    const guildId = guild.id;
+async function syncRoles() {
+  // Use for...of to properly await cache iteration
+  for (const [guildId, guild] of Module.client.guilds.cache) {
     const dbGuild = await db.Guild.get(guildId);
-    if (!dbGuild) return; // if we don't have a database entry for this guild, skip it.
-    let syncRoles = await DBGuildRoleObject.get_all_slave_roles_for_guild(dbGuild.id);
-    if (syncRoles.length === 0) return; // if there are no slave roles in this guild, skip it.
-    syncRoles.forEach(async db_roles => {
-      let membersToSync = await db_roles.slave.get_master_role_members();
+    if (!dbGuild) continue; // if we don't have a database entry for this guild, skip it.
 
+    let syncRoles = await DBGuildRoleObject.get_all_slave_roles_for_guild(dbGuild.id);
+    if (syncRoles.length === 0) continue; // if there are no slave roles in this guild, skip it.
+
+    for (const db_roles of syncRoles) {
+      let membersToSync = await db_roles.slave.get_master_role_members();
       let guildRole = await guild.roles.fetch(db_roles.slave.snowflake);
       let membersWithRole = guildRole.members.map(member => member.id);
 
-      //remove any members from membersToSync that already have the role, so we don't waste time trying to add the role to them again.
+      // remove any members from membersToSync that already have the role
       membersToSync = membersToSync.filter(memberId => !membersWithRole.includes(memberId));
 
-      //remove the role from any members that have it
-      membersWithRole.forEach(memberId => {
+      // remove the role from any members that shouldn't have it
+      for (const memberId of membersWithRole) {
         if (!membersToSync.includes(memberId)) {
           let member = guild.members.cache.get(memberId);
-          if (!member) return; // if the member isn't in the guild, skip them.
-          member.roles.remove(db_roles.slave.discord_role_id).catch(err => {
-            utils.log(`Failed to remove role ${db_roles.slave.discord_role_id} from member ${memberId} in guild ${guildId}: ${err}`);
+          if (!member) continue;
+
+          await member.roles.remove(db_roles.slave.snowflake).catch(err => {
+            utils.log(`Failed to remove role ${db_roles.slave.snowflake} from member ${memberId} in guild ${guildId}: ${err}`);
           });
         }
-      });
+      }
 
-      membersToSync.forEach(memberId => {
+      for (const memberId of membersToSync) {
         let member = guild.members.cache.get(memberId);
-        if (!member) return; // if the member isn't in the guild, skip them.
-        member.roles.add(db_roles.slave.discord_role_id).catch(err => {
-          utils.log(`Failed to add role ${db_roles.slave.discord_role_id} to member ${memberId} in guild ${guildId}: ${err}`);
-        });
-      });
+        if (!member) continue;
 
-    });
-  });
+        await member.roles.add(db_roles.slave.snowflake).catch(err => {
+          utils.log(`Failed to add role ${db_roles.slave.snowflake} to member ${memberId} in guild ${guildId}: ${err}`);
+        });
+      }
+    }
+  }
   return true;
 }
 
 async function update_sync_role_members() {
   let membersSynced = [];
-  Module.client.guilds.cache.forEach(async guild => {
-    const guildId = guild.id;
+
+  for (const [guildId, guild] of Module.client.guilds.cache) {
     const dbGuild = await db.Guild.get(guildId);
-    if (!dbGuild) return; // if we don't have a database entry for this guild, skip it.
-    console.log(dbGuild);
-    dbGuild.roles.forEach(async dbRole => {
+    if (!dbGuild) continue;
+
+    for (const dbRole of dbGuild.roles) {
       if (dbRole.slave_role_id) {
         let guildRole = await guild.roles.fetch(dbRole.snowflake);
         let membersWithRole = guildRole.members.map(member => member.id);
-        membersWithRole.forEach(async memberId => {
+
+        for (const memberId of membersWithRole) {
           let member = guild.members.cache.get(memberId);
-          if (!member) return; // if the member isn't in the guild, skip them.
-          membersSynced.push(await db.User.sync_roles(member));
-        });
+          if (!member) continue;
+          membersSynced.push(db.User.sync_roles(member));
+        }
       }
-    });
-  });
+    }
+  }
   return Promise.all(membersSynced);
 }
 
@@ -72,10 +74,8 @@ const secondsInAnHour = 60 * secondsInAMinute;
 const hours = 1;
 
 Module.setClockwork(async () => {
-
   await update_sync_role_members();
   return syncRoles();
-
 }, 1000 * secondsInAnHour * hours);
 
 Module.addCommand({
@@ -87,7 +87,8 @@ Module.addCommand({
   process: async function (msg, suffix) {
     await update_sync_role_members();
 
-    let success = syncRoles();
+    // Properly await the syncRoles function
+    let success = await syncRoles();
     if (success) {
       msg.channel.send("Roles synced successfully.");
     } else {
