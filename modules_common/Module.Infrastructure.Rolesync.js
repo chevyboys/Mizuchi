@@ -66,10 +66,12 @@ async function update_sync_role_members() {
   return Promise.all(membersSynced);
 }
 
+const secondsInAMinute = 60
+const secondsInAnHour = 60 * secondsInAMinute;
+const hours = 1;
+
 Module.setClockwork(async () => {
-  const secondsInAMinute = 60
-  const secondsInAnHour = 60 * secondsInAMinute;
-  const hours = 1
+
   await update_sync_role_members();
   return syncRoles();
 
