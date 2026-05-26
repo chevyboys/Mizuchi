@@ -8,7 +8,7 @@ function syncRoles() {
   //For every guild we are currently in, check if that guild has any slave roles that need to be updated, and if so, update them.
   Module.client.guilds.cache.forEach(async guild => {
     const guildId = guild.id;
-    const dbGuild = db.Guild.get(guildId);
+    const dbGuild = await db.Guild.get(guildId);
     if (!dbGuild) return; // if we don't have a database entry for this guild, skip it.
     let syncRoles = await DBGuildRoleObject.get_all_slave_roles_for_guild(dbGuild.id);
     if (syncRoles.length === 0) return; // if there are no slave roles in this guild, skip it.
