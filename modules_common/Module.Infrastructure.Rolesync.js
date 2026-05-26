@@ -117,6 +117,9 @@ Module.addCommand({
     msg.react("⏳");
 
     let dbGuilds = await db.Guild.getAll();
+
+    //react with a 1 to indicate step 1 is complete (finding the roles in the database)
+    msg.react("1️⃣");
     //verify that both roles exist in the database
     /** 
       * @type {DBGuildRoleObject}
@@ -142,11 +145,11 @@ Module.addCommand({
       return;
     }
 
-    msg.channel.send(`Setting up role sync between ${masterRole.friendly_name} and ${slaveRole.friendly_name}...`);
+    msg.react("2️⃣");
 
     await slaveRole.add_master_role(masterRole.snowflake);
 
-    msg.channel.send(`Roles ${masterRole.friendly_name} and ${slaveRole.friendly_name} are now set to be synced. Syncing roles now...`);
+    msg.react("3️⃣");
 
     await update_sync_role_members();
     await syncRoles();
