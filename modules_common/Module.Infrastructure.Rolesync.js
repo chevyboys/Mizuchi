@@ -5,7 +5,6 @@ const { DBGuildRoleObject } = require("../utils/Utils.Database.js");
 const utils = require("../utils/Utils.Generic.js");
 
 async function syncRoles() {
-  // Use for...of to properly await cache iteration
   for (const [guildId, guild] of Module.client.guilds.cache) {
     const dbGuild = await db.Guild.get(guildId);
     if (!dbGuild) continue; // if we don't have a database entry for this guild, skip it.
@@ -13,8 +12,11 @@ async function syncRoles() {
     let syncRoles = await DBGuildRoleObject.get_all_slave_roles_for_guild(dbGuild.id);
     if (syncRoles.length === 0) continue; // if there are no slave roles in this guild, skip it.
 
+    await guild.members.fetch().catch(() => { });
+
     for (const db_roles of syncRoles) {
       let membersToSync = await db_roles.slave.get_master_role_members();
+
       let guildRole = await guild.roles.fetch(db_roles.slave.snowflake);
       if (!guildRole) continue;
 
@@ -26,7 +28,7 @@ async function syncRoles() {
       // remove the role from any members that shouldn't have it
       for (const memberId of membersWithRole) {
         if (!membersToSync.includes(memberId)) {
-          let member = guild.members.cache.get(memberId);
+          let member = guild.members.cache.get(memberId) || await guild.members.fetch(memberId).catch(() => null);
           if (!member) continue;
 
           await member.roles.remove(db_roles.slave.snowflake).catch(err => {
@@ -35,8 +37,10 @@ async function syncRoles() {
         }
       }
 
+      // add the role to new members
       for (const memberId of membersToSync) {
-        let member = guild.members.cache.get(memberId);
+        // 🔴 FIX: Check cache first, if missing, reach out to Discord's API directly
+        let member = guild.members.cache.get(memberId) || await guild.members.fetch(memberId).catch(() => null);
         if (!member) continue;
 
         await member.roles.add(db_roles.slave.snowflake).catch(err => {
@@ -54,6 +58,7 @@ async function update_sync_role_members() {
   for (const [guildId, guild] of Module.client.guilds.cache) {
     const dbGuild = await db.Guild.get(guildId);
     if (!dbGuild) continue;
+    await guild.members.fetch().catch(() => { });
 
     for (const dbRole of dbGuild.roles) {
       if (dbRole.slave_role_id) {
@@ -63,10 +68,9 @@ async function update_sync_role_members() {
         let membersWithRole = guildRole.members.map(member => member.id);
 
         for (const memberId of membersWithRole) {
-          let member = guild.members.cache.get(memberId);
+          let member = guild.members.cache.get(memberId) || await guild.members.fetch(memberId).catch(() => null);
           if (!member) continue;
 
-          // FIX: Await sequentially so we don't exhaust the 10-connection limit pool
           await db.User.sync_roles(member);
           count++;
         }
