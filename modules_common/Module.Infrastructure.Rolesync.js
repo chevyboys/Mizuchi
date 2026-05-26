@@ -16,6 +16,8 @@ async function syncRoles() {
     for (const db_roles of syncRoles) {
       let membersToSync = await db_roles.slave.get_master_role_members();
       let guildRole = await guild.roles.fetch(db_roles.slave.snowflake);
+      if (!guildRole) continue;
+
       let membersWithRole = guildRole.members.map(member => member.id);
 
       // remove any members from membersToSync that already have the role
@@ -47,7 +49,7 @@ async function syncRoles() {
 }
 
 async function update_sync_role_members() {
-  let membersSynced = [];
+  let count = 0;
 
   for (const [guildId, guild] of Module.client.guilds.cache) {
     const dbGuild = await db.Guild.get(guildId);
@@ -56,17 +58,22 @@ async function update_sync_role_members() {
     for (const dbRole of dbGuild.roles) {
       if (dbRole.slave_role_id) {
         let guildRole = await guild.roles.fetch(dbRole.snowflake);
+        if (!guildRole) continue;
+
         let membersWithRole = guildRole.members.map(member => member.id);
 
         for (const memberId of membersWithRole) {
           let member = guild.members.cache.get(memberId);
           if (!member) continue;
-          membersSynced.push(db.User.sync_roles(member));
+
+          // FIX: Await sequentially so we don't exhaust the 10-connection limit pool
+          await db.User.sync_roles(member);
+          count++;
         }
       }
     }
   }
-  return Promise.all(membersSynced);
+  return count;
 }
 
 const secondsInAMinute = 60
@@ -85,10 +92,11 @@ Module.addCommand({
   description: "Manually trigger a sync of all roles that are set to be synced. This is automatically triggered every hour.",
   permissions: (msg) => (Module.config.ownerId === (msg.author.id)) || msg.member.roles.cache.has(Module.config.snowflakes.roles.BotMaster) || msg.member.roles.cache.has(Module.config.snowflakes.roles.BotAssistant),
   process: async function (msg, suffix) {
-    await update_sync_role_members();
+    await msg.react("⏳").catch(() => { });
 
-    // Properly await the syncRoles function
+    await update_sync_role_members();
     let success = await syncRoles();
+
     if (success) {
       msg.channel.send("Roles synced successfully.");
     } else {
@@ -114,21 +122,18 @@ Module.addCommand({
       return;
     }
 
-    msg.react("⏳");
+    // FIX: Await reactions and catch errors to prevent silent execution breaks
+    await msg.react("⏳").catch(() => { });
 
     let dbGuilds = await db.Guild.getAll();
 
     //react with a 1 to indicate step 1 is complete (finding the roles in the database)
-    msg.react("1️⃣");
+    await msg.react("1️⃣").catch(() => { });
+
     //verify that both roles exist in the database
-    /** 
-      * @type {DBGuildRoleObject}
-     */
     let masterRole;
-    /**
-      * @type {DBGuildRoleObject}
-     */
     let slaveRole;
+
     dbGuilds.forEach(dbGuild => {
       dbGuild.roles.forEach(dbRole => {
         if (dbRole.snowflake == firstRoleId) {
@@ -145,18 +150,16 @@ Module.addCommand({
       return;
     }
 
-    msg.react("2️⃣");
+    await msg.react("2️⃣").catch(() => { });
 
     await slaveRole.add_master_role(masterRole.snowflake);
 
-    msg.react("3️⃣");
+    await msg.react("3️⃣").catch(() => { });
 
     await update_sync_role_members();
     await syncRoles();
 
-    msg.channel.send(`Roles ${masterRole.friendly_name} and ${slaveRole.friendly_name} are now synced. Whenever the members of ${masterRole.friendly_name} are updated, the members of ${slaveRole.friendly_name} will be updated to match. (within the next hour, or you can trigger an immediate sync with !syncroles in the master guild, then the slave guild)`);
-
+    msg.channel.send(`Roles ${masterRole.friendly_name} and ${slaveRole.friendly_name} are now synced. Whenever the members of ${masterRole.friendly_name} are updated, the members of ${slaveRole.friendly_name} will be updated to match.`);
   }
 });
 module.exports = Module;
-
