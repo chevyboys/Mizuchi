@@ -51,6 +51,7 @@ async function update_sync_role_members() {
     const guildId = guild.id;
     const dbGuild = db.Guild.get(guildId);
     if (!dbGuild) return; // if we don't have a database entry for this guild, skip it.
+    console.log(dbGuild);
     dbGuild.roles.forEach(async dbRole => {
       if (dbRole.slave_role_id) {
         let guildRole = await guild.roles.fetch(dbRole.snowflake);
