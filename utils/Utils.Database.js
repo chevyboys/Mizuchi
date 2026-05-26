@@ -347,7 +347,7 @@ class DBGuildRoleObject {
     const [rows] = await pool.execute(
       {
         nestedTables: true,
-        sql: `SELECT slave.*, master.* FROM guild_role master LEFT JOIN guild_role slave ON slave.id = master.slave_role_id WHERE slave.guild_id = ?`,
+        sql: `SELECT slave.id as slave_id, master.id as master_id, slave.guild_id as slave_guild_id, master.guild_id as master_guild_id FROM guild_role master LEFT JOIN guild_role slave ON slave.id = master.slave_role_id WHERE slave.guild_id = ?`,
       },
       [guildId]);
     console.log(rows);
@@ -357,16 +357,16 @@ class DBGuildRoleObject {
         slave: null,
         master: null,
       }
-      let slaveGuild = await privateDataBaseActions.Guild.get_by_internal_id(row.slave.guild_id);
-      let masterGuild = await privateDataBaseActions.Guild.get_by_internal_id(row.master.guild_id);
+      let slaveGuild = await privateDataBaseActions.Guild.get_by_internal_id(row.slave_guild_id);
+      let masterGuild = await privateDataBaseActions.Guild.get_by_internal_id(row.master_guild_id);
       if (!slaveGuild || !masterGuild) return; // if either guild isn't found, skip this row
       slaveGuild.roles.forEach(slave_guild_role => {
-        if (slave_guild_role.id === row.slave.id) {
+        if (slave_guild_role.id === row.slave_id) {
           this_roles_member.slave = slave_guild_role;
         }
       });
       masterGuild.roles.forEach(master_guild_role => {
-        if (master_guild_role.id === row.master.id) {
+        if (master_guild_role.id === row.master_id) {
           this_roles_member.master = master_guild_role;
         }
       });
