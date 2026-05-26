@@ -66,7 +66,7 @@ async function update_sync_role_members() {
   return Promise.all(membersSynced);
 }
 
-Module.setClockwork(() => {
+Module.setClockwork(async () => {
   const secondsInAMinute = 60
   const secondsInAnHour = 60 * secondsInAMinute;
   const hours = 1
