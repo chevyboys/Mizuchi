@@ -351,10 +351,28 @@ class DBGuildRoleObject {
       },
       [guildId]);
     console.log(rows);
-    return rows.map(row => ({
-      slave: new DBGuildRoleObject(row.slave),
-      master: new DBGuildRoleObject(row.master)
-    }));
+    let roles = [];
+    rows.forEach(row => {
+      let this_roles_member = {
+        slave: null,
+        master: null,
+      }
+      let slaveGuild = await privateDataBaseActions.Guild.get_by_internal_id(row.slave.guild_id);
+      let masterGuild = await privateDataBaseActions.Guild.get_by_internal_id(row.master.guild_id);
+      if (!slaveGuild || !masterGuild) return; // if either guild isn't found, skip this row
+      slaveGuild.roles.forEach(slave_guild_role => {
+        if (slave_guild_role.id === row.slave.id) {
+          this_roles_member.slave = slave_guild_role;
+        }
+      });
+      masterGuild.roles.forEach(master_guild_role => {
+        if (master_guild_role.id === row.master.id) {
+          this_roles_member.master = master_guild_role;
+        }
+      });
+      roles.push(this_roles_member);
+    });
+    return roles;
   }
 
 }
