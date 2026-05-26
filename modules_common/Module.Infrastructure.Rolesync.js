@@ -146,7 +146,7 @@ Module.addCommand({
     await update_sync_role_members();
     await syncRoles();
 
-    msg.channel.send(`Roles ${masterRole.name} and ${slaveRole.name} are now synced. Whenever the members of ${masterRole.name} are updated, the members of ${slaveRole.name} will be updated to match. (within the next hour, or you can trigger an immediate sync with !syncroles in the master guild, then the slave guild)`);
+    msg.channel.send(`Roles ${masterRole.friendly_name} and ${slaveRole.friendly_name} are now synced. Whenever the members of ${masterRole.friendly_name} are updated, the members of ${slaveRole.friendly_name} will be updated to match. (within the next hour, or you can trigger an immediate sync with !syncroles in the master guild, then the slave guild)`);
 
   }
 });
