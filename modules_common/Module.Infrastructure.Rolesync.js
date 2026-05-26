@@ -2,7 +2,7 @@ const Augur = require("augurbot");
 const Module = new Augur.Module();
 const db = require("../utils/Utils.Database.js");
 const { DBGuildRoleObject } = require("../utils/Utils.Database.js");
-const utils = require("../utils/Utils.js");
+const utils = require("../utils/Utils.Generic.js");
 
 function syncRoles() {
   //For every guild we are currently in, check if that guild has any slave roles that need to be updated, and if so, update them.
