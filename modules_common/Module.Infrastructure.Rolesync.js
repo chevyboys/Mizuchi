@@ -143,6 +143,7 @@ Module.addCommand({
 
     await slaveRole.add_master_role(masterRole.snowflake);
 
+    msg.channel.send(`Roles ${masterRole.friendly_name} and ${slaveRole.friendly_name} are now set to be synced. Syncing roles now...`);
 
     await update_sync_role_members();
     await syncRoles();
