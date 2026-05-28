@@ -567,18 +567,18 @@ class DBCurrencyTotalObject {
 }
 
 class DBCurrencyMessageEmojiSpawnData {
-  #currency_value = 0;
+  #value = 0;
   #emoji = "";
   #color = "#FFFFFF";
 
-  constructor(currency_value, emoji, color) {
-    this.#currency_value = currency_value;
+  constructor(value, emoji, color) {
+    this.#value = value;
     this.#emoji = emoji;
     this.#color = color || "#FFFFFF";
   }
 
-  get currency_value() {
-    return this.#currency_value;
+  get value() {
+    return this.#value;
   }
 
   get emoji() {
