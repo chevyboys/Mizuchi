@@ -51,7 +51,7 @@ let thankProcess = async (interaction) => {
   let userPmEmbed = u.embed()
     .setColor(interaction.guild.roles.cache.get(Module.config.snowflakes.roles.Helper).hexColor)
     .setAuthor({ iconURL: interaction.member.displayAvatarURL(), name: interaction.member.displayName + " has sent you a thank you!" })
-    .setDescription(`Thank you for helping out the staff members of ${interaction.guild.name}! Your efforts were noticed by the staff, and the ${interaction.guild.roles.cache.get(Module.config.snowflakes.roles.Helper).name} role was given to you for ${days} day(s)! \n Thank you so much! You will also receive a 10% boost to the amount of XP you earn in that time! In addition, you were given ${numberOfPointsToGrant} ${validCurrencies.find(c => c.is_primary).name}!.\n Keep up the good work!\n\n`)
+    .setDescription(`Thank you for helping out the staff members of ${interaction.guild.name}! Your efforts were noticed by the staff, and the ${interaction.guild.roles.cache.get(Module.config.snowflakes.roles.Helper).name} role was given to you for ${days} day(s)! \n Thank you so much! You will also receive a 10% boost to the amount of XP you earn in that time! In addition, you were given ${numberOfPointsToGrant} ${validCurrencies.find(c => c.is_primary).name}!\n Keep up the good work!\n\n`)
     .addField(interaction.member.displayName + "'s listed reason:", "```" + reason + "```")
 
   try {

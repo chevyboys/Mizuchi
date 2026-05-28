@@ -52,7 +52,7 @@ async function createLeaderboardMessageObject(guild, currency = null) {
     if (currencyObj) {
       placeholder = currencyObj.name;
 
-      let leaderboard = await UtilsDatabase.Economy.getLeaderboard(currencyObj.id);
+      let leaderboard = await UtilsDatabase.Economy.getLeaderboard(currencyObj.id, 10, guild.id);
       if (leaderboard.length === 0) {
         let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
         embed.setDescription(`No one has any ${currencyDisplay} yet.`);
@@ -285,7 +285,7 @@ Module.addCommand({
         let user = interaction.options.getUser("user") || interaction.user;
         let member = await interaction.guild.members.fetch(user.id).catch(() => null);
         let displayName = member ? member.displayName : user.username;
-        let balanceTotalObject = await UtilsDatabase.User.getBalance(user.id);
+        let balanceTotalObject = await UtilsDatabase.User.getBalance(user.id, interaction.guild.id);
 
         if (balanceTotalObject.currencies.length === 0) {
           return interaction.reply({ content: `${displayName} doesn't have any balances yet.`, ephemeral: true });
@@ -326,7 +326,7 @@ Module.addCommand({
         }
 
         //check if the user has enough of the currency to give
-        let giverBalance = await UtilsDatabase.User.getBalance(interaction.user.id);
+        let giverBalance = await UtilsDatabase.User.getBalance(interaction.user.id, interaction.guild.id);
         let giverCurrency = giverBalance.currencies.find(c => c.id == currencyObj.id);
         if (!giverCurrency || giverCurrency.total < amount) {
           let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;

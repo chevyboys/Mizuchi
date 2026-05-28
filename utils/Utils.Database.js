@@ -1149,19 +1149,34 @@ const DataBaseActions = {
      * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} snowflakeResolvable 
      * @returns {DBUserCurrencyTotalObject} the database user currency object for the user, if it exists 
      */
-    getBalance: async (snowflakeResolvable) => {
+    getBalance: async (snowflakeResolvable, guild_resolvable = null) => {
       const snowflake = await parsesnowflake(snowflakeResolvable);
+      let guildId = null;
+      let guildSnowflake = null;
+
+      if (guild_resolvable && guild_resolvable instanceof DBGuildObject) {
+        guildId = guild_resolvable.id;
+        guildSnowflake = guild_resolvable.snowflake;
+      } else if (guild_resolvable && typeof guild_resolvable === "string") {
+        if (assertIsSnowflake(guild_resolvable)) guildSnowflake = guild_resolvable;
+      } else if (guild_resolvable && typeof guild_resolvable === "object" && "id" in guild_resolvable) {
+        if (typeof guild_resolvable.id === "string" && assertIsSnowflake(guild_resolvable.id)) guildSnowflake = guild_resolvable.id;
+        else guildId = guild_resolvable.id;
+      }
 
       const query = `
-        SELECT currency.name as name, currency.emoji as emoji, currency.id as id, SUM(amount) as total 
+        SELECT currency.name as name, COALESCE(MAX(guild_currency.icon_emoji), '') as emoji, currency.id as id, SUM(amount) as total 
         FROM users 
         LEFT JOIN transaction ON users.snowflake = transaction.userid 
         LEFT JOIN currency ON currency.id = transaction.currencyid 
-        WHERE users.snowflake = ? AND currency.active 
+        LEFT JOIN guild_currency ON guild_currency.currency_id = currency.id
+        LEFT JOIN guild ON guild.id = guild_currency.guild_id
+        WHERE users.snowflake = ? AND currency.active
+          AND (? IS NULL OR guild.snowflake = ? OR guild.id = ?)
         GROUP BY currency.id 
         ORDER BY currency.id`;
 
-      const [rows] = await pool.execute(query, [snowflake]);
+      const [rows] = await pool.execute(query, [snowflake, guildSnowflake, guildSnowflake, guildId]);
 
       if (!rows || rows.length === 0) {
         throw new Error(`No transactions for snowflake ${snowflake} were found.`);
@@ -1653,7 +1668,7 @@ const DataBaseActions = {
     getTransactionHistory: async (snowflakeResolvable) => {
       const snowflake = await parsesnowflake(snowflakeResolvable);
       const sql = `
-        SELECT transaction.*, currency.name as currencyName, currency.emoji as currencyEmoji 
+        SELECT transaction.*, currency.name as currencyName, '' as currencyEmoji 
         FROM transaction 
         LEFT JOIN currency ON transaction.currencyid = currency.id 
         WHERE transaction.userid = ?
@@ -1674,23 +1689,38 @@ const DataBaseActions = {
      * @param {number} [limit=10] the number of users to return in the leaderboard
      * @returns {Promise<LeaderboardEntryObject[]>} an array of user currency total objects
      */
-    getLeaderboard: async (currencyId, limit = 10) => {
+    getLeaderboard: async (currencyId, limit = 10, guild_resolvable = null) => {
       const [currencyRows] = await pool.execute("SELECT id FROM currency WHERE id = ? AND active = 1", [currencyId]);
       if (!currencyRows || currencyRows.length === 0) throw new Error("Invalid currency ID");
 
+      let guildId = null;
+      let guildSnowflake = null;
+      if (guild_resolvable && guild_resolvable instanceof DBGuildObject) {
+        guildId = guild_resolvable.id;
+        guildSnowflake = guild_resolvable.snowflake;
+      } else if (guild_resolvable && typeof guild_resolvable === "string") {
+        if (assertIsSnowflake(guild_resolvable)) guildSnowflake = guild_resolvable;
+      } else if (guild_resolvable && typeof guild_resolvable === "object" && "id" in guild_resolvable) {
+        if (typeof guild_resolvable.id === "string" && assertIsSnowflake(guild_resolvable.id)) guildSnowflake = guild_resolvable.id;
+        else guildId = guild_resolvable.id;
+      }
+
       const sql = `
         SELECT users.snowflake, users.username, SUM(transaction.amount) as total, 
-               currency.name as currencyName, currency.emoji as currencyEmoji 
+               currency.name as currencyName, COALESCE(MAX(guild_currency.icon_emoji), '') as currencyEmoji 
         FROM users 
         LEFT JOIN transaction ON users.snowflake = transaction.userid
         LEFT JOIN currency ON transaction.currencyid = currency.id 
-        WHERE transaction.currencyid = ? AND currency.active = 1 
-        GROUP BY users.snowflake 
+        LEFT JOIN guild_currency ON guild_currency.currency_id = currency.id
+        LEFT JOIN guild ON guild.id = guild_currency.guild_id
+        WHERE transaction.currencyid = ? AND currency.active = 1
+          AND (? IS NULL OR guild.snowflake = ? OR guild.id = ?)
+        GROUP BY users.snowflake, users.username, currency.name
         ORDER BY total DESC 
         LIMIT ?`;
 
       // parseInt is important here because passing a string to a ? for a LIMIT clause throws a syntax error in some MySQL versions
-      const [rows] = await pool.execute(sql, [currencyId, parseInt(limit)]);
+      const [rows] = await pool.execute(sql, [currencyId, guildSnowflake, guildSnowflake, guildId, parseInt(limit)]);
 
       return rows.map(entry =>
         new LeaderboardEntryObject(

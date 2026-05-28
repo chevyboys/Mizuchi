@@ -64,7 +64,7 @@ class Item {
     //respond to the interaction immediately to avoid the "This interaction failed" message, we will edit the response later if needed
     if (this.processPurchaseCallback) {
       //check if the user has enough currency to purchase the item
-      let userBalanceObj = await db.User.getBalance(interaction.user.id);
+      let userBalanceObj = await db.User.getBalance(interaction.user.id, interaction.guild.id);
       let userBalance = userBalanceObj.currencies.find(c => c.id == this.currencyId);
       if (!userBalance || userBalance.total < this.price) {
         await interaction.reply({ content: `You do not have enough ${userBalance ? userBalance.currencyName : "currency"} to purchase this item.`, ephemeral: true });
