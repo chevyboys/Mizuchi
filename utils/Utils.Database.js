@@ -686,7 +686,7 @@ class DBCurrencyObject {
       .filter(r => r.currency_value != null && r.emoji != null)
       .map(r => new DBCurrencyMessageEmojiSpawnData(r.currency_value, r.emoji, r.color));
     this.#name = row.name;
-    this.#emoji = row.emoji;
+    this.#emoji = row.icon_emoji;
     this.#spawn_on_1_out_of = row.spawn_on_1_out_of_X_messages;
     this.#is_primary = !!row.is_primary;
     this.#type = row.type;

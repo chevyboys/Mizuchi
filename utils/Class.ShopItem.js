@@ -83,7 +83,7 @@ class Item {
 
         let currency = await this.getCurrency(interaction.guild);
         const currencyName = currency ? currency.name : "Unknown Currency";
-        const currencyEmoji = currency ? currency.emoji : "";
+        const currencyEmoji = currency && currency.emoji ? currency.emoji : "";
 
         //send a message in bot-logs channel about the purchase
         let logChannel = await interaction.client.channels.fetch(interaction.client.config.snowflakes.channels.botSpam);
