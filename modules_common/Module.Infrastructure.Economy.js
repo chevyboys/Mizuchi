@@ -5,6 +5,7 @@ const Augur = require("augurbot"),
   fs = require("fs"),
   ShopItem = require("../utils/Class.ShopItem"),
   UtilsDatabase = require("../utils/Utils.Database");
+const DBCurrencyObject = UtilsDatabase.DBCurrencyObject
 
 //an object who's keys correspond to message IDs, and values are the user IDs of who caught the emoji in that message, to prevent multiple people from getting currency from reacting to the same message 
 let who_caught_the_emoji_cache = {};
@@ -17,14 +18,13 @@ let currency_caches_for_unload = {};
 async function createLeaderboardMessageObject(guild, currency = null) {
   let botMember = guild.members.cache.get(guild.client.user.id);
   let botColor = botMember ? botMember.displayHexColor : null;
-
   let embed = u.embed()
     .setTitle(`Currency Leaderboard`)
     .setDescription(`Select a currency from the dropdown below to see the leaderboard for that currency.`);
 
   if (botColor) embed.setColor(botColor);
 
-  let currencies = await UtilsDatabase.Economy.getValidCurrencies();
+  let currencies = await UtilsDatabase.Economy.getValidCurrencies(guild.id);
   let options = [];
   for (let currency of currencies) {
     let option = { label: currency.name, value: String(currency.id), emoji: currency.emoji || undefined };
@@ -151,7 +151,9 @@ async function createShopMessageObject(guild, selectedItemId = null) {
 }
 
 
-
+/**
+ * @type {DBCurrencyObject|null}
+ */
 let tournamentPointsCurrency = null;
 
 function canGrantCurrency(Module, member) {
@@ -180,34 +182,38 @@ function weighted_random(options) {
   return options[i].item;
 }
 
+/**
+ * 
+ * @param {DBCurrencyObject} currency 
+ */
+function getCurrencyEmojiByValue(currency) {
+  if (!currency.spawned_gem_emoji_cache) return null;
+  if (!currency.spawn_data) return null;
+  let spawnData = currency.spawn_data;
 
-const currencyEmoji = [
-  { value: 1, emoji: "<:Quartz_E:909751241658208276>", color: "#E0E0E0" },
-  { value: 5, emoji: "<:Carnelian_E:909751066986414160>", color: "#FF5733" },
-  { value: 10, emoji: "<:Sunstone_E:909750969934417950>", color: "#ffae00" },
-  { value: 25, emoji: "<:Citrine_E:909748066582663180>", color: "#f7f2a6" },
-  { value: 50, emoji: "<:Emerald_E:909750429737435206>", color: "#33FF57" },
-  { value: 100, emoji: "<:SapphireE:1476079802489245797>", color: "#3385ff" },
-]
-const currencyEmojiByValue = currencyEmoji.reduce((acc, current) => {
-  acc[current.emoji] = current;
-  return acc;
-}, {});
+  return spawnData.reduce((acc, current) => {
+    acc[current.emoji] = current;
+    return acc;
+  }, {});
+}
 
-const defaultDivisor = 5000; // 1 in 5000 chance for a gemstone to spawn in a message, which can be adjusted by the bot owner with the setcurrencyodds command
-let baseOddsDivisor = defaultDivisor;
+let defaultDivisor = null; // 1 in 5000 chance for a gemstone to spawn in a message, which can be adjusted by the bot owner with the setcurrencyodds command
+let baseOddsDivisor = null;
 
 async function load(Module, data) {
-  let currencies = data && data.currencies ? data.currencies : await UtilsDatabase.Economy.getValidCurrencies();
+  let currencies = await UtilsDatabase.Economy.getValidCurrencies(Module.config.snowflakes.guilds.PrimaryServer);
   currency_caches_for_unload.currencies = currencies; // Cache currencies for unload
   if (data) {
     who_caught_the_emoji_cache = data.who_caught_the_emoji_cache || {};
     spawned_gem_emoji_cache = data.spawned_gem_emoji_cache || {};
   }
-  tournamentPointsCurrency = currencies.find(c => c.id == "1");
-  tournamentPointsCurrencyEmoji = tournamentPointsCurrency ? tournamentPointsCurrency.emoji : null;
-  console.log(`Tournament Points Currency initialized: ${tournamentPointsCurrency ? tournamentPointsCurrency.name : 'Not found'}`);
+  let guild_snowflake = Module.config.snowflakes.guilds.PrimaryServer;
 
+
+  tournamentPointsCurrency = currencies.find(c => c.is_primary) || null;
+  console.log(`Tournament Points Currency initialized: ${tournamentPointsCurrency ? tournamentPointsCurrency.name : 'Not found'}`);
+  defaultDivisor = tournamentPointsCurrency ? tournamentPointsCurrency.spawn_on_1_out_of : 5000;
+  baseOddsDivisor = defaultDivisor;
 
   let shopItems = fs.readdirSync("./shop").filter(file => file.endsWith(".js"));
   for (let itemFile of shopItems) {
@@ -218,9 +224,14 @@ async function load(Module, data) {
       continue;
     }
 
+    //check to make sure this item is of a currency this bot/guild has access to
+    if (!currencies.find(c => c.id === item.currencyId)) {
+      continue;
+    }
+
     //hydrate the currency for the item, so that we can display the correct emoji in the shop, and avoid asynchronous constructor issues in the ShopItem class
     if (typeof item.hydrateCurrency === "function") {
-      await item.hydrateCurrency();
+      await item.hydrateCurrency(Module.config.snowflakes.guilds.PrimaryServer);
     }
 
     let itemId = itemFile.replace(".js", "");
@@ -308,7 +319,7 @@ Module.addCommand({
         let amount = interaction.options.getInteger("amount");
         let currencyOption = interaction.options.getString("currency");
 
-        let currencies = await UtilsDatabase.Economy.getValidCurrencies();
+        let currencies = await UtilsDatabase.Economy.getValidCurrencies(interaction.guild.id);
         let currencyObj = currencies.find(c => c.id == currencyOption || c.name.toLowerCase() === currencyOption.toLowerCase());
         if (!currencyObj) {
           return interaction.reply({ content: `Currency not found.`, ephemeral: true });
@@ -365,7 +376,7 @@ Module.addCommand({
         let amount = interaction.options.getInteger("amount");
         let currencyOption = interaction.options.getString("currency");
 
-        let currencies = await UtilsDatabase.Economy.getValidCurrencies();
+        let currencies = await UtilsDatabase.Economy.getValidCurrencies(interaction.guild.id);
         let currencyObj = currencies.find(c => c.id == currencyOption || c.name.toLowerCase() === currencyOption.toLowerCase());
         if (!currencyObj) {
           return interaction.reply({ content: `Currency not found.`, ephemeral: true });
@@ -443,6 +454,7 @@ Module.addCommand({
   // add a rare chance for the emoji of currency 'Tournament Points' to be added to messages in the server.
   .addEvent("messageCreate", async (message) => {
     if (message.author.bot) return;
+    if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
     let randomNum = Math.random();
     //determine if the person has a role containing the word 'Carnelian' or 'Quartz' and double the odds for them if they do, otherwise use the base odds divisor
     let member = message.guild.members.cache.get(message.author.id) || await message.guild.members.fetch(message.author.id).catch(() => null);
@@ -450,10 +462,8 @@ Module.addCommand({
     let effectiveOddsDivisor = isNewMember ? baseOddsDivisor / 2 : baseOddsDivisor;
 
     if (randomNum < (1 / effectiveOddsDivisor)) {
-      if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
-
       //get weighted random emoji from the currencyEmoji array, where the weights are determined by the value of each emoji (higher value emojis are more rare)
-      let emoji = weighted_random(currencyEmoji.map(c => ({ item: c.emoji, weight: 1 / c.value * 50 })));
+      let emoji = weighted_random(tournamentPointsCurrency.spawn_data.map(c => ({ item: c.emoji, weight: 1 / c.value * 100 })));
       message.react(emoji).then(() => {
         spawned_gem_emoji_cache[message.id] = emoji;
       }).catch(() => { });
@@ -463,6 +473,7 @@ Module.addCommand({
   //if someone reacts to a message with Tournament Points emoji, give a tournament point to that user if criteria is met
   .addEvent("messageReactionAdd", async (reaction, user) => {
     if (user.bot) return;
+    if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
     if (reaction.partial) await reaction.fetch();
     let message = reaction.message;
     if (message.partial) await message.fetch();
@@ -475,6 +486,7 @@ Module.addCommand({
     }
 
     let emojiString = reaction.emoji.toString();
+    const currencyEmojiByValue = getCurrencyEmojiByValue(tournamentPointsCurrency);
     let isGemEmoji = !!currencyEmojiByValue[emojiString];
     // Ignore unrelated reactions as early as possible.
     if (emojiString !== "👈" && !isGemEmoji) return;
@@ -484,7 +496,7 @@ Module.addCommand({
       if (!canGrantCurrency(Module, member)) return;
       try {
         reaction.remove().catch(() => { });
-        message.react(weighted_random(currencyEmoji.map(c => ({ item: c.emoji, weight: 1 / c.value * 50 })))).then(() => {
+        message.react(weighted_random(tournamentPointsCurrency.spawn_data.map(c => ({ item: c.emoji, weight: 1 / c.value * 100 })))).then((emoji) => {
           spawned_gem_emoji_cache[message.id] = emoji;
         }).catch(() => { });
 
@@ -501,7 +513,7 @@ Module.addCommand({
       try {
         reaction.remove().catch(() => { });
         if (!botAlreadyOwnedGem) {
-          message.react(reaction.emoji).then(() => {
+          message.react(reaction.emoji).then((emoji) => {
             spawned_gem_emoji_cache[message.id] = emoji;
           }).catch(() => { });
           return;
@@ -510,6 +522,7 @@ Module.addCommand({
         //ignore error
       }
     }
+
     //find the corresponding value for the emoji that was reacted with
     let currencyObj = currencyEmojiByValue[emojiString];
     if (!currencyObj) return;

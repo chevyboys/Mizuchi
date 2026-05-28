@@ -566,6 +566,30 @@ class DBCurrencyTotalObject {
   }
 }
 
+class DBCurrencyMessageEmojiSpawnData {
+  #currency_value = 0;
+  #emoji = "";
+  #color = "#FFFFFF";
+
+  constructor(currency_value, emoji, color) {
+    this.#currency_value = currency_value;
+    this.#emoji = emoji;
+    this.#color = color || "#FFFFFF";
+  }
+
+  get currency_value() {
+    return this.#currency_value;
+  }
+
+  get emoji() {
+    return this.#emoji;
+  }
+
+  get color() {
+    return this.#color;
+  }
+}
+
 /**
  * An object representing a currency in the database
  * @member {number} id the internal database ID of the currency
@@ -573,16 +597,82 @@ class DBCurrencyTotalObject {
  * @member {string} emoji the emoji representing the currency
  */
 class DBCurrencyObject {
+  #id = null;
+  #name = "";
+  #type = ""; //Either General or Developer
+  #emoji = "";
+  #is_primary = false; //Whether this currency is the primary currency for the guild, which will be the default currency for all operations that don't specify a currency. Each guild can only have one primary currency, and it should be the most commonly used currency in that guild to avoid confusion.
+  #guild_resolvable = null; // the guild this currency is associated with, which can be a snowflake, guild object, or internal database ID. This is used to ensure that currencies are only used in the guild they are associated with, and to allow for guild-specific currencies.
+  #guild_cache = null; // cache for the guild this currency is associated with, so we don't have to query the database for it every time we need it. This will be populated the first time we call get_guild() and then stored here for future reference.
+  #spawn_on_1_out_of = 0; //The chance for this currency to spawn on a message, set to Zero for do not spawn
+  #spawn_data = null; //an array of DBCurrencyMessageEmojiSpawnData objects representing the different emojis and values this currency can spawn with when it spawns on messages, 
   /**
    * 
    * @param {number} id 
-   * @param {string} name 
-   * @param {string} emoji 
+   * @param {Discord.Snowflake|Discord.Guild|number|DBGuildObject} guild_resolvable
    */
-  constructor(id, name, emoji) {
-    this.id = id;
-    this.name = name;
-    this.emoji = emoji;
+  constructor(id, guild_resolvable) {
+    this.#id = id;
+    this.#guild_resolvable = guild_resolvable;
+  }
+
+
+  get id() {
+    return this.#id;
+  }
+
+  get name() {
+    return this.#name;
+  }
+
+  get emoji() {
+    return this.#emoji;
+  }
+
+  get guild() {
+    if (this.#guild_cache) return this.#guild_cache;
+    else throw new Error("Guild not loaded yet. Call fetch() to load the guild from the database first.");
+  }
+
+  get spawn_on_1_out_of() {
+    return this.#spawn_on_1_out_of;
+  }
+
+  get spawn_data() {
+    return this.#spawn_data;
+  }
+
+  get is_primary() {
+    return this.#is_primary;
+  }
+
+  static async fetch(id, guild_resolvable) {
+    const currency = new DBCurrencyObject(id, guild_resolvable);
+    await currency.fetch();
+    return currency;
+  }
+
+  async fetch() {
+    if (!this.#guild_resolvable) return null;
+    if (this.#guild_resolvable instanceof DBGuildObject) {
+      this.#guild_cache = this.#guild_resolvable;
+    } else if (typeof this.#guild_resolvable === "number") {
+      this.#guild_cache = await privateDataBaseActions.Guild.get_by_internal_id(this.#guild_resolvable);
+    } else {
+      const guildSnowflake = parsesnowflake(this.#guild_resolvable);
+      this.#guild_cache = await DataBaseActions.Guild.get(guildSnowflake);
+    }
+    let sql = `SELECT currency.id, currency.name, currency.type, guild_currency.icon_emoji, guild_currency.spawn_on_1_out_of_X_messages, guild_currency.is_primary, guild_currency_emoji.emoji, guild_currency_emoji.currency_value, guild_currency_emoji.color FROM currency LEFT JOIN guild_currency ON currency.id = guild_currency.currency_id AND guild_currency.guild_id = ? LEFT JOIN guild_currency_emoji ON guild_currency.id = guild_currency_emoji.guild_currency_id WHERE currency.id = ? AND currency.active = 1`;
+    const [rows] = await pool.execute(sql, [this.#guild_cache.id, this.#id]);
+    if (rows.length === 0) throw new Error(`Currency with ID ${this.#id} not found in database for this guild.`);
+    const row = rows[0];
+    this.#spawn_data = rows.map(r => new DBCurrencyMessageEmojiSpawnData(r.currency_value, r.emoji, r.color));
+    this.#name = row.name;
+    this.#emoji = row.emoji;
+    this.#spawn_on_1_out_of = row.spawn_on_1_out_of_X_messages;
+    this.#is_primary = !!row.is_primary;
+    this.#type = row.type;
+    return this;
   }
 }
 
@@ -1454,17 +1544,32 @@ const DataBaseActions = {
   },
   Economy: {
     /** gets all the valid currencies from the cache
+     * @param {(Discord.Guild|Discord.Snowflake|DBGuildObject)} guild_resolvable the guild to get the valid currencies for, this is used to ensure the cache is loaded, as the cache is only loaded when this function is called, and it is assumed that if you are calling this function, you need the cache to be loaded. The guild_resolvable can be a Discord Guild object, a snowflake string representing the guild ID, or a DBGuildObject representing the guild from the database.
       * @returns {DBCurrencyObject[]} the valid currency objects if they exist
     */
-    getValidCurrencies: async () => {
+    getValidCurrencies: async (guild_resolvable) => {
+      //The INTERNAL id for the guild, or the snowflake if it's a string
+      let guildId_or_snowflake = null;
+      if (guild_resolvable && guild_resolvable instanceof DBGuildObject) {
+        guildId_or_snowflake = guild_resolvable.id;
+      } else if (guild_resolvable && typeof guild_resolvable === 'string') {
+        guildId_or_snowflake = guild_resolvable;
+      } else if (guild_resolvable && typeof guild_resolvable === 'object' && 'id' in guild_resolvable) {
+        guildId_or_snowflake = guild_resolvable.id;
+      }
+
+
+      if (!guildId_or_snowflake) {
+        throw new Error("A valid guild_resolvable is required to load the currencies.");
+      }
+
+
       if (ValidCurrenciesCache.length === 0) {
         try {
-          const [rows] = await pool.execute("SELECT * FROM currency WHERE active = 1");
-
-          ValidCurrenciesCache = rows.map(currency =>
-            new DBCurrencyObject(currency.id, currency.name, currency.emoji)
-          );
-
+          const [rows] = await pool.execute("SELECT * FROM currency LEFT JOIN guild_currency ON currency.id = guild_currency.currency_id LEFT JOIN guild ON guild.id = guild_currency.guild_id WHERE currency.active = 1 AND (guild_currency.guild_id = ? OR guild.snowflake = ?)", [guildId_or_snowflake, guildId_or_snowflake]);
+          ValidCurrenciesCache = await Promise.all(rows.map(currency =>
+            DBCurrencyObject.fetch(currency.id, guild_resolvable)
+          ));
           console.log(`Currency cache loaded with ${ValidCurrenciesCache.length} currencies.`);
         } catch (error) {
           console.error("Error loading currency cache:", error);
@@ -1602,13 +1707,10 @@ const DataBaseActions = {
     }
 
     try {
-      // 1. Initialize the currency cache
-      await DataBaseActions.Economy.getValidCurrencies();
 
-      // 2. Synchronize Guilds
+
       const dbGuilds = await DataBaseActions.Guild.getAll();
 
-      // Use a for...of loop so we can await each insertion sequentially.
       const guilds = await client.guilds.fetch();
       for (const guild of guilds.values()) {
 

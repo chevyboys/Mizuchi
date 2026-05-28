@@ -34,11 +34,11 @@ class Item {
     this.processPurchaseCallback = processPurchaseCallback;
   }
 
-  async hydrateCurrency(force = false) {
+  async hydrateCurrency(guild, force = false) {
     if (this.currency && !force) return this.currency;
 
     if (!this._currencyLoadPromise || force) {
-      this._currencyLoadPromise = econDB.getValidCurrencies()
+      this._currencyLoadPromise = econDB.getValidCurrencies(guild)
         .then(currencies => {
           this.currency = currencies.find(c => c.id == this.currencyId) || null;
           return this.currency;
@@ -55,9 +55,9 @@ class Item {
     return await this._currencyLoadPromise;
   }
 
-  async getCurrency() {
+  async getCurrency(guild) {
     if (this.currency) return this.currency;
-    return await this.hydrateCurrency();
+    return await this.hydrateCurrency(guild);
   }
 
   async execute(interaction) {
@@ -81,7 +81,7 @@ class Item {
           `Purchase of ${this.name}`
         );
 
-        let currency = await this.getCurrency();
+        let currency = await this.getCurrency(interaction.guild);
         const currencyName = currency ? currency.name : "Unknown Currency";
         const currencyEmoji = currency ? currency.emoji : "";
 

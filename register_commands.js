@@ -34,8 +34,11 @@ mainClient.once('ready', async () => {
     let rollData = await gs(tavareConfig.snowflakes.sheets.rolls, true);
     let authors = await UtilsDatabase.Author.getAll();
 
-    let currencies = await UtilsDatabase.Economy.getValidCurrencies();
-    let currencyChoices = currencies.slice(0, 25).map(c => ({ name: c.name, value: String(c.id) }));
+    let currencies_anathema = await UtilsDatabase.Economy.getValidCurrencies(anathemaConfig.snowflakes.guilds.PrimaryServer);
+    let currency_choices_anathema = currencies_anathema.slice(0, 25).map(c => ({ name: c.name, value: String(c.id) }));
+    let currencies_tavare = await UtilsDatabase.Economy.getValidCurrencies(tavareConfig.snowflakes.guilds.PrimaryServer);
+    let currency_choices_tavare = currencies_tavare.slice(0, 25).map(c => ({ name: c.name, value: String(c.id) }));
+
     let authorChoices = authors.filter(a => a.active)
       .slice(0, 24)
       .map(a => ({ name: a.name, value: String(a.name) }));
@@ -118,8 +121,8 @@ mainClient.once('ready', async () => {
       "options": [
         { "type": 1, "name": "balance", "description": "Check your currency balances or someone else's balance", "options": [{ "type": 6, "name": "user", "description": "The user to check the balance of", "required": false }] },
         { "type": 1, "name": "leaderboard", "description": "Check the currency leaderboard for a specific currency", "options": [] },
-        { "type": 1, "name": "give", "description": "Give a specific amount of currency to a user", "options": [{ "type": 6, "name": "user", "description": "The user to give the currency to", "required": true }, { "type": 4, "name": "amount", "description": "The amount of currency to give", "required": true }, { "type": 3, "name": "currency", "description": "The currency to give", "required": true, "choices": currencyChoices }] },
-        { "type": 1, "name": "grant", "description": "Grant a specific amount of currency to a user (admin only)", "options": [{ "type": 6, "name": "user", "description": "The user to grant the currency to", "required": true }, { "type": 4, "name": "amount", "description": "The amount of currency to grant", "required": true }, { "type": 3, "name": "currency", "description": "The currency to grant", "required": true, "choices": currencyChoices }] },
+        { "type": 1, "name": "give", "description": "Give a specific amount of currency to a user", "options": [{ "type": 6, "name": "user", "description": "The user to give the currency to", "required": true }, { "type": 4, "name": "amount", "description": "The amount of currency to give", "required": true }, { "type": 3, "name": "currency", "description": "The currency to give", "required": true, "choices": currency_choices_tavare }] },
+        { "type": 1, "name": "grant", "description": "Grant a specific amount of currency to a user (admin only)", "options": [{ "type": 6, "name": "user", "description": "The user to grant the currency to", "required": true }, { "type": 4, "name": "amount", "description": "The amount of currency to grant", "required": true }, { "type": 3, "name": "currency", "description": "The currency to grant", "required": true, "choices": currency_choices_tavare }] },
         { "type": 1, "name": "shop", "description": "View the shop and purchase items", "options": [] }
       ]
     });
@@ -150,6 +153,19 @@ mainClient.once('ready', async () => {
         if (file === "pride.json" && new Date().getMonth() != 5) continue;
         anathemaCommands.push(require(`./registry/Anathema/${file}`));
       }
+
+
+      anathemaCommands.push({
+        "name": "economy",
+        "description": "Manage and view currency balances",
+        "options": [
+          { "type": 1, "name": "balance", "description": "Check your currency balances or someone else's balance", "options": [{ "type": 6, "name": "user", "description": "The user to check the balance of", "required": false }] },
+          { "type": 1, "name": "leaderboard", "description": "Check the currency leaderboard for a specific currency", "options": [] },
+          { "type": 1, "name": "give", "description": "Give a specific amount of currency to a user", "options": [{ "type": 6, "name": "user", "description": "The user to give the currency to", "required": true }, { "type": 4, "name": "amount", "description": "The amount of currency to give", "required": true }, { "type": 3, "name": "currency", "description": "The currency to give", "required": true, "choices": currency_choices_anathema }] },
+          { "type": 1, "name": "grant", "description": "Grant a specific amount of currency to a user (admin only)", "options": [{ "type": 6, "name": "user", "description": "The user to grant the currency to", "required": true }, { "type": 4, "name": "amount", "description": "The amount of currency to grant", "required": true }, { "type": 3, "name": "currency", "description": "The currency to grant", "required": true, "choices": currency_choices_anathema }] },
+          { "type": 1, "name": "shop", "description": "View the shop and purchase items", "options": [] }
+        ]
+      });
 
       console.log(`[Anathema] Registering ${anathemaCommands.length} commands to Discord...`);
       await anathemaClient.application.commands.set(anathemaCommands);

@@ -32,25 +32,33 @@ const roleUtilities = {
     let memberRoles = member.roles.cache.filter(r => roles.filter(sheetRole => sheetRole.colorInventory).map(sr => sr.id).includes(r.id));
     let roleInventory = (await (await Promise.all(memberRoles.map((r) => roleUtilities.getColorsProvidedByRole(module, r.id, roles))))).flat();
     //check the role inventory folder to see if the user has any roles in their inventory that are not currently provided by their discord roles, and if so, add those to the roleInventory array as well. This will ensure that users have access to any roles they have purchased from the shop, even if those roles are not currently provided by any of their discord roles for whatever reason (e.g. a temporary role that has expired but hasn't been removed from their inventory yet).
-    const inventoryFiles = fs.readdirSync(path).filter(fileName => fileName.endsWith('.json'));
-    for (const fileName of inventoryFiles) {
-      const roleId = fileName.replace('.json', '');
-      let roleData = JSON.parse(fs.readFileSync(`${path}/${fileName}`));
-      //remove any expired roles that are in the file so they don't need to be processed again in the future
-      const currentDate = new Date();
-      roleData = roleData.filter(entry => !entry.scheduledRemovalDate || new Date(entry.scheduledRemovalDate) > currentDate);
-      //only write to the file again if there were any expired roles that needed to be removed, to avoid unnecessary writes to the file system
-      if (roleData.length !== JSON.parse(fs.readFileSync(`${path}/${fileName}`)).length) {
-        fs.writeFileSync(`${path}/${fileName}`, JSON.stringify(roleData));
+    let guilds = [];
+    if (member.guild) {
+      guilds.push(member.guild);
+    }
+    for (const guild of guilds.values()) {
+      if (!fs.existsSync(`${path}/${guild.id}/`)) {
+        fs.mkdirSync(`${path}/${guild.id}/`, { recursive: true });
       }
-      if (roleData.find(entry => entry.userId === member.id)) {
-        //the user has this role in their inventory, so we should add it to the roleInventory array if it's not already provided by their discord roles
-        if (!roleInventory.includes(roleId)) {
-          roleInventory.push(roleId);
+      const inventoryFiles = fs.readdirSync(`${path}/${guild.id}/`).filter(fileName => fileName.endsWith('.json'));
+      for (const fileName of inventoryFiles) {
+        const roleId = fileName.replace('.json', '');
+        let roleData = JSON.parse(fs.readFileSync(`${path}/${guild.id}/${fileName}`));
+        //remove any expired roles that are in the file so they don't need to be processed again in the future
+        const currentDate = new Date();
+        roleData = roleData.filter(entry => !entry.scheduledRemovalDate || new Date(entry.scheduledRemovalDate) > currentDate);
+        //only write to the file again if there were any expired roles that needed to be removed, to avoid unnecessary writes to the file system
+        if (roleData.length !== JSON.parse(fs.readFileSync(`${path}/${guild.id}/${fileName}`)).length) {
+          fs.writeFileSync(`${path}/${guild.id}/${fileName}`, JSON.stringify(roleData));
+        }
+        if (roleData.find(entry => entry.userId === member.id)) {
+          //the user has this role in their inventory, so we should add it to the roleInventory array if it's not already provided by their discord roles
+          if (!roleInventory.includes(roleId)) {
+            roleInventory.push(roleId);
+          }
         }
       }
     }
-
     return [... new Set(roleInventory.flat(1))];
   },
   getSecondaryRolesProvidedByRole: async (module, roleid, sheetRoleArray) => {
@@ -76,8 +84,14 @@ const roleUtilities = {
     let roleInventory = (await (await Promise.all(memberRoles.map((r) => roleUtilities.getSecondaryRolesProvidedByRole(module, r.id, roles))))).flat();
     return [... new Set(roleInventory.flat(1))];
   },
-  addRoleToInventory: async (member, roleId, scheduledRemovalDate = null) => {
-    const roleFilePath = `${path}/${roleId}.json`;
+  addRoleToInventory: async (guild_snowflake, member, roleId, scheduledRemovalDate = null) => {
+    //Make sure that the folder for the guild exists
+    const guildPath = `${path}/${guild_snowflake}`;
+    if (!fs.existsSync(guildPath)) {
+      fs.mkdirSync(guildPath, { recursive: true });
+    }
+
+    const roleFilePath = `${guildPath}/${roleId}.json`;
     if (!fs.existsSync(roleFilePath)) {
       fs.writeFileSync(roleFilePath, JSON.stringify([]));
     }
