@@ -455,6 +455,8 @@ Module.addCommand({
   .addEvent("messageCreate", async (message) => {
     if (message.author.bot) return;
     if (!tournamentPointsCurrency) return; // If the currency doesn't exist, do nothing
+    if (!tournamentPointsCurrency.spawn_data || tournamentPointsCurrency.spawn_data.length === 0) return; // If there is no spawn data, do nothing
+    if (!tournamentPointsCurrency.spawn_on_1_out_of) return; // If there is no spawn odds defined, do nothing
     let randomNum = Math.random();
     //determine if the person has a role containing the word 'Carnelian' or 'Quartz' and double the odds for them if they do, otherwise use the base odds divisor
     let member = message.guild.members.cache.get(message.author.id) || await message.guild.members.fetch(message.author.id).catch(() => null);
