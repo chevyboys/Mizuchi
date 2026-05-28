@@ -31,6 +31,7 @@ let thankProcess = async (interaction) => {
   const numberOfPointsToGrant = 3;
 
   const currencies = await UtilsDatabase.Economy.getValidCurrencies(interaction.guild.id);
+  console.log(currencies);
   const TournamentPointsId = currencies.find(c => c.is_primary).id;
 
   await UtilsDatabase.Economy.newTransaction(member.id, TournamentPointsId, numberOfPointsToGrant, interaction.member.id, 'Thank');
