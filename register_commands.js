@@ -62,18 +62,21 @@ mainClient.once('ready', async () => {
     // ==========================================
     // 1. BUILD COMMON COMMANDS
     // ==========================================
-    let commonCommands = [
-      new SlashCommandBuilder().setName('wiki').setDescription('pull description from the wiki')
-        .addStringOption(o => o.setName('page').setDescription('Phrase to search for').setAutocomplete(true).setRequired(true))
-        .addBooleanOption(o => o.setName('advanced').setDescription('Sends a longer page description').setRequired(false)),
-      new SlashCommandBuilder().setName("tone").setDescription("View a list of tone tags"),
-      new SlashCommandBuilder().setName("repo").setDescription("View my code!"),
-      new SlashCommandBuilder().setName("links").setDescription("Handy links to things around the fandom"),
-      new SlashCommandBuilder().setName("author-info").setDescription("Get information about an author").addStringOption(o => o.setName("author").setDescription("The author to get info on").setRequired(true).addChoices(...authorChoices)),
-      new SlashCommandBuilder().setName("pulse").setDescription("Get the bot's and discord's pulse")
-        .addBooleanOption(o => o.setName("verbose").setDescription("set to true if you want lots of extra info").setRequired(false)),
+    let commonCommands = [new SlashCommandBuilder().setName("thank").setDescription("Thanks someone for helping out")
+      .addUserOption(o => o.setName('helper').setDescription('the person to thank').setRequired(true))
+      .addStringOption(o => o.setName("reason").setDescription("the great thing the person did!").setRequired(true))
+      .addIntegerOption(o => o.setName("days").setRequired(false).setDescription("The number of days to give an xp boost")),
+    new SlashCommandBuilder().setName('wiki').setDescription('pull description from the wiki')
+      .addStringOption(o => o.setName('page').setDescription('Phrase to search for').setAutocomplete(true).setRequired(true))
+      .addBooleanOption(o => o.setName('advanced').setDescription('Sends a longer page description').setRequired(false)),
+    new SlashCommandBuilder().setName("tone").setDescription("View a list of tone tags"),
+    new SlashCommandBuilder().setName("repo").setDescription("View my code!"),
+    new SlashCommandBuilder().setName("links").setDescription("Handy links to things around the fandom"),
+    new SlashCommandBuilder().setName("author-info").setDescription("Get information about an author").addStringOption(o => o.setName("author").setDescription("The author to get info on").setRequired(true).addChoices(...authorChoices)),
+    new SlashCommandBuilder().setName("pulse").setDescription("Get the bot's and discord's pulse")
+      .addBooleanOption(o => o.setName("verbose").setDescription("set to true if you want lots of extra info").setRequired(false)),
       rollCommand,
-      new SlashCommandBuilder().setName("role_permissions").setDescription("Get the unique permissions of a role in each channel").addRoleOption(o => o.setName("role").setDescription("The role to check").setRequired(true))
+    new SlashCommandBuilder().setName("role_permissions").setDescription("Get the unique permissions of a role in each channel").addRoleOption(o => o.setName("role").setDescription("The role to check").setRequired(true))
     ].map(command => command.toJSON());
 
     let commonRegistry = fs.readdirSync('./registry/Common').filter(f => f.endsWith('.js') || f.endsWith('.json'));
@@ -98,10 +101,6 @@ mainClient.once('ready', async () => {
           .addStringOption(o => o.setName('answerer').setDescription('The person you want to answer your question').setRequired(true).addChoices(...authorChoices))
           .addIntegerOption(o => o.setName('page').setDescription('The page to select from, default 1').setRequired(false))
         ),
-      new SlashCommandBuilder().setName("thank").setDescription("Thanks someone for helping out")
-        .addUserOption(o => o.setName('helper').setDescription('the person to thank').setRequired(true))
-        .addStringOption(o => o.setName("reason").setDescription("the great thing the person did!").setRequired(true))
-        .addIntegerOption(o => o.setName("days").setRequired(false).setDescription("The number of days to give an xp boost")),
       new SlashCommandBuilder().setName("welcome").setDescription("Edits the server greeting.")
         .addSubcommand(sub => sub.setName("embed").setDescription("Appends and Embed to welcome messages until they are reset")
           .addStringOption(o => o.setName("title").setDescription("The title of the embed").setRequired(true))
