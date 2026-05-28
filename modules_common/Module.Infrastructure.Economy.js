@@ -187,12 +187,13 @@ function weighted_random(options) {
  * @param {DBCurrencyObject} currency 
  */
 function getCurrencyEmojiByValue(currency) {
-  if (!currency.spawned_gem_emoji_cache) return null;
-  if (!currency.spawn_data) return null;
+  if (!currency || !currency.spawn_data || !Array.isArray(currency.spawn_data)) return {};
   let spawnData = currency.spawn_data;
 
   return spawnData.reduce((acc, current) => {
-    acc[current.emoji] = current;
+    if (current && current.emoji) {
+      acc[current.emoji] = current;
+    }
     return acc;
   }, {});
 }
@@ -496,7 +497,7 @@ Module.addCommand({
     }
 
     let emojiString = reaction.emoji.toString();
-    const currencyEmojiByValue = getCurrencyEmojiByValue(tournamentPointsCurrency);
+    const currencyEmojiByValue = getCurrencyEmojiByValue(tournamentPointsCurrency) || {};
     let isGemEmoji = !!currencyEmojiByValue[emojiString];
     // Ignore unrelated reactions as early as possible.
     if (emojiString !== "👈" && !isGemEmoji) return;
