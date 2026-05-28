@@ -29,7 +29,10 @@ let thankProcess = async (interaction) => {
   interaction.reply({ content: `${member.displayName} has been given the <@&${Module.config.snowflakes.roles.Helper}> role for ${days} day(s)`, ephemeral: true });
 
   const numberOfPointsToGrant = 3;
-  let TournamentPointsId = 1;
+
+  const currencies = await UtilsDatabase.Economy.getValidCurrencies(interaction.guild.id);
+  const TournamentPointsId = currencies.find(c => c.is_primary).id;
+
   await UtilsDatabase.Economy.newTransaction(member.id, TournamentPointsId, numberOfPointsToGrant, interaction.member.id, 'Thank');
   let validCurrencies = await UtilsDatabase.Economy.getValidCurrencies(interaction.guild.id);
   //notify the mods
