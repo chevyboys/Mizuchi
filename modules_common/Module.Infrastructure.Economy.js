@@ -285,8 +285,15 @@ Module.addCommand({
         let user = interaction.options.getUser("user") || interaction.user;
         let member = await interaction.guild.members.fetch(user.id).catch(() => null);
         let displayName = member ? member.displayName : user.username;
-        let balanceTotalObject = await UtilsDatabase.User.getBalance(user.id, interaction.guild.id);
-
+        try {
+          let balanceTotalObject = await UtilsDatabase.User.getBalance(user.id, interaction.guild.id);
+        } catch (error) {
+          if (error.message.includes("No transactions")) {
+            return interaction.reply({ content: `${displayName} doesn't have any balances yet.`, ephemeral: true });
+          } else {
+            throw error; // Re-throw unexpected errors
+          }
+        }
         if (balanceTotalObject.currencies.length === 0) {
           return interaction.reply({ content: `${displayName} doesn't have any balances yet.`, ephemeral: true });
         }
