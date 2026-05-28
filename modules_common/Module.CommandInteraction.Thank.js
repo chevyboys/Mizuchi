@@ -56,6 +56,12 @@ let thankProcess = async (interaction) => {
 let endThank = async () => {
   //get a list of all guilds this client is in, and for each guild, check the helpers folder for any json files with a removeRoleTime that has passed, and if so, remove the helper role from the user and delete the json file
   for (const guild of Module.client.guilds.cache.values()) {
+    //If there is not a folder in the helpers folder for this guild, create the folder and skip to the next guild
+    if (!fs.existsSync(`./data/helpers/${guild.id}/`)) {
+      fs.mkdirSync(`./data/helpers/${guild.id}/`);
+      continue;
+    }
+
     let files = fs.readdirSync(`./data/helpers/${guild.id}/`).filter(x => x.endsWith(`.json`));
     let rawData = [];
     for (let i = 0; i < files.length; i++) {
