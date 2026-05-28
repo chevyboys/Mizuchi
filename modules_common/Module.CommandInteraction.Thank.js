@@ -32,7 +32,11 @@ let thankProcess = async (interaction) => {
 
   const currencies = await UtilsDatabase.Economy.getValidCurrencies(interaction.guild.id);
   console.log(JSON.stringify(currencies, null, 2));
-  const TournamentPointsId = currencies.find(c => c.is_primary).id;
+  const primaryCurrency = currencies.find(c => c.is_primary);
+  if (!primaryCurrency) {
+    throw new Error(`No primary currency configured for guild ${interaction.guild.id}.`);
+  }
+  const TournamentPointsId = primaryCurrency.id;
 
   await UtilsDatabase.Economy.newTransaction(member.id, TournamentPointsId, numberOfPointsToGrant, interaction.member.id, 'Thank');
   let validCurrencies = await UtilsDatabase.Economy.getValidCurrencies(interaction.guild.id);

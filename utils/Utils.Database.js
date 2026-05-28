@@ -662,11 +662,29 @@ class DBCurrencyObject {
       const guildSnowflake = parsesnowflake(this.#guild_resolvable);
       this.#guild_cache = await DataBaseActions.Guild.get(guildSnowflake);
     }
-    let sql = `SELECT currency.id, currency.name, currency.type, guild_currency.icon_emoji, guild_currency.spawn_on_1_out_of_X_messages, guild_currency.is_primary, guild_currency_emoji.emoji, guild_currency_emoji.currency_value, guild_currency_emoji.color FROM currency LEFT JOIN guild_currency ON currency.id = guild_currency.currency_id AND guild_currency.guild_id = ? LEFT JOIN guild_currency_emoji ON guild_currency.id = guild_currency_emoji.guild_currency_id WHERE currency.id = ? AND currency.active = 1`;
+    const sql = `
+      SELECT
+        currency.id,
+        currency.name,
+        currency.type,
+        guild_currency.icon_emoji,
+        guild_currency.spawn_on_1_out_of_X_messages,
+        guild_currency.is_primary,
+        guild_currency_emoji.emoji,
+        guild_currency_emoji.currency_value,
+        guild_currency_emoji.color
+      FROM guild_currency
+      INNER JOIN currency ON currency.id = guild_currency.currency_id
+      LEFT JOIN guild_currency_emoji ON guild_currency.id = guild_currency_emoji.guild_currency_id
+      WHERE guild_currency.guild_id = ?
+        AND currency.id = ?
+        AND currency.active = 1`;
     const [rows] = await pool.execute(sql, [this.#guild_cache.id, this.#id]);
     if (rows.length === 0) throw new Error(`Currency with ID ${this.#id} not found in database for this guild.`);
     const row = rows[0];
-    this.#spawn_data = rows.map(r => new DBCurrencyMessageEmojiSpawnData(r.currency_value, r.emoji, r.color));
+    this.#spawn_data = rows
+      .filter(r => r.currency_value != null && r.emoji != null)
+      .map(r => new DBCurrencyMessageEmojiSpawnData(r.currency_value, r.emoji, r.color));
     this.#name = row.name;
     this.#emoji = row.emoji;
     this.#spawn_on_1_out_of = row.spawn_on_1_out_of_X_messages;
@@ -676,9 +694,9 @@ class DBCurrencyObject {
   }
 }
 
-//Cache for valid currencies that are in the database to avoid querying the database every time we need to determine the list of valid currencies. This is an object with the currency ID as the key and the value being a DBCurrencyObject representing that currency. 
-//This cache is updated on bot restart
-let ValidCurrenciesCache = [];
+// Cache valid currencies by guild to avoid cross-guild cache contamination.
+// Key format is either "snowflake:<guildSnowflake>" or "internal:<guildId>".
+let ValidCurrenciesCache = {};
 
 class LeaderboardEntryObject {
   constructor(snowflake, username, total, currencyName, currencyEmoji) {
@@ -1548,35 +1566,54 @@ const DataBaseActions = {
       * @returns {DBCurrencyObject[]} the valid currency objects if they exist
     */
     getValidCurrencies: async (guild_resolvable) => {
-      //The INTERNAL id for the guild, or the snowflake if it's a string
-      let guildId_or_snowflake = null;
+      // The INTERNAL id for the guild, or the snowflake if available.
+      let guildId = null;
+      let guildSnowflake = null;
+      let guildCacheKey = null;
       if (guild_resolvable && guild_resolvable instanceof DBGuildObject) {
-        guildId_or_snowflake = guild_resolvable.id;
+        guildId = guild_resolvable.id;
+        guildSnowflake = guild_resolvable.snowflake;
+        guildCacheKey = `snowflake:${guildSnowflake}`;
       } else if (guild_resolvable && typeof guild_resolvable === 'string') {
-        guildId_or_snowflake = guild_resolvable;
+        guildSnowflake = guild_resolvable;
+        guildCacheKey = `snowflake:${guildSnowflake}`;
       } else if (guild_resolvable && typeof guild_resolvable === 'object' && 'id' in guild_resolvable) {
-        guildId_or_snowflake = guild_resolvable.id;
+        if (typeof guild_resolvable.id === 'string' && assertIsSnowflake(guild_resolvable.id)) {
+          guildSnowflake = guild_resolvable.id;
+          guildCacheKey = `snowflake:${guildSnowflake}`;
+        } else {
+          guildId = guild_resolvable.id;
+          guildCacheKey = `internal:${guildId}`;
+        }
       }
 
 
-      if (!guildId_or_snowflake) {
+      if (!guildCacheKey) {
         throw new Error("A valid guild_resolvable is required to load the currencies.");
       }
 
 
-      if (ValidCurrenciesCache.length === 0) {
+      if (!ValidCurrenciesCache[guildCacheKey]) {
         try {
-          const [rows] = await pool.execute("SELECT * FROM currency LEFT JOIN guild_currency ON currency.id = guild_currency.currency_id LEFT JOIN guild ON guild.id = guild_currency.guild_id WHERE currency.active = 1 AND (guild_currency.guild_id = ? OR guild.snowflake = ?)", [guildId_or_snowflake, guildId_or_snowflake]);
-          ValidCurrenciesCache = await Promise.all(rows.map(currency =>
+          const [rows] = await pool.execute(
+            `SELECT DISTINCT currency.id
+             FROM guild_currency
+             INNER JOIN currency ON currency.id = guild_currency.currency_id
+             LEFT JOIN guild ON guild.id = guild_currency.guild_id
+             WHERE currency.active = 1
+               AND (guild_currency.guild_id = ? OR guild.snowflake = ?)`,
+            [guildId, guildSnowflake]
+          );
+          ValidCurrenciesCache[guildCacheKey] = await Promise.all(rows.map(currency =>
             DBCurrencyObject.fetch(currency.id, guild_resolvable)
           ));
-          console.log(`Currency cache loaded with ${ValidCurrenciesCache.length} currencies.`);
+          console.log(`Currency cache loaded for ${guildCacheKey} with ${ValidCurrenciesCache[guildCacheKey].length} currencies.`);
         } catch (error) {
           console.error("Error loading currency cache:", error);
           throw error;
         }
       }
-      return ValidCurrenciesCache;
+      return ValidCurrenciesCache[guildCacheKey];
     },
     /**
      * Creates a new transaction in the database
@@ -1591,8 +1628,8 @@ const DataBaseActions = {
       const snowflake = await parsesnowflake(snowflakeResolvable);
       const initatedbysnowflake = await parsesnowflake(initiatedBysnowflakeResolvable);
 
-      const currency = ValidCurrenciesCache.find(c => c.id == currencyId);
-      if (!currency) throw new Error("Invalid currency ID");
+      const [currencyRows] = await pool.execute("SELECT id FROM currency WHERE id = ? AND active = 1", [currencyId]);
+      if (!currencyRows || currencyRows.length === 0) throw new Error("Invalid currency ID");
 
       const sql = `
         INSERT INTO \`transaction\` (\`userid\`, \`currencyID\`, \`amount\`, \`initatedbyuserid\`, \`reason\`)
@@ -1638,8 +1675,8 @@ const DataBaseActions = {
      * @returns {Promise<LeaderboardEntryObject[]>} an array of user currency total objects
      */
     getLeaderboard: async (currencyId, limit = 10) => {
-      const currency = ValidCurrenciesCache.find(c => c.id == currencyId);
-      if (!currency) throw new Error("Invalid currency ID");
+      const [currencyRows] = await pool.execute("SELECT id FROM currency WHERE id = ? AND active = 1", [currencyId]);
+      if (!currencyRows || currencyRows.length === 0) throw new Error("Invalid currency ID");
 
       const sql = `
         SELECT users.snowflake, users.username, SUM(transaction.amount) as total, 
