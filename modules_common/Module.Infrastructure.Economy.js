@@ -560,6 +560,8 @@ Module.addCommand({
 
     let emojiString = reaction.emoji.toString();
     const currencyEmojiByValue = getCurrencyEmojiByValue(tournamentPointsCurrency) || {};
+    console.log(`Reaction added: ${emojiString} by ${user.tag} on message ${message.id}. Checking if it's a valid currency emoji...`);
+    console.log(`Valid currency emojis for ${tournamentPointsCurrency.name}: ${Object.keys(currencyEmojiByValue).join(", ")}`);
     let isGemEmoji = !!currencyEmojiByValue[emojiString];
     // Ignore unrelated reactions as early as possible.
     if (emojiString !== "👈" && !isGemEmoji) return;
