@@ -581,7 +581,7 @@ class User_Guild_Inventory extends Array {
     return inventory;
   }
 
-  async #addItemsToDB(...items) {
+  async _addItemsToDB(...items) {
     const newItems = [];
     for (const item of items) {
       const insertSQL = `INSERT INTO guild_role_inventory (granted_guild_role_id, granted_by_guild_role_id, granted_by_user_guild_id, date_expires, reason_for_award, is_color) VALUES (?, ?, ?, ?, ?, ?)`;
@@ -602,12 +602,12 @@ class User_Guild_Inventory extends Array {
   }
 
   async unshift(...items) {
-    const fetchedItems = await this.#addItemsToDB(...items);
+    const fetchedItems = await this._addItemsToDB(...items);
     return super.unshift(...fetchedItems);
   }
 
   async push(...items) {
-    const fetchedItems = await this.#addItemsToDB(...items);
+    const fetchedItems = await this._addItemsToDB(...items);
     return super.push(...fetchedItems);
   }
 
@@ -626,7 +626,7 @@ class User_Guild_Inventory extends Array {
     //Handle DB Additions
     let fetchedItems = [];
     if (items.length > 0) {
-      fetchedItems = await this.#addItemsToDB(...items);
+      fetchedItems = await this._addItemsToDB(...items);
     }
 
     //Memory Mutation at the end
@@ -641,6 +641,86 @@ class User_Guild_Inventory extends Array {
   async shift() {
     if (this.length === 0) return undefined;
     return await this.splice(0, 1).then(removed => removed[0]);
+  }
+  /**
+   * 
+   * @param {Object} param0 
+   * @param {Discord.Snowflake} param0.granted_role_snowflake - the snowflake of the role to grant to this user
+   * @param {Discord.Snowflake} param0.granted_guild_snowflake - the snowflake of the guild this inventory item is being granted in
+   * @param {Discord.Snowflake} [param0.granted_by_guild_role_snowflake] - the snowflake of the role that is granting this inventory item, if it is being granted by a role rather than directly to the user
+   * @param {Discord.Snowflake} [param0.granted_by_user_snowflake] - the snowflake of the user that is granting this inventory item, if it is being granted directly to the user rather than by a role
+   * @param {Date} [param0.date_expires] - the date this inventory item expires and should be removed from the user's inventory
+   * @param {string} param0.reason_for_award - the reason this inventory item is being awarded, stored for record keeping and display purposes
+   * @param {boolean} [param0.is_color] - whether this inventory item is a color role, which may have special handling in the application to ensure only one color role can be active at a time
+   * @returns {Promise<Inventory_Item>} - the newly added inventory item
+   */
+  async add({
+    granted_role_snowflake,
+    granted_guild_snowflake,
+    granted_by_guild_role_snowflake = null,
+    granted_by_user_snowflake = null,
+    date_expires = null,
+    reason_for_award,
+    is_color = false
+  }) {
+    if (!granted_role_snowflake) {
+      throw new Error("granted_role_snowflake is required to add an inventory item");
+    }
+    if (!granted_guild_snowflake) {
+      throw new Error("granted_guild_snowflake is required to add an inventory item");
+    }
+    if (!reason_for_award) {
+      throw new Error("reason_for_award is required to add an inventory item");
+    }
+    if (granted_by_guild_role_snowflake && granted_by_user_snowflake) {
+      throw new Error("Cannot have both granted_by_guild_role_snowflake and granted_by_user_snowflake");
+    }
+    if (!granted_by_guild_role_snowflake && !granted_by_user_snowflake) {
+      throw new Error("Must have either granted_by_guild_role_snowflake or granted_by_user_snowflake");
+    }
+
+    const guildRoleSQL = `SELECT id FROM guild_role WHERE snowflake = ? AND guild_id = (SELECT id FROM guild WHERE snowflake = ?)`;
+    const [guildRoleRows] = await pool.execute(guildRoleSQL, [granted_role_snowflake, granted_guild_snowflake]);
+    if (guildRoleRows.length === 0) {
+      throw new Error(`Guild role with snowflake ${granted_role_snowflake} not found in guild ${granted_guild_snowflake}`);
+    }
+    const granted_guild_role_id = guildRoleRows[0].id;
+
+    let granted_by_guild_role_id = null;
+    if (granted_by_guild_role_snowflake) {
+      const [grantedByGuildRoleRows] = await pool.execute(guildRoleSQL, [granted_by_guild_role_snowflake, granted_guild_snowflake]);
+      if (grantedByGuildRoleRows.length === 0) {
+        throw new Error(`Granted by guild role with snowflake ${granted_by_guild_role_snowflake} not found in guild ${granted_guild_snowflake}`);
+      }
+      granted_by_guild_role_id = grantedByGuildRoleRows[0].id;
+    }
+
+    let granted_by_user_guild_id = null;
+    if (granted_by_user_snowflake) {
+      const userGuildSQL = `SELECT ug.id FROM user_guild ug LEFT JOIN users un ON ug.user_id = un.id WHERE un.snowflake = ? AND ug.guild_id = (SELECT id FROM guild WHERE snowflake = ?)`;
+      const [userGuildRows] = await pool.execute(userGuildSQL, [granted_by_user_snowflake, granted_guild_snowflake]);
+      if (userGuildRows.length === 0) {
+        throw new Error(`Granted by user with snowflake ${granted_by_user_snowflake} not found in guild ${granted_guild_snowflake}`);
+      }
+      granted_by_user_guild_id = userGuildRows[0].id;
+    }
+
+    const newItem = new Inventory_Item({
+      granted_guild_role_id,
+      granted_by_guild_role_id,
+      granted_by_user_guild_id,
+      date_expires,
+      reason_for_award,
+      is_color
+    });
+
+    const addedItems = await this._addItemsToDB(newItem);
+    if (addedItems.length > 0) {
+      this.push(...addedItems);
+      return addedItems[0];
+    } else {
+      throw new Error("Failed to add inventory item");
+    }
   }
 }
 
