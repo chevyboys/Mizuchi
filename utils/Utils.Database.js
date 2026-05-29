@@ -930,6 +930,13 @@ class DBCurrencyMessageEmojiSpawnData {
   get color() {
     return this.#color;
   }
+  toJSON() {
+    return {
+      value: this.#value,
+      emoji: this.#emoji,
+      color: this.#color
+    };
+  }
 }
 
 /**

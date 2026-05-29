@@ -207,7 +207,7 @@ function weighted_random(options) {
  * 
  * @param {DBCurrencyObject} currency 
  */
-function getCurrencyEmojiByValue(currency) {
+function getCurrencyDataByEmoji(currency) {
   if (!currency || !currency.spawn_data || !Array.isArray(currency.spawn_data)) return {};
   let spawnData = currency.spawn_data;
 
@@ -558,7 +558,7 @@ Module.addCommand({
     }
 
     let emojiString = reaction.emoji.toString();
-    const currencyEmojiByValue = getCurrencyEmojiByValue(tournamentPointsCurrency) || {};
+    const currencyEmojiByValue = getCurrencyDataByEmoji(tournamentPointsCurrency) || {};
     console.log(`Reaction added: ${emojiString} by ${user.tag} on message ${message.id}. Checking if it's a valid currency emoji...`);
     console.log(`Valid currency emojis for ${tournamentPointsCurrency.name}: ${Object.keys(currencyEmojiByValue).map(key => `key:${key} value:${JSON.stringify(currencyEmojiByValue[key])}`).join(", ")}`);
     let isGemEmoji = !!currencyEmojiByValue[emojiString];
