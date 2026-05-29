@@ -559,8 +559,8 @@ Module.addCommand({
 
     let emojiString = reaction.emoji.toString();
     const currencyEmojiByValue = getCurrencyDataByEmoji(tournamentPointsCurrency) || {};
-    console.log(`Reaction added: ${emojiString} by ${user.tag} on message ${message.id}. Checking if it's a valid currency emoji...`);
-    console.log(`Valid currency emojis for ${tournamentPointsCurrency.name}: ${Object.keys(currencyEmojiByValue).map(key => `key:${key} value:${JSON.stringify(currencyEmojiByValue[key])}`).join(", ")}`);
+    //console.log(`Reaction added: ${emojiString} by ${user.tag} on message ${message.id}. Checking if it's a valid currency emoji...`);
+    //console.log(`Valid currency emojis for ${tournamentPointsCurrency.name}: ${Object.keys(currencyEmojiByValue).map(key => `key:${key} value:${JSON.stringify(currencyEmojiByValue[key])}`).join(", ")}`);
     let isGemEmoji = !!currencyEmojiByValue[emojiString];
     // Ignore unrelated reactions as early as possible.
     if (emojiString !== "👈" && !isGemEmoji) return;
@@ -643,7 +643,7 @@ Module.addCommand({
     delete spawned_gem_emoji_cache[message.id];
 
     console.log(`User ${user.tag} caught a ${emojiString} for currency id ${tournamentPointsCurrency?.id} emoji in message ${message.id} and received ${currencyObj.value} points.`);
-    console.log(`${user.id} ${tournamentPointsCurrency.id} ${currencyObj.value} ${Module.client.user.id} reaction caught`);
+    //console.log(`${user.id} ${tournamentPointsCurrency.id} ${currencyObj.value} ${Module.client.user.id} reaction caught`);
 
     //give the user tournament points
     await UtilsDatabase.Economy.newTransaction(
