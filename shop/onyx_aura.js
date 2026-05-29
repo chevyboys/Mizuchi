@@ -13,6 +13,7 @@ module.exports = new ShopItem(
     let inventory = await db.User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
     await inventory.add({
       granted_role_snowflake: "902768080323772468", // Onyx Role ID
+      granted_guild_snowflake: interaction.guild.id,
       is_color: true,
       granted_by_user_snowflake: interaction.user.id,
       reason_for_award: "Purchase"
