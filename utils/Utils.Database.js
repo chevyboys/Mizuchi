@@ -560,7 +560,22 @@ class User_Guild_Inventory extends Array {
     return this;
   }
 
-  static async fetch(user_id, guild_id) {
+  static async fetch(user_snowflake_or_id, guild_snowflake_or_id) {
+    //get user and guild internal ids
+    const userIdSQL = `SELECT id FROM users WHERE snowflake = ? OR id = ?`;
+    const [userRows] = await pool.execute(userIdSQL, [user_snowflake_or_id, user_snowflake_or_id]);
+    if (userRows.length === 0) {
+      throw new Error(`User with snowflake or id ${user_snowflake_or_id} not found`);
+    }
+    const user_id = userRows[0].id;
+    const guildIdSQL = `SELECT id FROM guild WHERE snowflake = ? OR id = ?`;
+    const [guildRows] = await pool.execute(guildIdSQL, [guild_snowflake_or_id, guild_snowflake_or_id]);
+    if (guildRows.length === 0) {
+      throw new Error(`Guild with snowflake or id ${guild_snowflake_or_id} not found`);
+    }
+    const guild_id = guildRows[0].id;
+
+
     const inventory = new User_Guild_Inventory({ user_id, guild_id });
     await inventory.fetch();
     return inventory;
