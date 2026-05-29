@@ -76,7 +76,26 @@ mainClient.once('ready', async () => {
     new SlashCommandBuilder().setName("pulse").setDescription("Get the bot's and discord's pulse")
       .addBooleanOption(o => o.setName("verbose").setDescription("set to true if you want lots of extra info").setRequired(false)),
       rollCommand,
-    new SlashCommandBuilder().setName("role_permissions").setDescription("Get the unique permissions of a role in each channel").addRoleOption(o => o.setName("role").setDescription("The role to check").setRequired(true))
+    new SlashCommandBuilder().setName("role_permissions").setDescription("Get the unique permissions of a role in each channel").addRoleOption(o => o.setName("role").setDescription("The role to check").setRequired(true)),
+    new SlashCommandBuilder()
+      .setName('inventory-grant')
+      .setDescription('Links a granted role into the inventory of a grantee role.')
+      .addRoleOption(option =>
+        option.setName('grantee')
+          .setDescription('The role that "owns" the inventory (e.g. VIP Role, Booster)')
+          .setRequired(true))
+      .addRoleOption(option =>
+        option.setName('granted')
+          .setDescription('The inventory item role being added (e.g. Red Color Role)')
+          .setRequired(true))
+      .addBooleanOption(option => // FIX: Added the color designation option
+        option.setName('is_color')
+          .setDescription('Is this role an exclusive color?')
+          .setRequired(true))
+      .addRoleOption(option =>
+        option.setName('inherit')
+          .setDescription('Optional: Copy all inventory items from this role to the grantee as well')
+          .setRequired(false))
     ].map(command => command.toJSON());
 
     let commonRegistry = fs.readdirSync('./registry/Common').filter(f => f.endsWith('.js') || f.endsWith('.json'));

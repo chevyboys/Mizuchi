@@ -14,20 +14,30 @@ let spawned_gem_emoji_cache = {};
 const shopItemsCache = {};
 let currency_caches_for_unload = {};
 
+const Jace_IconURL = "https://drive.google.com/uc?export=view&id=16IbXiqSTlOlYgdpxHmIcZJ9lSUh_VWmv";
+let Jace_Embed = () => u.embed().setAuthor({
+  name: "Jace, Master Merchant of the Red Company",
+  iconURL: Jace_IconURL
+}).setColor("#ff9cbf").setThumbnail(Jace_IconURL);
+
 
 async function createLeaderboardMessageObject(guild, currency = null) {
   let botMember = guild.members.cache.get(guild.client.user.id);
   let botColor = botMember ? botMember.displayHexColor : null;
-  let embed = u.embed()
-    .setTitle(`Currency Leaderboard`)
-    .setDescription(`Select a currency from the dropdown below to see the leaderboard for that currency.`);
-
-  if (botColor) embed.setColor(botColor);
+  let embed = Jace_Embed()
+    .setAuthor(`The Red Company's Richest`, Jace_IconURL)
+    .setDescription(
+      currency ? "Jace casually slides your bribe into his coat Oh, hey I have a delivery to sign for in the back, make sure you don't look at this ledger of everyone's credit rating here on the counter while I'm gone... *Jace walks backwards out of the front of the shop while winking and shooting finger guns*"
+        : `Ha! Checking up on the neighbors eh? Listen, I'm not about to reveal market secrets to people, that wouldn't be ethical for a person of my position, right?`
+    );
 
   let currencies = await UtilsDatabase.Economy.getValidCurrencies(guild.id);
   let options = [];
+  let primaryCurrency = currencies.find(c => c.is_primary);
   for (let currency of currencies) {
-    let option = { label: currency.name, value: String(currency.id), emoji: currency.emoji || undefined };
+    let cost_currency = primaryCurrency ? primaryCurrency : currency;
+    let cost_string = cost_currency ? `${cost_currency.emoji || ""} ${cost_currency.name}` : "unknown currency";
+    let option = { label: currency.name + "(Bribe cost: " + cost_string + ")", value: String(currency.id), emoji: currency.emoji || undefined };
     if (currency.emoji) {
       // Parse custom emoji format <:name:id> or <a:name:id>
       const customEmojiMatch = currency.emoji.match(/^<(a)?:(\w+):(\d+)>$/);
@@ -42,11 +52,11 @@ async function createLeaderboardMessageObject(guild, currency = null) {
 
   // If there are no currencies, return early without a select menu
   if (options.length === 0) {
-    embed.setDescription(`No currencies have been created yet.`);
+    embed.setDescription(`Ha! Checking up on the neighbors eh? Well, unfortunately for you, even if I *were* willing to reveal market secrets, I don't have market records handy at the moment.`);
     return { embeds: [embed], components: [] };
   }
 
-  let placeholder = "Select a currency";
+  let placeholder = "Pick a Ledger to peak at";
   if (currency) {
     let currencyObj = currencies.find(c => c.id == currency || c.name.toLowerCase() == currency.toLowerCase());
     if (currencyObj) {
@@ -58,7 +68,7 @@ async function createLeaderboardMessageObject(guild, currency = null) {
         embed.setDescription(`No one has any ${currencyDisplay} yet.`);
       } else {
         let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
-        let description = `Top ${leaderboard.length} users with the most ${currencyDisplay}`;
+        let description = `Top ${leaderboard.length} customers with the most ${currencyDisplay}`;
         for (let entry of leaderboard) {
           let guildMember = await guild.members.fetch(entry.snowflake).catch(() => null);
           let username = guildMember ? guildMember.displayName : entry.username;
@@ -67,8 +77,8 @@ async function createLeaderboardMessageObject(guild, currency = null) {
         embed.setDescription(description);
       }
     } else {
-      placeholder = "Currency not found";
-      embed.setDescription(`Currency not found.`);
+      placeholder = "Hmmm..";
+      embed.setDescription(`I don't recognize that coinage, Would you mind handing it over to my assistant?.`);
     }
   }
 
@@ -85,13 +95,26 @@ async function createLeaderboardMessageObject(guild, currency = null) {
 
 }
 
+async function get_trust_me_role(guild) {
+  let trustMeRole = guild.roles.cache.find(role => role.name.toLowerCase() === 'trust me');
+  //if the role doesn't exist, return the string "trust me" instead of a role mention
+  let trustMeRoleMention = trustMeRole ? `<@&${trustMeRole.id}>` : 'trust me';
+  return trustMeRoleMention;
+}
+
 async function createShopMessageObject(guild, selectedItemId = null) {
   let botMember = guild.members.cache.get(guild.client.user.id);
   let botColor = botMember ? botMember.displayHexColor : null;
 
-  let embed = u.embed()
-    .setTitle(`Shop`)
-    .setDescription(`Browse and purchase items from the shop.`);
+  let trustMeRoleMention = await get_trust_me_role(guild);
+
+  let embed = Jace_Embed()
+    .setDescription(
+      "Welcome, welcome! It looks like you're looking for something special today, " +
+      "can I interest you in any of these rare and unique one-of-a-kind relics? " +
+      "\nThese beauties are of the highest quality and you won't find anything " +
+      `better anywhere else *${trustMeRoleMention}*.`
+    );
 
   //If there is a selected item, show the details of that item, and make sure the purchase button is enabled
   if (selectedItemId && shopItemsCache[selectedItemId]) {
@@ -100,8 +123,6 @@ async function createShopMessageObject(guild, selectedItemId = null) {
       embed.setDescription(`**${selectedItem.name}**\n${selectedItem.description}\nPrice: ${selectedItem.price}`);
     }
   }
-
-  if (botColor) embed.setColor(botColor);
 
   let options = Object.keys(shopItemsCache).map(itemId => {
     let item = shopItemsCache[itemId];
@@ -120,7 +141,7 @@ async function createShopMessageObject(guild, selectedItemId = null) {
 
   // If there are no items in the shop, return early without a select menu
   if (options.length === 0) {
-    embed.setDescription(`Nothing is currently available in the shop. Check back later!`);
+    embed.setDescription(`Oh, hey, listen, we just had a run of customers through here and we are cleaned out.  Sorry about that, but ${trustMeRoleMention}, I won't let you leave unsatisfied; come back later once I can restock and for any inconvenience I'll give you a great deal on your next purchase!  See, you feel great about that don't you?  Yeah you do!`);
     return { embeds: [embed], components: [] };
   }
 
@@ -301,13 +322,12 @@ Module.addCommand({
         }
 
         let botMember = interaction.guild.members.cache.get(interaction.client.user.id);
-        let embedColor = (member && member.displayHexColor) ? member.displayHexColor : (botMember ? botMember.displayHexColor : null);
 
-        let embed = u.embed()
-          .setTitle(`${displayName}'s Balance`)
+
+        let embed = Jace_Embed()
+          .setAuthor(`Red Company Ledger for ${displayName}`, Jace_IconURL)
           .setThumbnail(user.displayAvatarURL({ dynamic: true }));
 
-        if (embedColor) embed.setColor(embedColor);
         for (let currency of balanceTotalObject.currencies) {
           let currencyDisplay = currency.emoji ? `${currency.emoji} ${currency.name}` : currency.name;
           embed.addFields({ name: currencyDisplay, value: "```" + currency.total.toString() + "```", inline: true });
@@ -339,39 +359,49 @@ Module.addCommand({
         let giverCurrency = giverBalance.currencies.find(c => c.id == currencyObj.id);
         if (!giverCurrency || giverCurrency.total < amount) {
           let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
-          return interaction.reply({ content: `You don't have enough ${currencyDisplay} to give.`, ephemeral: true });
+          return interaction.reply({ content: `I'm not running a charity here, you need to actually have ${currencyDisplay} to give.`, ephemeral: true });
         }
 
         //don't allow giving negative amounts
         if (amount <= 0) {
-          return interaction.reply({ content: `The amount of given currency must be positive.`, ephemeral: true });
-        }
-
-        //don't allow giving currency to yourself or to bots
-        if (targetUser.id === interaction.user.id) {
-          return interaction.reply({ content: `You can't give currency to yourself.`, ephemeral: true });
-        }
-        if (targetUser.bot) {
-          return interaction.reply({ content: `The elemental declines your generous offer.`, ephemeral: true });
+          let embed = Jace_Embed()
+            .setDescription(`What do you think we are?  Thieves?  I've never stolen from anyone that didn't deserve it.`);
+          return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
         //subtract the amount from the giver and add it to the target user
         await UtilsDatabase.Economy.newTransaction(interaction.user.id, giverCurrency.id, -amount, interaction.user.id, `give`);
-        await UtilsDatabase.Economy.newTransaction(targetUser.id, giverCurrency.id, amount, interaction.user.id, `give`);
+        const taxRate = 0.05; // 5% tax on gifts
+        const taxAmount = Math.round(amount * taxRate * 100) / 100; // Round to 2 decimal places
+        const amountAfterTax = amount - taxAmount;
+
+        if (targetUser.bot) {
+          await UtilsDatabase.Economy.newTransaction("172862815961350144", giverCurrency.id, amountAfterTax, interaction.user.id, `give`);
+          let trustMeRoleMention = await get_trust_me_role(guild);
+          let embed = Jace_Embed()
+            .setDescription(`How kind!  I know just the thing to get them as well.  I'll make sure they know it was from you, ${trustMeRoleMention}.  I definitely won't be just keeping this money.`)
+          return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        //If Jace isn't pocketing the coin,
+        await UtilsDatabase.Economy.newTransaction(targetUser.id, giverCurrency.id, amountAfterTax, interaction.user.id, `give`);
+        await UtilsDatabase.Economy.newTransaction("172862815961350144", giverCurrency.id, taxAmount, interaction.user.id, `gift tax`); // Add a transaction for the tax amount with null user ID to indicate it's a tax
 
         //send a success message
         let targetMember = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
         let targetDisplayName = targetMember ? targetMember.displayName : targetUser.username;
         let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
 
-        let botMember = interaction.guild.members.cache.get(interaction.client.user.id);
-        let embedColor = botMember ? botMember.displayHexColor : null;
+        if (targetUser.id === interaction.user.id) {
+          let embed = Jace_Embed()
+            .setDescription(`Done!  Weird thing to ask, but who am I to judge?
+            You receive \`${amountAfterTax}\` ${currencyDisplay}. (Tax: \`${taxAmount}\`) `);
+          return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
 
-        let embed = u.embed()
-          .setTitle(`Balance Transfer`)
-          .setThumbnail(targetMember.user.displayAvatarURL({ dynamic: true }))
-          .setDescription(`You gave \`${amount}\` ${currencyDisplay} to ${targetDisplayName}.`);
-        if (embedColor) embed.setColor(embedColor);
+
+
+        let embed = Jace_Embed()
+          .setDescription(`Courier service?  Sure we can handle that, Safely, Securely, aaand for a nominal service fee. You gave \`${amountAfterTax}\` ${currencyDisplay} to ${targetDisplayName}. (Tax: \`${taxAmount}\`)`);
 
         interaction.reply({ embeds: [embed], ephemeral: false });
         break;
@@ -429,6 +459,32 @@ Module.addCommand({
 }).addInteractionHandler({
   customId: "currency_leaderboard_select", process: async (interaction) => {
     let selectedCurrencyId = interaction.values[0];
+    let primaryCurrency = await UtilsDatabase.Economy.getValidCurrencies(interaction.guild.id).then(currencies => currencies.find(c => c.is_primary));
+    let chargedCurrency = await UtilsDatabase.DBCurrencyObject.fetch(primaryCurrency?.id || selectedCurrencyId, interaction.guild.id);
+    let selectedCurrency = await UtilsDatabase.DBCurrencyObject.fetch(selectedCurrencyId, interaction.guild.id);
+
+    ////////////////////////////////
+    let userBalanceObj = await db.User.getBalance(interaction.user.id, interaction.guild.id);
+    let userBalance = userBalanceObj.currencies.find(c => c.id == chargedCurrency.id);
+    if (!userBalance || userBalance.total < this.price) {
+      await interaction.reply({ content: `You do not have enough ${userBalance ? userBalance.currencyName : "currency"} to purchase this item.`, ephemeral: true });
+      return Promise.resolve();
+    }
+
+    //if the purchase was successful, create a new transaction in the database for the user
+    await UtilsDatabase.Economy.newTransaction(
+      interaction.user.id,
+      chargedCurrency.id,
+      -1,
+      interaction.user.id,
+      `Leaderboard Bribe of ${selectedCurrency ? selectedCurrency.name : "Unknown Currency"}`
+    );
+
+    let currency = selectedCurrency;
+    const currencyName = currency ? currency.name : "Unknown Currency";
+    const currencyEmoji = currency && currency.emoji ? currency.emoji : "";
+
+    ////////////////////////////////
     let replyObject = await createLeaderboardMessageObject(interaction.guild, selectedCurrencyId);
     replyObject.ephemeral = true;
     interaction.update(replyObject);
@@ -439,7 +495,6 @@ Module.addCommand({
     let replyObject = await createShopMessageObject(interaction.guild, selectedItemId);
     replyObject.ephemeral = true;
     interaction.update(replyObject);
-    //
   }
 }).addInteractionHandler({
   customId: "shop_purchase_button", process: async (interaction) => {
@@ -592,8 +647,8 @@ Module.addCommand({
 
     //send a message to the bot channel announcing who caught the emoji
     let embed = u.embed()
-      .setTitle(`Gemstone Caught!`)
-      .setDescription(`<@${user.id}> has found a ${currencyObj.emoji} in <#${message.channel.id}> worth ${currencyObj.currency_value} point${currencyObj.currency_value !== 1 ? "s" : ""}!`)
+      .setTitle(`${tournamentPointsCurrency.name} Caught!`)
+      .setDescription(`<@${user.id}> has found a ${currencyObj.emoji} in <#${message.channel.id}> worth ${currencyObj.currency_value} ${tournamentPointsCurrency.name}${currencyObj.currency_value !== 1 ? "s" : ""}!`)
       .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
       .setColor(currencyObj.color);
     bot_channel.send({ embeds: [embed] });

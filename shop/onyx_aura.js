@@ -2,8 +2,8 @@ const ShopItem = require("../utils/Class.ShopItem");
 const RoleInventory = require("../utils/Utils.RoleInventory");
 
 module.exports = new ShopItem(
-  "Onyx",
-  "Add the Onyx Role to your /inventory for as long as the role remains. Note: staff may remove this role at some point in the future.",
+  "Onyx Robe",
+  "Oh yes, this is one of my favorites. A fine black cloak made from the finest silks. Do be careful when wearing it, as it is quite delicate. (Add the Onyx Role to your /inventory for as long as the role remains. Note: staff may remove this role at some point in the future.)",
   9000,
   1, // Assuming 1 is the ID for the main currency used in the shop, and 2 is the id for test currency we are using for this item, which doesn't actually do anything yet
   //NOTE: The processPurchaseCallback is meant to handle giving the purchased item to the user, and any other side effects of purchasing the item. In this case, since Kudos doesn't actually do anything yet, we will just reply to the interaction to confirm the purchase.
@@ -11,7 +11,7 @@ module.exports = new ShopItem(
   // YOU MUST also make sure to return a promise that resolves when the purchase has been processed, which in this case is just after we reply to the interaction. If you have any asynchronous code in the processPurchaseCallback, you should make sure to await it before returning, to ensure that the purchase is fully processed before the promise resolves.
   async (interaction) => {
     await RoleInventory.addRoleToInventory(interaction.guild.id, interaction.member, "902768080323772468"); // Onyx Role ID
-    await interaction.reply({ content: "Use /inventory to equip the Onyx role", ephemeral: true });
+    await interaction.reply({ content: "*You receive a fine robe that shimmers under the light, its fabric soft and luxurious.* (Use /inventory to equip the Onyx role)", ephemeral: true });
     return Promise.resolve({ success: true });
   }
 );

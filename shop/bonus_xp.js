@@ -3,8 +3,8 @@ const fs = require('fs');
 const ShopItem = require("../utils/Class.ShopItem");
 
 module.exports = new ShopItem(
-  "Bonus XP",
-  "Give yourself a temporary bonus XP role! (This will grant you extra XP for a limited time)",
+  "Adaptation Elixir",
+  "Ah, you've found our elixirs! Very nice ones too. This one helps you develop essence more rapidly (This will grant you extra XP for a limited time)",
   10, // the cost
   1, // Assuming 1 is the ID for the main currency used in the shop, and 2 is the id for test currency we are using for this item, which doesn't actually do anything yet
   //NOTE: The processPurchaseCallback is meant to handle giving the purchased item to the user, and any other side effects of purchasing the item. In this case, since Kudos doesn't actually do anything yet, we will just reply to the interaction to confirm the purchase.
@@ -21,7 +21,7 @@ module.exports = new ShopItem(
     }
     fs.writeFileSync(`./data/helpers/${interaction.guild.id}/${member.id}.json`, JSON.stringify(data, null, 4));
     await member.roles.add(interaction.guild.client.config.snowflakes.roles.Helper);
-    await interaction.reply({ content: `You have given yourself the bonus XP <@&${interaction.guild.client.config.snowflakes.roles.Helper}> role for ${days} day(s)`, ephemeral: true });
+    await interaction.reply({ content: `*You feel no difference after you drink the foul tasting liquid, except perhaps vaguely queasy.* (You have the bonus XP <@&${interaction.guild.client.config.snowflakes.roles.Helper}> role for ${days} day(s))`, ephemeral: true });
     return Promise.resolve({ success: true });
   }
 );

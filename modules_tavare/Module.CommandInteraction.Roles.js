@@ -1,71 +1,135 @@
 const Module = new (require("augurbot")).Module;
-const roleUtilities = require("../utils/Utils.RoleInventory.js");
 const u = require("../utils/Utils.Generic.js");
-const { MessageActionRow, MessageSelectMenu } = require("discord.js");
+const db = require("../utils/Utils.Database.js");
+const { User_Guild_Inventory } = db;
+const { MessageActionRow, MessageSelectMenu, CommandInteraction, User } = require("discord.js");
 
-
-
-function roleMessageComponents(interaction, memberColors) {
-  let SelectMenuOptions = [];
-  //buildSelectMenu
-  for (const role of memberColors) {
-    let name = interaction.guild.roles.cache.get(role).name
-    SelectMenuOptions.push({
-      label: name,
-      description: `The ${name} role`,
-      value: role,
-    })
+function inventory_item_embed_string(interaction, item, member_roles_cache = interaction.member.roles.cache) {
+  let snowflake = item.granted_role_snowflake;
+  if (snowflake) {
+    //determine if the person has this role right now
+    let hasRole = member_roles_cache.has(snowflake);
+    return `<@&${snowflake}> ${hasRole ? "✅" : ""}`;
   }
-  SelectMenuOptions.push({
-    label: "Random",
-    description: `A Random color`,
-    value: "Random",
-  })
-  let rows = []
-  const row = new MessageActionRow()
-    .addComponents(
-      new MessageSelectMenu()
-        .setCustomId('InventoryRoleSelect')
-        .setPlaceholder('Nothing    selected')
-        .addOptions(SelectMenuOptions),
-    );
-  rows.push(row);
-  return rows;
-}
-async function inventoryEmbed(interaction, memberColors) {
-  memberColors = memberColors || await roleUtilities.getMemberColorInventory(Module, interaction.member);
-  let memberColorString = memberColors.map(c => `<@&${c}>` + (interaction.member.roles.cache.has(c) ? " ✅" : "")).join("\n");
-  let embed = u.embed()
-    .setTitle(interaction.member.displayName + "'s inventory")
-    .setDescription(`__**Equipable Colors:**__\n${memberColorString}`);
-  return embed;
+  return item.toString();
 }
 
+async function inventory_embed(interaction, inventory, member_roles_cache) {
+  if (!member_roles_cache) member_roles_cache = await interaction.member.roles.fetch(true);
+  inventory = inventory || await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
+  if (inventory.length == 0) {
+    return u.embed({ title: `${interaction.member.displayName}'s Inventory`, description: "Your inventory is empty!" });
+  } else {
+    let roles_strings = inventory.filter(item => !item.is_color).map(item => inventory_item_embed_string(interaction, item, member_roles_cache));
+    let colors_strings = inventory.filter(item => item.is_color).map(item => inventory_item_embed_string(interaction, item, member_roles_cache));
+    let fields = [];
+    if (roles_strings.length > 0) fields.push({ name: "Roles", value: roles_strings.join("\n"), inline: true });
+    if (colors_strings.length > 0) fields.push({ name: "Colors", value: colors_strings.join("\n"), inline: true });
 
+    let embed = u.embed({ title: `${interaction.member.displayName}'s Inventory` })
+      .addFields(fields);
+    return embed;
+  }
+}
+
+async function inventory_select_menus(interaction, inventory, member_roles_cache) {
+  if (!member_roles_cache) member_roles_cache = await interaction.member.roles.fetch(true);
+  inventory = inventory || await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
+  if (inventory.length == 0) {
+    return null; // No select menu if inventory is empty
+  } else {
+    //split inventory into colors and roles
+    let roles = inventory.filter(item => !item.is_color);
+    let colors = inventory.filter(item => item.is_color);
+    let selectMenus = [];
+    if (roles.length > 0) {
+      selectMenus.push(new MessageActionRow().addComponents(
+        new MessageSelectMenu()
+          .setCustomId(`InventoryRoleSelect`)
+          .setPlaceholder("Select your roles") //roles can be multiple select, colors can only be single select, and will start selected on the currently held color and roles if applicable
+          .addOptions(roles.map(item => {
+            let hasRole = member_roles_cache.has(item.granted_role_snowflake);
+            return {
+              label: interaction.guild.roles.cache.get(item.granted_role_snowflake)?.name || "Unknown Role",
+              value: `role_${item.id}`,
+              default: hasRole
+            }
+          })).setMaxValues(roles.length).setMinValues(0)
+      ));
+    }
+    if (colors.length > 0) {
+      selectMenus.push(new MessageActionRow().addComponents(
+        new MessageSelectMenu()
+          .setCustomId(`InventoryColorSelect`)
+          .setPlaceholder("Select a color")
+          .addOptions(colors.map(item => {
+            let hasColor = member_roles_cache.has(item.granted_role_snowflake);
+            return {
+              label: interaction.guild.roles.cache.get(item.granted_role_snowflake)?.name || "Unknown Color",
+              value: `color_${item.id}`,
+              default: hasColor
+            }
+          })).setMaxValues(1).setMinValues(0)
+      ));
+    }
+    return selectMenus;
+  }
+}
 Module.addInteractionCommand({
   name: "inventory",
   process: async (interaction) => {
-    interaction.deferReply();
-    let memberColors = await roleUtilities.getMemberColorInventory(Module, interaction.member);
-    let embed = await inventoryEmbed(interaction, memberColors);
+    await interaction.deferReply();
+    let member_roles_cache = await interaction.member.roles.fetch(true);
+    let inventory = await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
+    let embed = await inventory_embed(interaction, inventory, member_roles_cache);
     await interaction.editReply({ embeds: [embed] });
-    interaction.followUp({ content: "Select your role", components: roleMessageComponents(interaction, memberColors), ephemeral: true })
+    //prevent other people from using the select menu by making it ephemeral
+    await interaction.followUp({ content: "Use the select menu below to manage your roles and colors!", components: await inventory_select_menus(interaction, inventory, member_roles_cache), ephemeral: true });
   }
 })
   .addInteractionHandler({
     customId: `InventoryRoleSelect`, process: async (interaction) => {
-      interaction.deferReply?.({ ephemeral: true });
-      let memberColors = await roleUtilities.getMemberColorInventory(Module, interaction.member);
-      let color;
-      if (interaction.values[0].toLowerCase().indexOf("random") > -1) color = await interaction.guild.roles.cache.get(`${memberColors[Math.floor(Math.random() * memberColors.length)]}`);
-      else color = await interaction.guild.roles.cache.get(`${interaction.values[0]}`);
-      console.log(color.id);
-      let member = interaction.member;
-      await member.roles.remove(memberColors);
-      await member.roles.add(color)
-      await interaction.editReply({ content: "You have successfully selected a role", ephemeral: true })
+      await interaction.deferUpdate();
+      let member_roles_cache = await interaction.member.roles.fetch(true);
+      let inventory = await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
+      let selectedRoleIds = interaction.values.map(value => parseInt(value.split("_")[1]));
+      let selectedItems = inventory.filter(item => !item.is_color && selectedRoleIds.includes(item.id));
+      let unselectedItems = inventory.filter(item => !item.is_color && !selectedRoleIds.includes(item.id));
+      let rolesToAdd = selectedItems.filter(item => !member_roles_cache.has(item.granted_role_snowflake)).map(item => item.granted_role_snowflake);
+      let rolesToRemove = unselectedItems.filter(item => member_roles_cache.has(item.granted_role_snowflake)).map(item => item.granted_role_snowflake);
+      await interaction.member.roles.add(rolesToAdd);
+      await interaction.member.roles.remove(rolesToRemove);
+      member_roles_cache = await interaction.member.roles.fetch(true); //refetch roles to update cache
+      let newSelectMenus = await inventory_select_menus(interaction, inventory, member_roles_cache);
+      await interaction.editReply({ content: "Your roles have been updated!", embeds: [], components: newSelectMenus, ephemeral: true });
     }
   })
+  .addInteractionHandler({
+    customId: `InventoryColorSelect`, process: async (interaction) => {
+      await interaction.deferUpdate();
+      let member_roles_cache = await interaction.member.roles.fetch(true);
+      let inventory = await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
+      // Remove existing colors
+      let colorsToRemove = inventory.filter(item => item.is_color && member_roles_cache.has(item.granted_role_snowflake)).map(item => item.granted_role_snowflake);
+      if (colorsToRemove.length > 0) {
+        await interaction.member.roles.remove(colorsToRemove);
+      }
+      if (interaction.values.length > 0) {
+        let selectedColorId = parseInt(interaction.values[0].split("_")[1]);
+        let selectedItem = inventory.find(item => item.is_color && item.id === selectedColorId);
+
+        if (selectedItem && !member_roles_cache.has(selectedItem.granted_role_snowflake)) {
+          await interaction.member.roles.add(selectedItem.granted_role_snowflake);
+        }
+      }
+
+      member_roles_cache = await interaction.member.roles.fetch(true);
+      let newSelectMenus = await inventory_select_menus(interaction, inventory, member_roles_cache);
+      await interaction.editReply({ content: "Your color has been updated!", embeds: [], components: newSelectMenus, ephemeral: true });
+    }
+  })
+
+
 
 module.exports = Module;
 

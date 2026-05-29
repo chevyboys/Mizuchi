@@ -1,7 +1,6 @@
 const mysql = require("mysql2/promise"); // Updated to mysql2
 const Discord = require("discord.js");
 const { errorHandler } = require("./Utils.Error");
-const get = require("./Utils.GetGoogleSheetsAsJson");
 
 let hasBeenInitialized = false;
 /**
@@ -380,6 +379,254 @@ class DBGuildRoleObject {
     return roles;
   }
 
+}
+
+/**
+ * CREATE TABLE `guild_role_inventory` (
+  `id` double NOT NULL AUTO_INCREMENT,
+  `granted_guild_role_id` double NOT NULL COMMENT 'the role granted by this entry',
+  `granted_by_guild_role_id` double DEFAULT NULL COMMENT 'the role that grants this inventory item (MUST BE NULL IF granted_by_user_guild_id is filled)',
+  `granted_by_user_guild_id` double DEFAULT NULL COMMENT 'the user this role is being granted to. MUST BE NULL IF granted_by_guild_role_id IS FILLED',
+  `date_awarded` date NOT NULL DEFAULT current_timestamp(),
+  `date_expires` date DEFAULT NULL COMMENT 'If set, remove this entry after this date',
+  `reason_for_award` varchar(100) NOT NULL COMMENT 'The reason this was awarded',
+  `is_color` boolean NULL DEFAULT NULL COMMENT 'Indicates if this inventory item is a color and should be exclusive with other colors',
+  PRIMARY KEY (`id`),
+  KEY `guild_role_inventory_guild_role_FK` (`granted_guild_role_id`),
+  KEY `guild_role_inventory_date_expires_IDX` (`date_expires`) USING BTREE,
+  KEY `guild_role_inventory_granted_by_guild_role_id_IDX` (`granted_by_guild_role_id`) USING BTREE,
+  KEY `guild_role_inventory_granted_by_user_guild_id_IDX` (`granted_by_user_guild_id`) USING BTREE,
+  CONSTRAINT `guild_role_inventory_guild_role_FK` FOREIGN KEY (`granted_guild_role_id`) REFERENCES `guild_role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `guild_role_inventory_guild_role_FK_1` FOREIGN KEY (`granted_by_guild_role_id`) REFERENCES `guild_role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `guild_role_inventory_user_guild_FK` FOREIGN KEY (`granted_by_user_guild_id`) REFERENCES `user_guild` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+ * */
+class Inventory_Item {
+  #id = null;
+  #granted_guild_role_id = null;
+  #granted_role_snowflake = null; // for ease of use, we will also store the snowflake of the granted role in this object, even though it can be obtained through the granted_guild_role_id foreign key. This is to avoid having to do extra queries to get the snowflake when we just want to check if a user has a certain role in their inventory.
+  #granted_by_guild_role_id = null;
+  #granted_by_user_guild_id = null;
+  #date_awarded = null;
+  #date_expires = null;
+  #reason_for_award = "";
+  #is_color = false;
+
+  constructor(constructionObj) {
+    if (constructionObj instanceof Inventory_Item) return constructionObj;
+    this.#id = constructionObj.id || null;
+    this.#granted_guild_role_id = constructionObj.granted_guild_role_id || null;
+    if (constructionObj.granted_by_guild_role_id && constructionObj.granted_by_user_guild_id) {
+      throw new Error("Invalid Inventory Item: cannot have both granted_by_guild_role_id and granted_by_user_guild_id");
+    } else if (!constructionObj.granted_by_guild_role_id && !constructionObj.granted_by_user_guild_id) {
+      throw new Error("Invalid Inventory Item: must have either granted_by_guild_role_id or granted_by_user_guild_id");
+    }
+    this.#granted_by_guild_role_id = constructionObj.granted_by_guild_role_id || null;
+    this.#granted_by_user_guild_id = constructionObj.granted_by_user_guild_id || null;
+    this.#date_awarded = constructionObj.date_awarded ? new Date(constructionObj.date_awarded) : null;
+    this.#date_expires = constructionObj.date_expires ? new Date(constructionObj.date_expires) : null;
+    this.#reason_for_award = (constructionObj.reason_for_award) || "";
+    this.#is_color = constructionObj.is_color || false;
+  }
+
+  get id() {
+    return this.#id;
+  }
+
+  get granted_guild_role_id() {
+    return this.#granted_guild_role_id;
+  }
+
+  get granted_role_snowflake() {
+    if (!this.#granted_role_snowflake) {
+      throw new Error("Cannot get granted_role_snowflake without fetching inventory item first");
+    }
+    return this.#granted_role_snowflake;
+  }
+
+  get granted_by_guild_role_id() {
+    return this.#granted_by_guild_role_id;
+  }
+
+  get granted_by_user_guild_id() {
+    return this.#granted_by_user_guild_id;
+  }
+
+  get date_awarded() {
+    return this.#date_awarded;
+  }
+
+  get date_expires() {
+    return this.#date_expires;
+  }
+
+  get reason_for_award() {
+    return this.#reason_for_award;
+  }
+
+  get is_color() {
+    return this.#is_color;
+  }
+
+  get is_expired() {
+    if (!this.#date_expires) return false;
+    return new Date() > this.#date_expires;
+  }
+
+  async fetch() {
+    if (!this.#granted_guild_role_id) {
+      throw new Error("Cannot fetch Inventory Item without granted_guild_role_id");
+    }
+    const [rows] = await pool.execute(`SELECT snowflake FROM guild_role WHERE id = ?`, [this.#granted_guild_role_id]);
+    if (rows.length === 0) {
+      throw new Error(`Guild role with id ${this.#granted_guild_role_id} not found`);
+    }
+    this.#granted_role_snowflake = rows[0].snowflake;
+    return this;
+  }
+
+  static async fetch(id) {
+    const [rows] = await pool.execute(`SELECT * FROM guild_role_inventory WHERE id = ?`, [id]);
+    if (rows.length === 0) {
+      throw new Error(`Inventory item with id ${id} not found`);
+    }
+    const item = new Inventory_Item(rows[0]);
+    await item.fetch(); // fetch the snowflake for the granted role
+    return item;
+  }
+
+  toString() {
+    return this.#granted_role_snowflake ? `<@&${this.#granted_role_snowflake}>` : `Inventory Item ${this.#id}`;
+  }
+
+}
+
+/**
+ * This class represents a user's inventory in a specific guild, which is determined by the roles they have that grant inventory items. It fetches the user's roles in the guild, then fetches all inventory items that are granted by those roles or directly to the user, and stores them in an array. The inventory items can have expiration dates, and the fetch method will only return items that are currently active (not expired). This class extends Array, so it can be used like a normal array of inventory items, but it also has additional properties for the user ID, guild ID, and user_guild_id for database reference.
+  * @member {number} user_id the internal database ID of the user this inventory belongs to
+  * @member {number} guild_id the internal database ID of the guild this inventory belongs to
+  * @member {number} user_guild_id the internal database ID of the user_guild entry that links this user and guild together, used for database reference when fetching inventory items that are granted directly to the user rather than through a role
+  * @member {Inventory_Item[]} an array of inventory items that the user currently has in this guild
+*/
+class User_Guild_Inventory extends Array {
+  #user_id = null;
+  #guild_id = null;
+  #user_guild_id = null;
+  constructor(constructionObj) {
+    if (constructionObj instanceof User_Guild_Inventory) return constructionObj;
+    super();
+
+    // Removed the undeclared this.#id assignment
+    this.#user_id = constructionObj.user_id || null;
+    this.#guild_id = constructionObj.guild_id || null;
+
+    // --- PROXY IMPLEMENTATION ---
+    // Return a proxy that wraps 'this' instance
+    return new Proxy(this, {
+      set: (target, prop, value) => {
+        // Prevent adding elements where ID is explicitly set to null
+        if (!isNaN(prop) && value?.id === null) {
+          return true; // Ignore the assignment
+        }
+        return Reflect.set(target, prop, value);
+      }
+    });
+  }
+
+  async fetch() {
+    //first get all the user_guild_role entries so we can get all the roles this user has in this guild
+    const user_guild_role_SQL = `SELECT guild_role.id FROM user_guild_role LEFT JOIN guild_role ON user_guild_role.guild_role_id = guild_role.id WHERE user_guild_role.user_id = ? AND guild_role.guild_id = ?`;
+    const [userGuildRoleRows] = await pool.execute(user_guild_role_SQL, [this.#user_id, this.#guild_id]);
+    const guildRoleIds = userGuildRoleRows.map(row => row.id);
+    const userGuildSQL = `SELECT id FROM user_guild WHERE user_id = ? AND guild_id = ?`;
+    const [userGuildRows] = await pool.execute(userGuildSQL, [this.#user_id, this.#guild_id]);
+    if (userGuildRows.length === 0) {
+      throw new Error(`User guild entry not found for user_id ${this.#user_id} and guild_id ${this.#guild_id}`);
+    }
+    this.#user_guild_id = userGuildRows[0].id;
+    if (guildRoleIds.length === 0) {
+      //if the user has no roles in this guild, we still want to get any inventory items that are granted directly to the user, so we will use a dummy value for the guild role ids that will never match anything in the database
+      guildRoleIds.push(-1);
+    }
+    //now get all the inventory items that are granted by these roles or by this user id
+    const inventory_SQL = `SELECT id FROM guild_role_inventory WHERE granted_by_user_guild_id = ? OR granted_by_guild_role_id IN (${guildRoleIds.join(',')}) AND (date_expires IS NULL OR date_expires > NOW())`;
+    const [inventoryRows] = await pool.execute(inventory_SQL, [this.#user_guild_id]);
+    this.length = 0; // clear the array before pushing new items
+    for (const row of inventoryRows) {
+      const item = await Inventory_Item.fetch(row.id);
+      // Because we are in the class, super.push avoids triggering our async overrides
+      super.push(item);
+    }
+    return this;
+  }
+
+  static async fetch(user_id, guild_id) {
+    const inventory = new User_Guild_Inventory({ user_id, guild_id });
+    await inventory.fetch();
+    return inventory;
+  }
+
+  async #addItemsToDB(...items) {
+    const newItems = [];
+    for (const item of items) {
+      const insertSQL = `INSERT INTO guild_role_inventory (granted_guild_role_id, granted_by_guild_role_id, granted_by_user_guild_id, date_expires, reason_for_award, is_color) VALUES (?, ?, ?, ?, ?, ?)`;
+
+      const [result] = await pool.execute(insertSQL, [
+        item.granted_guild_role_id,
+        item.granted_by_guild_role_id,
+        item.granted_by_user_guild_id,
+        item.date_expires || null,
+        item.reason_for_award,
+        item.is_color ? 1 : 0
+      ]);
+
+      const fullItem = await Inventory_Item.fetch(result.insertId);
+      newItems.push(fullItem);
+    }
+    return newItems;
+  }
+
+  async unshift(...items) {
+    const fetchedItems = await this.#addItemsToDB(...items);
+    return super.unshift(...fetchedItems);
+  }
+
+  async push(...items) {
+    const fetchedItems = await this.#addItemsToDB(...items);
+    return super.push(...fetchedItems);
+  }
+
+  async splice(start, deleteCount, ...items) {
+    //Handle DB Deletions
+    if (deleteCount > 0) {
+      const itemsToDelete = this.slice(start, start + deleteCount);
+      const idsToDelete = itemsToDelete.map(item => item.id).filter(id => id != null);
+      if (idsToDelete.length > 0) {
+        const placeholders = idsToDelete.map(() => '?').join(',');
+        const deleteSQL = `DELETE FROM guild_role_inventory WHERE id IN (${placeholders})`;
+        await pool.execute(deleteSQL, idsToDelete);
+      }
+    }
+
+    //Handle DB Additions
+    let fetchedItems = [];
+    if (items.length > 0) {
+      fetchedItems = await this.#addItemsToDB(...items);
+    }
+
+    //Memory Mutation at the end
+    return super.splice(start, deleteCount, ...fetchedItems);
+  }
+
+  async pop() {
+    if (this.length === 0) return undefined;
+    return await this.splice(this.length - 1, 1).then(removed => removed[0]);
+  }
+
+  async shift() {
+    if (this.length === 0) return undefined;
+    return await this.splice(0, 1).then(removed => removed[0]);
+  }
 }
 
 let privateDataBaseActions = {
@@ -1110,6 +1357,7 @@ const DataBaseActions = {
   DBGuildObject,
   DBGuildRoleObject,
   Author,
+  User_Guild_Inventory,
   User: {
     /** gets all the info a database has about a user, and returns it as a DBUserObject
      * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} snowflakeResolvable
@@ -1731,6 +1979,67 @@ const DataBaseActions = {
           entry.currencyEmoji
         )
       );
+    }
+  },
+  Inventory: {
+    /**
+     * Grants an inventory item (role) to another role. Optionally inherits all grants from another role.
+     * @param {string} granteeSnowflake The Discord snowflake of the role that will "own" the inventory
+     * @param {string} grantedSnowflake The Discord snowflake of the role being added to the inventory
+     * @param {string|null} inheritSnowflake Optional. The snowflake of a role to inherit inventory from
+     * @param {string} reason The reason for the award
+     * @param {boolean} isColor Indicates if the role is a color 
+     * @returns {Promise<number>} The total number of items added to the grantee's inventory
+     */
+    grantRoleToRole: async (granteeSnowflake, grantedSnowflake, inheritSnowflake, reason, isColor = false) => {
+      const getInternalRoleId = async (snowflake) => {
+        const [rows] = await pool.execute(`SELECT id FROM guild_role WHERE snowflake = ?`, [snowflake]);
+        if (rows.length === 0) {
+          throw new Error(`The role <@&${snowflake}> is not registered in the internal guild_role database table yet.`);
+        }
+        return rows[0].id;
+      };
+
+      const granteeDbId = await getInternalRoleId(granteeSnowflake);
+      const grantedDbId = await getInternalRoleId(grantedSnowflake);
+
+      let addedCount = 0;
+      const insertPrimarySQL = `
+        INSERT INTO guild_role_inventory 
+        (granted_guild_role_id, granted_by_guild_role_id, reason_for_award, is_color) 
+        VALUES (?, ?, ?, ?)
+      `;
+      await pool.execute(insertPrimarySQL, [
+        grantedDbId,
+        granteeDbId,
+        reason,
+        isColor ? 1 : 0
+      ]);
+
+      addedCount++;
+
+      // Inheritance remains unchanged as it dynamically copies the is_color status of parent items
+      if (inheritSnowflake) {
+        const inheritDbId = await getInternalRoleId(inheritSnowflake);
+
+        const inheritSQL = `
+          INSERT INTO guild_role_inventory 
+          (granted_guild_role_id, granted_by_guild_role_id, is_color, reason_for_award)
+          SELECT granted_guild_role_id, ?, is_color, ?
+          FROM guild_role_inventory
+          WHERE granted_by_guild_role_id = ?
+        `;
+
+        const [inheritResult] = await pool.execute(inheritSQL, [
+          granteeDbId,
+          `Inherited from ${inheritSnowflake} via command`,
+          inheritDbId
+        ]);
+
+        addedCount += inheritResult.affectedRows;
+      }
+
+      return addedCount;
     }
   },
   /**

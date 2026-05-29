@@ -4,7 +4,7 @@ const econDB = database.Economy;
 
 module.exports = new ShopItem(
   "Judgement Token",
-  "A token for a live Ghost judgement. Subject to limited availability, and depends greatly on Ghost's schedule for redeeming. In the event that the token cannot be redeemed within a reasonable time frame, you will be able to get a refund for the token.",
+  "Ah yes, one of our more limited items. A token from the soaring wings to allow entrance into the spire. Be sure to bring a water bottle with you when you go. (This grants a single person one Ghost run Judgement)",
   6000,
   1, // Assuming 1 is the ID for the main currency used in the shop, and 2 is the id for test currency we are using for this item, which doesn't actually do anything yet
   //NOTE: The processPurchaseCallback is meant to handle giving the purchased item to the user, and any other side effects of purchasing the item. In this case, since Kudos doesn't actually do anything yet, we will just reply to the interaction to confirm the purchase.
@@ -14,7 +14,7 @@ module.exports = new ShopItem(
     const numberOfPointsToGrant = 1;
     const Judgement_Token_Id = 3; // Assuming 1 is the ID for the main currency used in the shop, and 2 is the id for test currency we are using for this item, which doesn't actually do anything yet
     await econDB.newTransaction(interaction.user.id, Judgement_Token_Id, numberOfPointsToGrant, interaction.user.id, "Judgement Token");
-    await interaction.reply({ content: "You have purchased 1 Judgement Token", ephemeral: true });
+    await interaction.reply({ content: "*The token is small, intricately designed, and feels surprisingly heavy for its size.* (Please reach out to Ghost to redeem this item)", ephemeral: true });
     return Promise.resolve({ success: true });
   }
 );
