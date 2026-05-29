@@ -37,7 +37,7 @@ async function createLeaderboardMessageObject(guild, currency = null) {
   for (let currency of currencies) {
     let cost_currency = primaryCurrency ? primaryCurrency : currency;
     let cost_string = cost_currency ? `${cost_currency.emoji || ""} ${cost_currency.name}` : "unknown currency";
-    let option = { label: currency.name + " (Bribe cost: " + cost_currency.name + ")", value: String(currency.id), emoji: currency.emoji || undefined };
+    let option = { label: currency.name + " (Bribe cost: 1 " + cost_currency.name + ")", value: String(currency.id), emoji: currency.emoji || undefined };
     if (currency.emoji) {
       // Parse custom emoji format <:name:id> or <a:name:id>
       const customEmojiMatch = currency.emoji.match(/^<(a)?:(\w+):(\d+)>$/);
