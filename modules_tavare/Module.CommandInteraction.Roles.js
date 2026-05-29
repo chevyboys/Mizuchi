@@ -63,17 +63,34 @@ async function inventory_select_menus(interaction, inventory, member_roles_cache
           })).setMaxValues(roles.length).setMinValues(0)
       ));
     }
+
+
     if (colors.length > 0) {
+      let selectedColor = colors.find(item => member_roles_cache.has(item.granted_role_snowflake));
+      //check if the user currently has more than one color
+      if (member_roles_cache.filter(role => colors.some(color => color.granted_role_snowflake == role.id)).size > 1) {
+        //if they do, we should treat only the highest role as the currently selected color, and unselect the rest, to avoid confusion
+        let highestColor = colors.reduce((highest, color) => {
+          let role = interaction.guild.roles.cache.get(color.granted_role_snowflake);
+          if (!role) return highest;
+          if (!highest) return color;
+          let highestRole = interaction.guild.roles.cache.get(highest.granted_role_snowflake);
+          if (!highestRole) return color;
+          return role.position > highestRole.position ? color : highest;
+        }, null);
+        selectedColor = highestColor;
+      }
+
       selectMenus.push(new MessageActionRow().addComponents(
         new MessageSelectMenu()
           .setCustomId(`InventoryColorSelect`)
           .setPlaceholder("Select a color")
           .addOptions(colors.map(item => {
-            let hasColor = member_roles_cache.has(item.granted_role_snowflake);
+            let isSelected = selectedColor && selectedColor.id === item.id;
             return {
               label: interaction.guild.roles.cache.get(item.granted_role_snowflake)?.name || "Unknown Color",
               value: `color_${item.id}`,
-              default: hasColor
+              default: isSelected
             }
           })).setMaxValues(1).setMinValues(0)
       ));

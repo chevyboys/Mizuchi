@@ -83,7 +83,7 @@ class Item {
 
         //Give Jace the money for this purchase, for him to be a gremlin with
         await econDB.newTransaction(
-          172862815961350144, // Jace's user ID
+          "172862815961350144", // Jace's user ID
           this.currencyId,
           this.price,
           interaction.user.id,
