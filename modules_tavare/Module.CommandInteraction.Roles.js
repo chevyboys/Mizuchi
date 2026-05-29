@@ -15,7 +15,10 @@ function inventory_item_embed_string(interaction, item, member_roles_cache = int
 }
 
 async function inventory_embed(interaction, inventory, member_roles_cache) {
-  if (!member_roles_cache) member_roles_cache = await interaction.member.roles.fetch(true);
+  if (!member_roles_cache) {
+    let freshMember = await interaction.member.fetch(true);
+    member_roles_cache = freshMember.roles.cache;
+  }
   inventory = inventory || await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
   if (inventory.length == 0) {
     return u.embed({ title: `${interaction.member.displayName}'s Inventory`, description: "Your inventory is empty!" });
@@ -33,7 +36,10 @@ async function inventory_embed(interaction, inventory, member_roles_cache) {
 }
 
 async function inventory_select_menus(interaction, inventory, member_roles_cache) {
-  if (!member_roles_cache) member_roles_cache = await interaction.member.roles.fetch(true);
+  if (!member_roles_cache) {
+    let freshMember = await interaction.member.fetch(true);
+    member_roles_cache = freshMember.roles.cache;
+  }
   inventory = inventory || await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
   if (inventory.length == 0) {
     return null; // No select menu if inventory is empty
@@ -79,7 +85,8 @@ Module.addInteractionCommand({
   name: "inventory",
   process: async (interaction) => {
     await interaction.deferReply();
-    let member_roles_cache = await interaction.member.roles.fetch(true);
+    let freshMember = await interaction.member.fetch(true);
+    let member_roles_cache = freshMember.roles.cache;
     let inventory = await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
     let embed = await inventory_embed(interaction, inventory, member_roles_cache);
     await interaction.editReply({ embeds: [embed] });
@@ -90,7 +97,8 @@ Module.addInteractionCommand({
   .addInteractionHandler({
     customId: `InventoryRoleSelect`, process: async (interaction) => {
       await interaction.deferUpdate();
-      let member_roles_cache = await interaction.member.roles.fetch(true);
+      let freshMember = await interaction.member.fetch(true);
+      let member_roles_cache = freshMember.roles.cache;
       let inventory = await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
       let selectedRoleIds = interaction.values.map(value => parseInt(value.split("_")[1]));
       let selectedItems = inventory.filter(item => !item.is_color && selectedRoleIds.includes(item.id));
@@ -99,7 +107,8 @@ Module.addInteractionCommand({
       let rolesToRemove = unselectedItems.filter(item => member_roles_cache.has(item.granted_role_snowflake)).map(item => item.granted_role_snowflake);
       await interaction.member.roles.add(rolesToAdd);
       await interaction.member.roles.remove(rolesToRemove);
-      member_roles_cache = await interaction.member.roles.fetch(true); //refetch roles to update cache
+      let freshMember = await interaction.member.fetch(true);
+      let member_roles_cache = freshMember.roles.cache; //refetch roles to update cache
       let newSelectMenus = await inventory_select_menus(interaction, inventory, member_roles_cache);
       await interaction.editReply({ content: "Your roles have been updated!", embeds: [], components: newSelectMenus, ephemeral: true });
     }
@@ -107,7 +116,8 @@ Module.addInteractionCommand({
   .addInteractionHandler({
     customId: `InventoryColorSelect`, process: async (interaction) => {
       await interaction.deferUpdate();
-      let member_roles_cache = await interaction.member.roles.fetch(true);
+      let freshMember = await interaction.member.fetch(true);
+      let member_roles_cache = freshMember.roles.cache;
       let inventory = await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
       // Remove existing colors
       let colorsToRemove = inventory.filter(item => item.is_color && member_roles_cache.has(item.granted_role_snowflake)).map(item => item.granted_role_snowflake);
@@ -123,7 +133,8 @@ Module.addInteractionCommand({
         }
       }
 
-      member_roles_cache = await interaction.member.roles.fetch(true);
+      let freshMember = await interaction.member.fetch(true);
+      let member_roles_cache = freshMember.roles.cache;
       let newSelectMenus = await inventory_select_menus(interaction, inventory, member_roles_cache);
       await interaction.editReply({ content: "Your color has been updated!", embeds: [], components: newSelectMenus, ephemeral: true });
     }
