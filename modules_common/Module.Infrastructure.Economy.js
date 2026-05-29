@@ -554,14 +554,13 @@ Module.addCommand({
     if (!guild) return;
     let member = guild.members.cache.get(user.id) || await guild.members.fetch(user.id);
     if (!member) {
-      await message.react("❌");
       return;
     }
 
     let emojiString = reaction.emoji.toString();
     const currencyEmojiByValue = getCurrencyEmojiByValue(tournamentPointsCurrency) || {};
     console.log(`Reaction added: ${emojiString} by ${user.tag} on message ${message.id}. Checking if it's a valid currency emoji...`);
-    console.log(`Valid currency emojis for ${tournamentPointsCurrency.name}: ${Object.keys(currencyEmojiByValue).join(", ")}`);
+    console.log(`Valid currency emojis for ${tournamentPointsCurrency.name}: ${Object.keys(currencyEmojiByValue).map(key => `key:${key} value:${currencyEmojiByValue[key]}`).join(", ")}`);
     let isGemEmoji = !!currencyEmojiByValue[emojiString];
     // Ignore unrelated reactions as early as possible.
     if (emojiString !== "👈" && !isGemEmoji) return;
