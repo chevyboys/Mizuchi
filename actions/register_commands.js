@@ -98,10 +98,10 @@ mainClient.once('ready', async () => {
           .setRequired(false))
     ].map(command => command.toJSON());
 
-    let commonRegistry = fs.readdirSync('./registry/Common').filter(f => f.endsWith('.js') || f.endsWith('.json'));
+    let commonRegistry = fs.readdirSync('../registry/Common').filter(f => f.endsWith('.js') || f.endsWith('.json'));
     for (const file of commonRegistry) {
       if (file === "pride.json" && new Date().getMonth() != 5) continue;
-      commonCommands.push(require(`./registry/Common/${file}`));
+      commonCommands.push(require(`../registry/Common/${file}`));
     }
 
     // ==========================================
@@ -145,9 +145,9 @@ mainClient.once('ready', async () => {
       ]
     });
 
-    let tavareRegistry = fs.readdirSync('./registry/Tavare').filter(f => f.endsWith('.js') || f.endsWith('.json'));
+    let tavareRegistry = fs.readdirSync('../registry/Tavare').filter(f => f.endsWith('.js') || f.endsWith('.json'));
     for (const file of tavareRegistry) {
-      tavareCommands.push(require(`./registry/Tavare/${file}`));
+      tavareCommands.push(require(`../registry/Tavare/${file}`));
     }
 
     // ==========================================
@@ -166,10 +166,10 @@ mainClient.once('ready', async () => {
       console.log(`[Anathema] Logged in as ${anathemaClient.user.tag}`);
 
       let anathemaCommands = [...commonCommands];
-      let anathemaRegistry = fs.readdirSync('./registry/Anathema').filter(f => f.endsWith('.js') || f.endsWith('.json'));
+      let anathemaRegistry = fs.readdirSync('../registry/Anathema').filter(f => f.endsWith('.js') || f.endsWith('.json'));
       for (const file of anathemaRegistry) {
         if (file === "pride.json" && new Date().getMonth() != 5) continue;
-        anathemaCommands.push(require(`./registry/Anathema/${file}`));
+        anathemaCommands.push(require(`../registry/Anathema/${file}`));
       }
 
 
