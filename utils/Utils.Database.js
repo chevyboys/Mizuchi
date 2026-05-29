@@ -509,16 +509,16 @@ class Inventory_Item {
   * @member {Inventory_Item[]} an array of inventory items that the user currently has in this guild
 */
 class User_Guild_Inventory extends Array {
-  #user_id = null;
-  #guild_id = null;
-  #user_guild_id = null;
+  _user_id = null;
+  _guild_id = null;
+  _user_guild_id = null;
   constructor(constructionObj) {
     if (constructionObj instanceof User_Guild_Inventory) return constructionObj;
     super();
 
     // Removed the undeclared this.#id assignment
-    this.#user_id = constructionObj.user_id || null;
-    this.#guild_id = constructionObj.guild_id || null;
+    this._user_id = constructionObj.user_id || null;
+    this._guild_id = constructionObj.guild_id || null;
 
     // --- PROXY IMPLEMENTATION ---
     // Return a proxy that wraps 'this' instance
@@ -536,21 +536,21 @@ class User_Guild_Inventory extends Array {
   async fetch() {
     //first get all the user_guild_role entries so we can get all the roles this user has in this guild
     const user_guild_role_SQL = `SELECT guild_role.id FROM user_guild_role LEFT JOIN guild_role ON user_guild_role.guild_role_id = guild_role.id WHERE user_guild_role.user_id = ? AND guild_role.guild_id = ?`;
-    const [userGuildRoleRows] = await pool.execute(user_guild_role_SQL, [this.#user_id, this.#guild_id]);
+    const [userGuildRoleRows] = await pool.execute(user_guild_role_SQL, [this._user_id, this._guild_id]);
     const guildRoleIds = userGuildRoleRows.map(row => row.id);
     const userGuildSQL = `SELECT id FROM user_guild WHERE user_id = ? AND guild_id = ?`;
-    const [userGuildRows] = await pool.execute(userGuildSQL, [this.#user_id, this.#guild_id]);
+    const [userGuildRows] = await pool.execute(userGuildSQL, [this._user_id, this._guild_id]);
     if (userGuildRows.length === 0) {
-      throw new Error(`User guild entry not found for user_id ${this.#user_id} and guild_id ${this.#guild_id}`);
+      throw new Error(`User guild entry not found for user_id ${this._user_id} and guild_id ${this._guild_id}`);
     }
-    this.#user_guild_id = userGuildRows[0].id;
+    this._user_guild_id = userGuildRows[0].id;
     if (guildRoleIds.length === 0) {
       //if the user has no roles in this guild, we still want to get any inventory items that are granted directly to the user, so we will use a dummy value for the guild role ids that will never match anything in the database
       guildRoleIds.push(-1);
     }
     //now get all the inventory items that are granted by these roles or by this user id
     const inventory_SQL = `SELECT id FROM guild_role_inventory WHERE granted_by_user_guild_id = ? OR granted_by_guild_role_id IN (${guildRoleIds.join(',')}) AND (date_expires IS NULL OR date_expires > NOW())`;
-    const [inventoryRows] = await pool.execute(inventory_SQL, [this.#user_guild_id]);
+    const [inventoryRows] = await pool.execute(inventory_SQL, [this._user_guild_id]);
     this.length = 0; // clear the array before pushing new items
     for (const row of inventoryRows) {
       const item = await Inventory_Item.fetch(row.id);
