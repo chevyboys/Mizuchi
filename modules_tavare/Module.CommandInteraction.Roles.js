@@ -107,8 +107,8 @@ Module.addInteractionCommand({
       let rolesToRemove = unselectedItems.filter(item => member_roles_cache.has(item.granted_role_snowflake)).map(item => item.granted_role_snowflake);
       await interaction.member.roles.add(rolesToAdd);
       await interaction.member.roles.remove(rolesToRemove);
-      let freshMember = await interaction.member.fetch(true);
-      let member_roles_cache = freshMember.roles.cache; //refetch roles to update cache
+      freshMember = await interaction.member.fetch(true);
+      member_roles_cache = freshMember.roles.cache; //refetch roles to update cache
       let newSelectMenus = await inventory_select_menus(interaction, inventory, member_roles_cache);
       await interaction.editReply({ content: "Your roles have been updated!", embeds: [], components: newSelectMenus, ephemeral: true });
     }
@@ -133,8 +133,8 @@ Module.addInteractionCommand({
         }
       }
 
-      let freshMember = await interaction.member.fetch(true);
-      let member_roles_cache = freshMember.roles.cache;
+      freshMember = await interaction.member.fetch(true);
+      member_roles_cache = freshMember.roles.cache;
       let newSelectMenus = await inventory_select_menus(interaction, inventory, member_roles_cache);
       await interaction.editReply({ content: "Your color has been updated!", embeds: [], components: newSelectMenus, ephemeral: true });
     }
