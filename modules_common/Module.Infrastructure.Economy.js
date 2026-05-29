@@ -37,7 +37,7 @@ async function createLeaderboardMessageObject(guild, currency = null) {
   for (let currency of currencies) {
     let cost_currency = primaryCurrency ? primaryCurrency : currency;
     let cost_string = cost_currency ? `${cost_currency.emoji || ""} ${cost_currency.name}` : "unknown currency";
-    let option = { label: currency.name + "(Bribe cost: " + cost_string + ")", value: String(currency.id), emoji: currency.emoji || undefined };
+    let option = { label: currency.name + " (Bribe cost: " + cost_currency.name + ")", value: String(currency.id), emoji: currency.emoji || undefined };
     if (currency.emoji) {
       // Parse custom emoji format <:name:id> or <a:name:id>
       const customEmojiMatch = currency.emoji.match(/^<(a)?:(\w+):(\d+)>$/);
@@ -467,7 +467,7 @@ Module.addCommand({
     let userBalanceObj = await UtilsDatabase.User.getBalance(interaction.user.id, interaction.guild.id);
     let userBalance = userBalanceObj.currencies.find(c => c.id == chargedCurrency.id);
     if (!userBalance || userBalance.total < this.price) {
-      await interaction.reply({ content: `You do not have enough ${userBalance ? userBalance.currencyName : "currency"} to purchase this item.`, ephemeral: true });
+      await interaction.reply({ content: `*It seems you don't have enough ${userBalance ? userBalance.currencyName : "currency"} for this bribe*.`, ephemeral: true });
       return Promise.resolve();
     }
 
