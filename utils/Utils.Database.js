@@ -1836,6 +1836,29 @@ const DataBaseActions = {
         }
       }
       return true;
+    },
+    delete_role: async (roleSnowflake) => {
+      const sql = "DELETE FROM guild_role WHERE snowflake = ?";
+      try {
+        await pool.execute(sql, [roleSnowflake]);
+        return true;
+      } catch (error) {
+        console.error(`Error deleting role with snowflake ${roleSnowflake}:`, error);
+        return false;
+      }
+    },
+    add_role: async (guildSnowflake, roleSnowflake, friendlyName, hasRedactedInfo = false, isUpdateRole = false) => {
+      const sql = `
+        INSERT INTO \`guild_role\` (\`guild_id\`, \`snowflake\`, \`friendly_name\`, \`has_redacted_info\`, \`is_update_role\`) 
+        VALUES ((SELECT id FROM guild WHERE snowflake = ?), ?, ?, ?, ?)`;
+
+      try {
+        await pool.execute(sql, [guildSnowflake, roleSnowflake, friendlyName, hasRedactedInfo ? 1 : 0, isUpdateRole ? 1 : 0]);
+        return true;
+      } catch (error) {
+        console.error(`Error adding role ${friendlyName} to guild with snowflake ${guildSnowflake}:`, error);
+        return false;
+      }
     }
   },
   Economy: {

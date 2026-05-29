@@ -261,6 +261,24 @@ Module
         } catch (error) { u.errorHandler(error, "Update Roles on Role Remove"); }
       }
     }
+  }).addEvent("guildRoleDelete", async (role) => {
+    if (role.guild.id == Module.config.snowflakes.guilds.PrimaryServer) {
+      try {
+        await db.Guild.delete_role(role.id);
+      } catch (error) { u.errorHandler(error, "Delete Role on Role Delete"); }
+    }
+  }).addEvent("guildRoleCreate", async (role) => {
+    if (role.guild.id == Module.config.snowflakes.guilds.PrimaryServer) {
+      try {
+        await db.Guild.create_role(role.id, role.name);
+      } catch (error) { u.errorHandler(error, "Create Role on Role Create"); }
+    }
+  }).addEvent("guildRoleUpdate", async (oldRole, newRole) => {
+    if (newRole.guild.id == Module.config.snowflakes.guilds.PrimaryServer) {
+      try {
+        await db.Guild.update_roles(newRole.guild.id, [{ snowflake: newRole.id, friendly_name: newRole.name, has_redacted_info: false, is_update_role: false }]);
+      } catch (error) { u.errorHandler(error, "Update Role on Role Update"); }
+    }
   })
   //each time this module is loaded, update the module.config.snowflakes.
   .setInit(async (reload) => {
