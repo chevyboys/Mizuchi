@@ -4,10 +4,10 @@ const { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandStringOp
 const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
 const UtilsDatabase = require("../utils/Utils.Database");
 
-const tavareConfig = require("./config/config_tavare.json");
-const anathemaConfig = require("./config/config_anathema.json");
-tavareConfig.snowflakes = require("./config/snowflakes.json");
-anathemaConfig.snowflakes = require("./config/snowflakes_anathema.json");
+const tavareConfig = require("../config/config_tavare.json");
+const anathemaConfig = require("../config/config_anathema.json");
+tavareConfig.snowflakes = require("../config/snowflakes.json");
+anathemaConfig.snowflakes = require("../config/snowflakes_anathema.json");
 
 // Intent 1 (GUILDS) is required to let the database sync guilds on startup
 const mainClient = new Client({ intents: 1 });
