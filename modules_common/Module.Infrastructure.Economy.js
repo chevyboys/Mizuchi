@@ -536,7 +536,7 @@ Module.addCommand({
 
     if (randomNum < (1 / effectiveOddsDivisor)) {
       //get weighted random emoji from the currencyEmoji array, where the weights are determined by the value of each emoji (higher value emojis are more rare)
-      let emoji = weighted_random(tournamentPointsCurrency.spawn_data.map(c => ({ item: c.emoji, weight: 1 / c.currency_value * 100 })));
+      let emoji = weighted_random(tournamentPointsCurrency.spawn_data.map(c => ({ item: c.emoji, weight: 1 / c.value * 100 })));
       message.react(emoji).then(() => {
         spawned_gem_emoji_cache[message.id] = emoji;
       }).catch(() => { });
@@ -570,7 +570,7 @@ Module.addCommand({
       if (!canGrantCurrency(Module, member)) return;
       try {
         reaction.remove().catch(() => { });
-        message.react(weighted_random(tournamentPointsCurrency.spawn_data.map(c => ({ item: c.emoji, weight: 1 / c.currency_value * 100 })))).then((emoji) => {
+        message.react(weighted_random(tournamentPointsCurrency.spawn_data.map(c => ({ item: c.emoji, weight: 1 / c.value * 100 })))).then((emoji) => {
           spawned_gem_emoji_cache[message.id] = emoji;
         }).catch(() => { });
 
@@ -642,21 +642,21 @@ Module.addCommand({
     who_caught_the_emoji_cache[message.id] = user.id;
     delete spawned_gem_emoji_cache[message.id];
 
-    console.log(`User ${user.tag} caught a ${emojiString} for currency id ${tournamentPointsCurrency?.id} emoji in message ${message.id} and received ${currencyObj.currency_value} points.`);
-    console.log(`${user.id} ${tournamentPointsCurrency.id} ${currencyObj.currency_value} ${Module.client.user.id} reaction caught`);
+    console.log(`User ${user.tag} caught a ${emojiString} for currency id ${tournamentPointsCurrency?.id} emoji in message ${message.id} and received ${currencyObj.value} points.`);
+    console.log(`${user.id} ${tournamentPointsCurrency.id} ${currencyObj.value} ${Module.client.user.id} reaction caught`);
 
     //give the user tournament points
     await UtilsDatabase.Economy.newTransaction(
       user.id,
       tournamentPointsCurrency.id,
-      currencyObj.currency_value,
+      currencyObj.value,
       Module.client.user.id,
       `reaction caught`);
 
     //send a message to the bot channel announcing who caught the emoji
     let embed = u.embed()
       .setTitle(`${tournamentPointsCurrency.name} Caught!`)
-      .setDescription(`<@${user.id}> has found a ${currencyObj.emoji} in <#${message.channel.id}> worth ${currencyObj.currency_value} ${tournamentPointsCurrency.name}${currencyObj.currency_value !== 1 ? "s" : ""}!`)
+      .setDescription(`<@${user.id}> has found a ${currencyObj.emoji} in <#${message.channel.id}> worth ${currencyObj.value} ${tournamentPointsCurrency.name}${currencyObj.value !== 1 ? "s" : ""}!`)
       .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
       .setColor(currencyObj.color);
     bot_channel.send({ embeds: [embed] });
