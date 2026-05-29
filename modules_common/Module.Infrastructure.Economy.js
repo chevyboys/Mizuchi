@@ -642,7 +642,7 @@ Module.addCommand({
     delete spawned_gem_emoji_cache[message.id];
 
     console.log(`User ${user.tag} caught a ${emojiString} for currency id ${tournamentPointsCurrency?.id} emoji in message ${message.id} and received ${currencyObj.currency_value} points.`);
-    console.log(tournamentPointsCurrency);
+    console.log(`${user.id} ${tournamentPointsCurrency.id} ${currencyObj.currency_value} ${Module.client.user.id} reaction caught`);
 
     //give the user tournament points
     await UtilsDatabase.Economy.newTransaction(
