@@ -464,7 +464,7 @@ Module.addCommand({
     let selectedCurrency = await UtilsDatabase.DBCurrencyObject.fetch(selectedCurrencyId, interaction.guild.id);
 
     ////////////////////////////////
-    let userBalanceObj = await db.User.getBalance(interaction.user.id, interaction.guild.id);
+    let userBalanceObj = await UtilsDatabase.User.getBalance(interaction.user.id, interaction.guild.id);
     let userBalance = userBalanceObj.currencies.find(c => c.id == chargedCurrency.id);
     if (!userBalance || userBalance.total < this.price) {
       await interaction.reply({ content: `You do not have enough ${userBalance ? userBalance.currencyName : "currency"} to purchase this item.`, ephemeral: true });
