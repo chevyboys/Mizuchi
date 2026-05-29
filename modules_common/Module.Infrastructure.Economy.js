@@ -479,6 +479,13 @@ Module.addCommand({
       interaction.user.id,
       `Leaderboard Bribe of ${selectedCurrency ? selectedCurrency.name : "Unknown Currency"}`
     );
+    await UtilsDatabase.Economy.newTransaction(
+      "172862815961350144",
+      chargedCurrency.id,
+      1,
+      interaction.user.id,
+      `Leaderboard Bribe of ${selectedCurrency ? selectedCurrency.name : "Unknown Currency"}`
+    );
 
     let currency = selectedCurrency;
     const currencyName = currency ? currency.name : "Unknown Currency";
