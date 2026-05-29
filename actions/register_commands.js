@@ -1,8 +1,8 @@
 const { Client } = require('discord.js');
 const fs = require('fs');
 const { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandStringOption } = require('@discordjs/builders');
-const gs = require("./utils/Utils.GetGoogleSheetsAsJson");
-const UtilsDatabase = require("./utils/Utils.Database");
+const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
+const UtilsDatabase = require("../utils/Utils.Database");
 
 const tavareConfig = require("./config/config_tavare.json");
 const anathemaConfig = require("./config/config_anathema.json");
