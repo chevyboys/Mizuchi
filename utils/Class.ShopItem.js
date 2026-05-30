@@ -89,7 +89,10 @@ class Item {
       }
       let userBalance = userBalanceObj.currencies.find(c => c.id == this.currencyId);
       if (!userBalance || userBalance.total < this.price) {
-        await interaction.reply({ content: `You do not have enough ${userBalance ? userBalance.currencyName : "currency"} to purchase this item.`, ephemeral: true });
+        let currency = await this.getCurrency(interaction.guild);
+        let currencyDisplay = currency ? currency.name : "currency";
+
+        await interaction.reply({ content: `You do not have enough ${currencyDisplay} to purchase this item.`, ephemeral: true });
         return Promise.resolve();
       }
       let result = await this.processPurchaseCallback(interaction);

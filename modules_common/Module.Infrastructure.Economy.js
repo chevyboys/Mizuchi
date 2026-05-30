@@ -475,7 +475,7 @@ Module.addCommand({
     let userBalanceObj = await UtilsDatabase.User.getBalance(interaction.user.id, interaction.guild.id);
     let userBalance = userBalanceObj.currencies.find(c => c.id == chargedCurrency.id);
     if (!userBalance || userBalance.total < this.price) {
-      await interaction.reply({ content: `*It seems you don't have enough ${userBalance ? userBalance.currencyName : "currency"} for this bribe*.`, ephemeral: true });
+      await interaction.reply({ content: `*It seems you don't have enough ${userBalance ? userBalance.name : "currency"} for this bribe*.`, ephemeral: true });
       return Promise.resolve();
     }
 
