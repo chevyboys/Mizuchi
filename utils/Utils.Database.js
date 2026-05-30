@@ -549,7 +549,7 @@ class User_Guild_Inventory extends Array {
       guildRoleIds.push(-1);
     }
     //now get all the inventory items that are granted by these roles or by this user id
-    const inventory_SQL = `SELECT id FROM guild_role_inventory WHERE granted_by_user_guild_id = ? OR granted_by_guild_role_id IN (${guildRoleIds.join(',')}) AND (date_expires IS NULL OR date_expires > NOW()) GROUP BY id`; // group by id to prevent duplicates if an item is granted by multiple roles that the user has
+    const inventory_SQL = `SELECT id FROM guild_role_inventory WHERE granted_by_user_guild_id = ? OR granted_by_guild_role_id IN (${guildRoleIds.join(',')}) AND (date_expires IS NULL OR date_expires > NOW()) GROUP BY granted_guild_role_id`; // group by id to prevent duplicates if an item is granted by multiple roles that the user has
     const [inventoryRows] = await pool.execute(inventory_SQL, [this._user_guild_id]);
     this.length = 0; // clear the array before pushing new items
     for (const row of inventoryRows) {
