@@ -49,7 +49,7 @@ const filename = path.basename(__filename);
 const roleSnowflakes = [
   {
     "id": filename + "_star",
-    "name": "Star",
+    "name": "Star Rank Badge",
     "cost": 2000,
     "available": (interaction) => {
       return is_at_least_level(interaction, level_role_snowflakes[level_role_snowflakes_names.indexOf("Meadow")]); //meadow level
