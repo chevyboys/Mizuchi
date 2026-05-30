@@ -55,7 +55,7 @@ const roleSnowflakes = [
       return is_at_least_level(interaction, level_role_snowflakes[level_role_snowflakes_names.indexOf("Meadow")]); //meadow level
     },
     "description": "A small rectangle made of adamantine with a diamond embedded in it that fits within the palm of your hand, with your name on it. This signifies that you are the highest rank within the guild, most likely the most powerful person in any room you enter.",
-    "purchase_message": "Ah, very nice. Glad to see you've survived this long. Guild leadership is very impressed with the effort you’ve put into your advancement. It is my honor, privilege, joy and to promote you to Star rank, Don’t forget to stop by The Dungeon to continue your training and enjoy the amenities found within.",
+    "purchase_message": "\"Ah, very nice. Glad to see you've survived this long. Guild leadership is very impressed with the effort you’ve put into your advancement. It is my honor, privilege, joy and to promote you to Star rank, Don’t forget to stop by The Dungeon to continue your training and enjoy the amenities found within.\"",
     "snowflake": "1506174143064838194"
   },
   {
@@ -66,7 +66,7 @@ const roleSnowflakes = [
       return is_at_least_level(interaction, level_role_snowflakes[level_role_snowflakes_names.indexOf("Glade")]); //glade level
     },
     "description": "A small rectangle made of adamantine that fits within the palm of your hand with your name on it. This signifies that you are an expert adventurer and most likely the leader of your group.",
-    "purchase_message": "We didn’t think you’d make it this far! In recognition of your unexpected tenacity, we are pleased to award you your promotion to Adamantine rank! This new chapter of your life will include access to the exclusive **Sky Lounge** to enjoy with other distinguished members of the Guild!",
+    "purchase_message": "\"We didn’t think you’d make it this far! In recognition of your unexpected tenacity, we are pleased to award you your promotion to Adamantine rank! This new chapter of your life will include access to the exclusive **Sky Lounge** to enjoy with other distinguished members of the Guild.\"",
     "snowflake": "1506170807011770378"
   },
   {
@@ -77,7 +77,7 @@ const roleSnowflakes = [
       return is_at_least_level(interaction, level_role_snowflakes[level_role_snowflakes_names.indexOf("Crown")]); //crown level
     },
     "description": "A small rectangle made of polished bronze that fits within the palm of your hand with your name on it. This signifies that you are a fixture of the guild.",
-    "purchase_message": " Hey, oh! It looks like your card finally came in! Congratulations on reaching Bronze rank, be sure to take advantage of the trainers available at the Guild headquarters that you have access to now! By the authority of the Ruin Reclamation and Restoration Society, I name You Bronze!",
+    "purchase_message": "\"Hey, oh! It looks like your card finally came in! Congratulations on reaching Bronze rank, be sure to take advantage of the trainers available at the Guild headquarters that you have access to now! By the authority of the Ruin Reclamation and Restoration Society, I name You Bronze!\"",
     "snowflake": "1506168610786115644"
   },
   {
@@ -88,7 +88,7 @@ const roleSnowflakes = [
       return is_at_least_level(interaction, level_role_snowflakes[level_role_snowflakes_names.indexOf("Regalia")]); //regalia level
     },
     "description": "A small rectangle made of copper that fits within the palm of your hand with your name on it. This signifies that you have been proven to be a reliable member of the guild.",
-    "purchase_message": "We wouldn't want your accomplishments to go unrecognized. We should promote you on the spot! By the authority of the Ruin Reclamation and Restoration Society, I name you a Copper.",
+    "purchase_message": "\"We wouldn't want your accomplishments to go unrecognized. We should promote you on the spot! By the authority of the Ruin Reclamation and Restoration Society, I name you a Copper.\"",
     "snowflake": "1506167647417405490"
   },
   {
@@ -99,7 +99,7 @@ const roleSnowflakes = [
       return is_at_least_level(interaction, level_role_snowflakes[level_role_snowflakes_names.indexOf("Signet")]); //signet level
     },
     "description": "A gently used scrap of leather with rough lettering inked upon it, signifying base competency at being an adventurer",
-    "purchase_message": "You have passed the tests and proven that you are not a liability to yourself or others while adventuring.  Congratulations, You are Dirt.",
+    "purchase_message": "\"You have passed the tests and proven that you are not a liability to yourself or others while adventuring.  Congratulations, You are Dirt.\"",
     "snowflake": "1506167243753656421"
   },
 ];

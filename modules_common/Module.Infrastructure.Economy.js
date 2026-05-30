@@ -27,8 +27,8 @@ async function createLeaderboardMessageObject(guild, currency = null) {
   let embed = Jace_Embed()
     .setAuthor(`The Red Company's Richest`, Jace_IconURL)
     .setDescription(
-      currency ? "Jace casually slides your bribe into his coat Oh, hey I have a delivery to sign for in the back, make sure you don't look at this ledger of everyone's credit rating here on the counter while I'm gone... *Jace walks backwards out of the front of the shop while winking and shooting finger guns*"
-        : `Ha! Checking up on the neighbors eh? Listen, I'm not about to reveal market secrets to people, that wouldn't be ethical for a person of my position, right?`
+      currency ? "*Jace casually slides your bribe into his coat* \"Oh, hey I have a delivery to sign for in the back, make sure you don't look at this ledger of everyone's credit rating here on the counter while I'm gone...\" *Jace walks backwards out of the front of the shop while winking and shooting finger guns*"
+        : `\"Ha! Checking up on the neighbors eh? Listen, I'm not about to reveal market secrets to people, that wouldn't be ethical for a person of my position, right?\"`
     );
 
   let currencies = await UtilsDatabase.Economy.getValidCurrencies(guild.id);
@@ -52,7 +52,7 @@ async function createLeaderboardMessageObject(guild, currency = null) {
 
   // If there are no currencies, return early without a select menu
   if (options.length === 0) {
-    embed.setDescription(`Ha! Checking up on the neighbors eh? Well, unfortunately for you, even if I *were* willing to reveal market secrets, I don't have market records handy at the moment.`);
+    embed.setDescription(`\"Ha! Checking up on the neighbors eh? Well, unfortunately for you, even if I *were* willing to reveal market secrets, I don't have market records handy at the moment.\"`);
     return { embeds: [embed], components: [] };
   }
 
@@ -78,7 +78,7 @@ async function createLeaderboardMessageObject(guild, currency = null) {
       }
     } else {
       placeholder = "Hmmm..";
-      embed.setDescription(`I don't recognize that coinage, Would you mind handing it over to my assistant?.`);
+      embed.setDescription(`\"I don't recognize that coinage, Would you mind handing it over to my assistant?.\"`);
     }
   }
 
@@ -157,7 +157,7 @@ async function createShopMessageObject(interaction, selectedItemId = null) {
 
   // If there are no items in the shop, return early without a select menu
   if (options.length === 0) {
-    embed.setDescription(`Oh, hey, listen, we just had a run of customers through here and we are cleaned out.  Sorry about that, but ${trustMeRoleMention}, I won't let you leave unsatisfied; come back later once I can restock and for any inconvenience I'll give you a great deal on your next purchase!  See, you feel great about that don't you?  Yeah you do!`);
+    embed.setDescription(`\"Oh, hey, listen, we just had a run of customers through here and we are cleaned out.  Sorry about that, but ${trustMeRoleMention}, I won't let you leave unsatisfied; come back later once I can restock and for any inconvenience I'll give you a great deal on your next purchase!  See, you feel great about that don't you?  Yeah you do!\"`);
     return { embeds: [embed], components: [] };
   }
 
@@ -388,7 +388,7 @@ Module.addCommand({
         //don't allow giving negative amounts
         if (amount <= 0) {
           let embed = Jace_Embed()
-            .setDescription(`What do you think we are?  Thieves?  I've never stolen from anyone that didn't deserve it.`);
+            .setDescription(`\"What do you think we are?  Thieves?  I've never stolen from anyone that didn't deserve it.\"`);
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
@@ -402,7 +402,7 @@ Module.addCommand({
           await UtilsDatabase.Economy.newTransaction("172862815961350144", giverCurrency.id, amountAfterTax, interaction.user.id, `give`);
           let trustMeRoleMention = await get_trust_me_role(guild);
           let embed = Jace_Embed()
-            .setDescription(`How kind!  I know just the thing to get them as well.  I'll make sure they know it was from you, ${trustMeRoleMention}.  I definitely won't be just keeping this money.`)
+            .setDescription(`\"How kind!  I know just the thing to get them as well.  I'll make sure they know it was from you, ${trustMeRoleMention}.  I definitely won't be just keeping this money.\"`)
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         //If Jace isn't pocketing the coin,
@@ -416,15 +416,15 @@ Module.addCommand({
 
         if (targetUser.id === interaction.user.id) {
           let embed = Jace_Embed()
-            .setDescription(`Done!  Weird thing to ask, but who am I to judge?
-            You receive \`${amountAfterTax}\` ${currencyDisplay}. (Tax: \`${taxAmount}\`) `);
+            .setDescription(`\"Done!  Weird thing to ask, but who am I to judge?
+            You receive \`${amountAfterTax}\` ${currencyDisplay}. (Tax: \`${taxAmount}\`) \"`);
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
 
 
         let embed = Jace_Embed()
-          .setDescription(`Courier service?  Sure we can handle that, Safely, Securely, aaand for a nominal service fee. You gave \`${amountAfterTax}\` ${currencyDisplay} to ${targetDisplayName}. (Tax: \`${taxAmount}\`)`);
+          .setDescription(`\"Courier service?  Sure we can handle that, Safely, Securely, aaand for a nominal service fee.\" *You gave ${amountAfterTax} ${currencyDisplay} to ${targetDisplayName}. (Tax: ${taxAmount})*`);
 
         interaction.reply({ embeds: [embed], ephemeral: false });
         break;
@@ -464,7 +464,7 @@ Module.addCommand({
         let embed = u.embed()
           .setTitle(`Balance Grant`)
           .setThumbnail(grantTargetMember.user.displayAvatarURL({ dynamic: true }))
-          .setDescription(`You granted \`${amount}\` ${currencyDisplay} to ${grantTargetDisplayName}.`);
+          .setDescription(`*You granted \`${amount}\` ${currencyDisplay} to ${grantTargetDisplayName}.*`);
         if (embedColor) embed.setColor(embedColor);
 
         interaction.reply({ embeds: [embed], ephemeral: false });
