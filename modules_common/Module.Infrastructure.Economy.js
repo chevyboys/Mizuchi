@@ -65,7 +65,7 @@ async function createLeaderboardMessageObject(guild, currency = null) {
       let leaderboard = await UtilsDatabase.Economy.getLeaderboard(currencyObj.id, 10, guild.id);
       if (leaderboard.length === 0) {
         let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
-        embed.setDescription(`${embed.data.description}\n\n*The ledger for ${currencyDisplay} is blank.*`);
+        embed.setDescription(`${embed.description}\n\n*The ledger for ${currencyDisplay} is blank.*`);
       } else {
         let currencyDisplay = currencyObj.emoji ? `${currencyObj.emoji} ${currencyObj.name}` : currencyObj.name;
         let description = `Top ${leaderboard.length} customers with the most ${currencyDisplay}`;
@@ -74,7 +74,7 @@ async function createLeaderboardMessageObject(guild, currency = null) {
           let username = guildMember ? guildMember.displayName : entry.username;
           description += `\n**${username}**: ${entry.total}`;
         }
-        embed.setDescription(`${embed.data.description}\n\n${description}`);
+        embed.setDescription(`${embed.description}\n\n${description}`);
       }
     } else {
       placeholder = "Hmmm..";
