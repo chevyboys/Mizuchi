@@ -76,7 +76,18 @@ class Item {
     //respond to the interaction immediately to avoid the "This interaction failed" message, we will edit the response later if needed
     if (this.processPurchaseCallback) {
       //check if the user has enough currency to purchase the item
-      let userBalanceObj = await db.User.getBalance(interaction.user.id, interaction.guild.id);
+      try {
+        let userBalanceObj = await db.User.getBalance(interaction.user.id, interaction.guild.id);
+      } catch (err) {
+        //if the error includes no transactions for snowflake, that means the user has no balance, so we can just set their balance to 0 for the purposes of this check. If it's a different error, we should log it and return an error message to the user.
+        if (err.message.includes("No transactions found for snowflake")) {
+          userBalanceObj = { currencies: [] };
+        } else {
+          u.get_log_webhook().send({ embeds: [u.embed().setColor("RED").setTitle("Error fetching user balance").setDescription(`An error occurred while fetching the balance for user ${interaction.user.id} in guild ${interaction.guild.id}:\n\`\`\`${err.stack}\`\`\``)] });
+          await interaction.reply({ content: "An error occurred while processing your purchase. Please try again later.", ephemeral: true });
+          return Promise.resolve();
+        }
+      }
       let userBalance = userBalanceObj.currencies.find(c => c.id == this.currencyId);
       if (!userBalance || userBalance.total < this.price) {
         await interaction.reply({ content: `You do not have enough ${userBalance ? userBalance.currencyName : "currency"} to purchase this item.`, ephemeral: true });
