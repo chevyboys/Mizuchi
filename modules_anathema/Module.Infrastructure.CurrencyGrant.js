@@ -9,7 +9,7 @@ const arcane_snowflake = "645343657075146772";
 
 Module.addEvent("messageCreate", async (msg) => {
   //watch for the arcane bot level up message, and grant currency to the user who leveled up based on the level they reached
-  if (!msg.author.id === arcane_snowflake || !msg.channel.id === Module.config.snowflakes.channels.botSpam) return;
+  if (msg.author.id !== arcane_snowflake) return;
   //The messages are structured as <@mention> has reached level <level>. GG!
   const regex = /<@!?(\d+)> has reached level (\d+)/;
   const match = msg.content.match(regex);
