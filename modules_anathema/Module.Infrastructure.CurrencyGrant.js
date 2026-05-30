@@ -19,6 +19,10 @@ Module.addEvent("messageCreate", async (msg) => {
   //The amount of currency to grant is equal to the level reached, so level 5 would grant 5 currency, level 10 would grant 10 currency, etc.
   const amountToGrant = 10;
   await UtilsDatabase.Economy.newTransaction(userId, 4, amountToGrant, userId, `Arcane Bot Level Up Reward for reaching level ${level}`);
+  let embed = u.embed();
+  embed.setAuthor("Anathema", msg.client.user.avatarURL()).setDescription(
+    "Congrats on another job well done Adventurer! Here's a few coins I found to give you for your help!"
+  ).setFooter("You have been granted " + amountToGrant + " Silver");
 });
 
 module.exports = Module;
