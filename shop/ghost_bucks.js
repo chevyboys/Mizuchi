@@ -1,8 +1,11 @@
 const ShopItem = require("../utils/Class.ShopItem");
 const database = require("../utils/Utils.Database");
 const econDB = database.Economy;
+const path = require('path');
+const filename = path.basename(__filename);
 
 module.exports = new ShopItem({
+  id: filename, // the id of the item, should be unique and match the filename (without the .js extension) for simplicity
   name: "Ghost Bucks",
   description: "Give yourself some Ghost Bucks!",
   price: 3,

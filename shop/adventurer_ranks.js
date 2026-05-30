@@ -42,11 +42,13 @@ function is_at_least_level(interaction, levelSnowflake) {
   return memberLevelIndex >= requiredLevelIndex; //the member meets the requirement if their level role is the same or higher than the required level role  
 }
 
-
+const path = require('path');
+const filename = path.basename(__filename);
 
 
 const roleSnowflakes = [
   {
+    "id": filename + "_star",
     "name": "Star",
     "cost": 2000,
     "available": (interaction) => {
@@ -57,6 +59,7 @@ const roleSnowflakes = [
     "snowflake": "1506174143064838194"
   },
   {
+    "id": filename + "_adamantine",
     "name": "Adamantine Rank Badge",
     "cost": 1500,
     "available": (interaction) => {
@@ -67,6 +70,7 @@ const roleSnowflakes = [
     "snowflake": "1506170807011770378"
   },
   {
+    "id": filename + "_bronze",
     "name": "Bronze Rank Badge",
     "cost": 1000,
     "available": (interaction) => {
@@ -77,6 +81,7 @@ const roleSnowflakes = [
     "snowflake": "1506168610786115644"
   },
   {
+    "id": filename + "_copper",
     "name": "Copper Rank Badge",
     "cost": 750,
     "available": (interaction) => {
@@ -87,6 +92,7 @@ const roleSnowflakes = [
     "snowflake": "1506167647417405490"
   },
   {
+    "id": filename + "_dirt",
     "name": "Dirt Rank Badge",
     "cost": 500,
     "available": (interaction) => {
@@ -102,6 +108,7 @@ const roleSnowflakes = [
 
 module.exports = roleSnowflakes.map(role => {
   return new ShopItem({
+    id: role.id,
     name: role.name,
     description: role.description + `(Add the ${role.name} Role to your /inventory.)`,
     price: role.cost,

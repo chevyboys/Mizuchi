@@ -1,6 +1,9 @@
 const ShopItem = require("../utils/Class.ShopItem");
+const path = require('path');
+const filename = path.basename(__filename);
 
 module.exports = new ShopItem({
+  id: filename, // the id of the item, should be unique and match the filename (without the .js extension) for simplicity
   name: "Literally Nothing",
   description: "An \"Authentic\" Ancient Relic of a Bygone Age, No Refunds",
   price: 1000, // the cost

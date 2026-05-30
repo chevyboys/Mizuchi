@@ -262,7 +262,7 @@ async function load(Module, data) {
         await item.hydrateCurrency(Module.config.snowflakes.guilds.PrimaryServer);
       }
 
-      let itemId = itemFile.replace(".js", "");
+      let itemId = item.id;
       if (shopItemsCache[itemId]) {
         u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Duplicate item ID ${itemId} from ${shopItemsCache[itemId].name}.`)] });
         continue;

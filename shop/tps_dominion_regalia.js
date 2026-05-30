@@ -1,5 +1,7 @@
 const ShopItem = require("../utils/Class.ShopItem.js");
 const db = require("../utils/Utils.Database.js");
+const path = require('path');
+const filename = path.basename(__filename);
 
 
 
@@ -22,6 +24,7 @@ const roleSnowflakes = [
 
 module.exports = roleSnowflakes.map(role => {
   return new ShopItem({
+    id: filename + "_" + role.name.replace(/\s+/g, "_").toLowerCase(), // the id of the item, should be unique and match the filename (without the .js extension) for simplicity
     name: role.name,
     description: `Ah! I see you’re looking at our fine selection of enchanted goods!  Each of these are hand-crafted by our world-renowned crystal artisans; and every one of these many of a kind enchanted items are guaranteed to be genuine items that are enchanted.  Just so you know, it’s your lucky day as all of the multifaceted magical miscellany your eyes meander over are on sale for a limited time only!  (Add the ${role.name} Role to your /inventory.)`,
     price: 200,

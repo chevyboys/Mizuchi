@@ -1,6 +1,9 @@
 const ShopItem = require("../utils/Class.ShopItem");
+const path = require('path');
+const filename = path.basename(__filename);
 
 module.exports = new ShopItem({
+  id: filename, // the id of the item, should be unique and match the filename (without the .js extension) for simplicity
   name: "Donation",
   description: "A generous soul! That bag is for donations to the Red Company Charity for Orphans and Injured Puppies.",
   price: 3,

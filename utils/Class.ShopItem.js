@@ -23,6 +23,7 @@ class Item {
    * @param {function|null} constructionObj.processPurchaseCallback 
    */
   constructor(constructionObj) {
+    this.id = constructionObj.id;
     this.name = constructionObj.name;
     this.description = constructionObj.description;
     this.price = constructionObj.price;

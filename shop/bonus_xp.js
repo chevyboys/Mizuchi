@@ -1,8 +1,11 @@
 const u = require("../utils/Utils.Generic");
 const fs = require('fs');
 const ShopItem = require("../utils/Class.ShopItem");
+const path = require('path');
+const filename = path.basename(__filename);
 
 module.exports = new ShopItem({
+  id: filename, // the id of the item, should be unique and match the filename (without the .js extension) for simplicity
   name: "Adaptation Elixir",
   description: "Ah, you've found our elixirs! Very nice ones too. This one helps you develop essence more rapidly (This will grant you extra XP for a limited time)",
   price: 10, // the cost

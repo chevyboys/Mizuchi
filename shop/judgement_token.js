@@ -1,8 +1,11 @@
 const ShopItem = require("../utils/Class.ShopItem");
 const database = require("../utils/Utils.Database");
 const econDB = database.Economy;
+const path = require('path');
+const filename = path.basename(__filename);
 
 module.exports = new ShopItem({
+  id: filename, // the id of the item, should be unique and match the filename (without the .js extension) for simplicity
   name: "Judgement Token",
   description: "Ah yes, one of our more limited items. A token from the soaring wings to allow entrance into the spire. Be sure to bring a water bottle with you when you go. (This grants a single person one Ghost run Judgement)",
   price: 6000,

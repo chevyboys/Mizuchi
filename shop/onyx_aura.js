@@ -1,7 +1,10 @@
 const ShopItem = require("../utils/Class.ShopItem");
 const db = require("../utils/Utils.Database.js");
+const path = require('path');
+const filename = path.basename(__filename);
 
 module.exports = new ShopItem({
+  id: filename, // the id of the item, should be unique and match the filename (without the .js extension) for simplicity
   name: "Onyx Robe",
   description: "Oh yes, this is one of my favorites. A fine black cloak made from the finest silks. Do be careful when wearing it, as it is quite delicate. (Add the Onyx Role to your /inventory for as long as the role remains. Note: staff may remove this role at some point in the future.)",
   price: 9000,
