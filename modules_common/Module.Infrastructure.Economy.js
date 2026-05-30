@@ -102,7 +102,8 @@ async function get_trust_me_role(guild) {
   return trustMeRoleMention;
 }
 
-async function createShopMessageObject(guild, selectedItemId = null) {
+async function createShopMessageObject(interaction, selectedItemId = null) {
+  let guild = interaction.guild;
   let botMember = guild.members.cache.get(guild.client.user.id);
   let botColor = botMember ? botMember.displayHexColor : null;
 
@@ -124,7 +125,7 @@ async function createShopMessageObject(guild, selectedItemId = null) {
     }
   }
 
-  let options = Object.keys(shopItemsCache).map(itemId => {
+  let options = Object.keys(shopItemsCache).filter(itemId => shopItemsCache[itemId].checkAvailability(interaction)).map(itemId => {
     let item = shopItemsCache[itemId];
     return { label: `${item.emoji || ""} ${item.price}: ${item.name}`, value: itemId, emoji: item.currency ? item.currency.emoji : undefined };
   });
@@ -239,29 +240,35 @@ async function load(Module, data) {
 
   let shopItems = fs.readdirSync("./shop").filter(file => file.endsWith(".js"));
   for (let itemFile of shopItems) {
-    let item = require(`../shop/${itemFile}`);
-    //make sure that we have an item of the ShopItem class, and that it has the required properties before adding it to the shop
-    if (!(item instanceof ShopItem) || !item.name || !item.description || !item.price || !item.currencyId) {
-      u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Invalid or missing properties.`)] })
-      continue;
+    let item_array = require(`../shop/${itemFile}`);
+    // Allow both single item exports and arrays of items for flexibility
+    if (!Array.isArray(item_array)) {
+      item_array = [item_array];
     }
+    for (let item of item_array) {
+      //make sure that we have an item of the ShopItem class, and that it has the required properties before adding it to the shop
+      if (!(item instanceof ShopItem) || !item.name || !item.description || !item.price || !item.currencyId) {
+        u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Invalid or missing properties.`)] })
+        continue;
+      }
 
-    //check to make sure this item is of a currency this bot/guild has access to
-    if (!currencies.find(c => c.id === item.currencyId)) {
-      continue;
-    }
+      //check to make sure this item is of a currency this bot/guild has access to
+      if (!currencies.find(c => c.id === item.currencyId)) {
+        continue;
+      }
 
-    //hydrate the currency for the item, so that we can display the correct emoji in the shop, and avoid asynchronous constructor issues in the ShopItem class
-    if (typeof item.hydrateCurrency === "function") {
-      await item.hydrateCurrency(Module.config.snowflakes.guilds.PrimaryServer);
-    }
+      //hydrate the currency for the item, so that we can display the correct emoji in the shop, and avoid asynchronous constructor issues in the ShopItem class
+      if (typeof item.hydrateCurrency === "function") {
+        await item.hydrateCurrency(Module.config.snowflakes.guilds.PrimaryServer);
+      }
 
-    let itemId = itemFile.replace(".js", "");
-    if (shopItemsCache[itemId]) {
-      u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Duplicate item ID ${itemId} from ${shopItemsCache[itemId].name}.`)] });
-      continue;
+      let itemId = itemFile.replace(".js", "");
+      if (shopItemsCache[itemId]) {
+        u.get_log_webhook(Module, Module.config.identifier).send({ embeds: [u.embed().setColor("RED").setDescription(`Error in shop item file ${itemFile}: Duplicate item ID ${itemId} from ${shopItemsCache[itemId].name}.`)] });
+        continue;
+      }
+      shopItemsCache[itemId] = item;
     }
-    shopItemsCache[itemId] = item;
   }
 
 }
@@ -326,7 +333,8 @@ Module.addCommand({
 
         let embed = Jace_Embed()
           .setAuthor(`Red Company Ledger for ${displayName}`, Jace_IconURL)
-          .setThumbnail(user.displayAvatarURL({ dynamic: true }));
+          .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+          .setFooter("All purchases final, no refunds, the Red Company Trading Coaster offers no guarantees for any secondhand products purchased through a Red Company affiliate.  The consumer bears all legal responsibility for the use, misuse, or mishaps involving any product provided by the Company. ");
 
         for (let currency of balanceTotalObject.currencies) {
           let currencyDisplay = currency.emoji ? `${currency.emoji} ${currency.name}` : currency.name;
@@ -449,7 +457,7 @@ Module.addCommand({
       }
 
       case "shop": {
-        let replyObject = await createShopMessageObject(interaction.guild);
+        let replyObject = await createShopMessageObject(interaction);
         replyObject.ephemeral = true;
         interaction.reply(replyObject);
         break;
@@ -499,7 +507,7 @@ Module.addCommand({
 }).addInteractionHandler({
   customId: "shop_item_select", process: async (interaction) => {
     let selectedItemId = interaction.values[0];
-    let replyObject = await createShopMessageObject(interaction.guild, selectedItemId);
+    let replyObject = await createShopMessageObject(interaction, selectedItemId);
     replyObject.ephemeral = true;
     interaction.update(replyObject);
   }

@@ -14,24 +14,26 @@ const u = require("./Utils.Generic");
  */
 class Item {
   /**
-   * 
-   * @param {string} name 
-   * @param {string} description 
-   * @param {number} price 
-   * @param {number} currencyId 
-   * @param {function|null} processPurchaseCallback 
+   * @param {Object} constructionObj an object containing the properties needed to construct the item
+   * @param {string} constructionObj.name 
+   * @param {string} constructionObj.description 
+   * @param {number} constructionObj.price 
+   * @param {number} constructionObj.currencyId 
+   * @param {boolean} [constructionObj.is_available=true] whether the item is available for purchase
+   * @param {function|null} constructionObj.processPurchaseCallback 
    */
-  constructor(name, description, price, currencyId, processPurchaseCallback = null) {
-    this.name = name;
-    this.description = description;
-    this.price = price;
-    this.currencyId = currencyId;
+  constructor(constructionObj) {
+    this.name = constructionObj.name;
+    this.description = constructionObj.description;
+    this.price = constructionObj.price;
+    this.currencyId = constructionObj.currencyId;
+    this.is_available = constructionObj.is_available !== undefined ? constructionObj.is_available : true;
     this.currency = null;
     this._currencyLoadPromise = null;
     /* A callback function that will be called when a user purchases the item. 
     It should take the following parameters: (interaction)
      and return a promise that resolves when the purchase has been processed.*/
-    this.processPurchaseCallback = processPurchaseCallback;
+    this.processPurchaseCallback = constructionObj.processPurchaseCallback;
   }
 
   async hydrateCurrency(guild, force = false) {
@@ -58,6 +60,15 @@ class Item {
   async getCurrency(guild) {
     if (this.currency) return this.currency;
     return await this.hydrateCurrency(guild);
+  }
+
+  async checkAvailability(interaction) {
+    //if this.is_available is a function pass the interaction to it and return the result, otherwise just return this.is_available
+    if (typeof this.is_available === "function") {
+      return await this.is_available(interaction);
+    } else {
+      return this.is_available;
+    }
   }
 
   async execute(interaction) {
