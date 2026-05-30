@@ -26,6 +26,9 @@ Module.addEvent("messageCreate", async (msg) => {
   embed.setAuthor("Anathema", msg.client.user.avatarURL()).setDescription(
     "Congrats on another job well done Adventurer! Here's a few coins I found to give you for your help!"
   ).setFooter("You have been granted " + amountToGrant + " Silver");
+
+  msg.channel.send({ embeds: [embed] });
+
 });
 
 module.exports = Module;
