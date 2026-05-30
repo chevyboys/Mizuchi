@@ -83,9 +83,7 @@ class Item {
         if (err.message.includes("No transactions found for snowflake")) {
           userBalanceObj = { currencies: [] };
         } else {
-          u.get_log_webhook().send({ embeds: [u.embed().setColor("RED").setTitle("Error fetching user balance").setDescription(`An error occurred while fetching the balance for user ${interaction.user.id} in guild ${interaction.guild.id}:\n\`\`\`${err.stack}\`\`\``)] });
-          await interaction.reply({ content: "An error occurred while processing your purchase. Please try again later.", ephemeral: true });
-          return Promise.resolve();
+          throw err;
         }
       }
       let userBalance = userBalanceObj.currencies.find(c => c.id == this.currencyId);
@@ -108,7 +106,7 @@ class Item {
         await econDB.newTransaction(
           "172862815961350144", // Jace's user ID
           this.currencyId,
-          this.price,
+          this.price * 0.7, //30% tax
           interaction.user.id,
           `Jace's cut of ${this.name}`
         );
