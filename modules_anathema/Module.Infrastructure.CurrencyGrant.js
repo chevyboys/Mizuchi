@@ -13,7 +13,7 @@ Module.addEvent("messageCreate", async (msg) => {
   if (msg.author.id !== arcane_snowflake && msg.author.id !== ownerID) return;
   console.log("Received message: " + msg.content);
   //The messages are structured as <@mention> has reached level <level>. GG!
-  const regex = /<@!?(\d+)> has reached level (\d+)/;
+  const regex = /<@!?(\d+)> has reached level [^\d]*(\d+)[^\d]*/;
   const match = msg.content.match(regex);
   console.log("Regex match: " + JSON.stringify(match));
   if (!match) return;
