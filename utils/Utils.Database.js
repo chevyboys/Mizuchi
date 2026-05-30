@@ -716,7 +716,7 @@ class User_Guild_Inventory extends Array {
 
     const addedItems = await this._addItemsToDB(newItem);
     if (addedItems.length > 0) {
-      this.push(...addedItems);
+      super.push(...addedItems);
       return addedItems[0];
     } else {
       throw new Error("Failed to add inventory item");
