@@ -8,7 +8,7 @@ const DBCurrencyObject = UtilsDatabase.DBCurrencyObject;
 const arcane_snowflake = "645343657075146772";
 
 Module.addEvent("messageCreate", async (msg) => {
-  let ownerID = Module.config.ownerID;
+  let ownerID = Module.client.config.ownerId;
   console.log("Received message: " + msg.content);
   //watch for the arcane bot level up message, and grant currency to the user who leveled up based on the level they reached
   if (msg.author.id !== arcane_snowflake && msg.author.id !== ownerID) return;
