@@ -11,9 +11,11 @@ Module.addEvent("messageCreate", async (msg) => {
   let ownerID = Module.config.ownerID;
   //watch for the arcane bot level up message, and grant currency to the user who leveled up based on the level they reached
   if (msg.author.id !== arcane_snowflake && msg.author.id !== ownerID) return;
+  console.log("Received message: " + msg.content);
   //The messages are structured as <@mention> has reached level <level>. GG!
   const regex = /<@!?(\d+)> has reached level (\d+)/;
   const match = msg.content.match(regex);
+  console.log("Regex match: " + JSON.stringify(match));
   if (!match) return;
   const userId = match[1];
   const level = parseInt(match[2]);
