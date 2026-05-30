@@ -113,9 +113,17 @@ module.exports = roleSnowflakes.map(role => {
     description: role.description + `(Add the ${role.name} Role to your /inventory.)`,
     price: role.cost,
     currencyId: 4,
-    is_available: true,
+    is_available: async (interaction) => {
+      let inventory = await db.User_Guild_Inventory.fetch(interaction.user.id, interaction.guild.id);
+
+      // Check if they already have an item with this exact role snowflake in their inventory
+      let alreadyOwns = inventory.some(item => item.granted_role_snowflake === role.snowflake);
+
+      // If they own it, it is NOT available for purchase.
+      return !alreadyOwns && role.available(interaction); // If they don't own it, check if it's available based on the level requirement
+    },
     processPurchaseCallback: async (interaction) => {
-      let inventory = await db.User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
+      let inventory = await db.User_Guild_Inventory.fetch(interaction.user.id, interaction.guild.id);
       await inventory.add({
         granted_role_snowflake: role.snowflake,
         granted_guild_snowflake: interaction.guild.id,

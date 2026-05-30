@@ -125,11 +125,22 @@ async function createShopMessageObject(interaction, selectedItemId = null) {
     }
   }
 
-  let options = Object.keys(shopItemsCache).filter(itemId => shopItemsCache[itemId].checkAvailability(interaction)).map(itemId => {
-    let item = shopItemsCache[itemId];
-    return { label: `${item.emoji || ""} ${item.price}: ${item.name}`, value: itemId, emoji: item.currency ? item.currency.emoji : undefined };
-  });
+  let options = [];
 
+  for (let itemId of Object.keys(shopItemsCache)) {
+    let item = shopItemsCache[itemId];
+
+    // Actually await the async check!
+    let isAvailable = await item.checkAvailability(interaction);
+
+    if (isAvailable) {
+      options.push({
+        label: `${item.emoji || ""} ${item.price}: ${item.name}`,
+        value: itemId,
+        emoji: item.currency ? item.currency.emoji : undefined
+      });
+    }
+  }
   //sort options by currency, then by price
   options.sort((a, b) => {
     let currencyA = shopItemsCache[a.value].currency ? shopItemsCache[a.value].currency.name : "";
@@ -474,9 +485,9 @@ Module.addCommand({
     ////////////////////////////////
     let userBalanceObj = await UtilsDatabase.User.getBalance(interaction.user.id, interaction.guild.id);
     let userBalance = userBalanceObj.currencies.find(c => c.id == chargedCurrency.id);
-    if (!userBalance || userBalance.total < this.price) {
+    if (!userBalance || userBalance.total < 1) {
       await interaction.reply({ content: `*It seems you don't have enough ${userBalance ? userBalance.name : "currency"} for this bribe*.`, ephemeral: true });
-      return Promise.resolve();
+      return;
     }
 
     //if the purchase was successful, create a new transaction in the database for the user

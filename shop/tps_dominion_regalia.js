@@ -29,9 +29,17 @@ module.exports = roleSnowflakes.map(role => {
     description: `Ah! I see you’re looking at our fine selection of enchanted goods!  Each of these are hand-crafted by our world-renowned crystal artisans; and every one of these many of a kind enchanted items are guaranteed to be genuine items that are enchanted.  Just so you know, it’s your lucky day as all of the multifaceted magical miscellany your eyes meander over are on sale for a limited time only!  (Add the ${role.name} Role to your /inventory.)`,
     price: 200,
     currencyId: 4,
-    is_available: true,
+    is_available: async (interaction) => {
+      let inventory = await db.User_Guild_Inventory.fetch(interaction.user.id, interaction.guild.id);
+
+      // Check if they already have an item with this exact role snowflake in their inventory
+      let alreadyOwns = inventory.some(item => item.granted_role_snowflake === role.snowflake);
+
+      // If they own it, it is NOT available for purchase.
+      return !alreadyOwns; // If they don't own it, check if it's available based on the level requirement
+    },
     processPurchaseCallback: async (interaction) => {
-      let inventory = await db.User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
+      let inventory = await db.User_Guild_Inventory.fetch(interaction.user.id, interaction.guild.id);
       await inventory.add({
         granted_role_snowflake: role.snowflake,
         granted_guild_snowflake: interaction.guild.id,
