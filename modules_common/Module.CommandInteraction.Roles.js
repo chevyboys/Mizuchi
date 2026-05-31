@@ -361,7 +361,7 @@ Module.addInteractionCommand({
         await target_inventory.add(
           {
             granted_role_snowflake: itemToGive.granted_role_snowflake,
-            granted_guild_snowflake: itemToGive.granted_guild_snowflake,
+            granted_guild_snowflake: interaction.guildId,
             granted_by_user_snowflake: targetId,
             reason_for_award: `Gifted by ${interaction.user.username} InventoryGive`,
             can_gift: false,
