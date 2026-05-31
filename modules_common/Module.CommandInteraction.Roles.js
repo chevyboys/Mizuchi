@@ -27,9 +27,9 @@ function sort_inventory_by_role_position(inventory, guild) {
   });
 }
 
-function inventory_item_embed_string(interaction, item, member_roles_cache = interaction.member.roles.cache) {
+function inventory_item_embed_string(interaction, item, can_gift_all = false, member_roles_cache = interaction.member.roles.cache) {
   let snowflake = item.granted_role_snowflake;
-  let can_give = item.can_gift ? "🎁" : "";
+  let can_give = item.can_gift || can_gift_all ? "🎁" : "";
   if (snowflake) {
     //determine if the person has this role right now
     let hasRole = member_roles_cache.has(snowflake);
@@ -55,7 +55,7 @@ function giftable_inventory_embed_string(interaction, item, target_inventory) {
   return item.toString();
 }
 
-async function inventory_embed(interaction, inventory, member_roles_cache) {
+async function inventory_embed(interaction, inventory, can_gift_all = false, member_roles_cache) {
   if (!member_roles_cache) {
     let freshMember = await interaction.member.fetch(true);
     member_roles_cache = freshMember.roles.cache;
@@ -65,8 +65,8 @@ async function inventory_embed(interaction, inventory, member_roles_cache) {
     return u.embed({ title: `${interaction.member.displayName}'s Inventory`, description: "Your inventory is empty!" });
   } else {
     inventory = sort_inventory_by_role_position(inventory, interaction.guild);
-    let roles_strings = inventory.filter(item => !item.is_color).map(item => inventory_item_embed_string(interaction, item, member_roles_cache));
-    let colors_strings = inventory.filter(item => item.is_color).map(item => inventory_item_embed_string(interaction, item, member_roles_cache));
+    let roles_strings = inventory.filter(item => !item.is_color).map(item => inventory_item_embed_string(interaction, item, can_gift_all, member_roles_cache));
+    let colors_strings = inventory.filter(item => item.is_color).map(item => inventory_item_embed_string(interaction, item, can_gift_all, member_roles_cache));
     let fields = [];
     if (roles_strings.length > 0) fields.push({ name: "Roles", value: roles_strings.join("\n"), inline: true });
     if (colors_strings.length > 0) fields.push({ name: "Colors", value: colors_strings.join("\n"), inline: true });
@@ -264,10 +264,11 @@ Module.addInteractionCommand({
     switch (subcommand) {
       case "view":
         await interaction.deferReply();
-        let embed = await inventory_embed(interaction, inventory, member_roles_cache);
+        let can_gift_all = await can_administer_inventory(Module, interaction);
+        let embed = await inventory_embed(interaction, inventory, can_gift_all, member_roles_cache);
         await interaction.editReply({ embeds: [embed] });
         //prevent other people from using the select menu by making it ephemeral
-        await interaction.followUp({ content: "Use the select menu below to manage your roles and colors!", components: await inventory_select_menus(interaction, inventory, member_roles_cache), ephemeral: true });
+        await interaction.followUp({ content: "Use the select menu below to manage your roles and colors!", components: await inventory_select_menus(interaction, inventory, can_gift_all, member_roles_cache), ephemeral: true });
         break;
       case "give":
         await interaction.deferReply({ ephemeral: true });
