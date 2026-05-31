@@ -211,16 +211,14 @@ async function give_inventory_item_select_menu(interaction, inventory, target_in
   target_inventory = target_inventory || await User_Guild_Inventory.fetch(interaction.options.getUser("recipient").id, interaction.guildId);
 
   let giftable_items_target_does_not_have = [];
-  if (!can_gift_all) {
-    for (const item of inventory) {
-      let targetHasItem = target_inventory.some(targetItem => targetItem.granted_role_snowflake === item.granted_role_snowflake);
-      if (!targetHasItem) {
-        giftable_items_target_does_not_have.push(item);
-      }
+
+  for (const item of inventory) {
+    let targetHasItem = target_inventory.some(targetItem => targetItem.granted_role_snowflake === item.granted_role_snowflake);
+    if (!targetHasItem) {
+      giftable_items_target_does_not_have.push(item);
     }
-  } else {
-    giftable_items_target_does_not_have = inventory;
   }
+
 
   if (giftable_items_target_does_not_have.length == 0) {
     return null; // No select menu if there are no giftable items that the target doesn't already have
