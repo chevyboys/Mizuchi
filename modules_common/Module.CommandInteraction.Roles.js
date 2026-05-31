@@ -29,10 +29,11 @@ function sort_inventory_by_role_position(inventory, guild) {
 
 function inventory_item_embed_string(interaction, item, member_roles_cache = interaction.member.roles.cache) {
   let snowflake = item.granted_role_snowflake;
+  let can_give = item.can_gift ? "🎁" : "";
   if (snowflake) {
     //determine if the person has this role right now
     let hasRole = member_roles_cache.has(snowflake);
-    return `<@&${snowflake}> ${hasRole ? "✅" : ""}`;
+    return `<@&${snowflake}> ${can_give}${hasRole ? "✅" : ""}`;
   }
   return item.toString();
 }
@@ -47,7 +48,8 @@ function giftable_inventory_embed_string(interaction, item, target_inventory) {
       return `~~<@&${snowflake}>~~ *(Already owned)*`;
     } else {
       let hasRole = interaction.member.roles.cache.has(snowflake);
-      return `<@&${snowflake}>`;
+      let can_give = item.can_gift ? "🎁" : "";
+      return `<@&${snowflake}> ${can_give}${hasRole ? "✅" : ""}`;
     }
   }
   return item.toString();
