@@ -9,7 +9,11 @@ module.exports = new ShopItem({
   price: 10000, // the cost
   currencyId: 4,
   processPurchaseCallback: async (interaction) => {
-    await interaction.reply({ content: "*You are handed a coupon to be redeemed at a later time* ", ephemeral: false });
+
+
+
+
+    await interaction.reply({ content: "*You are handed a coupon to be redeemed at a later time* (please contact the moderation team)", ephemeral: false });
     return Promise.resolve({ success: true });
   }
 });

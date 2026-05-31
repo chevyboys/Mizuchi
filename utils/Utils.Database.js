@@ -411,6 +411,7 @@ class Inventory_Item {
   #date_expires = null;
   #reason_for_award = "";
   #is_color = false;
+  #can_gift = false;
 
   constructor(constructionObj) {
     if (constructionObj instanceof Inventory_Item) return constructionObj;
@@ -427,6 +428,7 @@ class Inventory_Item {
     this.#date_expires = constructionObj.date_expires ? new Date(constructionObj.date_expires) : null;
     this.#reason_for_award = (constructionObj.reason_for_award) || "";
     this.#is_color = constructionObj.is_color || false;
+    this.#can_gift = constructionObj.can_gift || false;
   }
 
   get id() {
@@ -473,6 +475,10 @@ class Inventory_Item {
     return new Date() > this.#date_expires;
   }
 
+  get can_gift() {
+    return this.#can_gift;
+  }
+
   async fetch() {
     if (!this.#granted_guild_role_id) {
       throw new Error("Cannot fetch Inventory Item without granted_guild_role_id");
@@ -506,7 +512,8 @@ class Inventory_Item {
   * @member {number} user_id the internal database ID of the user this inventory belongs to
   * @member {number} guild_id the internal database ID of the guild this inventory belongs to
   * @member {number} user_guild_id the internal database ID of the user_guild entry that links this user and guild together, used for database reference when fetching inventory items that are granted directly to the user rather than through a role
-  * @member {Inventory_Item[]} an array of inventory items that the user currently has in this guild
+  * This is an array of Inventory_Item objects
+  * 
 */
 class User_Guild_Inventory extends Array {
   _user_id = null;
@@ -584,7 +591,7 @@ class User_Guild_Inventory extends Array {
   async _addItemsToDB(...items) {
     const newItems = [];
     for (const item of items) {
-      const insertSQL = `INSERT INTO guild_role_inventory (granted_guild_role_id, granted_by_guild_role_id, granted_by_user_guild_id, date_expires, reason_for_award, is_color) VALUES (?, ?, ?, ?, ?, ?)`;
+      const insertSQL = `INSERT INTO guild_role_inventory (granted_guild_role_id, granted_by_guild_role_id, granted_by_user_guild_id, date_expires, reason_for_award, is_color, can_gift) VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
       const [result] = await pool.execute(insertSQL, [
         item.granted_guild_role_id,
@@ -592,7 +599,8 @@ class User_Guild_Inventory extends Array {
         item.granted_by_user_guild_id,
         item.date_expires || null,
         item.reason_for_award,
-        item.is_color ? 1 : 0
+        item.is_color ? 1 : 0,
+        item.can_gift ? 1 : 0
       ]);
 
       const fullItem = await Inventory_Item.fetch(result.insertId);

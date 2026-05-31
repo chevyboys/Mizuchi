@@ -541,7 +541,7 @@ Module.addCommand({
     if (!shopItem) {
       return interaction.reply({ content: `Selected item not found.`, ephemeral: true });
     }
-    await shopItem.execute(interaction);
+    await shopItem.execute(interaction, Module);
   }
 })
 

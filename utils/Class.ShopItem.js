@@ -63,16 +63,16 @@ class Item {
     return await this.hydrateCurrency(guild);
   }
 
-  async checkAvailability(interaction) {
+  async checkAvailability(interaction, module) {
     //if this.is_available is a function pass the interaction to it and return the result, otherwise just return this.is_available
     if (typeof this.is_available === "function") {
-      return await this.is_available(interaction);
+      return await this.is_available(interaction, module);
     } else {
       return this.is_available;
     }
   }
 
-  async execute(interaction) {
+  async execute(interaction, module) {
     //respond to the interaction immediately to avoid the "This interaction failed" message, we will edit the response later if needed
     if (this.processPurchaseCallback) {
       //check if the user has enough currency to purchase the item
@@ -95,7 +95,7 @@ class Item {
         await interaction.reply({ content: `You do not have enough ${currencyDisplay} to purchase this item.`, ephemeral: true });
         return Promise.resolve();
       }
-      let result = await this.processPurchaseCallback(interaction);
+      let result = await this.processPurchaseCallback(interaction, module);
       if (result && result.success) {
         //if the purchase was successful, create a new transaction in the database for the user
         await econDB.newTransaction(
