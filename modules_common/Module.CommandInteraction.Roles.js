@@ -278,7 +278,7 @@ Module.addInteractionCommand({
 
         let giveEmbed = await give_inventory_item_embed(interaction, inventory, target_inventory, can_gift_all);
         if (giveEmbed) { // if the embed built successfully and didn't throw the "empty inventory" reply
-          let giveMenu = await give_inventory_item_select_menu(interaction, inventory, target_inventory);
+          let giveMenu = await give_inventory_item_select_menu(interaction, inventory, target_inventory, can_gift_all);
           let components = giveMenu ? [giveMenu] : [];
           await interaction.editReply({ embeds: [giveEmbed], components: components });
         }
