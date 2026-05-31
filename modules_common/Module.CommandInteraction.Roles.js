@@ -161,7 +161,7 @@ async function give_inventory_item_embed(interaction, inventory, target_inventor
 
 
   if (inventory.length == 0) {
-    await interaction.reply({ content: `You have no items in your inventory that can be gifted to ${target_name}.`, ephemeral: true });
+    await interaction.editReply({ content: `You have no items in your inventory that can be gifted to ${target_name}.`, ephemeral: true });
     return;
   } else {
     let roles_strings = inventory.filter(item => !item.is_color).map(item => giftable_inventory_embed_string(interaction, item, target_inventory, can_gift_all));
