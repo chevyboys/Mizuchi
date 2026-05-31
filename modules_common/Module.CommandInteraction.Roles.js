@@ -4,6 +4,29 @@ const db = require("../utils/Utils.Database.js");
 const { User_Guild_Inventory } = db;
 const { MessageActionRow, MessageSelectMenu, CommandInteraction, User } = require("discord.js");
 
+
+/**
+ * Sorts a user's inventory based on the hierarchical position of the granted roles.
+ * 
+ * @param {Array} inventory - The array of inventory items from User_Guild_Inventory.
+ * @param {Discord.Guild} guild - The guild object to fetch role positions from.
+ * @returns {Array} The sorted inventory array.
+ */
+function sort_inventory_by_role_position(inventory, guild) {
+  return inventory.sort((a, b) => {
+    // Fetch the Discord role objects from the cache using the snowflakes
+    let roleA = guild.roles.cache.get(a.granted_role_snowflake);
+    let roleB = guild.roles.cache.get(b.granted_role_snowflake);
+
+    // Default to a position of 0 if the role no longer exists in the server
+    let positionA = roleA ? roleA.position : 0;
+    let positionB = roleB ? roleB.position : 0;
+
+    // Sort descending (highest roles first)
+    return positionB - positionA;
+  });
+}
+
 function inventory_item_embed_string(interaction, item, member_roles_cache = interaction.member.roles.cache) {
   let snowflake = item.granted_role_snowflake;
   if (snowflake) {
@@ -19,10 +42,9 @@ function giftable_inventory_embed_string(interaction, item, target_inventory) {
 
   if (snowflake) {
     let targetHasItem = target_inventory.some(targetItem => targetItem.granted_role_snowflake === snowflake);
-    let roleName = interaction.guild.roles.cache.get(snowflake)?.name || "Unknown Role";
 
     if (targetHasItem) {
-      return `~~${roleName}~~ *(Already owned)*`;
+      return `~~<@&${snowflake}>~~ *(Already owned)*`;
     } else {
       let hasRole = interaction.member.roles.cache.has(snowflake);
       return `<@&${snowflake}>`;
@@ -40,6 +62,7 @@ async function inventory_embed(interaction, inventory, member_roles_cache) {
   if (inventory.length == 0) {
     return u.embed({ title: `${interaction.member.displayName}'s Inventory`, description: "Your inventory is empty!" });
   } else {
+    inventory = sort_inventory_by_role_position(inventory, interaction.guild);
     let roles_strings = inventory.filter(item => !item.is_color).map(item => inventory_item_embed_string(interaction, item, member_roles_cache));
     let colors_strings = inventory.filter(item => item.is_color).map(item => inventory_item_embed_string(interaction, item, member_roles_cache));
     let fields = [];
@@ -62,6 +85,7 @@ async function inventory_select_menus(interaction, inventory, member_roles_cache
     return null; // No select menu if inventory is empty
   } else {
     //split inventory into colors and roles
+    inventory = sort_inventory_by_role_position(inventory, interaction.guild);
     let roles = inventory.filter(item => !item.is_color);
     let colors = inventory.filter(item => item.is_color);
     let selectMenus = [];
@@ -166,6 +190,7 @@ async function give_inventory_item_embed(interaction, inventory, target_inventor
     await interaction.editReply({ content: `You have no items in your inventory that can be gifted to ${target_name}.`, ephemeral: true });
     return;
   } else {
+    inventory = sort_inventory_by_role_position(inventory, interaction.guild);
     let roles_strings = inventory.filter(item => !item.is_color).map(item => giftable_inventory_embed_string(interaction, item, target_inventory, can_gift_all));
     let colors_strings = inventory.filter(item => item.is_color).map(item => giftable_inventory_embed_string(interaction, item, target_inventory, can_gift_all));
     let fields = [];
@@ -200,6 +225,9 @@ async function give_inventory_item_select_menu(interaction, inventory, target_in
   if (giftable_items_target_does_not_have.length == 0) {
     return null; // No select menu if there are no giftable items that the target doesn't already have
   }
+
+  giftable_items_target_does_not_have = sort_inventory_by_role_position(giftable_items_target_does_not_have, interaction.guild);
+
   let selectMenu = new MessageActionRow().addComponents(
     new MessageSelectMenu()
       .setCustomId(`GiveInventorySelect`)
