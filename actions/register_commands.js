@@ -81,8 +81,8 @@ mainClient.once('ready', async () => {
     new SlashCommandBuilder().setName("inventory")
       .setDescription("View and manage your inventory")
       .addSubcommand(sub => sub.setName("view").setDescription("View your inventory"))
-      .addSubcommand(sub => sub.setName("give").setDescription("Give an item from your inventory to another user")
-        .addUserOption(o => o.setName("recipient").setDescription("The user to give the item to").setRequired(true)))
+      .addSubcommand(sub => sub.setName("grant").setDescription("Grant an item from your inventory to another user")
+        .addUserOption(o => o.setName("recipient").setDescription("The user to grant the item to").setRequired(true)))
       .addSubcommand(sub => sub.setName("administrate").setDescription("Administer inventory items to users (admin only)")
         .addRoleOption(option =>
           option.setName('grantee')

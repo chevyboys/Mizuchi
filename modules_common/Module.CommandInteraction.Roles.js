@@ -29,11 +29,11 @@ function sort_inventory_by_role_position(inventory, guild) {
 
 function inventory_item_embed_string(interaction, item, member_roles_cache = interaction.member.roles.cache) {
   let snowflake = item.granted_role_snowflake;
-  let can_give = item.can_gift ? "🎁" : "";
+  let can_grant = item.can_gift ? "🎁" : "";
   if (snowflake) {
     //determine if the person has this role right now
     let hasRole = member_roles_cache.has(snowflake);
-    return `<@&${snowflake}> ${can_give}${hasRole ? "✅" : ""}`;
+    return `<@&${snowflake}> ${can_grant}${hasRole ? "✅" : ""}`;
   }
   return item.toString();
 }
@@ -48,8 +48,8 @@ function giftable_inventory_embed_string(interaction, item, target_inventory) {
       return `~~<@&${snowflake}>~~ *(Already owned)*`;
     } else {
       let hasRole = interaction.member.roles.cache.has(snowflake);
-      let can_give = item.can_gift ? "🎁" : "";
-      return `<@&${snowflake}> ${can_give}${hasRole ? "✅" : ""}`;
+      let can_grant = item.can_gift ? "🎁" : "";
+      return `<@&${snowflake}> ${can_grant}${hasRole ? "✅" : ""}`;
     }
   }
   return item.toString();
@@ -179,7 +179,7 @@ async function administrate_inventory(interaction) {
   }
 }
 
-async function give_inventory_item_embed(interaction, inventory, target_inventory, can_gift_all = false) {
+async function grant_inventory_item_embed(interaction, inventory, target_inventory, can_gift_all = false) {
   inventory = inventory || await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
   if (!can_gift_all) {
     inventory = inventory.filter(item => item.can_gift);
@@ -205,7 +205,7 @@ async function give_inventory_item_embed(interaction, inventory, target_inventor
   }
 }
 
-async function give_inventory_item_select_menu(interaction, inventory, target_inventory, can_gift_all = false) {
+async function grant_inventory_item_select_menu(interaction, inventory, target_inventory, can_gift_all = false) {
   inventory = inventory || await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
   if (!can_gift_all) {
     inventory = inventory.filter(item => item.can_gift);
@@ -230,7 +230,7 @@ async function give_inventory_item_select_menu(interaction, inventory, target_in
 
   let selectMenu = new MessageActionRow().addComponents(
     new MessageSelectMenu()
-      .setCustomId(`GiveInventorySelect`)
+      .setCustomId(`GrantInventorySelect`)
       .setPlaceholder("Select an item to gift")
       .addOptions(giftable_items_target_does_not_have.map(item => {
         return {
@@ -269,18 +269,18 @@ Module.addInteractionCommand({
         //prevent other people from using the select menu by making it ephemeral
         await interaction.followUp({ content: "Use the select menu below to manage your roles and colors!", components: await inventory_select_menus(interaction, inventory, member_roles_cache), ephemeral: true });
         break;
-      case "give":
+      case "grant":
         await interaction.deferReply({ ephemeral: true });
         let targetUser = interaction.options.getUser("recipient");
         let target_inventory = await User_Guild_Inventory.fetch(targetUser.id, interaction.guildId);
 
         let can_gift_all = await can_administer_inventory(Module, interaction);
 
-        let giveEmbed = await give_inventory_item_embed(interaction, inventory, target_inventory, can_gift_all);
-        if (giveEmbed) { // if the embed built successfully and didn't throw the "empty inventory" reply
-          let giveMenu = await give_inventory_item_select_menu(interaction, inventory, target_inventory, can_gift_all);
-          let components = giveMenu ? [giveMenu] : [];
-          await interaction.editReply({ embeds: [giveEmbed], components: components });
+        let grantEmbed = await grant_inventory_item_embed(interaction, inventory, target_inventory, can_gift_all);
+        if (grantEmbed) { // if the embed built successfully and didn't throw the "empty inventory" reply
+          let grantMenu = await grant_inventory_item_select_menu(interaction, inventory, target_inventory, can_gift_all);
+          let components = grantMenu ? [grantMenu] : [];
+          await interaction.editReply({ embeds: [grantEmbed], components: components });
         }
         break;
       case "administrate":
@@ -336,21 +336,21 @@ Module.addInteractionCommand({
       await interaction.editReply({ content: "Your color has been updated!", embeds: [], components: newSelectMenus, ephemeral: true });
     }
   }).addInteractionHandler({
-    customId: `GiveInventorySelect`, process: async (interaction) => {
+    customId: `GrantInventorySelect`, process: async (interaction) => {
       await interaction.deferUpdate();
 
       // Parse the item ID and Recipient ID from the select menu value
       let [itemId, targetId] = interaction.values[0].split("_");
 
       try {
-        // Fetch both the giver's and the recipient's inventories
-        let giver_inventory = await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
+        // Fetch both the grantr's and the recipient's inventories
+        let grantr_inventory = await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
         let target_inventory = await User_Guild_Inventory.fetch(targetId, interaction.guildId);
 
         // Find the specific item the user selected from their inventory
-        let itemToGive = giver_inventory.find(item => item.id == itemId);
+        let itemToGrant = grantr_inventory.find(item => item.id == itemId);
 
-        if (!itemToGive) {
+        if (!itemToGrant) {
           return await interaction.editReply({
             content: "⚠️ It looks like you no longer have that item in your inventory!",
             embeds: [],
@@ -360,12 +360,12 @@ Module.addInteractionCommand({
 
         await target_inventory.add(
           {
-            granted_role_snowflake: itemToGive.granted_role_snowflake,
+            granted_role_snowflake: itemToGrant.granted_role_snowflake,
             granted_guild_snowflake: interaction.guildId,
             granted_by_user_snowflake: targetId,
-            reason_for_award: `Gifted by ${interaction.user.username} InventoryGive`,
+            reason_for_award: `Gifted by ${interaction.user.username} InventoryGrant`,
             can_gift: false,
-            is_color: itemToGive.is_color,
+            is_color: itemToGrant.is_color,
           }
         )
 
