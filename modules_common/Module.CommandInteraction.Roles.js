@@ -342,7 +342,7 @@ Module.addInteractionCommand({
         )
 
         await interaction.editReply({
-          content: `Successfully transferred item ${itemId} to <@${targetId}>! *(Transfer Logic Pending)*`,
+          content: `Successfully gave item ${itemId} to <@${targetId}>!`,
           embeds: [],
           components: []
         });
