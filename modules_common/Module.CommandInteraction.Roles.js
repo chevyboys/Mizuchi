@@ -180,7 +180,9 @@ async function give_inventory_item_embed(interaction, inventory, target_inventor
 
 async function give_inventory_item_select_menu(interaction, inventory, target_inventory, can_gift_all = false) {
   inventory = inventory || await User_Guild_Inventory.fetch(interaction.user.id, interaction.guildId);
-  inventory = inventory.filter(item => item.can_gift);
+  if (!can_gift_all) {
+    inventory = inventory.filter(item => item.can_gift);
+  }
   target_inventory = target_inventory || await User_Guild_Inventory.fetch(interaction.options.getUser("recipient").id, interaction.guildId);
 
   let giftable_items_target_does_not_have = [];
