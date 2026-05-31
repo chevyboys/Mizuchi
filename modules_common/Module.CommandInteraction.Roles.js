@@ -22,7 +22,7 @@ function giftable_inventory_embed_string(interaction, item, target_inventory) {
     let roleName = interaction.guild.roles.cache.get(snowflake)?.name || "Unknown Role";
 
     if (targetHasItem) {
-      return `~~${roleName}~~ *(Recipient already owns this)*`;
+      return `~~${roleName}~~ *(Already owned)*`;
     } else {
       let hasRole = interaction.member.roles.cache.has(snowflake);
       return `<@&${snowflake}>`;
