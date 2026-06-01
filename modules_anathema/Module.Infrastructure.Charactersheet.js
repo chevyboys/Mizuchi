@@ -32,12 +32,12 @@ const Command = {
           return interaction.reply({ content: "Please provide a valid Google Docs or Google Sheets URL.", ephemeral: true });
         }
 
-        await DBCharacterObject.create(interaction.user.id, name, url);
+        await DBCharacter.create(interaction.user.id, name, url);
         await interaction.reply({ content: `Character **${name}** has been successfully registered!`, ephemeral: true });
 
       } else if (subcommand === "delete") {
         let id = interaction.options.getString("character");
-        let char = await DBCharacterObject.getById(id);
+        let char = await DBCharacter.getById(id);
 
         if (!char) {
           return interaction.reply({ content: "Character not found. It may have already been deleted.", ephemeral: true });
@@ -51,12 +51,12 @@ const Command = {
           return interaction.reply({ content: "You do not have permission to delete a character that doesn't belong to you.", ephemeral: true });
         }
 
-        await DBCharacterObject.delete(char.id);
+        await DBCharacter.delete(char.id);
         await interaction.reply({ content: `Character **${char.name}** has been deleted.`, ephemeral: true });
 
       } else if (subcommand === "find") {
         let id = interaction.options.getString("character");
-        let char = await DBCharacterObject.getById(id);
+        let char = await DBCharacter.getById(id);
 
         if (!char) {
           return interaction.reply({ content: "Character not found.", ephemeral: true });
@@ -98,7 +98,7 @@ Module.addEvent("interactionCreate", async (interaction) => {
     }
 
     try {
-      const results = await DBCharacterObject.search(query, limitToUser);
+      const results = await DBCharacter.search(query, limitToUser);
 
       if (results.length == 0) {
         return interaction.respond([{ name: "No characters found", value: "0" }]);
