@@ -295,7 +295,7 @@ async function tavareSawThatPing(msg) {
 }
 
 removePrideRole = async (Module) => {
-  return; //disabling roll off. May enable at a future point
+  //disabling roll off. May enable at a future point
   //return if it's not between midnight and 1am
   let now = new Date();
   if (now.getHours() != 0) {
