@@ -166,7 +166,7 @@ async function pride(msg) {
     try {
       roleGuild.roles.fetch(Module.config.snowflakes.roles.Holiday[0]).then(async role => {
         //await role.setColor(color);
-        await setRandomRoleColors(Module.config.snowflakes.guilds.PrimaryServer, Module.config.snowflakes.roles.Holiday[0], Module.client.token, hexbase, parseInt(lightenHex(color, 0.5).replace(/^#/, ''), 16));
+        await setRandomRoleColors(Module.config.snowflakes.guilds.PrimaryServer, Module.config.snowflakes.roles.Holiday[0], Module.client.token, hexbase);
       });
 
     } catch (error) {
@@ -237,10 +237,10 @@ function lightenHex(hex, percent) {
  * @param {string} botToken - Your Discord bot token.
  * @returns {Promise<Object>} The updated role object returned by Discord.
  */
-async function setRandomRoleColors(guildId, roleId, botToken, randomPrimary, randomSecondary) {
+async function setRandomRoleColors(guildId, roleId, botToken, randomPrimary) {
   // Generate random integers between 0 and 16777215 (0xFFFFFF)
   randomPrimary = randomPrimary || Math.floor(Math.random() * 16777216);
-  randomSecondary = randomSecondary || Math.floor(Math.random() * 16777216);
+  let randomSecondary = parseInt(lightenHex(randomPrimary, 0.5).replace(/^#/, ''), 16);
 
   const endpoint = `https://discord.com/api/v10/guilds/${guildId}/roles/${roleId}`;
 
