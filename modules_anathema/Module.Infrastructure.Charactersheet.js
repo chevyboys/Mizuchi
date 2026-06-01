@@ -15,7 +15,6 @@ function canManageAnyCharacter(member) {
 
 const Command = {
   name: "character",
-
   process: async (interaction) => {
     try {
       let subcommand = interaction.options.getSubcommand();
@@ -23,6 +22,15 @@ const Command = {
       if (subcommand === "create") {
         let name = interaction.options.getString("name");
         let url = interaction.options.getString("url");
+        //ensure this is a google docs url
+        if (!url.match(/https:\/\/docs\.google\.com\/document\/d\/[a-zA-Z0-9_-]+/)) {
+          return interaction.reply({ content: "Please provide a valid Google Docs URL.", ephemeral: true });
+        }
+        //make sure that docs and google are within the first 20 characters to prevent people from putting the url in the name and bypassing the regex
+        let urlIndex = url.indexOf("docs.google.com");
+        if (urlIndex === -1 || urlIndex > 25) {
+          return interaction.reply({ content: "Please provide a valid Google Docs URL.", ephemeral: true });
+        }
 
         await DBCharacterObject.create(interaction.user.id, name, url);
         await interaction.reply({ content: `Character **${name}** has been successfully registered!`, ephemeral: true });
