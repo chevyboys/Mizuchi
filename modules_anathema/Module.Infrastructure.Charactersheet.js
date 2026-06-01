@@ -25,14 +25,14 @@ const Command = {
         let url = interaction.options.getString("url");
 
         await DBCharacterObject.create(interaction.user.id, name, url);
-        await interaction.reply({ content: `✅ Character **${name}** has been successfully registered!`, ephemeral: true });
+        await interaction.reply({ content: `Character **${name}** has been successfully registered!`, ephemeral: true });
 
       } else if (subcommand === "delete") {
         let id = interaction.options.getString("character");
         let char = await DBCharacterObject.getById(id);
 
         if (!char) {
-          return interaction.reply({ content: "❌ Character not found. It may have already been deleted.", ephemeral: true });
+          return interaction.reply({ content: "Character not found. It may have already been deleted.", ephemeral: true });
         }
 
         // Verify Ownership / Permissions
@@ -40,18 +40,18 @@ const Command = {
         let hasAdminBypass = canManageAnyCharacter(interaction.member);
 
         if (!isOwner && !hasAdminBypass) {
-          return interaction.reply({ content: "🛑 You do not have permission to delete a character that doesn't belong to you.", ephemeral: true });
+          return interaction.reply({ content: "You do not have permission to delete a character that doesn't belong to you.", ephemeral: true });
         }
 
         await DBCharacterObject.delete(char.id);
-        await interaction.reply({ content: `🗑️ Character **${char.name}** has been deleted.`, ephemeral: true });
+        await interaction.reply({ content: `Character **${char.name}** has been deleted.`, ephemeral: true });
 
       } else if (subcommand === "find") {
         let id = interaction.options.getString("character");
         let char = await DBCharacterObject.getById(id);
 
         if (!char) {
-          return interaction.reply({ content: "❌ Character not found.", ephemeral: true });
+          return interaction.reply({ content: "Character not found.", ephemeral: true });
         }
 
         let embed = u.embed()
