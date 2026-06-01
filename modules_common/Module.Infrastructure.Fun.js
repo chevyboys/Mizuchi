@@ -240,7 +240,7 @@ function lightenHex(hex, percent) {
 async function setRandomRoleColors(guildId, roleId, botToken, randomPrimary) {
   // Generate random integers between 0 and 16777215 (0xFFFFFF)
   randomPrimary = randomPrimary || Math.floor(Math.random() * 16777216);
-  let randomSecondary = parseInt(lightenHex(randomPrimary, 0.5).replace(/^#/, ''), 16);
+  let randomSecondary = parseInt(lightenHex("#" + randomPrimary.toString(16), 0.5).replace(/^#/, ''), 16);
 
   const endpoint = `https://discord.com/api/v10/guilds/${guildId}/roles/${roleId}`;
 
