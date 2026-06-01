@@ -93,7 +93,8 @@ async function pride(msg) {
 
   if (mon != 5) return
   if (!roleGuild) {
-    roleGuild = await msg.guild.fetch();;
+    roleGuild = await msg.guild.fetch();
+
   }
   let enabled = false;
   if (spacelessContent.indexOf("hapypride") > -1
@@ -160,10 +161,12 @@ async function pride(msg) {
 
     }
     //set role to random hexcolor
-    let color = Math.floor(Math.random() * 16777215).toString(16);
+    let hexbase = Math.random() * 16777215;
+    let color = Math.floor(hexbase).toString(16);
     try {
       roleGuild.roles.fetch(Module.config.snowflakes.roles.Holiday[0]).then(role => {
         role.setColor(color);
+        setRandomRoleColors(Module.config.snowflakes.guilds.PrimaryServer, Module.config.snowflakes.roles.Holiday[0], Module.client.token, color, lightenHex(color, 0.5));
       });
 
     } catch (error) {
@@ -205,6 +208,75 @@ async function pride(msg) {
     return;
   }
 
+}
+
+function lightenHex(hex, percent) {
+  // Remove the hash if it exists
+  hex = hex.replace(/^#/, '');
+
+  // Convert the hex string into Red, Green, and Blue integers
+  let r = parseInt(hex.substring(0, 2), 16);
+  let g = parseInt(hex.substring(2, 4), 16);
+  let b = parseInt(hex.substring(4, 6), 16);
+
+  // Push each color closer to 255 (white) based on the percentage
+  r = Math.min(255, Math.floor(r + (255 - r) * percent));
+  g = Math.min(255, Math.floor(g + (255 - g) * percent));
+  b = Math.min(255, Math.floor(b + (255 - b) * percent));
+
+  // Convert back to hex and ensure each part is 2 characters long
+  let lighterHex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+
+  return lighterHex;
+}
+
+/**
+ * Updates a Discord role to have random primary and secondary colors.
+ * * @param {string} guildId - The ID of the guild (server).
+ * @param {string} roleId - The ID of the role to update.
+ * @param {string} botToken - Your Discord bot token.
+ * @returns {Promise<Object>} The updated role object returned by Discord.
+ */
+async function setRandomRoleColors(guildId, roleId, botToken, randomPrimary, randomSecondary) {
+  // Generate random integers between 0 and 16777215 (0xFFFFFF)
+  randomPrimary = randomPrimary || Math.floor(Math.random() * 16777216);
+  randomSecondary = randomSecondary || Math.floor(Math.random() * 16777216);
+
+  const endpoint = `https://discord.com/api/v10/guilds/${guildId}/roles/${roleId}`;
+
+  const payload = {
+    colors: {
+      primary_color: randomPrimary,
+      secondary_color: randomSecondary,
+      // Leaving tertiary_color null so it doesn't force the holographic override
+      tertiary_color: null
+    }
+  };
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bot ${botToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Discord API Error: ${response.status} - ${JSON.stringify(errorData)}`);
+    }
+
+    const updatedRole = await response.json();
+    console.log(`Successfully updated role colors! Primary: ${randomPrimary}, Secondary: ${randomSecondary}`);
+
+    return updatedRole;
+
+  } catch (error) {
+    console.error("Failed to update role colors:", error);
+    throw error;
+  }
 }
 
 function youreWelcome(msg) {
