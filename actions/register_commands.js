@@ -170,7 +170,19 @@ mainClient.once('ready', async () => {
     anathemaClient.once('ready', async () => {
       console.log(`[Anathema] Logged in as ${anathemaClient.user.tag}`);
 
-      let anathemaCommands = [...commonCommands];
+      let anathemaCommands = [...commonCommands,
+      new SlashCommandBuilder().setName("character").setDescription("Manage and find character documents")
+        .addSubcommand(sub => sub.setName("create").setDescription("Register a new character document")
+          .addStringOption(o => o.setName("name").setDescription("The name of the character").setRequired(true))
+          .addStringOption(o => o.setName("url").setDescription("URL to the character document").setRequired(true))
+        )
+        .addSubcommand(sub => sub.setName("delete").setDescription("Delete a character")
+          .addStringOption(o => o.setName("character").setDescription("The character to delete").setAutocomplete(true).setRequired(true))
+        )
+        .addSubcommand(sub => sub.setName("find").setDescription("Find a character document")
+          .addStringOption(o => o.setName("character").setDescription("The character to find").setAutocomplete(true).setRequired(true))
+        ),
+      ];
       let anathemaRegistry = fs.readdirSync('../registry/Anathema').filter(f => f.endsWith('.js') || f.endsWith('.json'));
       for (const file of anathemaRegistry) {
         if (file === "pride.json" && new Date().getMonth() != 5) continue;

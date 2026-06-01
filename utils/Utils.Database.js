@@ -732,6 +732,193 @@ class User_Guild_Inventory extends Array {
   }
 }
 
+/**
+ * Data Model for Characters
+ * @member {number} id the internal database ID of the character
+ * @member {number} user_id the internal database ID of the user who created it
+ * @member {Discord.Snowflake} user_snowflake the discord snowflake of the owner (requires .fetch() to populate)
+ * @member {string} name the name of the character
+ * @member {string} url the url to the character document
+ * @member {Date} date_created when the character was created
+ */
+class DBCharacter {
+  #id = null;
+  #user_id = null;
+  #user_snowflake = null;
+  #name = "";
+  #url = "";
+  #date_created = null;
+
+  constructor(constructionObj) {
+    if (constructionObj instanceof DBCharacter) return constructionObj;
+
+    this.#id = constructionObj.id || null;
+    this.#user_id = constructionObj.user_id || null;
+    this.#name = constructionObj.name || "";
+    this.#url = constructionObj.url || "";
+    this.#date_created = constructionObj.date_created ? new Date(constructionObj.date_created) : null;
+
+    // If a custom query pre-fills the snowflake, we can cache it immediately
+    if (constructionObj.user_snowflake) {
+      this.#user_snowflake = constructionObj.user_snowflake;
+    }
+  }
+
+  get id() { return this.#id; }
+  get user_id() { return this.#user_id; }
+  get name() { return this.#name; }
+  get url() { return this.#url; }
+  get date_created() { return this.#date_created; }
+
+  get user_snowflake() {
+    if (!this.#user_snowflake) {
+      throw new Error("Cannot get user_snowflake without fetching character first");
+    }
+    return this.#user_snowflake;
+  }
+
+  /**
+   * Fetches relational data (like the user's Discord Snowflake) from connected tables.
+   */
+  async fetch() {
+    if (!this.#user_id) {
+      throw new Error("Cannot fetch user_snowflake without a user_id");
+    }
+    const [rows] = await pool.execute(`SELECT snowflake FROM users WHERE id = ?`, [this.#user_id]);
+    if (rows.length === 0) {
+      throw new Error(`User with internal id ${this.#user_id} not found`);
+    }
+    this.#user_snowflake = rows[0].snowflake;
+    return this;
+  }
+
+  /**
+   * Creates a new character in the database
+   * @param {Discord.Snowflake} user_snowflake - The Discord Snowflake of the user creating the character
+   * @param {string} name - The name of the character
+   * @param {string} url - The URL to the character document
+   * @returns {Promise<DBCharacter>} - The newly created character object
+   * @throws Will throw an error if the user is not found in the database
+   */
+  static async create(user_snowflake, name, url) {
+    // Get internal user id
+    const [userRows] = await pool.execute("SELECT id FROM users WHERE snowflake = ?", [user_snowflake]);
+    if (userRows.length === 0) {
+      throw new Error("User not found in database. Please interact with the bot first to register.");
+    }
+    const internalUserId = userRows[0].id;
+
+    const [result] = await pool.execute(
+      "INSERT INTO `character` (user_id, name, url) VALUES (?, ?, ?)",
+      [internalUserId, name, url]
+    );
+
+    // We already know the snowflake since we passed it in, so we can pre-populate it
+    return new DBCharacter({
+      id: result.insertId,
+      user_id: internalUserId,
+      user_snowflake: user_snowflake,
+      name: name,
+      url: url,
+      date_created: new Date()
+    });
+  }
+
+  /**
+   * Deletes a character by its internal ID
+   * @param {number} id - The internal ID of the character to delete
+   * @returns {Promise<boolean>} - Returns true if the deletion was successful
+   */
+  static async delete(id) {
+    await pool.execute("DELETE FROM `character` WHERE id = ?", [id]);
+    return true;
+  }
+
+  /**
+   * Fetches a specific character by its ID 
+   * @param {number} id - The internal ID of the character or the user's snowflake
+   * @returns {Promise<DBCharacter|null>} - The character object or null if not found
+   */
+  static async get(id) {
+    const [rows] = await pool.execute(`SELECT * FROM \`character\` LEFT JOIN users u ON \`character\`.user_id = u.id WHERE \`character\`.id = ? OR u.snowflake = ?`, [id, id]);
+    if (rows.length === 0) return null;
+
+    const char = new DBCharacter(rows[0]);
+    await char.fetch(); // Fetch the relational user_snowflake
+    return char;
+  }
+
+  /**
+   * Searches characters by name for Discord Autocomplete. 
+   * If limitToUserSnowflake is provided, it only returns characters owned by that user.
+   * Discord enforces a strict limit of 25 options for autocomplete, so this method will return at most 25 results.
+   * @param {string} query - The search query to match against character names
+   * @param {Discord.Snowflake} [limitToUserSnowflake] - If provided, only return characters owned by this user's snowflake
+   * @returns {Promise<DBCharacter[]>} - An array of matching character objects
+   */
+  static async search(query, limitToUserSnowflake = null) {
+    let sql = "SELECT c.* FROM `character` c ";
+    let params = [];
+
+    if (limitToUserSnowflake) {
+      sql += "JOIN users u ON c.user_id = u.id WHERE u.snowflake = ? AND c.name LIKE ? ";
+      params.push(limitToUserSnowflake, `%${query}%`);
+    } else {
+      sql += "WHERE c.name LIKE ? ";
+      params.push(`%${query}%`);
+    }
+
+    sql += "LIMIT 25"; // Discord enforces a strict limit of 25 options for autocomplete
+
+    const [rows] = await pool.execute(sql, params);
+
+    let characters = [];
+    for (const row of rows) {
+      const char = new DBCharacter(row);
+      await char.fetch(); // Ensure the snowflake is loaded for each returned search result
+      characters.push(char);
+    }
+
+    return characters;
+  }
+
+  /**
+   * Deletes this character from the database
+   * @returns {boolean}
+   */
+  async delete() {
+    if (!this.#id) {
+      throw new Error("Cannot delete character without an id");
+    }
+    await DBCharacter.delete(this.#id);
+    return true;
+  }
+
+  /**
+   * Fetches all characters, optionally filtered by a user's snowflake. If user_snowflake is provided, only characters owned by that user will be returned.
+   * @param {Discord.Snowflake} user_snowflake 
+   * @returns {Promise<DBCharacter[]>}
+   */
+  static async getAll(user_snowflake = null) {
+    let sql = "SELECT c.* FROM `character` c ";
+    let params = [];
+    if (user_snowflake) {
+      sql += "JOIN users u ON c.user_id = u.id WHERE u.snowflake = ? ";
+      params.push(user_snowflake);
+    }
+    const [rows] = await pool.execute(sql, params);
+
+    let characters = [];
+    for (const row of rows) {
+      const char = new DBCharacter(row);
+      await char.fetch(); // Ensure the snowflake is loaded for each character
+      characters.push(char);
+    }
+
+    return characters;
+  }
+}
+
 let privateDataBaseActions = {
   User: {
     /**
@@ -1468,6 +1655,7 @@ const DataBaseActions = {
   DBGuildRoleObject,
   Author,
   User_Guild_Inventory,
+  DBCharacter,
   User: {
     /** gets all the info a database has about a user, and returns it as a DBUserObject
      * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} snowflakeResolvable
