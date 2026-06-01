@@ -93,7 +93,7 @@ async function pride(msg) {
 
   if (mon != 5) return
   if (!roleGuild) {
-    roleGuild = await RoleClient.guilds.fetch(Module.config.snowflakes.guilds.PrimaryServer);
+    roleGuild = await msg.guild.fetch();;
   }
   let enabled = false;
   if (spacelessContent.indexOf("hapypride") > -1
@@ -176,7 +176,7 @@ async function pride(msg) {
 
     let member = await roleGuild.members.fetch(msg.member.id);
     if (!roleGuild) {
-      roleGuild = await RoleClient.guilds.fetch(Module.config.snowflakes.guilds.PrimaryServer);
+      roleGuild = await msg.guild.fetch();
     }
     try {
       await member.roles.add(Module.config.snowflakes.roles.Holiday[0]);
@@ -233,7 +233,7 @@ async function tavareSawThatPing(msg) {
   }
 }
 
-removePrideRole = async () => {
+removePrideRole = async (Module) => {
   return; //disabling roll off. May enable at a future point
   //return if it's not between midnight and 1am
   let now = new Date();
@@ -241,7 +241,7 @@ removePrideRole = async () => {
     return;
   }
 
-  const roleGuild = RoleClient.guilds.cache.get(Module.config.snowflakes.guilds.PrimaryServer);
+  const roleGuild = await Module.client.guilds.fetch(Module.config.snowflakes.guilds.PrimaryServer);
   const role = await roleGuild.roles.fetch(Module.config.snowflakes.roles.Holiday[0]);
   const members = await role.members;
   members.forEach(async member => {
@@ -266,7 +266,7 @@ Module.addEvent("messageCreate", async (msg) => {
 if (new Date().getMonth() == 5) {
   Module.setClockwork(() => {
     try {
-      return setInterval(removePrideRole, 60 * 60 * 1000);
+      return setInterval(() => removePrideRole(Module), 60 * 60 * 1000);
     } catch (e) { u.errorHandler(e, "pride Clockwork Error"); }
 
   })
