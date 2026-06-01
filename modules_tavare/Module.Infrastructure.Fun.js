@@ -166,7 +166,7 @@ async function pride(msg) {
     try {
       roleGuild.roles.fetch(Module.config.snowflakes.roles.Holiday[0]).then(role => {
         role.setColor(color);
-        setRandomRoleColors(Module.config.snowflakes.guilds.PrimaryServer, Module.config.snowflakes.roles.Holiday[0], Module.client.token, color, lightenHex(color, 0.5));
+        setRandomRoleColors(Module.config.snowflakes.guilds.PrimaryServer, Module.config.snowflakes.roles.Holiday[0], Module.client.token, hexbase, parseInt(lightenHex(color, 0.5).replace(/^#/, ''), 16));
       });
 
     } catch (error) {
