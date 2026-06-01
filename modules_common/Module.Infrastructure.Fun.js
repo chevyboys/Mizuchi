@@ -145,17 +145,18 @@ async function pride(msg) {
         "Wuv, twue wuv is what bwings us togethar today🌈",
         "⬆⬇⬆⬇",
         "Radiance, thy name is " + msg.member.displayName,
-        "||Find the secret: https://wydds.cc/doc_storage.html||",
+        // "||Find the secret: https://wydds.cc/doc_storage.html||",
       ]
 
     }
     //set role to random hexcolor
     let hexbase = Math.random() * 16777215;
     let color = Math.floor(hexbase).toString(16);
+    let makeHolographic = getRandomInt(100) < 1; // 1% chance to trigger holographic role effects by adding a random tertiary color
     try {
       roleGuild.roles.fetch(Module.config.snowflakes.roles.Holiday[0]).then(async role => {
         //await role.setColor(color);
-        await setRandomRoleColors(Module.config.snowflakes.guilds.PrimaryServer, Module.config.snowflakes.roles.Holiday[0], Module.client.token, hexbase);
+        await setRandomRoleColors(Module.config.snowflakes.guilds.PrimaryServer, Module.config.snowflakes.roles.Holiday[0], Module.client.token, hexbase, makeHolographic);
       });
 
     } catch (error) {
@@ -163,7 +164,7 @@ async function pride(msg) {
     }
 
 
-    msg.reply({ content: `Happy Pride ${msg.member.displayName}! ${u.rand(addons)}\n\n||By the way, your color for today is #${color}||`, allowedMentions: { repliedUser: false } });
+    msg.reply({ content: `Happy${makeHolographic ? " ***Holographic***" : ""} Pride ${msg.member.displayName}! ${u.rand(addons)}\n\n||By the way, your color for today is #${color}||`, allowedMentions: { repliedUser: false } });
     prideRepliedUsers.push(msg.author.id);
 
     let member = await roleGuild.members.fetch(msg.member.id);
@@ -226,7 +227,7 @@ function lightenHex(hex, percent) {
  * @param {string} botToken - Your Discord bot token.
  * @returns {Promise<Object>} The updated role object returned by Discord.
  */
-async function setRandomRoleColors(guildId, roleId, botToken, randomPrimary) {
+async function setRandomRoleColors(guildId, roleId, botToken, randomPrimary, makeHolographic = false) {
   // Generate random integers between 0 and 16777215 (0xFFFFFF)
   randomPrimary = randomPrimary || Math.floor(Math.random() * 16777216);
   let randomSecondary = parseInt(lightenHex("#" + randomPrimary.toString(16), 0.5).replace(/^#/, ''), 16);
@@ -237,8 +238,8 @@ async function setRandomRoleColors(guildId, roleId, botToken, randomPrimary) {
     colors: {
       primary_color: randomPrimary,
       secondary_color: randomSecondary,
-      // Leaving tertiary_color null so it doesn't force the holographic override
-      tertiary_color: null
+      // one in a hundred chance to have a tertiary color that is a random color to trigger holographic role effects
+      tertiary_color: makeHolographic ? Math.floor(Math.random() * 16777216) : null
     }
   };
 
