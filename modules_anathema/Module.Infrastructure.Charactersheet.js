@@ -56,7 +56,7 @@ const Command = {
 
       } else if (subcommand === "find") {
         let id = interaction.options.getString("character");
-        let char = await DBCharacter.getById(id);
+        let char = await DBCharacter.get(id);
 
         if (!char) {
           return interaction.reply({ content: "Character not found.", ephemeral: true });
