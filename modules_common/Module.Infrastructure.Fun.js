@@ -147,7 +147,7 @@ async function pride(msg) {
       "In the tapestry of life, every color is important. Embrace this 🏳‍🌈 and celebrate the vibrant diversity that makes us who we are.",
       "My young friend, take this 🏳‍🌈 and let it remind you that you are loved, cherished, and worthy of acceptance.",
       "🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈🏳‍🌈",
-      "🟥🟥🟥🟥🟥🟥\n🟧🟧🟧🟧🟧🟧\n🟨🟨🟨🟨🟨🟨\n🟩🟩🟩🟩🟩🟩\n🟦🟦🟦🟦🟦🟦\n🟪🟪🟪🟪🟪🟪"
+      "\n🟥🟥🟥🟥🟥🟥\n🟧🟧🟧🟧🟧🟧\n🟨🟨🟨🟨🟨🟨\n🟩🟩🟩🟩🟩🟩\n🟦🟦🟦🟦🟦🟦\n🟪🟪🟪🟪🟪🟪"
     ]
     //on a one in 100 chance, replace the addon with an easter egg
     if (getRandomInt(100) < 5) {
