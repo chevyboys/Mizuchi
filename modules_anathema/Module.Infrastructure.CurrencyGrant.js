@@ -24,7 +24,7 @@ Module.addEvent("messageCreate", async (msg) => {
   await UtilsDatabase.Economy.newTransaction(userId, 4, amountToGrant, userId, `Level Up Reward for level ${level}`);
   let embed = u.embed();
   embed.setAuthor("Anathema", msg.client.user.avatarURL()).setDescription(
-    "Congrats on another job well done Adventurer! Here's a few coins I found to give you for your help!"
+    "Congrats on another job well done, Adventurer! Here's your reward!"
   ).setFooter("You have been granted " + amountToGrant + " Silver");
 
   msg.channel.send({ embeds: [embed] });
