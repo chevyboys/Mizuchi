@@ -20,7 +20,8 @@
       "address": "127.0.0.1",
       "port": 9229,
       "localRoot": "${workspaceFolder}",
-      "remoteRoot": "/opt/mizuchi"
+      "remoteRoot": "/opt/mizuchi",
+      "preLaunchTask": "Start SSH Debug Tunnel"
     },
     {
       "type": "node",
