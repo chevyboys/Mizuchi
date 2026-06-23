@@ -400,7 +400,7 @@ Module.addCommand({
 
         if (targetUser.bot) {
           await UtilsDatabase.Economy.newTransaction("172862815961350144", giverCurrency.id, amountAfterTax, interaction.user.id, `give`);
-          let trustMeRoleMention = await get_trust_me_role(guild);
+          let trustMeRoleMention = await get_trust_me_role(interaction.guild);
           let embed = Jace_Embed()
             .setDescription(`\"How kind!  I know just the thing to get them as well.  I'll make sure they know it was from you, ${trustMeRoleMention}.  I definitely won't be just keeping this money.\"`)
           return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -446,7 +446,11 @@ Module.addCommand({
 
         //don't allow granting currency to bots
         if (targetUser.bot) {
-          return interaction.reply({ content: `The elemental declines your generous offer.`, ephemeral: true });
+          await UtilsDatabase.Economy.newTransaction("172862815961350144", giverCurrency.id, amountAfterTax, interaction.user.id, `give`);
+          let trustMeRoleMention = await get_trust_me_role(guild);
+          let embed = Jace_Embed()
+            .setDescription(`\"How kind!  I know just the thing to get them as well.  I'll make sure they know it was from you, ${trustMeRoleMention}.  I definitely won't be just keeping this money.\"`)
+          return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
         //we do allow granting negative amounts, as this can be used to take currency away from users
