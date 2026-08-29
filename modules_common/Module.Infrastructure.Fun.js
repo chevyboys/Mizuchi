@@ -68,13 +68,21 @@ function goodTime(msg) {
 
 }
 
+// helper func for pride to check if provided author has Holiday[0] in their roles
+function hasPrideRole(member) {
+  if (member.roles.cache.has(Module.config.snowflakes.roles.Holiday[0])) {
+    return true;
+  }
+  return false;
+}
+
 let roleGuild;
 let prideRepliedUsers = [];
 /**determines if the bot should respond with Happy pride, then does so 
  * @param {Discord.Message} msg
 */
 async function pride(msg) {
-  if (msg.author.bot || prideRepliedUsers.includes(msg.author.id)) return;
+  if (msg.author.bot || prideRepliedUsers.includes(msg.author.id) || hasPrideRole(msg.member)) return;
   if (msg.channel != Module.config.snowflakes.channels.general) return;
   let mon = new Date().getMonth();
   if (mon != 5) return
@@ -179,25 +187,6 @@ async function pride(msg) {
       modRequests.send("I couldn't add the <@&" + Module.config.snowflakes.roles.Holiday[0] + " role to " + msg.member.displayName)
       throw error;
     }
-    //create callback to remove user from array after 8 hours
-    //calculate seconds until midnight
-    let now = new Date();
-    let midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 24, 0, 0);
-    let milisecondsUntilMidnight = (midnight.valueOf() - now.valueOf());
-
-
-
-    setTimeout(async () => {
-      let index = prideRepliedUsers.indexOf(msg.author.id);
-      if (index > -1) {
-        prideRepliedUsers.splice(index, 1);
-        await member.roles.remove(Module.config.snowflakes.roles.Holiday[0]);
-      }
-    }
-      , milisecondsUntilMidnight);
-    return;
-  }
-
 }
 
 function lightenHex(hex, percent) {
@@ -308,9 +297,12 @@ removePrideRole = async (Module) => {
   const members = await role.members;
   members.forEach(async member => {
     await member.roles.remove(role);
+    if (prideRepliedUsers.includes(member.id)) {
+      let index = prideRepliedUsers.indexOf(member.id);
+      if (index > -1) {
+        prideRepliedUsers.splice(index, 1);
   }
   );
-
 }
 
 Module.addEvent("messageCreate", async (msg) => {
@@ -324,23 +316,4 @@ Module.addEvent("messageCreate", async (msg) => {
   pride(msg);
 })
 
-//if it's june
-if (new Date().getMonth() == 5) {
-  Module.setClockwork(() => {
-    try {
-      return setInterval(() => removePrideRole(Module), 60 * 60 * 1000);
-    } catch (e) { u.errorHandler(e, "pride Clockwork Error"); }
-
-  })
-    //if someone reacts with a rainbow emoji, give them the pride role
-    .addEvent("messageReactionAdd", async (reaction, user) => {
-      if (reaction.message.guild.id != Module.config.snowflakes.guilds.PrimaryServer || reaction.message.author.bot) return;
-      if (reaction.emoji.name == "🏳‍🌈") {
-        let member = await reaction.message.guild.members.fetch(user.id);
-        member.roles.add(Module.config.snowflakes.roles.Holiday[0]);
-        reaction.react();
-      }
-    }
-    )
-}
 module.exports = Module;
