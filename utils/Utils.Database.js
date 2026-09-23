@@ -1,10 +1,14 @@
 const mysql = require("mysql2/promise"); // Updated to mysql2
 const Discord = require("discord.js");
 const { errorHandler } = require("./Utils.Error");
+const { webhook } = require("./Webhook");
 
 let hasBeenInitialized = false;
 /**
  * This file is responsible for all interactions with the database, and contains utility functions for parsing and validating data related to the database. It also contains the data models for the database, such as the DBUserObject, which represents a user in the database and contains methods for updating that user's information in the database. The DataBaseActions object contains methods for interacting with the database, such as getting a user or updating a user's information. The database connection is established using mysql2/promise, and all queries are executed using prepared statements to prevent SQL injection.
+ */
+/**
+ * @type {AugurClient} client - The AugurClient instance, used for accessing Discord client and configuration.
  */
 let client; // this will hold our AugurClient instance, which we need for some of the utility functions. We have to declare it here to avoid circular dependencies, but the init function will set it to the actual client instance when it's called from bot.js
 let pool; // This will hold our connection pool
@@ -84,6 +88,7 @@ function normalizeRolesByGuild(rolesData) {
   }
   return normalized;
 }
+
 
 /**
  * Data Model for User interactions
@@ -232,6 +237,16 @@ class DBGuildObject {
   get roles() {
     return this.#roles;
   }
+
+  toJSON() {
+    return {
+      id: this.#id,
+      snowflake: this.#snowflake,
+      friendly_name: this.#friendly_name,
+      isTestGuild: this.#isTestGuild,
+      roles: this.#roles.length
+    };
+  }
 }
 /**
  * Data Model for Roles
@@ -257,17 +272,31 @@ class DBGuildObject {
  */
 class DBGuildRoleObject {
   #id = null;
+  #guild_id = null;
   #snowflake = "";
   #friendly_name = "";
   #has_redacted_info = false;
   #is_update_role = false;
   #slave_role_id = null; // the internal database id of a role that should have it's members updated to match the members of this role.
+  /**
+   * 
+   * @param {DBGuildRoleObject|{
+   *    id: number,
+   *    snowflake: Discord.Snowflake,
+   *    friendly_name: string,
+   *    has_redacted_info: boolean,
+   *    is_update_role: boolean,
+   *    slave_role_id: number
+   *    guild_id: number
+   * }} constructionObj 
+   * @returns 
+   */
   constructor(constructionObj) {
     if (constructionObj instanceof DBGuildRoleObject) return constructionObj;
     this.#id = constructionObj.id || null;
     this.#snowflake = parsesnowflake(constructionObj.snowflake);
     this.#friendly_name = cleanString(constructionObj.friendly_name) || "Unknown Role";
-
+    this.#guild_id = constructionObj.guild_id || null;
     // Explicitly parse these as booleans so they never default to undefined
     this.#has_redacted_info = !!constructionObj.has_redacted_info;
     this.#is_update_role = !!constructionObj.is_update_role;
@@ -288,6 +317,14 @@ class DBGuildRoleObject {
 
   get has_redacted_info() {
     return this.#has_redacted_info;
+  }
+
+  get guild_id() {
+    return this.#guild_id;
+  }
+
+  get guild() {
+    return privateDataBaseActions.Guild.get_by_internal_id(this.#guild_id);
   }
 
   get is_update_role() {
@@ -919,6 +956,710 @@ class DBCharacter {
   }
 }
 
+
+class DBEventRoleTemplate {
+  #id = null;
+  #event_id = null;
+  #name = "";
+  #color = null;
+  #gradient_secondary_color = null;
+  #icon = null;
+
+  constructor(row) {
+    if (row instanceof DBEventRoleTemplate) return row;
+
+    this.#id = row.id || null;
+    this.#event_id = row.event_id || null;
+    this.#name = cleanString(row.name);
+    this.#color = row.color || null;
+    this.#gradient_secondary_color = row.gradient_secondary_color || null;
+    this.#icon = row.icon || null;
+  }
+
+  get id() { return this.#id; }
+  get event_id() { return this.#event_id; }
+  get name() { return this.#name; }
+  get color() { return this.#color; }
+  get gradient_secondary_color() { return this.#gradient_secondary_color; }
+  get icon() { return this.#icon; }
+
+  toJSON() {
+    return {
+      id: this.#id,
+      event_id: this.#event_id,
+      name: this.#name,
+      color: this.#color,
+      gradient_secondary_color: this.#gradient_secondary_color,
+      icon: this.#icon
+    };
+  }
+
+}
+
+/**
+ * Data Model for Webhooks
+ * @member {number} id the internal database ID of the webhook
+ * @member {number} guild_id the internal database ID of the guild this webhook belongs to
+ * @member {string} name the name of the webhook
+ * @member {string} avatar the avatar url of the webhook
+ * @member {Discord.Snowflake} channel_snowflake the channel snowflake where the webhook posts
+ */
+class DBWebhook {
+  #id = null;
+  #guild_id = null;
+  #name = "";
+  #avatar = "";
+  #channel_snowflake = "";
+
+  constructor(row) {
+    if (row instanceof DBWebhook) return row;
+
+    this.#id = row.id || null;
+    this.#guild_id = row.guild_id || null;
+    this.#name = cleanString(row.name);
+    this.#avatar = row.avatar || "";
+    this.#channel_snowflake = row.channel_snowflake ? parsesnowflake(row.channel_snowflake) : "";
+  }
+
+  get id() { return this.#id; }
+  get guild_id() { return this.#guild_id; }
+  get name() { return this.#name; }
+  get avatar() { return this.#avatar; }
+  get channel_snowflake() { return this.#channel_snowflake; }
+
+  static async get(id) {
+    const [rows] = await pool.execute("SELECT * FROM webhook WHERE id = ?", [id]);
+    if (!rows.length) return null;
+    return new DBWebhook(rows[0]);
+  }
+
+  static async getByGuild(guildId) {
+    const [rows] = await pool.execute("SELECT * FROM webhook WHERE guild_id = ?", [guildId]);
+    return rows.map(row => new DBWebhook(row));
+  }
+
+  static async create({ guild_id, name, avatar, channel_snowflake }) {
+    const [result] = await pool.execute(
+      "INSERT INTO webhook (guild_id, name, avatar, channel_snowflake) VALUES (?, ?, ?, ?)",
+      [guild_id, cleanString(name), avatar || null, parsesnowflake(channel_snowflake)]
+    );
+    return new DBWebhook({
+      id: result.insertId,
+      guild_id,
+      name,
+      avatar,
+      channel_snowflake
+    });
+  }
+
+  toJSON() {
+    return {
+      id: this.#id,
+      guild_id: this.#guild_id,
+      name: this.#name,
+      avatar: this.#avatar,
+      channel_snowflake: this.#channel_snowflake
+    };
+  }
+}
+
+class DBGuildEvent {
+  // Local Guild Event State
+  #id = null;
+  #announcementWebhookId = null;
+  #guild = null; // Will hold the DBGuildObject
+
+  // Global Event State
+  #eventId = null;
+  #name = "";
+  #start = null;
+  #end = null;
+  #announcementMessage = "";
+  #data = {};
+  #embedColor = null;
+  /**
+   * 
+   * @param {{
+   *   eventId: number,
+   *   name: string,
+   *   start: string|Date,
+   *   end: string|Date,
+   *   announcementMessage: string,
+   * }} row 
+   * @param {*} guildObject 
+   * @returns 
+   */
+  constructor(row, guildObject) {
+    if (row instanceof DBGuildEvent) return row;
+
+    this.#embedColor = row.embed_color || null;
+
+    // Guild Event (Local) mapping
+    this.#id = row.guild_event_id || null;
+    this.#announcementWebhookId = row.announcement_webhook_id || null;
+
+    if (!guildObject) {
+      throw new Error("DBGuildEvent constructor requires a guildObject parameter");
+    }
+
+    if (guildObject instanceof DBGuildObject) {
+      this.#guild = guildObject;
+    } else {
+      throw new Error("Invalid guildObject parameter for DBGuildEvent constructor");
+    }
+
+
+    // Event (Global) mapping
+    this.#eventId = row.event_id || null;
+    this.#name = cleanString(row.name);
+    this.#start = row.start ? new Date(row.start) : null;
+    this.#end = row.end ? new Date(row.end) : null;
+    this.#announcementMessage = row.announcment_message || "";
+
+    // Parse global JSON data safely
+    this.#data = row.data
+      ? (typeof row.data === 'string' ? JSON.parse(row.data) : row.data)
+      : {};
+  }
+
+  get id() { return this.#id; }
+  get eventId() { return this.#eventId; }
+  get name() { return this.#name; }
+  get data() { return this.#data; }
+  get guild() { return this.#guild; }
+  get announcementWebhookId() { return this.#announcementWebhookId; }
+  get start() { return this.#start; }
+  get end() { return this.#end; }
+  get announcementMessage() { return this.#announcementMessage; }
+
+  /**
+   * Fetches the active event for a specific guild, combining global and local state.
+   * @param {number} guildDbId - The internal DB ID of the guild.
+   * @returns {Promise<DBGuildEvent|null>} - Returns the active event object or null if none found.
+   */
+  static async getActive(guildDbId) {
+
+    const query = `
+      SELECT 
+        ge.id AS guild_event_id, ge.announcement_webhook_id,
+        e.id AS event_id, e.name, e.start, e.end, e.announcement_message, e.data, embed_color
+      FROM Tavare.guild_event ge
+      INNER JOIN Tavare.event e ON ge.event_id = e.id
+      LEFT JOIN Tavare.guild g ON ge.guild_id = g.id
+      WHERE ge.guild_id = ? 
+        AND e.enabled = 1 
+        AND( g.isTestGuild OR CURRENT_DATE BETWEEN STR_TO_DATE(CONCAT(YEAR(CURDATE()), '-', MONTH(e.start), '-', DAY(e.start)), '%Y-%m-%d') AND DATE_ADD(STR_TO_DATE(CONCAT(YEAR(CURDATE()), '-', MONTH(e.start), '-', DAY(e.start)), '%Y-%m-%d'), INTERVAL DATEDIFF(e.end, e.start) DAY))
+      LIMIT 1
+    `;
+
+    const [eventRows] = await pool.query(query, [guildDbId]);
+
+    if (!eventRows.length) return null;
+
+    const guildObj = await privateDataBaseActions.Guild.get_by_internal_id(guildDbId);
+    return new DBGuildEvent(eventRows[0], guildObj);
+  }
+
+  static async getById(guildDbId, eventId) {
+    const query = `
+      SELECT 
+        ge.id AS guild_event_id, ge.announcement_webhook_id,
+        e.id AS event_id, e.name, e.start, e.end, e.announcement_message, e.data, embed_color
+      FROM Tavare.guild_event ge
+      INNER JOIN Tavare.event e ON ge.event_id = e.id
+      LEFT JOIN Tavare.guild g ON ge.guild_id = g.id
+      WHERE ge.guild_id = ? AND e.id = ?
+      LIMIT 1
+    `;
+
+    const [eventRows] = await pool.query(query, [guildDbId, eventId]);
+
+    if (!eventRows.length) return null;
+
+    const guildObj = await privateDataBaseActions.Guild.get_by_internal_id(guildDbId);
+    return new DBGuildEvent(eventRows[0], guildObj);
+
+  }
+  /**
+   * 
+   * @param {number} eventId 
+   * @returns {Promise<DBEventRoleTemplate[]>}
+   */
+  static async getEventRoleTemplates(eventId) {
+    const query = `
+      SELECT * FROM Tavare.event_role_template ert
+      WHERE ert.event_id = ?
+    `;
+
+    const [roleTemplateRows] = await pool.query(query, [eventId]);
+
+    return roleTemplateRows.map(row => new DBEventRoleTemplate(row));
+  }
+
+  static async getByName(guildDbId, eventName) {
+    const query = `
+      SELECT 
+        ge.id AS guild_event_id, ge.announcement_webhook_id,
+        e.id AS event_id, e.name, e.start, e.end, e.announcement_message, e.data, embed_color
+      FROM Tavare.guild_event ge
+      INNER JOIN Tavare.event e ON ge.event_id = e.id
+      LEFT JOIN Tavare.guild g ON ge.guild_id = g.id
+      WHERE ge.guild_id = ? AND e.name = ?
+      LIMIT 1
+    `;
+
+    const [eventRows] = await pool.query(query, [guildDbId, eventName]);
+
+    if (!eventRows.length) return null;
+
+    const guildObj = await privateDataBaseActions.Guild.get_by_internal_id(guildDbId);
+    return new DBGuildEvent(eventRows[0], guildObj);
+
+  }
+
+
+  async getUserData(userSnowflake, only_this_year = true) {
+    const [rows] = await pool.execute(
+      `SELECT
+        event_data as data
+        FROM user_event
+        LEFT JOIN users ON user_event.user_id = users.id
+        WHERE users.snowflake = ?
+        AND event_id = ?
+        ${only_this_year ? "AND event_year = YEAR(CURDATE())" : ""}
+      `,
+      [userSnowflake, this.#eventId]
+    );
+
+    if (!rows.length) return null;
+    if (only_this_year) {
+      return rows[0].data ? JSON.parse(rows[0].data) : null;
+    } else {
+      return rows.map(row => row.data ? JSON.parse(row.data) : null);
+    }
+  }
+
+  async setUserData(userSnowflake, data) {
+    await pool.execute(
+      `INSERT INTO user_event (user_id, event_id, event_year, event_data)
+       VALUES (
+         (SELECT id FROM users WHERE snowflake = ?),
+         ?,
+         YEAR(CURDATE()),
+         ?
+       )
+       ON DUPLICATE KEY UPDATE event_data = VALUES(event_data)`,
+      [userSnowflake, this.#eventId, JSON.stringify(data)]
+    );
+  }
+
+
+  /**
+   * @param {Discord.MessageOptions} message - The message object to send via the announcement webhook.
+   * @returns {Promise<Discord.Message|null>} - Returns the sent message or null if no webhook is configured.
+   */
+  async send_announcement(message) {
+    if (!this.#announcementWebhookId) return null;
+
+    const [rows] = await pool.query(
+      'SELECT * FROM Tavare.webhook WHERE id = ?',
+      [this.#announcementWebhookId]
+    );
+
+    let guild = client.guilds.cache.get(this.#guild.snowflake);
+    if (!guild) {
+      throw new Error(`Guild with snowflake ${this.#guild.snowflake} not found in cache.`);
+    }
+    let channel = await guild.channels.fetch(rows[0].channel_snowflake);
+    if (!channel) {
+      throw new Error(`Channel with snowflake ${rows[0].channel_snowflake} not found in guild ${this.#guild.snowflake}.`);
+    }
+
+    return webhook(channel, rows[0].name, rows[0].avatar, message);
+  }
+
+  /**
+   * Fetches the event-specific currency for this guild.
+   * @returns {Promise<[DBCurrencyObject]|null>}
+   */
+  async getEventCurrencies() {
+    const [rows] = await pool.execute(
+      `SELECT currency_id FROM guild_currency WHERE event_id = ? AND guild_id = ?`,
+      [this.#eventId, this.#guild.id]
+    );
+
+    if (!rows.length) return null;
+    return new Promise.all(rows.map(row => DBCurrencyObject.fetch(row.currency_id, this.#guild)));
+  }
+
+
+  /**
+   * Fetches the actual Discord Role objects generated or modified for this event.
+   * @param {Discord.Guild} discordGuild - The cached or fetched Discord Guild object
+   * @returns {Promise<Object<number, Discord.Role>>} Returns a dictionary of roles keyed by template_id
+   */
+  async getDiscordRoles(discordGuild) {
+    const [rows] = await pool.execute(`
+      SELECT gr.snowflake, germ.template_id 
+      FROM Tavare.guild_event_role_map germ
+      LEFT JOIN Tavare.guild_role gr ON germ.guild_role_id = gr.id
+      WHERE germ.guild_event_id = ?`,
+      [this.#id]
+    );
+
+    const roles = {};
+    for (const row of rows) {
+      try {
+        roles[row.template_id] = await discordGuild.roles.fetch(row.snowflake);
+      } catch (err) {
+        console.error(`Failed to fetch event role ${row.snowflake} from Discord:`, err);
+      }
+    }
+    return roles;
+  }
+
+
+  async getEventRoleTemplates() {
+    return await DBGuildEvent.getEventRoleTemplates(this.#eventId);
+  }
+
+  async getData() {
+    const [rows] = await pool.execute(
+      `SELECT data FROM event WHERE id = ?`,
+      [this.#eventId]
+    );
+
+    if (!rows.length) return null;
+    return rows[0].data ? JSON.parse(rows[0].data) : null;
+  }
+
+  async setData(data) {
+    await pool.execute(
+      `UPDATE event SET data = ? WHERE id = ?`,
+      [JSON.stringify(data), this.#eventId]
+    );
+  }
+
+
+  /**
+   * Intelligently sets up roles for the event. Uses reserved 'is_event_role' entries first, 
+   * then generates new roles in Discord for any overflow.
+   * @param {Discord.Guild} discordGuild - The cached or fetched Discord Guild object
+   */
+  async setup(discordGuild) {
+    //Fetch the blueprints (templates) for this event
+    const [templates] = await pool.execute(
+      `SELECT * FROM event_role_template WHERE event_id = ?`,
+      [this.#eventId]
+    );
+    if (!templates.length) return; // No roles needed for this event
+
+    //Fetch the reserved event roles for this specific guild
+    const [reservedRoles] = await pool.execute(
+      `SELECT * FROM guild_role WHERE guild_id = ? AND is_event_role = 1`,
+      [this.#guild.id]
+    );
+
+    //check if the guild is high enough level to have an icon set for the roles
+    let boost_level = discordGuild.premiumTier || 0;
+    let canSetRoleIcon = boost_level >= 2; // Level 2 is the minimum for role icons
+
+    for (let i = 0; i < templates.length; i++) {
+      const template = templates[i];
+
+      // CASE A: We have a reserved role available to hijack
+      if (i < reservedRoles.length) {
+        const reservedDbRole = reservedRoles[i];
+        const discordRole = await discordGuild.roles.fetch(reservedDbRole.snowflake).catch(() => null);
+
+        if (discordRole) {
+          // Snapshot the original state before mutating
+          const originalState = JSON.stringify({ name: discordRole.name, color: discordRole.hexColor, icon: discordRole.iconURL() });
+
+          // Mutate the Discord role to match the template
+          await discordRole.edit({
+            name: template.name,
+            color: template.color || discordRole.hexColor
+          }, "Event Setup Overwrite");
+
+          //if we have a url for the icon, we need to fetch it and convert it to a buffer. If we have a file within this project, we need to convert that to a buffer as well. If we have neither, we will set the icon to null
+          if (canSetRoleIcon && template.icon) {
+            let iconBuffer;
+            if (template.icon.startsWith("http")) {
+              const response = await fetch(template.icon);
+              iconBuffer = await response.buffer();
+            } else {
+              const iconPath = path.join(__dirname + "../", template.icon);
+              iconBuffer = fs.readFileSync(iconPath);
+            }
+            await discordRole.setIcon(iconBuffer, "Event Setup Icon Update");
+          }
+
+          // Map it for restoration later
+          await pool.execute(
+            `INSERT INTO guild_event_role_map (guild_event_id, guild_role_id, template_id, original_discord_state) 
+             VALUES (?, ?, ?, ?)`,
+            [this.#id, reservedDbRole.id, template.id, originalState]
+          );
+        }
+      }
+      // CASE B: We ran out of reserved roles; create a new one
+      else {
+        const newDiscordRole = await discordGuild.roles.create({
+          name: template.name,
+          color: template.color || null,
+          icon: canSetRoleIcon && template.icon ? template.icon : null,
+          reason: `Event Setup Generation: ${this.#name}`
+        });
+
+        // Register the new role in the database (is_event_role = 0 so it isn't permanent)
+        const [insertRes] = await pool.execute(
+          `INSERT INTO guild_role (guild_id, snowflake, friendly_name, is_event_role) 
+           VALUES (?, ?, ?, 0)`,
+          [this.#guild.id, newDiscordRole.id, template.name]
+        );
+        const newGuildRoleId = insertRes.insertId;
+
+        // Map it (original_discord_state is NULL, flagging it for deletion on cleanup)
+        await pool.execute(
+          `INSERT INTO guild_event_role_map (guild_event_id, guild_role_id, template_id, original_discord_state) 
+           VALUES (?, ?, ?, NULL)`,
+          [this.#id, newGuildRoleId, template.id]
+        );
+      }
+    }
+
+    await this.send_announcement(this.#announcementMessage);
+    return this.getDiscordRoles(discordGuild); // Return the current state of the roles for this event
+  }
+
+  /**
+   * Cleans up the event by restoring reserved roles and deleting generated overflow roles.
+   * @param {Discord.Guild} discordGuild 
+   */
+  async cleanup(discordGuild) {
+    const [mappedRoles] = await pool.execute(`
+      SELECT 
+          guild_event_role_map.id as map_id, 
+          guild_event_role_map.original_discord_state, 
+          gr.snowflake, 
+          gr.id as gr_id
+      FROM Tavare.guild_event_role_map
+      JOIN Tavare.guild_role gr ON guild_event_role_map.guild_role_id = gr.id
+      WHERE guild_event_role_map.guild_event_id = ? AND gr.guild_id = ?`,
+      [this.#id, this.#guild.id]
+    );
+
+    //check if the guild is high enough level to have an icon set for the roles
+    let boost_level = discordGuild.premiumTier || 0;
+    let canSetRoleIcon = boost_level >= 2; // Level 2 is the minimum for role icons
+
+    for (const map of mappedRoles) {
+      const discordRole = await discordGuild.roles.fetch(map.snowflake).catch(() => null);
+
+      if (map.original_discord_state) {
+        // It was a hijacked reserved role. Restore it.
+        if (discordRole) {
+          const state = typeof map.original_discord_state === 'string'
+            ? JSON.parse(map.original_discord_state)
+            : map.original_discord_state;
+
+          await discordRole.edit({ name: state.name, color: state.color }, "Event Cleanup Restoration");
+          if (canSetRoleIcon && state.icon) {
+            let iconBuffer;
+            if (state.icon.startsWith("http")) {
+              const response = await fetch(state.icon);
+              iconBuffer = await response.buffer();
+            } else {
+              const iconPath = path.join(__dirname + "../", state.icon);
+              iconBuffer = fs.readFileSync(iconPath);
+            }
+            await discordRole.setIcon(iconBuffer, "Event Cleanup Icon Restoration");
+          }
+        }
+      } else {
+        // It was a generated overflow role. Delete it from Discord and the DB.
+        if (discordRole) await discordRole.delete("Event Cleanup Deletion");
+        await pool.execute(`DELETE FROM guild_role WHERE id = ?`, [map.gr_id]);
+      }
+    }
+
+    // Wipe the mapping table for this event
+    await pool.execute(`DELETE FROM guild_event_role_map WHERE guild_event_id = ?`, [this.#id]);
+  }
+
+  /**
+   * You will still need to set up the webhooks and the currencies for the event after creating it. This method only creates the event and its role templates in the database.
+   * @param {Object} param0 
+   * @param {string} param0.name
+   * @param {string|Date} param0.start
+   * @param {string|Date} param0.end
+   * @param {string} param0.embed_color
+   * @param {boolean} [param0.enabled=true]
+   * @param {string} [param0.announcementMessage=""]
+   * @param {Object} [param0.data={}]
+   * @param {DBGuildObject[]|Discord.Snowflake[]|Discord.Guild[]} param0.guilds
+   * @param {DBEventRoleTemplate[]|Object[]} [param0.roleTemplates=[]]
+   * @param {Object.<string|number, DBWebhook|Object|number>} [param0.DBWebhooks_map={}] - A mapping of guild snowflakes or guild DB IDs to their corresponding DBWebhook objects or configs for the announcement webhooks.
+   * @returns {Promise<DBGuildEvent>}
+   * @throws Will throw an error if any of the parameters are invalid or if the guilds are not found in the database.
+   */
+  static async new({ name, start, end, embed_color, enabled = true, announcementMessage = "", data = {}, guilds, roleTemplates = [], DBWebhooks_map = {} }) {
+    // Validate parameters
+    if (!name || typeof name !== "string") {
+      throw new Error("Invalid name parameter");
+    }
+    if (!start || isNaN(new Date(start).getTime())) {
+      throw new Error("Invalid start parameter");
+    }
+    if (!end || isNaN(new Date(end).getTime())) {
+      throw new Error("Invalid end parameter");
+    }
+    if (!embed_color || typeof embed_color !== "string") {
+      throw new Error("Invalid embed_color parameter");
+    }
+    if (typeof enabled !== "boolean") {
+      throw new Error("Invalid enabled parameter");
+    }
+    if (typeof announcementMessage !== "string") {
+      throw new Error("Invalid announcementMessage parameter");
+    }
+    if (typeof data !== "object" || data === null) {
+      data = {};
+    }
+
+    if (!guilds || !Array.isArray(guilds) || guilds.length === 0) {
+      throw new Error("Invalid guilds parameter: expected non-empty array");
+    }
+
+    const guildObjs = await Promise.all(
+      guilds.map(async (guild) => {
+        if (guild instanceof DBGuildObject) {
+          return guild;
+        }
+
+        if (typeof guild === "string") {
+          const guildObj = await privateDataBaseActions.Guild.get(guild);
+          if (!guildObj) throw new Error(`Guild with snowflake ${guild} not found in database`);
+          return guildObj;
+        }
+
+        if (guild instanceof Discord.Guild) {
+          const guildObj = await privateDataBaseActions.Guild.get(guild.id);
+          if (!guildObj) throw new Error(`Guild with ID ${guild.id} not found in database`);
+          return guildObj;
+        }
+
+        if (guild && typeof guild.id === "number") {
+          const guildObj = await privateDataBaseActions.Guild.get_by_internal_id(guild.id);
+          if (!guildObj) throw new Error(`Guild with internal ID ${guild.id} not found in database`);
+          return guildObj;
+        }
+
+        throw new Error("Invalid guild parameter");
+      })
+    );
+
+    // Resolve webhooks for each guild from DBWebhooks_map if provided
+    const resolvedWebhookIds = {};
+    if (DBWebhooks_map && typeof DBWebhooks_map === "object") {
+      for (const guildObj of guildObjs) {
+        const webhookResolvable = DBWebhooks_map[guildObj.id] ?? DBWebhooks_map[guildObj.snowflake];
+        if (webhookResolvable) {
+          if (webhookResolvable instanceof DBWebhook && webhookResolvable.id) {
+            resolvedWebhookIds[guildObj.id] = webhookResolvable.id;
+          } else if (typeof webhookResolvable === "object" && webhookResolvable.id) {
+            const [webhook_rows] = await pool.execute("SELECT id FROM webhook WHERE id = ?", [webhookResolvable.id]);
+            if (!webhook_rows.length) {
+              throw new Error(`Webhook with ID ${webhookResolvable.id} not found in database`);
+            }
+            resolvedWebhookIds[guildObj.id] = webhookResolvable.id;
+          } else if (typeof webhookResolvable === "object" && webhookResolvable.name && webhookResolvable.channel_snowflake) {
+            const createdWebhook = await DBWebhook.create({
+              guild_id: guildObj.id,
+              name: webhookResolvable.name,
+              avatar: webhookResolvable.avatar || "",
+              channel_snowflake: webhookResolvable.channel_snowflake
+            });
+            resolvedWebhookIds[guildObj.id] = createdWebhook.id;
+          } else if (typeof webhookResolvable === "number") {
+            const [webhook_rows] = await pool.execute("SELECT id FROM webhook WHERE id = ?", [webhookResolvable]);
+            if (!webhook_rows.length) {
+              throw new Error(`Webhook with ID ${webhookResolvable} not found in database`);
+            }
+            resolvedWebhookIds[guildObj.id] = webhookResolvable;
+          } else {
+            throw new Error(`Invalid DBWebhook parameter for guild ID ${guildObj.id}`);
+          }
+        }
+      }
+    }
+
+    const startDate = new Date(start).toISOString().slice(0, 10);
+    const endDate = new Date(end).toISOString().slice(0, 10);
+
+    const [eventInsert] = await pool.execute(
+      `INSERT INTO event (name, start, end, embed_color, enabled, announcement_message, data) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [name, startDate, endDate, embed_color, enabled ? 1 : 0, announcementMessage, JSON.stringify(data)]
+    );
+
+    const eventId = eventInsert.insertId;
+
+    for (const guildObj of guildObjs) {
+      const webhookId = resolvedWebhookIds[guildObj.id] || null;
+      await pool.execute(
+        `INSERT INTO guild_event (guild_id, event_id, announcement_webhook_id) VALUES (?, ?, ?)`,
+        [guildObj.id, eventId, webhookId]
+      );
+    }
+
+    if (Array.isArray(roleTemplates)) {
+      for (let template of roleTemplates) {
+        if (!(template instanceof DBEventRoleTemplate)) {
+          template = new DBEventRoleTemplate(template);
+        }
+
+        await pool.execute(
+          `INSERT INTO event_role_template (event_id, name, color, gradient_secondary_color, icon) VALUES (?, ?, ?, ?, ?)`,
+          [eventId, template.name, template.color, template.gradient_secondary_color, template.icon]
+        );
+      }
+    }
+
+    return await this.getById(guildObjs[0].id, eventId);
+  }
+
+  async toAsyncJSON() {
+    let announcementWebhook = null;
+    if (this.#announcementWebhookId) {
+      const [rows] = await pool.execute("SELECT * FROM webhook WHERE id = ?", [this.#announcementWebhookId]);
+      if (rows.length) {
+        announcementWebhook = new DBWebhook(rows[0]).toJSON();
+      }
+    }
+
+    let currencies = await this.getEventCurrencies();
+    if (!currencies) currencies = [];
+
+    return {
+      id: this.#id,
+      eventId: this.#eventId,
+      name: this.#name,
+      start: this.#start,
+      end: this.#end,
+      announcementMessage: this.#announcementMessage,
+      data: this.getData(),
+      guild: this.guild,
+      announcementWebhook: announcementWebhook,
+      embedColor: this.#embedColor,
+      roleTemplates: (await this.getEventRoleTemplates()).map(template => template.toJSON()),
+      roles: await this.getDiscordRoles(await client.guilds.fetch(this.#guild.snowflake)),
+      currencies: await Promise.all(currencies.map(currency => currency.toJSON())),
+    };
+  }
+}
+
+
 let privateDataBaseActions = {
   User: {
     /**
@@ -1150,6 +1891,8 @@ class DBCurrencyObject {
   #guild_cache = null; // cache for the guild this currency is associated with, so we don't have to query the database for it every time we need it. This will be populated the first time we call get_guild() and then stored here for future reference.
   #spawn_on_1_out_of = 0; //The chance for this currency to spawn on a message, set to Zero for do not spawn
   #spawn_data = null; //an array of DBCurrencyMessageEmojiSpawnData objects representing the different emojis and values this currency can spawn with when it spawns on messages, 
+  #holiday_start_date = null; //The date this currency will be active. Year ignored
+  #holiday_end_date = null; //The date this currency will stop being active. Year ignored
   /**
    * 
    * @param {number} id 
@@ -1190,13 +1933,13 @@ class DBCurrencyObject {
     return this.#is_primary;
   }
 
-  static async fetch(id, guild_resolvable) {
+  static async fetch(id, guild_resolvable, debug = false) {
     const currency = new DBCurrencyObject(id, guild_resolvable);
-    await currency.fetch();
+    await currency.fetch(debug);
     return currency;
   }
 
-  async fetch() {
+  async fetch(debug = false) {
     if (!this.#guild_resolvable) return null;
     if (this.#guild_resolvable instanceof DBGuildObject) {
       this.#guild_cache = this.#guild_resolvable;
@@ -1211,19 +1954,29 @@ class DBCurrencyObject {
         currency.id,
         currency.name,
         currency.type,
+        event.name AS event_name,
         guild_currency.icon_emoji,
         guild_currency.spawn_on_1_out_of_X_messages,
         guild_currency.is_primary,
         guild_currency_emoji.emoji,
         guild_currency_emoji.currency_value,
-        guild_currency_emoji.color
+        guild_currency_emoji.color,
+        DATE_ADD(event.start, INTERVAL (YEAR(CURDATE()) - YEAR(event.start)) YEAR) AS holiday_start_date,
+        DATE_ADD(DATE_ADD(event.start, INTERVAL (YEAR(CURDATE()) - YEAR(event.start)) YEAR), INTERVAL DATEDIFF(event.end, event.start) DAY) AS holiday_end_date
       FROM guild_currency
       INNER JOIN currency ON currency.id = guild_currency.currency_id
       LEFT JOIN guild_currency_emoji ON guild_currency.id = guild_currency_emoji.guild_currency_id
+      LEFT JOIN guild_event ON guild_event.guild_id = guild_currency.guild_id AND guild_event.event_id = guild_currency.event_id
+      LEFT JOIN event ON
+        event.id = guild_currency.event_id
+        AND event.enabled = 1
+        AND (? OR (CURDATE() <= DATE_ADD(DATE_ADD(event.start, INTERVAL (YEAR(CURDATE()) - YEAR(event.start)) YEAR), INTERVAL DATEDIFF(event.end, event.start) DAY)
+        AND CURDATE() >= DATE_ADD(event.start, INTERVAL (YEAR(CURDATE()) - YEAR(event.start)) YEAR)))
+        AND guild_event.id
       WHERE guild_currency.guild_id = ?
         AND currency.id = ?
         AND currency.active = 1`;
-    const [rows] = await pool.execute(sql, [this.#guild_cache.id, this.#id]);
+    const [rows] = await pool.execute(sql, [debug, this.#guild_cache.id, this.#id]);
     if (rows.length === 0) throw new Error(`Currency with ID ${this.#id} not found in database for this guild.`);
     const row = rows[0];
     this.#spawn_data = rows
@@ -1234,7 +1987,31 @@ class DBCurrencyObject {
     this.#spawn_on_1_out_of = row.spawn_on_1_out_of_X_messages;
     this.#is_primary = !!row.is_primary;
     this.#type = row.type;
+    this.#holiday_start_date = row.holiday_start_date ? new Date(row.holiday_start_date) : null;
+    this.#holiday_end_date = row.holiday_end_date ? new Date(row.holiday_end_date) : null;
+    if (this.#holiday_start_date && this.#holiday_end_date && this.#holiday_start_date > this.#holiday_end_date) {
+      // If the holiday start date is after the holiday end date, it means the holiday spans across the new year.
+      // In this case, we need to adjust the holiday end date to be in the next year.
+      const adjustedEndDate = new Date(this.#holiday_end_date);
+      adjustedEndDate.setFullYear(adjustedEndDate.getFullYear() + 1);
+      this.#holiday_end_date = adjustedEndDate;
+    }
     return this;
+  }
+
+  async toJSON() {
+    fetched = await this.fetch();
+    return {
+      id: fetched.id,
+      name: fetched.name,
+      emoji: fetched.emoji,
+      spawn_on_1_out_of: fetched.spawn_on_1_out_of,
+      spawn_data: fetched.spawn_data.map(sd => sd.toJSON()),
+      is_primary: fetched.is_primary,
+      guild: fetched.guild ? fetched.guild.toJSON() : null,
+      holiday_start_date: fetched.#holiday_start_date ? fetched.#holiday_start_date.toISOString().split('T')[0] : null,
+      holiday_end_date: fetched.#holiday_end_date ? fetched.#holiday_end_date.toISOString().split('T')[0] : null
+    };
   }
 }
 
@@ -1644,6 +2421,7 @@ class AuthorLink {
 
 }
 
+
 const DataBaseActions = {
   // classes, for easier use in other files
   DBCurrencyObject,
@@ -1656,6 +2434,9 @@ const DataBaseActions = {
   Author,
   User_Guild_Inventory,
   DBCharacter,
+  DBEventRoleTemplate,
+  DBWebhook,
+  DBGuildEvent,
   User: {
     /** gets all the info a database has about a user, and returns it as a DBUserObject
      * @param {(Discord.User|Discord.GuildMember|Discord.Snowflake)} snowflakeResolvable
@@ -1931,16 +2712,11 @@ const DataBaseActions = {
     },
   },
   Guild: {
-    /*
-    +---------------+--------------+------+-----+---------+----------------+
-    | Field         | Type         | Null | Key | Default | Extra          |
-    +---------------+--------------+------+-----+---------+----------------+
-    | id            | double       | NO   | PRI | NULL    | auto_increment |
-    | snowflake     | varchar(100) | NO   | UNI | NULL    |                |
-    | isTestGuild   | tinyint(1)   | NO   |     | 0       |                |
-    | friendly_name | varchar(100) | NO   | UNI | NULL    |                |
-    +---------------+--------------+------+-----+---------+----------------+
-    */
+    /**
+     * Gets all the info a database has about a guild, and returns it as a DBGuildObject
+     * @param {(Discord.Guild|Discord.Snowflake)} snowflakeResolvable 
+     * @returns {Promise<DBGuildObject|null>} the database guild object if it exists, or null if it doesn't
+     */
     get: async (snowflakeResolvable) => {
       const snowflake = await parsesnowflake(snowflakeResolvable);
 
@@ -2149,7 +2925,7 @@ const DataBaseActions = {
      * @param {(Discord.Guild|Discord.Snowflake|DBGuildObject)} guild_resolvable the guild to get the valid currencies for, this is used to ensure the cache is loaded, as the cache is only loaded when this function is called, and it is assumed that if you are calling this function, you need the cache to be loaded. The guild_resolvable can be a Discord Guild object, a snowflake string representing the guild ID, or a DBGuildObject representing the guild from the database.
       * @returns {DBCurrencyObject[]} the valid currency objects if they exist
     */
-    getValidCurrencies: async (guild_resolvable) => {
+    getValidCurrencies: async (guild_resolvable, debug_ignore_event_currency_date = false) => {
       // The INTERNAL id for the guild, or the snowflake if available.
       let guildId = null;
       let guildSnowflake = null;

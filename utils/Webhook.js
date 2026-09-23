@@ -10,7 +10,7 @@ module.exports = {
    */
   webhook: async (channel, name, avatar, message) => {
     let thread = null;
-    if (channel.type == 'GUILD_PUBLIC_THREAD') {
+    if (channel.type === 'GUILD_PUBLIC_THREAD') {
       thread = channel;
       channel = await channel.parent;
       message.threadId = thread.id;

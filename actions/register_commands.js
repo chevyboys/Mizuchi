@@ -1,5 +1,6 @@
 const { Client } = require('discord.js');
 const fs = require('fs');
+const path = require('path');
 const { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandStringOption } = require('@discordjs/builders');
 const gs = require("../utils/Utils.GetGoogleSheetsAsJson");
 const UtilsDatabase = require("../utils/Utils.Database");
@@ -103,7 +104,11 @@ mainClient.once('ready', async () => {
       )
     ].map(command => command.toJSON());
 
-    let commonRegistry = fs.readdirSync('../registry/Common').filter(f => f.endsWith('.js') || f.endsWith('.json'));
+    const registryCommonPath = path.resolve(__dirname, '..', 'registry', 'Common');
+    if (!fs.existsSync(registryCommonPath)) {
+      throw new Error(`Registry missing: ${registryCommonPath}`);
+    }
+    let commonRegistry = fs.readdirSync(registryCommonPath).filter(f => f.endsWith('.js') || f.endsWith('.json'));
     for (const file of commonRegistry) {
       if (file === "pride.json" && new Date().getMonth() != 5) continue;
       commonCommands.push(require(`../registry/Common/${file}`));
@@ -150,7 +155,13 @@ mainClient.once('ready', async () => {
       ]
     });
 
-    let tavareRegistry = fs.readdirSync('../registry/Tavare').filter(f => f.endsWith('.js') || f.endsWith('.json'));
+    const registryTavarePath = path.resolve(__dirname, '..', 'registry', 'Tavare');
+    let tavareRegistry = [];
+    if (fs.existsSync(registryTavarePath)) {
+      tavareRegistry = fs.readdirSync(registryTavarePath).filter(f => f.endsWith('.js') || f.endsWith('.json'));
+    } else {
+      console.warn(`Tavare registry not found: ${registryTavarePath}`);
+    }
     for (const file of tavareRegistry) {
       tavareCommands.push(require(`../registry/Tavare/${file}`));
     }
@@ -183,7 +194,13 @@ mainClient.once('ready', async () => {
           .addStringOption(o => o.setName("character").setDescription("The character to find").setAutocomplete(true).setRequired(true))
         ),
       ];
-      let anathemaRegistry = fs.readdirSync('../registry/Anathema').filter(f => f.endsWith('.js') || f.endsWith('.json'));
+      const registryAnathemaPath = path.resolve(__dirname, '..', 'registry', 'Anathema');
+      let anathemaRegistry = [];
+      if (fs.existsSync(registryAnathemaPath)) {
+        anathemaRegistry = fs.readdirSync(registryAnathemaPath).filter(f => f.endsWith('.js') || f.endsWith('.json'));
+      } else {
+        console.warn(`Anathema registry not found: ${registryAnathemaPath}`);
+      }
       for (const file of anathemaRegistry) {
         if (file === "pride.json" && new Date().getMonth() != 5) continue;
         anathemaCommands.push(require(`../registry/Anathema/${file}`));

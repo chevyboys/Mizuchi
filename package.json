@@ -5,9 +5,10 @@
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
-    "test": "node bot.js",
     "launch": "node bot.js",
-    "debug": "node bot.js"
+    "debug": "node --enable-source-maps bot.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run typecheck"
   },
   "repository": {
     "type": "git",
@@ -50,8 +51,17 @@
     },
     "rules": {}
   },
-  "nodeVersion": "17.1.0",
+  "engines": {
+    "node": "24.14.1"
+  },
   "devDependencies": {
-    "@types/js-levenshtein": "^1.1.1"
+    "@types/js-levenshtein": "^1.1.1",
+    "@types/node": "^26.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^7.0.2"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/Chevyboys/Mizuchi/issues"
   }
 }
