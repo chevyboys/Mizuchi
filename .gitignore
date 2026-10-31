@@ -1,0 +1,4 @@
+node_modules
+config/snowflakes.json
+config/config.json
+config/config_*.json
