@@ -1,9 +1,0 @@
-# To learn more about .editorconfig see https://aka.ms/editorconfigdocs
-
-[*.js]
-indent_style = space
-indent_size = 2
-
-[*.json]
-indent_style = space
-indent_size = 2

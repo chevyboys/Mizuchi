@@ -1,0 +1,29 @@
+{
+  "name": "Mizuchi",
+  "version": "3.0.0",
+  "license": "AGPL-3.0-only",
+  "description": "Custom Discord bot for the Climber's Court",
+  "scripts": {
+    "lint": "npm run eslint:lint && npm run prettier:lint",
+    "eslint:lint": "eslint .",
+    "prettier:lint": "prettier --check .",
+    "format": "npm run eslint:fix && npm run prettier:fix",
+    "eslint:fix": "eslint --fix .",
+    "prettier:fix": "prettier --write ."
+  },
+  "devDependencies": {
+    "@eslint/css": "^2.0.1",
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^2.1.1",
+    "@eslint/markdown": "^8.0.3",
+    "eslint": "^10.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.14.0",
+    "jiti": "^2.7.0",
+    "prettier": "^3.9.10",
+    "typescript-eslint": "^8.72.1"
+  },
+  "engines": {
+    "node": "24.14.1"
+  }
+}

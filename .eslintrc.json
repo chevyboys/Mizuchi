@@ -1,15 +1,13 @@
 {
   "env": {
-      "commonjs": true,
-      "es2022": true,
-      "node": true
+    "commonjs": true,
+    "es2022": true,
+    "node": true
   },
   "extends": "eslint:recommended",
-  "overrides": [
-  ],
+  "overrides": [],
   "parserOptions": {
-      "ecmaVersion": 13
+    "ecmaVersion": 13
   },
-  "rules": {
-  }
+  "rules": {}
 }
