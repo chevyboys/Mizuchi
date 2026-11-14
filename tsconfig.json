@@ -10,7 +10,8 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
+    "module": "nodeNext",
+    "moduleResolution": "NodeNext",
     "target": "esnext",
     "types": ["node"],
 
